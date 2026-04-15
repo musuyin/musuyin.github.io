@@ -1,0 +1,784 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>关系模型 | 木素音的小站</title><meta name="author" content="Musuyin"><meta name="copyright" content="Musuyin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="关系模型元组与属性 元组：表中的一行，顺序无所谓 属性：必须为原子的，具有属性域（取值范围，也包含数据类型的限定） 空值为特殊值，表示取值未知或不存在    关系模式可表示为：$R(A_1,A_2,…,A_n)$  $A_i$ 表示属性 在关系模型中，使用相同属性可将不同关系的元组联系起来  关系实例 关系模式：关系的逻辑设计 关系实例：给定时刻关系中数据的一个快照  即类型与变量的关系 Keys">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关系模型">
+<meta property="og:url" content="https://musuyin.github.io/cs/database/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/index.html">
+<meta property="og:site_name" content="木素音的小站">
+<meta property="og:description" content="关系模型元组与属性 元组：表中的一行，顺序无所谓 属性：必须为原子的，具有属性域（取值范围，也包含数据类型的限定） 空值为特殊值，表示取值未知或不存在    关系模式可表示为：$R(A_1,A_2,…,A_n)$  $A_i$ 表示属性 在关系模型中，使用相同属性可将不同关系的元组联系起来  关系实例 关系模式：关系的逻辑设计 关系实例：给定时刻关系中数据的一个快照  即类型与变量的关系 Keys">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://musuyin.github.io/img/butterfly-icon.png">
+<meta property="article:published_time" content="2025-11-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-15T06:46:49.346Z">
+<meta property="article:author" content="Musuyin">
+<meta property="article:tag" content="关系模型">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://musuyin.github.io/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "关系模型",
+  "url": "https://musuyin.github.io/cs/database/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/",
+  "image": "https://musuyin.github.io/img/butterfly-icon.png",
+  "datePublished": "2025-11-09T16:00:00.000Z",
+  "dateModified": "2026-04-15T06:46:49.346Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Musuyin",
+      "url": "https://musuyin.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://musuyin.github.io/cs/database/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":null,"highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '关系模型',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">木素音的小站</span></a><a class="nav-page-title" href="/"><span class="site-name">关系模型</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">关系模型</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-11-09T16:00:00.000Z" title="发表于 2025-11-10 00:00:00">2025-11-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-04-15T06:46:49.346Z" title="更新于 2026-04-15 14:46:49">2026-04-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="关系模型"><a href="#关系模型" class="headerlink" title="关系模型"></a>关系模型</h1><h2 id="元组与属性"><a href="#元组与属性" class="headerlink" title="元组与属性"></a>元组与属性</h2><ul>
+<li>元组：表中的一行，顺序无所谓</li>
+<li>属性：必须为原子的，具有属性域（取值范围，也包含数据类型的限定）<ul>
+<li>空值为特殊值，表示取值未知或不存在</li>
+</ul>
+</li>
+</ul>
+<p>关系模式可表示为：$R(A_1,A_2,…,A_n)$</p>
+<ul>
+<li>$A_i$ 表示属性</li>
+<li>在关系模型中，使用<strong>相同属性</strong>可将不同关系的元组联系起来</li>
+</ul>
+<h2 id="关系实例"><a href="#关系实例" class="headerlink" title="关系实例"></a>关系实例</h2><ul>
+<li>关系模式：关系的逻辑设计</li>
+<li>关系实例：给定时刻关系中数据的一个快照</li>
+</ul>
+<p>即类型与变量的关系</p>
+<h1 id="Keys（键-码）"><a href="#Keys（键-码）" class="headerlink" title="Keys（键&#x2F;码）"></a>Keys（键&#x2F;码）</h1><h2 id="超码"><a href="#超码" class="headerlink" title="超码"></a>超码</h2><p>$K$ 能唯一标识关系 $r(R)$ 中的一个元组，则称 $K$ 是关系 $r(R)$ 的超码（Superkey）</p>
+<ul>
+<li>超码 $K$ 是一个或多个属性的集合，$K\subseteq R$<ul>
+<li>其中，$R$ 是关系模式 $r$ 的属性集合</li>
+<li>例：{ID} 和 {ID, name} 是 instructor 的超码</li>
+</ul>
+</li>
+<li>超码可能包含无关紧要的属性</li>
+<li>$K$ 的任意超集也是超码</li>
+</ul>
+<h2 id="候选码"><a href="#候选码" class="headerlink" title="候选码"></a>候选码</h2><p>任何真子集都不能成为超码的<strong>最小超码</strong>称为<strong>候选码</strong>（candidate key）</p>
+<ul>
+<li>例：{ID} 是 instructor 的候选码</li>
+</ul>
+<h2 id="主码"><a href="#主码" class="headerlink" title="主码"></a>主码</h2><p>选择一个候选码作为主码（primary key）</p>
+<ul>
+<li>选择那些值从不或极少变化的属性</li>
+<li>习惯将一个关系模式的主码属性列在属性列的最前面</li>
+</ul>
+<h2 id="外码"><a href="#外码" class="headerlink" title="外码"></a>外码</h2><p>一个关系模式 $(r1)$ 在其属性上包含另一个关系模式 $(r2)$ 的主码，此属性在 $r1$ 上称为引用 $r2$ 的外码（foreign key）, $r1$ 称为外码依赖的引用关系，$r2$ 称为外码的被引用关系</p>
+<p>参照关系中的任意元组在特定属性（如外码）上的取值，必须等于被引用关系中的某个元组在该特定属性上的取值，这种约束要求称之为引用<strong>完整性约束</strong>（referential integrity constraint），如外码约束</p>
+<h3 id="模式图"><a href="#模式图" class="headerlink" title="模式图"></a>模式图</h3><p>一个含有主码和外码依赖的数据库模式可用模式图来表示</p>
+<ul>
+<li>每一个关系模式用一个<strong>矩形</strong>来表示</li>
+<li>主码属性用<strong>下划线</strong>标注</li>
+<li>外码约束（依赖）用从参照关系的外码到被引用关系的主码之间的<strong>箭头</strong>表示</li>
+<li>不应与 E-R 图混淆</li>
+</ul>
+<p><img src="/images/Pasted%20image%2020251122103941.png"></p>
+<h1 id="关系查询语言"><a href="#关系查询语言" class="headerlink" title="关系查询语言"></a>关系查询语言</h1><ul>
+<li>命令式&#x2F;过程化查询语言</li>
+<li>函数式查询语言（functional query language）</li>
+<li>声明式&#x2F;非过程化语言</li>
+</ul>
+<h2 id="关系代数"><a href="#关系代数" class="headerlink" title="关系代数"></a>关系代数</h2><p>所有的过程化查询语言都提供了一组关系运算，这些运算施加于单个关系上，或者一对关系上；运算结果总是<strong>单个关系</strong></p>
+<p>6 中基本关系运算：</p>
+<ul>
+<li>选择：$\sigma$</li>
+<li>投影：$\prod$</li>
+<li>集合并：$\cup$</li>
+<li>集合差：$-$</li>
+<li>笛卡尔积：$\times$</li>
+<li>更名：$\rho$</li>
+</ul>
+<h3 id="选择运算"><a href="#选择运算" class="headerlink" title="选择运算"></a>选择运算</h3><ul>
+<li>作用：选择满足给定谓词条件的元组</li>
+<li>符号表示形式: $\sigma_{p}(r)$，$p$ 是选择谓词</li>
+</ul>
+<p>示例：选择物理系的所有老师信息</p>
+<p>$$\sigma _\text{dept_name&#x3D;’Physics’} (instructor)$$</p>
+<p>形式化定义：$\sigma _{p}(r) &#x3D; {t | t \in r \wedge p(t)}$</p>
+<p>$p$ 是一个由一至多个元组选择条件组成的谓词，而这些条件是由 $\wedge$ (and), $\vee$ (or), $\urcorner$ (not)连接起来的</p>
+<p>每个条件可表示为：</p>
+<p>$$<br>\text{&lt;属性&gt;&#x2F;&lt;常量&gt;} op \text{&lt;属性&gt;&#x2F;&lt;常量&gt;}<br>$$</p>
+<p>其中，$op$ 可以是：$&#x3D;$、$\neq(&lt;&gt;)$、$&gt;$、$\geq$ 、$&lt;$ 、$\leq$ 等比较运算符的其中一种</p>
+<h3 id="投影运算"><a href="#投影运算" class="headerlink" title="投影运算"></a>投影运算</h3><ul>
+<li>作用：过滤掉特定的属性</li>
+<li>符号表示形式：$\prod _{A_1,A_2,…,A_m} (r)$</li>
+<li>操作结果：通过去除未列出的列，获得的一个 m 列的关系</li>
+</ul>
+<blockquote>
+<p>示例：去除 instructor 的 dept_name 属性</p>
+</blockquote>
+<p>$$\prod _{\text{ID, name, salary}} (instructor)$$</p>
+<p>形式化定义：</p>
+<p>$$<br>\pi _{i_1,i_2,…,i_m}&#x3D;{t|t&#x3D;&lt;t_{i_1},…t_{i_m}&gt;\vee &lt;t_1,…,t_{i_1},…,t_{i_m},…t_n&gt;\in R}<br>$$</p>
+<h3 id="笛卡尔积运算"><a href="#笛卡尔积运算" class="headerlink" title="笛卡尔积运算"></a>笛卡尔积运算</h3><ul>
+<li>作用：结合来自任意两个关系的信息</li>
+<li>符号表示： $r \times s$</li>
+</ul>
+<p>示例： $instructor \times teaches$</p>
+<p>由于相同的属性名可能同时出现在 $r(R)$ 和 $s(S)$ 中，所以在笛卡尔积运算结果中需要<strong>重命名</strong>来区别这些属性，例如：$instructor.ID，teaches.ID$</p>
+<p>形式化定义：</p>
+<p>$$r \times s &#x3D; {&lt;t ,q&gt; | t \in r \wedge q \in s}$$</p>
+<p><img src="/images/Pasted%20image%2020251122110245.png"></p>
+<p>可以使用多种运算构建表达式</p>
+<p>如，表的连接运算： $\sigma_{A&#x3D;C}(r\times s)$</p>
+<h3 id="连接运算"><a href="#连接运算" class="headerlink" title="连接运算"></a>连接运算</h3><ul>
+<li>作用：可以将<strong>选择运算</strong>和<strong>笛卡尔积运算</strong>合并为一个运算操作，连接两个表的信息</li>
+<li>符号表示： $r \bowtie <em>{\theta} s &#x3D; \sigma</em>{\theta} (r \times s)$<ul>
+<li>$\theta$ 是 $R \cup S$ 模式属性上的一个选择谓词</li>
+</ul>
+</li>
+</ul>
+<p>例：</p>
+<p>$$<br>\sigma _{\text{instructor.id &#x3D; teaches.id}} (\text{instructor} \times \text{teaches} )<br>$$</p>
+<p>等价于：</p>
+<p>$$<br>\text{instructor} \bowtie _{\text{instructor.id &#x3D; teaches.id}} teaches<br>$$</p>
+<h3 id="集合并运算"><a href="#集合并运算" class="headerlink" title="集合并运算"></a>集合并运算</h3><ul>
+<li>符号表示： $r \cup s$</li>
+<li>形式化定义：$r \cup s &#x3D; {t | t \in r \vee t \in s}$</li>
+<li>要使 $r \cup s$ 有意义，要求以下两个条件同时成立：<ul>
+<li>关系 $r$ 和 $s$ <strong>必须同元</strong>，即它们的属性数目必须相同</li>
+<li><strong>属性域必须相同</strong></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>找出开设在 2009 年秋季学期或者 2010 年春季学期的所有课程编号的集合</p>
+</blockquote>
+<p>$$<br>\prod _{course_id} (\sigma _{semester&#x3D;’Fall’ \wedge year&#x3D;2009} (section))<br>\cup<br>\prod _{course_id} (\sigma _{semester&#x3D;’Spring’ \wedge year&#x3D;2010} (section))<br>$$</p>
+<h3 id="集合差运算"><a href="#集合差运算" class="headerlink" title="集合差运算"></a>集合差运算</h3><ul>
+<li>符号表示：$r – s$</li>
+<li>形式化定义：$r – s &#x3D; {t | t \in r \wedge t \notin s}$</li>
+<li>集合差必须保证集合差运算在相容的关系间进行<ul>
+<li>$r$ 和 $s$ 必须是同元的</li>
+<li>$r$ 和 $s$ 的属性域必须相同</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>找出所有开设在 2009 年秋季学期但<strong>不在</strong>2010 年春季学期开设的课程的编号</p>
+</blockquote>
+<p>$$<br>\prod _{course_id} (\sigma _{semester&#x3D;’Fall’ \wedge year&#x3D;2009} (section))<br>−<br>\prod _{course_id} (\sigma _{semester&#x3D;’Spring’ \wedge year&#x3D;2010} (section))<br>$$</p>
+<h3 id="更名运算"><a href="#更名运算" class="headerlink" title="更名运算"></a>更名运算</h3><p>通过更名运算，可以用一个新的名称来指代一个关系（或关系代数表达式的结果）</p>
+<ul>
+<li>$\rho _x (E)$</li>
+<li>返回表达式 $E$ 的结果，并把名字 $x$ 赋给它</li>
+</ul>
+<p>假设关系代数表达式 $E$ 是多元的，则表达式</p>
+<p>$$<br>\rho _{x(A_1,A_2, …, A_n)}(E)<br>$$</p>
+<p>返回表达式 $E$ 的结果，并赋给它名字 $x$，同时将各属性更名为 $A1 , A2 ,\dots, An$</p>
+<blockquote>
+<p>找出大学里的最高工资</p>
+</blockquote>
+<p>找出所有“不是最高工资”的工资值</p>
+<p>$$<br>\prod <em>{instructor.salary} (\sigma</em>{instructor.salary &lt;d.salary}(instructor \times \rho_d (instructor))<br>$$</p>
+<p>使用集合差，计算得到最高工资</p>
+<h2 id="prod-salary-instructor"><a href="#prod-salary-instructor" class="headerlink" title="$$\prod _{salary}(instructor)"></a>$$<br>\prod _{salary}(instructor)</h2><p>\prod <em>{instructor.salary} (\sigma</em>{instructor.salary &lt;d.salary}(instructor \times \rho_d (instructor))<br>$$</p>
+<h3 id="集合交运算"><a href="#集合交运算" class="headerlink" title="集合交运算"></a>集合交运算</h3><ul>
+<li>符号表示：$r \cap s$</li>
+<li>形式化定义：$r \cap s &#x3D; { t | t \in r \wedge t \in s }$</li>
+<li>$r$, $s$ 必须满足两个条件：<ul>
+<li>$r$, $s$ 必须是同元的</li>
+<li>$r$ 和 $s$ 的属性必须相同</li>
+</ul>
+</li>
+</ul>
+<p>任何集合交都可以用一对集合差运算来表示：</p>
+<p>$$<br>r \cap s &#x3D; r-(r-s)<br>$$</p>
+<h3 id="自然连接运算"><a href="#自然连接运算" class="headerlink" title="自然连接运算"></a>自然连接运算</h3><p>已知关系 $r (R)$ 和 $s(S)$，那么，$r \bowtie s$ 是在 $R \cup S$ 模式下获得的关系，具体如下：</p>
+<ul>
+<li>依次比较关系 $r$ 的元组 $t_r$ 和关系 $s$ 的元组 $t_s$</li>
+<li>如果在 $R \cap S$ 模式中，元组 $t_r$ 和元组 $t_s$ 的属性相同，就将一个元组 $t$ 加入到元组中，则<ul>
+<li>元组 $t$ 和关系 $r$ 中的 $t_r$ 有相同的属性值</li>
+<li>元组 $t$ 和关系 $s$ 中的 $t_s$ 有相同的属性值</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>如：R &#x3D; $(A, B, C, D)$；S &#x3D; $(E, B, D)$</p>
+</blockquote>
+<p>自然连接结果为：$(A,B,C,D,E)$</p>
+<h3 id="赋值运算"><a href="#赋值运算" class="headerlink" title="赋值运算"></a>赋值运算</h3><p>赋值操作($\leftarrow$)可以使复杂查询的表达变得简单，即将查询表达为一个顺序程序，包括：</p>
+<ul>
+<li>一系列的赋值</li>
+<li>一个值被做为查询结果显示的表达式</li>
+</ul>
+<blockquote>
+<p>例：找出所有所在部门为”Physics”和”Music”的老师</p>
+</blockquote>
+<p>$$<br>\begin{array}{l}<br>\text{Physics} \leftarrow \sigma_{dept_name&#x3D;’Physics’}(instructor) \newline<br>\text{Music} \leftarrow \sigma_{dept_name&#x3D;’Music’}(instructor) \newline<br>\text{Physics}\cup\text{Music}<br>\end{array}<br>$$</p>
+<ul>
+<li>赋值赋给一个临时关系变量，并不修改数据库关系实例</li>
+<li>赋值赋给一个数据库关系，修改数据库关系实例</li>
+</ul>
+<h3 id="修改数据库"><a href="#修改数据库" class="headerlink" title="修改数据库"></a>修改数据库</h3><p>可以使用赋值运算符来表示修改数据库的操作：删除、插入、更新</p>
+<h4 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h4><p>只可以删除整个元组，不能删除特定的属性值</p>
+<p>$$<br>r \leftarrow r-E<br>$$</p>
+<p>$r$ 是关系，$E$ 是一个关系代数查询</p>
+<blockquote>
+<p>删除 Perryridge 支行的所有账户记录</p>
+</blockquote>
+<p>$$<br>\text{account} \leftarrow \text{account}-\sigma_{\text{branch_name&#x3D;’Preeyridge’}}(account)<br>$$</p>
+<h4 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h4><p>插入对象：</p>
+<ul>
+<li>特定一个元组</li>
+<li>查询结果是元组的查询语句</li>
+</ul>
+<p>$$<br>r \leftarrow r \cup E<br>$$</p>
+<p>$r$ 是关系，$E$ 是一个关系代数查询。插入单一的元组表示假设 $E$ 是一个包含一个元组的常数关系</p>
+<blockquote>
+<p>在数据库中插入信息指明 Smith 在 Perryridge 的分行的账户有 $1200</p>
+</blockquote>
+<p>$$<br>\begin{array}{l}<br>\text{account} \leftarrow \text{account} \cup {(‘1024’,’Perryridge’,1200)}\newline<br>\text{depositor}\leftarrow \text{depositor}\cup {(‘Smith’,’1024’)}<br>\end{array}<br>$$</p>
+<h4 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h4><p>数据库更新需改变元组中的一个属性值，而不需要改变元组中所有的值</p>
+<p>可以使用<strong>广义投影操作</strong>来完成这个任务</p>
+<p>$$<br>r \leftarrow \prod_{F_1,F_2,\dots,F_I}(r)<br>$$</p>
+<p>每个 $F_i$ 是以下两者之一：</p>
+<ul>
+<li>如果第 $I$ 个属性没有更新，$F_i$ 可以是关系 $r$ 的第 $I$ 个属性；</li>
+<li>如果属性需要被更新，$F_i$ 可以是一个关于常数和 $r$ 的属性 $i$ 的表达式，给属性赋与新值</li>
+</ul>
+<blockquote>
+<p>将余额的 5%作为利息</p>
+</blockquote>
+<p>$$<br>\text{account} \leftarrow \prod _{account_number, branch_name, balance * 1.05} (account)<br>$$</p>
+<h1 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h1><blockquote>
+<p>列出至少选修过一门课程的所有学生姓名</p>
+</blockquote>
+<p>$$<br>\prod _{Students.StudentName} \sigma(Students\bowtie Enrollments)<br>$$</p>
+<blockquote>
+<p>查询选修了“计算机科学”系课程的所有学生的姓名和所选课程名称</p>
+</blockquote>
+<p>$$<br>\prod _{Students.StudentName, Courses.CourseName}\sigma _{Courses.Department&#x3D;\text{‘计算机科学’}}(Students\bowtie Enrollments \bowtie Courses)<br>$$</p>
+<blockquote>
+<p>查询 2023 年选修课程且成绩在 80 分以上的学生姓名和课程名称</p>
+</blockquote>
+<p>$$<br>\prod _{Students.StudentName, Courses.CourseName} \sigma _{Enrollments.Semester&#x3D;2023 \wedge Enrollments.Grade &gt; 80}(Students\bowtie Enrollments \bowtie Courses)<br>$$</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://musuyin.github.io">Musuyin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://musuyin.github.io/cs/database/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/">https://musuyin.github.io/cs/database/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://musuyin.github.io" target="_blank">木素音的小站</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><a class="post-meta__tags" href="/tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/">关系模型</a></div><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/cs/interview/Hot100-Java/" title="Hot100-Java"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Hot100-Java</div></div><div class="info-2"><div class="info-item-1">数组T14. 除自身以外数组的乘积 Given an integer array nums, return an array answer such that answer[i] is equal to the product of all the elements of nums except nums[i]. The product of any prefix or suffix of nums is guaranteed to fit in a 32-bit integer. You must write an algorithm that runs in O(n) time and without using the division operation.  如果是遍历每个数，令每个数在每个位置上相乘，则时间复杂度为 $O(n^2)$，不满足题意 使用 lmul 和 rmul 记录：当前这个数左侧所有数的乘积与当前这个数右侧所有数的乘积，就能使用 lmul[i]*rmul[i] 得到对应位置的乘积 public class Solution {     public in...</div></div></div></a><a class="pagination-related" href="/cs/tool/obsidian/Obsidian%E4%BD%BF%E7%94%A8Git%E5%90%8C%E6%AD%A5/" title="Obsidian Git同步"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Obsidian Git同步</div></div><div class="info-2"><div class="info-item-1">PCiOS</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/cs/database/%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/" title="关系型数据库设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-12-29</div><div class="info-item-2">关系型数据库设计</div></div><div class="info-2"><div class="info-item-1">设计规范有损分解有损分解（lossy decomposition）：无法通过自然连接重建原始关系元组的分解  将 employee(ID, name, street, city, salary)分解为 employee_attr1(ID, name)和 employee_attr2(name, street, city, salary)  name 无法作为 employee_attr2 关系的主码，有可能会重名 无损分解无损分解（lossless decomposition）：可以通过自然连接重建原始关系元组的分解 $$r&#x3D;\prod_{A,B}(r)\bowtie \prod_{B,C}(r)$$ 函数依赖成立条件假设 $r(R)$ 是一个关系模式，$\alpha\subseteq R,\beta\subseteq R$，模式 $R$ 上的函数依赖： $$\alpha \rightarrow \beta$$ 成立条件为：对于任意关系实例 $r$ 中任意两个元组 $t_1$ 和 $t_2$，若两者的属性（集）$\alpha$ 取值相同，那么它们的属性（集）$\beta...</div></div></div></a><a class="pagination-related" href="/cs/database/MongoDB/%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95/" title="MongoDB 基本用法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-02</div><div class="info-item-2">MongoDB 基本用法</div></div><div class="info-2"><div class="info-item-1">概述非关系型数据库，以类 JSON 格式存储数据，是非关系型数据库中与关系型数据库最相似的 CRUD1. Create（插入文档）向集合中插入新文档。 插入单个文档db.collection.insertOne({   name: &quot;Alice&quot;,   age: 25,   job: &quot;Engineer&quot; });  插入多个文档db.collection.insertMany([   { name: &quot;Bob&quot;, age: 30, job: &quot;Designer&quot; },   { name: &quot;Charlie&quot;, age: 35, job: &quot;Manager&quot; } ]);  2. Read（查询文档）从集合中查询文档。 查询所有文档db.collection.find();  查询特定条件的文档db.collection.find({ age: { $gt: 25 } }); // 查询 age 大于 25 的文档  查询并返回特定字段db.collection.f...</div></div></div></a><a class="pagination-related" href="/cs/database/%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%92%8C%E7%B4%A2%E5%BC%95/" title="存储管理和索引"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-02</div><div class="info-item-2">存储管理和索引</div></div><div class="info-2"><div class="info-item-1">文件和记录的组织数据库是以一系列文件的形式存储的。每个文件在逻辑上组织成为记录的一个序列  每个文件分为定长的存储单元：块（block） 块是存储分配和数据传输的基本单元，一般大小为 4-8KB  记录在文件中是定长或可变长的 定长记录删除记录，维护记录列表方法：  逐位移动 末尾记录移动到空缺位置 记录空闲列表 用链表存储空闲地址    变长记录出现方式 多种记录类型存储在一个文件中 允许一个或多个字段是变长的记录类型 允许可重复字段的记录类型  特点 属性按照顺序存储 以固定大小表示可变长度的属性（偏移量，长度），实际数据存储在所有固定长度的属性后 记录末尾有记录终止符  分槽的页结构分槽页块头结构 块中记录条目个数 块中空闲空间的末尾处 由包含记录位置和大小的记录条目组成的数组  存储特点 记录可以在页中移动，来保持连续存储 记录相互间没有空闲空间，如果删除记录需要移动记录数据  ![[images&#x2F;Pasted image 20260110105108.png]] 文件中记录的组织 堆文件组织：一个记录可以放在文件中的任何地方，只要那个地方有空间存放这条记录 顺...</div></div></div></a><a class="pagination-related" href="/cs/database/MongoDB/%E6%96%87%E6%A1%A3%E8%AE%BE%E8%AE%A1/" title="MongoDB 文档设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-02</div><div class="info-item-2">MongoDB 文档设计</div></div><div class="info-2"><div class="info-item-1">关联数据存储方案如何处理需要依赖其他表配置的数据，主要取决于数据之间的关系和使用场景 嵌入式文档适用场景：  配置数据较小且不经常变化 主数据和配置数据总是一起被查询 配置数据没有独立存在的必要 一对少或一对一关系  示例结构： // products 集合 {   _id: &quot;prod123&quot;,   name: &quot;智能手机&quot;,   price: 2999,   // 直接嵌入配置数据   displayConfig: {     showPrice: true,     layout: &quot;grid&quot;,     colorTheme: &quot;dark&quot;   },   inventoryConfig: {     lowStockThreshold: 10,     reorderPoint: 5   } }  优点：  读取性能高（单次查询获取所有数据） 数据一致性维护简单 无需额外查询关联数据  缺点：  可能导致数据冗余（如果多个文档共享相同配置） 配置更新时需要更新所有相关文档 文档可能变得过大  ...</div></div></div></a><a class="pagination-related" href="/cs/database/MySQL/MySQL-%E5%9F%BA%E7%A1%80/" title="MySQL 基础篇"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-02</div><div class="info-item-2">MySQL 基础篇</div></div><div class="info-2"><div class="info-item-1">MySQL 相关概念 ​​ 使用启动和停止在 Win + R 中输入 services.msc ​ 或在命令行（管理员模式）中输入： net start mysql80 net stop mysql80  注意：此处 mysql80 是在安装时指定的名称 客户端连接 方法一：MySQL 提供的客户端命令行工具  在菜单栏中寻找 MySQL Command Line Client 启动后输入密码    方法二：系统自带的命令行工具执行指令  ​mysql [-h 127.0.0.1] [-P 3306] -u root -p​ 注意：需要配置环境变量    关系型数据库建立在关系模型基础上，由多张相互连接的二维表组成的数据库 数据模型 DBMS：一个数据库管理系统 图形化界面工具配置信息 展开数据库 数据库操作创建数据库 表操作创建表 插入元素 对表的其他操作 使用 SQL 代码 SQL通用语法 字段类型数值类型 无符号表示需要写在类型后方，如：int unsigned​ 对于浮点数需要设置精度和标度，精度是数字最长整体长度，标度是保留小数点位数，如：double(4,1)​，整数...</div></div></div></a><a class="pagination-related" href="/cs/database/%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86%E5%92%8C%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6%E4%B8%8E%E6%81%A2%E5%A4%8D/" title="事务管理和并发控制与恢复"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-02</div><div class="info-item-2">事务管理和并发控制与恢复</div></div><div class="info-2"><div class="info-item-1">事务概念 事务是构成单一逻辑工作单元的操作集合 事务是访问并可能更新各种数据项的一个程序执行单元 事务由事务开始（begin transaction）与事务结束（end transaction）之间执行的全体操作组成 事务管理主要处理的两个主要问题 各类故障恢复，如硬件故障，系统崩溃等 多个事务的并发执行    ACID事务是访问并可能更新各种数据项的一个程序执行单元 为保证数据的完整性，数据库系统必须保证:  原子性（ Atomicity ）：事务的所有操作在数据库中要么全部反映出来，要么完全不反映 一致性（ Consistency ）：事务隔离执行时（即在没有其他事务并发执行的情况下）保持数据库的一致性 隔离性（ Isolation ）：尽管多个事务可能并发执行，但是每个事务都感觉不到系统中有其他事务在并发的执行 对于任何一对事务 $T_i$ 和 $T_j$ ，在 $T_i$ 看来，$T_j$ 或者在 $T_i$ 开始之前已经完成执行，或者在 $T_i$ 完成之后开始执行   持久性（ Durability ）：一个事务成功完成后，它对数据库的改变是永久的，即使系统出现故障时...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Musuyin</div><div class="author-info-description">Musuyin's Blog</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/musuyin"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/musuyin" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:musuyin@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">即使迷茫，也要前进！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.</span> <span class="toc-text">关系模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%83%E7%BB%84%E4%B8%8E%E5%B1%9E%E6%80%A7"><span class="toc-number">1.1.</span> <span class="toc-text">元组与属性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E7%B3%BB%E5%AE%9E%E4%BE%8B"><span class="toc-number">1.2.</span> <span class="toc-text">关系实例</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Keys%EF%BC%88%E9%94%AE-%E7%A0%81%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">Keys（键&#x2F;码）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B6%85%E7%A0%81"><span class="toc-number">2.1.</span> <span class="toc-text">超码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%80%99%E9%80%89%E7%A0%81"><span class="toc-number">2.2.</span> <span class="toc-text">候选码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E7%A0%81"><span class="toc-number">2.3.</span> <span class="toc-text">主码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%96%E7%A0%81"><span class="toc-number">2.4.</span> <span class="toc-text">外码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%BC%8F%E5%9B%BE"><span class="toc-number">2.4.1.</span> <span class="toc-text">模式图</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B3%E7%B3%BB%E6%9F%A5%E8%AF%A2%E8%AF%AD%E8%A8%80"><span class="toc-number">3.</span> <span class="toc-text">关系查询语言</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E7%B3%BB%E4%BB%A3%E6%95%B0"><span class="toc-number">3.1.</span> <span class="toc-text">关系代数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%89%E6%8B%A9%E8%BF%90%E7%AE%97"><span class="toc-number">3.1.1.</span> <span class="toc-text">选择运算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%95%E5%BD%B1%E8%BF%90%E7%AE%97"><span class="toc-number">3.1.2.</span> <span class="toc-text">投影运算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%9B%E5%8D%A1%E5%B0%94%E7%A7%AF%E8%BF%90%E7%AE%97"><span class="toc-number">3.1.3.</span> <span class="toc-text">笛卡尔积运算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9E%E6%8E%A5%E8%BF%90%E7%AE%97"><span class="toc-number">3.1.4.</span> <span class="toc-text">连接运算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E5%90%88%E5%B9%B6%E8%BF%90%E7%AE%97"><span class="toc-number">3.1.5.</span> <span class="toc-text">集合并运算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E5%90%88%E5%B7%AE%E8%BF%90%E7%AE%97"><span class="toc-number">3.1.6.</span> <span class="toc-text">集合差运算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9B%B4%E5%90%8D%E8%BF%90%E7%AE%97"><span class="toc-number">3.1.7.</span> <span class="toc-text">更名运算</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#prod-salary-instructor"><span class="toc-number">3.2.</span> <span class="toc-text">$$\prod _{salary}(instructor)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E5%90%88%E4%BA%A4%E8%BF%90%E7%AE%97"><span class="toc-number">3.2.1.</span> <span class="toc-text">集合交运算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E7%84%B6%E8%BF%9E%E6%8E%A5%E8%BF%90%E7%AE%97"><span class="toc-number">3.2.2.</span> <span class="toc-text">自然连接运算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97"><span class="toc-number">3.2.3.</span> <span class="toc-text">赋值运算</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">3.2.4.</span> <span class="toc-text">修改数据库</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A0%E9%99%A4"><span class="toc-number">3.2.4.1.</span> <span class="toc-text">删除</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%92%E5%85%A5"><span class="toc-number">3.2.4.2.</span> <span class="toc-text">插入</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0"><span class="toc-number">3.2.4.3.</span> <span class="toc-text">更新</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98"><span class="toc-number">4.</span> <span class="toc-text">例题</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/cloud/terraform/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" title="Terraform 基础知识">Terraform 基础知识</a><time datetime="2026-04-14T16:00:00.000Z" title="发表于 2026-04-15 00:00:00">2026-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/tool/obsidian/Mermaid%E4%BD%BF%E7%94%A8%E6%89%8B%E5%86%8C/" title="Mermaid使用">Mermaid使用</a><time datetime="2026-04-13T16:00:00.000Z" title="发表于 2026-04-14 00:00:00">2026-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8A%E4%BC%98%E5%85%88%E5%88%86%E6%9E%90/" title="自底向上优先分析">自底向上优先分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/LR%E5%88%86%E6%9E%90/" title="LR分析">LR分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/statistics-learning/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA/" title="支持向量机">支持向量机</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Musuyin</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

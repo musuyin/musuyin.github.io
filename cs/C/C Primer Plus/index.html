@@ -1,0 +1,2262 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>C Primer Plus整理 | 木素音的小站</title><meta name="author" content="Musuyin"><meta name="copyright" content="Musuyin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="数据基本数据类型先声明再使用声明数据实际上有两个作用  需占内存的大小, 能表示的数据范围 允许的操作种类  整数 int修饰词 short (int) %hd long (int) %ld %lo %lx 要把一个较小的数看做 long，在数后面加 l 或 L（建议使用 L） long long (int) %lld unsigned (int) %u  可移植类型 &lt;stdint.h&amp;g">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C Primer Plus整理">
+<meta property="og:url" content="https://musuyin.github.io/cs/C/C%20Primer%20Plus/index.html">
+<meta property="og:site_name" content="木素音的小站">
+<meta property="og:description" content="数据基本数据类型先声明再使用声明数据实际上有两个作用  需占内存的大小, 能表示的数据范围 允许的操作种类  整数 int修饰词 short (int) %hd long (int) %ld %lo %lx 要把一个较小的数看做 long，在数后面加 l 或 L（建议使用 L） long long (int) %lld unsigned (int) %u  可移植类型 &lt;stdint.h&amp;g">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://musuyin.github.io/img/butterfly-icon.png">
+<meta property="article:published_time" content="2025-10-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-15T06:27:26.179Z">
+<meta property="article:author" content="Musuyin">
+<meta property="article:tag" content="C语言">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://musuyin.github.io/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "C Primer Plus整理",
+  "url": "https://musuyin.github.io/cs/C/C%20Primer%20Plus/",
+  "image": "https://musuyin.github.io/img/butterfly-icon.png",
+  "datePublished": "2025-10-22T16:00:00.000Z",
+  "dateModified": "2026-04-15T06:27:26.179Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Musuyin",
+      "url": "https://musuyin.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://musuyin.github.io/cs/C/C%20Primer%20Plus/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":null,"highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'C Primer Plus整理',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">木素音的小站</span></a><a class="nav-page-title" href="/"><span class="site-name">C Primer Plus整理</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">C Primer Plus整理</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-10-22T16:00:00.000Z" title="发表于 2025-10-23 00:00:00">2025-10-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-04-15T06:27:26.179Z" title="更新于 2026-04-15 14:27:26">2026-04-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/C%E8%AF%AD%E8%A8%80/">C语言</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="数据"><a href="#数据" class="headerlink" title="数据"></a>数据</h1><h2 id="基本数据类型"><a href="#基本数据类型" class="headerlink" title="基本数据类型"></a>基本数据类型</h2><p>先声明再使用<br>声明数据实际上有两个作用</p>
+<ol>
+<li>需占内存的大小, 能表示的数据范围</li>
+<li>允许的操作种类</li>
+</ol>
+<h3 id="整数-int"><a href="#整数-int" class="headerlink" title="整数 int"></a>整数 int</h3><h4 id="修饰词"><a href="#修饰词" class="headerlink" title="修饰词"></a>修饰词</h4><ul>
+<li>short (int) <code>%hd</code></li>
+<li>long (int) <code>%ld</code> <code>%lo</code> <code>%lx</code> 要把一个较小的数看做 long，在数后面加 <strong><em>l</em></strong> 或 <strong><em>L</em></strong>（建议使用 L）</li>
+<li>long long (int) <code>%lld</code></li>
+<li>unsigned (int) <code>%u</code></li>
+</ul>
+<h4 id="可移植类型"><a href="#可移植类型" class="headerlink" title="可移植类型"></a>可移植类型</h4><ul>
+<li><code>&lt;stdint.h&gt;</code></li>
+<li><code>&lt;inttypes.h&gt;</code></li>
+</ul>
+<h3 id="浮点数-float"><a href="#浮点数-float" class="headerlink" title="浮点数 float"></a>浮点数 float</h3><h4 id="存储中的表示"><a href="#存储中的表示" class="headerlink" title="存储中的表示"></a>存储中的表示</h4><p>首位作为符号位，一部分作为值（尾数）部分，另一部分作为指数部分，根据指数部分的大小使小数点移动，因此称为“浮点数”</p>
+<h4 id="声明形式"><a href="#声明形式" class="headerlink" title="声明形式"></a>声明形式</h4><ul>
+<li>1.14</li>
+<li>5.e-2</li>
+<li>.45E-6<ul>
+<li>作为一个整体，不要在其中加入空格</li>
+</ul>
+</li>
+</ul>
+<p>注：<code>NaN</code> 为浮点数</p>
+<h4 id="修饰词-1"><a href="#修饰词-1" class="headerlink" title="修饰词"></a>修饰词</h4><ul>
+<li>float <code>%f</code> ​ 后面 8 位：127+C 最后 23 位：M-1, 丢弃小数点</li>
+<li>double <code>%lf</code> ​ <code>%le</code> ​ <code>%la</code> ​ a 表示十六进制的浮点数后面 11 位：1023+C 最后 52 位：M-1,丢弃小数点</li>
+<li>long double <code>%Lf</code> （注意是大写的 L，且只有一个）</li>
+</ul>
+<h4 id="浮点数的上溢和下溢"><a href="#浮点数的上溢和下溢" class="headerlink" title="浮点数的上溢和下溢"></a>浮点数的上溢和下溢</h4><p>精度不足导致的数据丢失</p>
+<h3 id="字符型-char"><a href="#字符型-char" class="headerlink" title="字符型 char"></a>字符型 char</h3><p>实际上的字符是以数值形式存储的，由于输出时上下文的区别会输出字符或数值</p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><h4 id="布尔值-Bool"><a href="#布尔值-Bool" class="headerlink" title="布尔值 Bool"></a>布尔值 Bool</h4><p>值为 true 或 false</p>
+<p>一般表达式的真值为 <code>int</code> ​ 类型<br>或 <code>&lt;stdbool.h&gt;</code> 使用 bool，值为 true 和 false</p>
+<h4 id="复数-Complex"><a href="#复数-Complex" class="headerlink" title="复数 Complex"></a>复数 Complex</h4><h4 id="虚数-Imaginary"><a href="#虚数-Imaginary" class="headerlink" title="虚数 Imaginary"></a>虚数 Imaginary</h4><h2 id="派生数据类型"><a href="#派生数据类型" class="headerlink" title="派生数据类型"></a>派生数据类型</h2><h3 id="指针"><a href="#指针" class="headerlink" title="指针 *"></a>指针 <code>*</code></h3><h4 id="声明-初始化"><a href="#声明-初始化" class="headerlink" title="声明&#x2F;初始化"></a>声明&#x2F;初始化</h4><pre><code class="language-c">int *num; //一个指向整型的指针
+float *ft[10]; //一个含有10个指针的数组，每个指针指向一个float
+int board[8][9];//一个二维数组
+int **ptr;//一个指向指针的指针，该指针指向一个整数
+int (* rusks)[10];//一个指针，指向一个有10个元素的数组
+int * oof[3][4];//一个数组，每个元素都是一个指向整数的指针
+int (* uuf)[3][4];//一个指向二维数组的指针
+int (* uof[3])[4];//声明一个含有三个指针的数组，每个指针指向一个含有4个整数的数组
+</code></pre>
+<p>不要把一个整数(例外:0)赋值给一个指针变量<br>0&#x2F;NULL 常用于表示一个指针变量暂未指向一个变量<br>指针必须指向同类型元素，但可以这样：</p>
+<pre><code class="language-cpp">int a = 5;
+void * p = &amp;a;
+</code></pre>
+<p>优先级：<code>[]</code>​&#x3D;<code>()</code>​&gt;<code>*</code>​</p>
+<h4 id="操作"><a href="#操作" class="headerlink" title="操作"></a>操作</h4><h5 id="–"><a href="#–" class="headerlink" title="++&#x2F;–&#x2F;"></a>++&#x2F;–&#x2F;</h5><p>自身递增&#x2F;递减，移向下一个元素（如果是数组），因此指针的类型和数组才需要对应，因为要移动对应的字节数</p>
+<h5 id="n-n"><a href="#n-n" class="headerlink" title="+n&#x2F;-n"></a>+n&#x2F;-n</h5><p>向后 n 个&#x2F;前 n 个元素移动</p>
+<h5 id="指针相减"><a href="#指针相减" class="headerlink" title="指针相减"></a>指针相减</h5><p>得到两个指针相距的元素个数</p>
+<h5 id=""><a href="#" class="headerlink" title="*"></a>*</h5><p>解引用，得到指针所指地址的内容，注意不要解引用没有初始化的指针！</p>
+<h5 id="-1"><a href="#-1" class="headerlink" title="&amp;"></a>&amp;</h5><p>取地址，得到存放指针的地址，即指向指针的指针</p>
+<h4 id="指向多维数组的指针"><a href="#指向多维数组的指针" class="headerlink" title="指向多维数组的指针"></a>指向多维数组的指针</h4><pre><code class="language-c">int (*pz)[2]; //pz指向一个含2个int的数组
+int *px[2]; //px是一个含有两个指针的数组，指针指向int
+int pc[2][3]; //pc是一个含有两个指针的数组，每个指针指向一个含有3个int的数组
+</code></pre>
+<h3 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h3><h4 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h4><p>由数据类型<strong>相同</strong>的一系列元素组成</p>
+<h4 id="声明-初始化-1"><a href="#声明-初始化-1" class="headerlink" title="声明&#x2F;初始化"></a>声明&#x2F;初始化</h4><pre><code class="language-c">int num[42] = {[1] = 6}; //指定位置初始化，若有特定位置被初始化则其他未操作位置都会为0
+char st[114] = {&#39;s&#39;,&#39;k&#39;,&#39;a&#39;,&#39;d&#39;,&#39;i&#39;,&#39;\0&#39;}; //若如st已创建内容，则可省略`[]`中的数值，会为数组自动分配相应的大小
+char *s[10]; //一个指向数组的指针，该数组含10个元素
+</code></pre>
+<p>数组的下标从 <code>0</code> 开始，到 <code>SIZE-1</code><br>数组的名称即为一个指向数组首元素的指针<br>可以用负数表示下标，即往回走</p>
+<h4 id="变长数组（VLA）"><a href="#变长数组（VLA）" class="headerlink" title="变长数组（VLA）"></a>变长数组（VLA）</h4><p>可以先获取 n（如输入），再创建数组<br>因为数组需要划分一个连续的空间，所以原本会在程序运行前为数组分配空间防止它扰乱进程，新版的 C 可以在运行过程中创建数组<br>但还是推荐使用 malloc()</p>
+<pre><code class="language-c">int example(int n , int m , int st[n][m]); //传参数时要把n,m放前面，或者略去所有形参，用*代替[]中的参数
+</code></pre>
+<h4 id="多维数组"><a href="#多维数组" class="headerlink" title="多维数组"></a>多维数组</h4><p>传给函数时需要以 <code>ar[][n][m]</code> 的格式</p>
+<pre><code class="language-c">int num[4][2]; //num是一个拥有4个元素的数组，每一个元素都是一个含有2个int的数组，即num存着4个地址
+</code></pre>
+<h4 id="遍历数组"><a href="#遍历数组" class="headerlink" title="遍历数组"></a>遍历数组</h4><pre><code class="language-c">int main(void)
+{
+	int i,n=10;
+	int num[10];
+	for (i = 0 ; i &lt; n ; i++)
+			printf(&quot;%d &quot;,num[i]); //使用[]来获取数组内的值（指针表示法）
+	for (i = 0 ; i &lt; n ; i++)
+			printf(&quot;%d &quot;,*(num+i)); //使用*来获取数组内的值（数组表示法）
+	return 0;
+}
+</code></pre>
+<p>传参时，可以传<strong>数组</strong>，也可以传入数组的<strong>首元素的指针</strong>和<strong>末元素的指针</strong></p>
+<h4 id="复合字面量"><a href="#复合字面量" class="headerlink" title="复合字面量"></a>复合字面量</h4><p>相当于创建一个没有名称的数据（匿名数据），可以在给函数传数据的时候用，就可以不用再声明一个数据了</p>
+<pre><code class="language-c">(int [2]){10,20}
+int *pt1;
+pt1 = (int[2]){10,20};
+</code></pre>
+<h3 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h3><h4 id="本质"><a href="#本质" class="headerlink" title="本质"></a>本质</h4><p>是一个 char 类型的数组，且以 <code>&#39;\0&#39;</code> 结尾，因此必须为数组多留一位来存放 <code>&#39;\0&#39;</code></p>
+<h4 id="定义-1"><a href="#定义-1" class="headerlink" title="定义"></a>定义</h4><h5 id="字符串常量-string-constant"><a href="#字符串常量-string-constant" class="headerlink" title="字符串常量(string constant)"></a>字符串常量(string constant)</h5><ul>
+<li>双引号 <code>&quot;&quot;</code> 括起来的内容，也叫字符串字面量(string literal)</li>
+<li>编译器会自动加入 <code>\0</code> 在末尾</li>
+<li>如果字符串字面量之间没有间隔或用空白字符分割，会视为一个</li>
+</ul>
+<pre><code class="language-c">char a[50] = &quot;hello &quot; &quot;world&quot;;
+//等价于
+char b[50] = &quot;hello world&quot;;
+</code></pre>
+<h5 id="char-类型数组"><a href="#char-类型数组" class="headerlink" title="char 类型数组"></a>char 类型数组</h5><p>其他未初始化的位置默认为 <code>\0</code></p>
+<pre><code class="language-c">const char m1[40] = {&#39;h&#39;,&#39;e&#39;,&#39;l&#39;,&#39;l&#39;,&#39;o&#39;};  //不是一个字符串，只是一个char数组
+const char m2[40] = {&#39;h&#39;,&#39;e&#39;,&#39;l&#39;,&#39;l&#39;,&#39;o&#39;,&#39;\0&#39;}; //结尾必须有&#39;\0&#39;才是字符串
+const char m3[40] = &quot;hello&quot;;  //更加简便，会自动添加&#39;\0&#39;
+</code></pre>
+<h5 id="指向-char-的指针"><a href="#指向-char-的指针" class="headerlink" title="指向 char 的指针"></a>指向 char 的指针</h5><pre><code class="language-c">const char * pt = &quot;hello&quot;;
+//基本等价于
+const char ar[] = &quot;hello&quot;;
+</code></pre>
+<h5 id="数组和指针的区别"><a href="#数组和指针的区别" class="headerlink" title="数组和指针的区别"></a>数组和指针的区别</h5><ul>
+<li>pt 的值可以改变（指针前后移动或指向另一个字符串），但 ar 的值不可改变（不能进行自增自减，数组名不是变量，但可以进行指针加法操作）</li>
+<li>编译器使用内存中的一个副本来表示所有完全相同的字符串字面量</li>
+</ul>
+<pre><code class="language-c">char * p1 = &quot;hello&quot;;
+p1[0] = &quot;c&quot;;
+printf(&quot;hello&quot;);
+printf(&quot;\n %s&quot;,&quot;hello&quot;);
+//理论上会输出：
+//cello
+//cello
+//但实际上没有输出，可能是编译器区别，所以如果打算修改字符串，就不要用指针指向字符串字面量
+</code></pre>
+<h4 id="I-O"><a href="#I-O" class="headerlink" title="I&#x2F;O"></a>I&#x2F;O</h4><h5 id="fgets"><a href="#fgets" class="headerlink" title="fgets()"></a>fgets()</h5><h5 id="gets-s"><a href="#gets-s" class="headerlink" title="gets_s"></a>gets_s</h5><p>与 fgets 基本相同，但是只能从 stdin 中读取，所以只需两个参数，且会舍弃换行符<br><code>gets_s(words,STLEN)</code></p>
+<h5 id="s-gets"><a href="#s-gets" class="headerlink" title="s_gets"></a>s_gets</h5><pre><code class="language-c">char *s_gets(char st[],int n) //读取一行字符串
+{
+	char *ret_val,*find;
+	ret_val = fgets(st,n,stdin);
+	if (ret_val)
+	{
+		find = strchr(st,&#39;\n&#39;);
+		if (find)
+			*find = &#39;\0&#39;;
+		else
+			while (getchar() != &#39;\n&#39;)
+				continue;
+	}
+	return ret_val;
+}
+</code></pre>
+<h5 id="scanf"><a href="#scanf" class="headerlink" title="scanf()"></a>scanf()</h5><h5 id="puts"><a href="#puts" class="headerlink" title="puts()"></a>puts()</h5><h5 id="fputs"><a href="#fputs" class="headerlink" title="fputs()"></a>fputs()</h5><h5 id="printf"><a href="#printf" class="headerlink" title="printf()"></a>printf()</h5><h4 id="字符串函数"><a href="#字符串函数" class="headerlink" title="字符串函数"></a>字符串函数</h4><h5 id="strlen"><a href="#strlen" class="headerlink" title="strlen()"></a>strlen()</h5><p><code>size_t strlen(const char *_Str)</code></p>
+<p>获取字符串长度，不包括 <code>\0</code></p>
+<h5 id="strcat-strncat"><a href="#strcat-strncat" class="headerlink" title="strcat() &#x2F; strncat()"></a>strcat() &#x2F; strncat()</h5><ul>
+<li><code>char *strcat(char *__restrict__ _Dest, const char *__restrict__ _Source)</code></li>
+<li><code>char *strncat(char *__restrict__ _Dest, const char *__restrict__ _Source, size_t _Count)</code></li>
+</ul>
+<p>将 Source 拼接到 Dest 上，会将 Dest 末尾的 <code>\0</code> 删去，Count 指定 Source 的长度<br>返回 Dest</p>
+<h5 id="strcmp-strncmp"><a href="#strcmp-strncmp" class="headerlink" title="strcmp() &#x2F; strncmp"></a>strcmp() &#x2F; strncmp</h5><ul>
+<li><code>int strcmp(const char *_Str1, const char *_Str2)</code></li>
+<li><code>int strncmp(const char *_Str1, const char *_Str2, size_t _MaxCount)</code></li>
+</ul>
+<p>比较字符串在机器排序中的先后（如 AASCII 码），相等返回 <code>0</code>；不相等的情况下，视为 Str1-Str2，会得到正值或负值</p>
+<p>MaxCount 表示最多会比较到的长度</p>
+<h5 id="strcpy-strncpy"><a href="#strcpy-strncpy" class="headerlink" title="strcpy &#x2F; strncpy()"></a>strcpy &#x2F; strncpy()</h5><ul>
+<li><code>char *strcpy(char *__restrict__ _Dest, const char *__restrict__ _Source)</code></li>
+<li><code>char *strncpy(char *__restrict__ _Dest, const char *__restrict__ _Source, size_t _Count)</code></li>
+</ul>
+<p>将 Source 的内容拷贝到 Dest 中，要注意不要溢出，返回 Dest</p>
+<p>Count 指定 Source 拷贝的长度</p>
+<h5 id="sprintf"><a href="#sprintf" class="headerlink" title="sprintf()"></a>sprintf()</h5><p><code>int sprintf(char *__restrict__ _Dest, const char *__restrict__ _Format, ...)</code></p>
+<p>将多个元素合成一个字符串，Dest 为目标字符串，打印结果会进入 Dest 中而不是屏幕上</p>
+<h5 id="strchr-strrchr"><a href="#strchr-strrchr" class="headerlink" title="strchr() &#x2F; strrchr()"></a>strchr() &#x2F; strrchr()</h5><ul>
+<li><code>char *strchr(const char *_Str, int _Val)</code><ul>
+<li>返回字符串中首次(包含’\0）出现 Val 的地址，不存在则返回 <code>NULL</code></li>
+</ul>
+</li>
+<li><code>char *strrchr(const char *_Str, int _Ch)</code><ul>
+<li>返回字符串中最后一次（包含’\0’）出现 Ch 的地址，不存在则返回 <code>NULL</code></li>
+</ul>
+</li>
+</ul>
+<h5 id="strpbrk"><a href="#strpbrk" class="headerlink" title="strpbrk()"></a>strpbrk()</h5><p><code>char *strpbrk(const char *_Str, const char *_Control)</code></p>
+<p>如果 Str 中包含 Control 中的任意字符，则函数返回指向 Str 首元素的指针；不包含则返回 <code>NULL</code></p>
+<h5 id="strstr"><a href="#strstr" class="headerlink" title="strstr()"></a>strstr()</h5><p><code>char *strstr(const char *_Str, const char *_SubStr)</code></p>
+<p>返回 Str 中 SubStr 出现的首位置，未出现则返回 <code>NULL</code>​</p>
+<h4 id="字符串与数值转换"><a href="#字符串与数值转换" class="headerlink" title="字符串与数值转换"></a>字符串与数值转换</h4><h5 id="atoi-atof-atol"><a href="#atoi-atof-atol" class="headerlink" title="atoi()atof()atol()"></a>atoi()atof()atol()</h5><p>字符串转为 int&#x2F;double&#x2F;long</p>
+<p>如果字符串是以数字开头的字母数字混合字符串，则会取开头的数字直到字母</p>
+<h5 id="strtol-strtoul-strtod"><a href="#strtol-strtoul-strtod" class="headerlink" title="strtol()strtoul()strtod()"></a>strtol()strtoul()strtod()</h5><p>字符串转为 long&#x2F;unsigned long&#x2F;double</p>
+<p>可以识别和报告字符串中而的首字符是否是数字</p>
+<h3 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h3><h4 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h4><pre><code class="language-c">struct book  //struct为关键字，book为标记
+{
+	char title[MAX];
+	char author[MAX];
+	float value;
+};  //不要忘了分号
+
+struct book library;  //声明一个book类型变量，变量名为library
+struct book *pt;  //声明一个指向book的指针
+
+//如果这个结构只需用到一次，可以：
+struct  //无需结构标记
+{
+	char title[MAX];
+	char author[MAX];
+	float value;
+} library;
+
+//初始化
+struct book library = {
+	&quot;Golden Age&quot;,
+	&quot;Ji Ci&quot;,
+	11.45
+}; //可以不用换行，仅仅是为了增加可读性
+
+//指定初始化
+struct book library = {
+	.value = 11.45;  //也可以单独为其中一个成员赋值，而其他成员保持空的状态
+	.title = &quot;Golden Age&quot;,
+	.author = &quot;Ji Ci&quot;
+};  //若多次对同一个成员进行赋值，最后一次会成为最终的结果
+
+struct book library[10] = {
+	[2]={
+        .foclen = 500,
+        .fstop = 2,
+        .brand = &quot;Remarkata&quot;
+    }
+};//为一个结构数组中的其中一个元素初始化，其他初始化为0，字符串为空
+</code></pre>
+<h4 id="访问成员"><a href="#访问成员" class="headerlink" title="访问成员"></a>访问成员</h4><p>结构成员运算符：<code>.</code>，相当于下标的作用<br>​<br><code>library.title</code></p>
+<h4 id="结构数组"><a href="#结构数组" class="headerlink" title="结构数组"></a>结构数组</h4><ul>
+<li><code>struct book library[NUM]</code> ​ 生成一个 book 类型变量的数组</li>
+<li><code>library[count].title</code> ​ 类似格式进行访问</li>
+</ul>
+<h4 id="嵌套结构"><a href="#嵌套结构" class="headerlink" title="嵌套结构"></a>嵌套结构</h4><pre><code class="language-c">struct city
+{
+	int population;
+	struct book library;
+};
+
+//访问
+struct city ShangHai;
+printf(&quot;%s&quot;,ShangHai.library.title);
+</code></pre>
+<h4 id="指向结构的指针"><a href="#指向结构的指针" class="headerlink" title="指向结构的指针"></a>指向结构的指针</h4><pre><code class="language-c">struct book * pt;
+pt = &amp;library;  //注意，与数组不同，结构名不代表其地址
+printf(&quot;%f&quot;,pt -&gt; value);  //指针使用-&gt;来访问成员
+printf(&quot;%s&quot;,(*pt).title);  //先将pt解引用得到library，再使用结构的访问成员的方式来访问，注意()是必须的，&quot;.&quot;的优先级高于&quot;*&quot;
+</code></pre>
+<h4 id="向函数传递结构的信息"><a href="#向函数传递结构的信息" class="headerlink" title="向函数传递结构的信息"></a>向函数传递结构的信息</h4><h5 id="传递结构本身"><a href="#传递结构本身" class="headerlink" title="传递结构本身"></a>传递结构本身</h5><pre><code class="language-c">void show(const struct book);
+……
+show(libaray);  //注意结构名本身不代表结构的地址
+……
+void show(const struct book library)
+{
+	printf(&quot;%s is written by %s and values %f&quot;, library.title , library.author , library.value);
+}
+//使用传递结构本身可能会导致程序运行速度变慢
+//而且当需要改变结构所含的值时，函数需要返回结构
+</code></pre>
+<h5 id="传递结构指针"><a href="#传递结构指针" class="headerlink" title="传递结构指针"></a>传递结构指针</h5><pre><code class="language-c">void show(const struct book * pt);  //pt可省略
+……
+show(&amp;libaray);  //注意结构名本身不代表结构的地址
+……
+void show(const struct book * pt)
+{
+	printf(&quot;%s is written by %s and values %f&quot;, pt-&gt;title , pt-&gt;author , pt-&gt;value);
+}
+</code></pre>
+<h5 id="传递结构成员"><a href="#传递结构成员" class="headerlink" title="传递结构成员"></a>传递结构成员</h5><p>单独的将结构的成员的值提取出来向结构传递</p>
+<h4 id="赋值"><a href="#赋值" class="headerlink" title="赋值"></a>赋值</h4><ul>
+<li>如果两个结构类型相同，则可以直接进行赋值（不是只给地址）</li>
+<li>也可以在进行初始化的时候直接赋其另一个相同类型的值</li>
+</ul>
+<h4 id="在结构内使用指针"><a href="#在结构内使用指针" class="headerlink" title="在结构内使用指针"></a>在结构内使用指针</h4><pre><code class="language-c">//需要使用malloc()为指针分配空间，不能让指针空指
+struct namect
+{
+	char * fname;
+	char * lname;
+};
+……
+struct namect * YY;
+YY -&gt; fname = (char *)malloc(strlen(temp)+1);  //sizeof(char)(=1)可以省去
+strcpy(YY -&gt; fname , temp);  //malloc()处理字符串常规操作
+……
+free(YY -&gt; fname);
+</code></pre>
+<h4 id="结构的复合字面量"><a href="#结构的复合字面量" class="headerlink" title="结构的复合字面量"></a>结构的复合字面量</h4><pre><code class="language-c">reader = (struct book) {&quot;Arknight&quot;,&quot;Ocean Cat&quot;,&quot;10.10&quot;}
+</code></pre>
+<h4 id="匿名结构"><a href="#匿名结构" class="headerlink" title="匿名结构"></a>匿名结构</h4><pre><code class="language-c">struct person
+{
+	int id;
+	struct {char first[20] ; char last[20]};
+};
+//访问
+struct ZYY;
+……
+puts(ZYY.first);  //可以直接访问二级成员
+</code></pre>
+<h4 id="伸缩型数组成员"><a href="#伸缩型数组成员" class="headerlink" title="伸缩型数组成员"></a>伸缩型数组成员</h4><pre><code class="language-c">struct flex
+{
+	int count;
+	double scores[];  //放在最后一个，作为伸缩型数组成员
+}
+struct flex * pt;
+pt = malloc(sizeof(struct flex) + 5 * sizeof(double));
+//在struct flex（不含scores）的基础上再有一个含5个元素的double数组
+</code></pre>
+<p>不应该声明 <code>struct flex</code> ​ 变量，而是应该声明对应的指针，再使用 <code>malloc()</code> ​ 为其创建空间<br>使用含伸缩型数组的结构时：<br>1）不能直接进行拷贝（直接拷贝会略去伸缩型数组而把其他的元素拷贝）,如果确实要拷贝使用 <code>memcpy()</code>​<br>2）不要把结构直接传递给函数，应该传递指针<br>3）不要使用带有伸缩型数组的结构作为数组，或者是其他结构的成员。</p>
+<h4 id="保存结构到文件中"><a href="#保存结构到文件中" class="headerlink" title="保存结构到文件中"></a>保存结构到文件中</h4><p>​<code>fwrite(&amp;library , sizeof(struct book) , 1 , pbooks);</code>​<br>虽然使用起来比较方便，但是由于各个系统（甚至同一系统不同编译器）的二进制表示法不一定相同，所以可移植性很差</p>
+<h3 id="联合"><a href="#联合" class="headerlink" title="联合"></a>联合</h3><h4 id="创建-1"><a href="#创建-1" class="headerlink" title="创建"></a>创建</h4><pre><code class="language-c">union hold
+{
+	int d;
+	float f;
+	double lf;
+};
+//联合的字节数会根据包含的最大的字节数确定
+//把结构看作“和”，那就可以把联合看作“或”。联合在一个时间只能是它包含数据类型的其中一个，即只能存储一个值
+</code></pre>
+<h4 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h4><pre><code class="language-c">union hold fit;
+fit.d = 1;  //fit选择int类型
+fit.f = 2.0; //fit选择float类型
+fit.lf = 6.4; //fit选择double类型
+</code></pre>
+<pre><code class="language-c">//模拟实现一个选择
+struct company……
+struct person……
+//比如一辆出租车，是属于个人还是公司，对于每个从属会有不同的属性，可以用union实现一个“选择”的功能
+union owner
+{
+	struct company companyown;
+	struct person personown;
+};
+</code></pre>
+<h4 id="匿名联合"><a href="#匿名联合" class="headerlink" title="匿名联合"></a>匿名联合</h4><pre><code class="language-c">struct car_data
+{
+	……
+	union
+	{
+		struct company companyown;
+		struct person personown;
+	};
+};
+</code></pre>
+<h3 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h3><h4 id="创建-2"><a href="#创建-2" class="headerlink" title="创建"></a>创建</h4><p>​<code>enum spectrum{red , orange , yellow , green , blue , violet};</code><br>​<code>enum spectrum color;</code>​<br>相当于把这些符号常量作为标识符（但又不完全是）来使用，称为枚举符</p>
+<h4 id="enum-常量"><a href="#enum-常量" class="headerlink" title="enum 常量"></a>enum 常量</h4><p>会给 enum 中的枚举符逐个赋值，默认从 0 开始递增，也可以赋值</p>
+<pre><code class="language-c">enum spectrum {red , orange = 100 , yellow , green , blue = 1000 , violet};
+//red == 0 , orange == 100 , yellow == 101 , green == 102 , blue == 1000 , violet == 1001
+</code></pre>
+<h4 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h4><p>枚举类型的目的只是为了提高程序的可读性和可维护性，但枚举类型只能在内部使用，要用字符串进行比较来确定值</p>
+<pre><code class="language-c">enum spectrum {red , orange = 100 , yellow , green , blue = 1000 , violet};
+const char * colors [] = {&quot;red&quot;,&quot;orange&quot;……};
+……
+if (strcmp(choice,colors[color]) == 0)
+</code></pre>
+<h2 id="高级数据类型"><a href="#高级数据类型" class="headerlink" title="高级数据类型"></a>高级数据类型</h2><p><a href="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/AcWing.md">AcWing</a><br>((20231031135627-8inw3kf ‘MOOC《数据结构》’))</p>
+<h2 id="typedef"><a href="#typedef" class="headerlink" title="typedef"></a>typedef</h2><p>示例</p>
+<pre><code class="language-c">typedef unsigned char BYTE;  //BYTE == unsigned char
+typedef char * STRING;
+STRING a,b; //== char *a,*b;  如果用#define STRING char *  则会变成char * a,b;
+//define 是单纯的文本替换；typedef 是打包
+typedef struct complex{……} COMPLEX;
+COMPLEX x;
+</code></pre>
+<hr>
+<h1 id="运算符"><a href="#运算符" class="headerlink" title="运算符"></a>运算符</h1><p>一个表达式的操作数类型可能不相同，但其结果均具有确定的数据类型和值</p>
+<h2 id="优先级"><a href="#优先级" class="headerlink" title="优先级"></a>优先级</h2><table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>运算符</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>[] -&gt; .</td>
+<td>数组下标、结构体&#x2F;联合体成员选择、结构体&#x2F;联合体指针的成员选择</td>
+</tr>
+<tr>
+<td>2</td>
+<td>++ – - ! ~ + (type) * &amp; sizeof</td>
+<td>后缀&#x2F;前缀增减、负号、逻辑非、按位取反、正号、类型转换、取地址、取内容、求大小</td>
+</tr>
+<tr>
+<td>3</td>
+<td>* &#x2F; %</td>
+<td>乘法、除法、取模</td>
+</tr>
+<tr>
+<td>4</td>
+<td>+ -</td>
+<td>加法、减法</td>
+</tr>
+<tr>
+<td>5</td>
+<td>&lt;&lt; &gt;&gt;</td>
+<td>左移、右移</td>
+</tr>
+<tr>
+<td>6</td>
+<td>&lt; &lt;&#x3D; &gt; &gt;&#x3D;</td>
+<td>小于、小于等于、大于、大于等于</td>
+</tr>
+<tr>
+<td>7</td>
+<td>&#x3D;&#x3D; !&#x3D;</td>
+<td>等于、不等于</td>
+</tr>
+<tr>
+<td>8</td>
+<td>&amp;</td>
+<td>按位与</td>
+</tr>
+<tr>
+<td>9</td>
+<td>^</td>
+<td>按位异或</td>
+</tr>
+<tr>
+<td>10</td>
+<td>​<code>|</code>​</td>
+<td>按位或</td>
+</tr>
+<tr>
+<td>11</td>
+<td>&amp;&amp;</td>
+<td>逻辑与</td>
+</tr>
+<tr>
+<td>12</td>
+<td>​<code>||</code>​</td>
+<td>逻辑或</td>
+</tr>
+<tr>
+<td>13</td>
+<td>? :</td>
+<td>条件运算符（三目运算符）</td>
+</tr>
+<tr>
+<td>14</td>
+<td>&#x3D; +&#x3D; -&#x3D; *&#x3D; &#x2F;&#x3D; %&#x3D; &amp;&#x3D; ^&#x3D;</td>
+<td>&#x3D; &lt;&lt;&#x3D; &gt;&gt;&#x3D;</td>
+</tr>
+<tr>
+<td>15</td>
+<td>,</td>
+<td>逗号运算符（从左到右顺序执行）</td>
+</tr>
+</tbody></table>
+<h2 id="基本运算符"><a href="#基本运算符" class="headerlink" title="基本运算符"></a>基本运算符</h2><h3 id="加"><a href="#加" class="headerlink" title="+ 加"></a>+ 加</h3><h3 id="减-取负"><a href="#减-取负" class="headerlink" title="- 减&#x2F;取负"></a>- 减&#x2F;取负</h3><h3 id="赋值-左值-右值"><a href="#赋值-左值-右值" class="headerlink" title="&#x3D; 赋值 左值 &#x3D; 右值"></a>&#x3D; 赋值 左值 &#x3D; 右值</h3><p>+&#x3D; -&#x3D; *&#x3D; &#x2F;&#x3D; %&#x3D;</p>
+<h3 id="乘"><a href="#乘" class="headerlink" title="* 乘"></a>* 乘</h3><h3 id="除-整数-整数仍为整数"><a href="#除-整数-整数仍为整数" class="headerlink" title="&#x2F; 除 整数&#x2F;整数仍为整数"></a>&#x2F; 除 整数&#x2F;整数仍为整数</h3><h2 id="其他运算符"><a href="#其他运算符" class="headerlink" title="其他运算符"></a>其他运算符</h2><h3 id="sizeof"><a href="#sizeof" class="headerlink" title="sizeof()"></a><code>sizeof()</code></h3><p>以字节为单位返回运算对象的大小，返回类型为 <code>size_t</code><br>输出时要用 <code>%zd</code>，老版本用 <code>%u</code> 或 <code>%lu</code></p>
+<h3 id="-2"><a href="#-2" class="headerlink" title="%"></a>%</h3><p>求模，只能用于整数<br>被模数的符号决定了结果的符号<br><code>a%b</code> 可以用 <code>a - (a/b)*b</code> 替换</p>
+<h3 id="–-1"><a href="#–-1" class="headerlink" title="++&#x2F;–"></a>++&#x2F;–</h3><p>递增&#x2F;递减，前缀为<strong>先加再用</strong>；后缀为<strong>先用再加</strong></p>
+<h3 id="type"><a href="#type" class="headerlink" title="(type)"></a>(type)</h3><p>强制类型转换，注意可能会丢失精度</p>
+<h3 id="-3"><a href="#-3" class="headerlink" title="&amp;"></a>&amp;</h3><p>取地址运算符</p>
+<h3 id="-4"><a href="#-4" class="headerlink" title="*"></a>*</h3><p>间接运算符，即解引用，获取一个地址上的值</p>
+<h2 id="关系运算符"><a href="#关系运算符" class="headerlink" title="关系运算符"></a>关系运算符</h2><table>
+<thead>
+<tr>
+<th align="left">&#x3D;&#x3D;</th>
+<th align="left">等于</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">&lt;</td>
+<td align="left">小于</td>
+</tr>
+<tr>
+<td align="left">&lt;&#x3D;</td>
+<td align="left">小于等于</td>
+</tr>
+<tr>
+<td align="left">&gt;</td>
+<td align="left">大于</td>
+</tr>
+<tr>
+<td align="left">&gt;&#x3D;</td>
+<td align="left">大于等于</td>
+</tr>
+<tr>
+<td align="left">!&#x3D;</td>
+<td align="left">不等于</td>
+</tr>
+</tbody></table>
+<h2 id="逻辑运算符"><a href="#逻辑运算符" class="headerlink" title="逻辑运算符"></a>逻辑运算符</h2><h3 id="与"><a href="#与" class="headerlink" title="&amp;&amp; 与"></a>&amp;&amp; 与</h3><p>当左侧判断为 false 时，不会再判断右侧</p>
+<h3 id="或"><a href="#或" class="headerlink" title="|| 或"></a>|| 或</h3><p>当左侧判断为 true 时，不会在判断右侧</p>
+<h3 id="非"><a href="#非" class="headerlink" title="! 非"></a>! 非</h3><p>a 等价于 a !&#x3D; 0<br>!a 等价于 a &#x3D;&#x3D; 0</p>
+<h2 id="优先级和结合律"><a href="#优先级和结合律" class="headerlink" title="优先级和结合律"></a>优先级和结合律</h2><table>
+<thead>
+<tr>
+<th align="left">()</th>
+<th align="left"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">- + ++ – sizeof</td>
+<td align="left">→</td>
+</tr>
+<tr>
+<td align="left">* &#x2F; %</td>
+<td align="left">←</td>
+</tr>
+<tr>
+<td align="left">+ -</td>
+<td align="left">→</td>
+</tr>
+<tr>
+<td align="left">&lt; &lt;&#x3D; &gt; &gt;&#x3D;</td>
+<td align="left">→</td>
+</tr>
+<tr>
+<td align="left">&#x3D;&#x3D; !&#x3D;</td>
+<td align="left">→</td>
+</tr>
+<tr>
+<td align="left">&#x3D;</td>
+<td align="left">←</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="I-O-1"><a href="#I-O-1" class="headerlink" title="I&#x2F;O"></a>I&#x2F;O</h1><h2 id="转换说明-conversion-specification"><a href="#转换说明-conversion-specification" class="headerlink" title="转换说明(conversion specification)"></a>转换说明(conversion specification)</h2><table>
+<thead>
+<tr>
+<th align="left">%a %A</th>
+<th align="left">浮点数、十六进制数、p 计数法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">%d %i</td>
+<td align="left">有符号十进制整数</td>
+</tr>
+<tr>
+<td align="left">%c</td>
+<td align="left">单个字符</td>
+</tr>
+<tr>
+<td align="left">%e %E</td>
+<td align="left">浮点数，e 计数法（区别在于 e 的大小写）</td>
+</tr>
+<tr>
+<td align="left">%f</td>
+<td align="left">浮点数（十进制）输入必须 lf 对应 double，f 对应 float；输出时可以都用 f&#x2F;lf</td>
+</tr>
+<tr>
+<td align="left">%g %G</td>
+<td align="left">根据值自动选择 %f 或 %e</td>
+</tr>
+<tr>
+<td align="left">%o</td>
+<td align="left">无符号八进制整数</td>
+</tr>
+<tr>
+<td align="left">%x %X</td>
+<td align="left">无符号十六进制整数</td>
+</tr>
+<tr>
+<td align="left">%p</td>
+<td align="left">指针</td>
+</tr>
+<tr>
+<td align="left">%s</td>
+<td align="left">字符串</td>
+</tr>
+<tr>
+<td align="left">%u</td>
+<td align="left">无符号十进制整数</td>
+</tr>
+<tr>
+<td align="left">%%</td>
+<td align="left">百分号</td>
+</tr>
+</tbody></table>
+<h3 id="意义"><a href="#意义" class="headerlink" title="意义"></a>意义</h3><p>因为计算机中的数据全部都是以一系列 01 存储，不同的转换说明将取不同的字节数，并进行不同的输出，也就是所谓的“上下文”</p>
+<h2 id="输入"><a href="#输入" class="headerlink" title="输入"></a>输入</h2><h3 id="scanf-1"><a href="#scanf-1" class="headerlink" title="scanf()"></a>scanf()</h3><h4 id="函数原型"><a href="#函数原型" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int scanf(const char *__restrict__ _Format, ...)</code><br>来自 <code>&lt;stdio.h&gt;</code></p>
+<h4 id="输入格式"><a href="#输入格式" class="headerlink" title="输入格式"></a>输入格式</h4><p>输入格式要与 <code>&quot;&quot;</code> 中填写的格式一致，例如写了”%d,%d”，输入也要是<strong>数字，数字</strong></p>
+<h4 id="返回值"><a href="#返回值" class="headerlink" title="返回值"></a>返回值</h4><p>返回输入成功的项的个数，可以用来判断输入是否成功</p>
+<h4 id="转换修饰符"><a href="#转换修饰符" class="headerlink" title="转换修饰符"></a>转换修饰符</h4><table>
+<thead>
+<tr>
+<th align="left">*</th>
+<th align="left">抑制赋值，会跳过对应的输入，可以用在读取文件中的特定列</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">数字</td>
+<td align="left">最大字段宽度，输入达到最大字段宽度处停止，或第一次遇到空白字符</td>
+</tr>
+</tbody></table>
+<pre><code class="language-cpp">int main(void)
+{
+    char c,d;
+    scanf(&quot;%3c%c&quot;, &amp;c, &amp;d);
+    printf(&quot;%c %c\n&quot;, c, d);
+    return 0;
+}
+//abcd
+//a d
+</code></pre>
+<h4 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h4><p>1)会无视空白字符，所以要记得清除</p>
+<pre><code class="language-c">void eatline(void)
+{
+	while (getchar() != &#39;\n&#39;)
+		continue;
+}
+</code></pre>
+<p>2)读到与要求输入类型不同的值会停止读入，这些值就会留在缓冲区，要注意清除<br>3)如果带多个转换说明，会在第一个出错处停止读入输入</p>
+<h3 id="getchar"><a href="#getchar" class="headerlink" title="getchar()"></a>getchar()</h3><h4 id="函数原型-1"><a href="#函数原型-1" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int getchar(void)</code></p>
+<h4 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h4><p>从缓冲区读入一个字符，返回它的字符码，需要赋值给变量<br>注意当 scanf()与 getchar()混用时，要注意空白符号，scanf()会跳过空白符号，但最后一次处理过后会有空白符号残留在缓冲区中，再次使用 getchar()时要注意清除</p>
+<h2 id="输出"><a href="#输出" class="headerlink" title="输出"></a>输出</h2><h3 id="printf-1"><a href="#printf-1" class="headerlink" title="printf()"></a>printf()</h3><h4 id="函数原型-2"><a href="#函数原型-2" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int printf(const char *__restrict__ _Format, ...)</code><br>来自 <code> &lt;stdio.h&gt;</code></p>
+<h4 id="转换修饰符-1"><a href="#转换修饰符-1" class="headerlink" title="转换修饰符"></a>转换修饰符</h4><table>
+<thead>
+<tr>
+<th align="left">标记</th>
+<th align="left">见下</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">数字</td>
+<td align="left">最小字宽度，若不满足会用空格填充；若超出则会相应扩充（可以认为无效）</td>
+</tr>
+<tr>
+<td align="left">.数字</td>
+<td align="left">1）%f %e：小数点后的精度，自带四舍五入 2)%g：有效数字最大位数 3）%s：待打印字符最大数量 4）整型：待打印数字最小位数</td>
+</tr>
+<tr>
+<td align="left">h hh <code>%hd</code> <code>%hhd</code></td>
+<td align="left">h 表示 <code>short int</code> 或 <code>unsigned short int</code>；hh 表示 <code>signed char</code> 或 <code>unsigned char</code></td>
+</tr>
+<tr>
+<td align="left">j <code>%jd</code></td>
+<td align="left">表示 <code>intmax_</code> <em>​<code>t</code>​</em> <em>或</em> <em>​<code>unint</code>​</em> <code>mat_t</code></td>
+</tr>
+<tr>
+<td align="left">l ll L <code>%ld</code> <code>%llu</code> <code>%Lf</code></td>
+<td align="left">表示 <code>(unsigned) long int</code> ；<code>unsigned long long int</code>； <code>long double</code></td>
+</tr>
+<tr>
+<td align="left">t <code>%td</code></td>
+<td align="left">表示 <code>ptrdiff_t</code> 的值，是两个指针的差值</td>
+</tr>
+<tr>
+<td align="left">z <code>%zd</code></td>
+<td align="left">表示 <code>size_t</code> 的值，是 sizeof 的返回类型</td>
+</tr>
+<tr>
+<td align="left">* <code>%*d</code></td>
+<td align="left">用程序来指定字段宽度，需要传入两个参数，前者为字段宽度，后者为输出值</td>
+</tr>
+</tbody></table>
+<h4 id="标记"><a href="#标记" class="headerlink" title="标记"></a>标记</h4><table>
+<thead>
+<tr>
+<th align="left">-</th>
+<th align="left">向左对齐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">+</td>
+<td align="left">添加正负号</td>
+</tr>
+<tr>
+<td align="left">空格</td>
+<td align="left">根据正负在数值前添加空格或负号，保持长度一致</td>
+</tr>
+<tr>
+<td align="left">##</td>
+<td align="left">转换结果形式 <code>%#o</code></td>
+</tr>
+<tr>
+<td align="left">0</td>
+<td align="left">用 0 填充字段宽度</td>
+</tr>
+</tbody></table>
+<h3 id="putchar"><a href="#putchar" class="headerlink" title="putchar()"></a>putchar()</h3><h4 id="函数原型-3"><a href="#函数原型-3" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int putchar(int _Ch)</code><br>来自 <code>&lt;stdio.h&gt;</code></p>
+<h4 id="作用-1"><a href="#作用-1" class="headerlink" title="作用"></a>作用</h4><p>输出一个给定字符到 stdout，只能输出字符，不能输出数值或浮点数（字符形式的数字可以）</p>
+<h3 id="puts-1"><a href="#puts-1" class="headerlink" title="puts()"></a>puts()</h3><h4 id="函数原型-4"><a href="#函数原型-4" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int puts(const char *_Str)</code></p>
+<h4 id="作用-2"><a href="#作用-2" class="headerlink" title="作用"></a>作用</h4><p>输出给定字符串，自动添加 <code>\n</code></p>
+<hr>
+<h1 id="控制语句"><a href="#控制语句" class="headerlink" title="控制语句"></a>控制语句</h1><h2 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h2><h3 id="for"><a href="#for" class="headerlink" title="for"></a>for</h3><p>for (在循环前执行 ; 在每次循环前判断 ; 在循环结束后执行)<br>每一个 <code>;</code> 内可以用 <code>,</code>（逗号运算符）来执行多条语句，也可以空着</p>
+<h3 id="while"><a href="#while" class="headerlink" title="while"></a>while</h3><p>while () 在每次循环前若 <code>()</code> 中的条件为真则执行</p>
+<h3 id="do-while"><a href="#do-while" class="headerlink" title="do {} while;"></a>do {} while;</h3><p>先执行命令，再判断 while() 是否满足，即保证至少有一次执行<br>注意有 <code>;</code> 结尾</p>
+<h2 id="选择"><a href="#选择" class="headerlink" title="选择"></a>选择</h2><h3 id="if-else-if-else"><a href="#if-else-if-else" class="headerlink" title="if&#x2F;else if&#x2F;else"></a>if&#x2F;else if&#x2F;else</h3><p>只会执行其中一条<br>else 总是与前面最近的尚无 else 配对的同一个块中的 if 配对</p>
+<h3 id="switch"><a href="#switch" class="headerlink" title="switch"></a>switch</h3><pre><code class="language-c">switch ()
+{
+	case &#39;&#39;:
+	default:
+}
+</code></pre>
+<p>视作简化版的 if，速度更快，但只接受单个字符或者数字，不接受浮点数<br>注意：进入一个 case 后会一直向下执行，会执行到其他 case 中去以及 default，所以要加 <code>break</code> ​ 来停止，可以利用这个性质叠加多个 case 达到取范围的效果</p>
+<h3 id="-5"><a href="#-5" class="headerlink" title="?:"></a>?:</h3><p>​<code>(statement) ? ret_val1 : ret_val2</code> ​ 两个返回值必须是<strong>同一类型</strong>，向高位靠齐<br>任何一个表达式均具有确定的数据类型和值<br>多个在一起无括号，则从右向左结合</p>
+<hr>
+<h1 id="函数-多文件"><a href="#函数-多文件" class="headerlink" title="函数&#x2F;多文件"></a>函数&#x2F;多文件</h1><h2 id="函数的创建及使用"><a href="#函数的创建及使用" class="headerlink" title="函数的创建及使用"></a>函数的创建及使用</h2><pre><code class="language-c">void read(char st[],int n); //函数原型(function prototype)，可省略形参名称 void read(char [],int);
+int main(void) //无传入参数写void
+{
+……
+	read(st,n);  //函数调用(function call)
+	return 0; // 函数返回
+}
+void read(char st[],int n)  //函数定义(function definition)
+{
+……  //变量归函数私有（具体见存储类别）
+}
+</code></pre>
+<h2 id="函数指针"><a href="#函数指针" class="headerlink" title="函数指针"></a>函数指针</h2><h3 id="创建-3"><a href="#创建-3" class="headerlink" title="创建"></a>创建</h3><pre><code class="language-c">char (* frump)(int); //指向函数的指针，这个函数的返回类型为char
+char (* frump[3])(int); //一个内含3个指针的数组，每个指针都指向范围类型为char的函数
+</code></pre>
+<p>声明时，必须声明指针指向的函数类型（函数签名，即返回类型和形参类型）</p>
+<pre><code class="language-c">void ToUpper(char *); //无返回值，参数为char *
+void (*pt) (char *); //与ToUpper()对应的指针，直接把函数名称换成指针形式就好
+pt = ToUpper;
+</code></pre>
+<h3 id="作用-3"><a href="#作用-3" class="headerlink" title="作用"></a>作用</h3><p>可以通过为函数传递指向函数的指针来控制使用什么函数</p>
+<pre><code class="language-c">(*pt)(str);
+pt(str);
+</code></pre>
+<p>两种方法都可以<br>1）pt 指向 ToUpper，*pt 就是 ToUpper<br>2）由于函数名是指针，那么指针和函数名可以互换使用，pt(str)就是 ToUpper(str)</p>
+<h2 id="变量的存储类别"><a href="#变量的存储类别" class="headerlink" title="变量的存储类别"></a>变量的存储类别</h2><h3 id="五种存储类别"><a href="#五种存储类别" class="headerlink" title="五种存储类别"></a>五种存储类别</h3><table>
+<thead>
+<tr>
+<th align="left">存储类别</th>
+<th align="left">存储期</th>
+<th align="left">作用域</th>
+<th align="left">链接</th>
+<th align="left">声明方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">自动</td>
+<td align="left">自动</td>
+<td align="left">块</td>
+<td align="left">无</td>
+<td align="left">块内</td>
+</tr>
+<tr>
+<td align="left">寄存器</td>
+<td align="left">自动</td>
+<td align="left">块</td>
+<td align="left">无</td>
+<td align="left">块内，register</td>
+</tr>
+<tr>
+<td align="left">静态外部链接</td>
+<td align="left">静态</td>
+<td align="left">文件</td>
+<td align="left">外部</td>
+<td align="left">所有函数外</td>
+</tr>
+<tr>
+<td align="left">静态内部链接</td>
+<td align="left">静态</td>
+<td align="left">文件</td>
+<td align="left">内部</td>
+<td align="left">所有函数外，static</td>
+</tr>
+<tr>
+<td align="left">静态无链接</td>
+<td align="left">静态</td>
+<td align="left">块</td>
+<td align="left">无</td>
+<td align="left">块内，static</td>
+</tr>
+</tbody></table>
+<h4 id="自动变量"><a href="#自动变量" class="headerlink" title="自动变量"></a>自动变量</h4><p>可以使用 <code>auto</code> 来标识（最好不要用，会和 c++ 冲突）<br>进入该变量声明所在的块时变量存在，在退出该块时变量消失</p>
+<h4 id="寄存器变量"><a href="#寄存器变量" class="headerlink" title="寄存器变量"></a>寄存器变量</h4><p>用 <code>register</code> 请求使用寄存器来存放变量，可以使程序运行速度更快，但不能对该变量使用地址运算符（<code>&amp;</code>）<br>而且可声明为寄存器变量的数据类型有限，因为寄存器可能没有足够大的空间</p>
+<h4 id="静态外部链接"><a href="#静态外部链接" class="headerlink" title="静态外部链接"></a>静态外部链接</h4><p>使用 <code>extern</code> 来声明</p>
+<pre><code class="language-c">extern int a; //如果要用别的文件的变量，则必须要加extern进行声明，声明后才可使用
+int b; //定义式声明，只可初始化一次，且必须在定义时初始化，默认生成的就是具有静态外部链接的变量
+int c;
+int main(void)
+{
+	extern int b; //引用式声明，可选的声明，删去也可以
+	int c; //会创建一个与外部的c不同的变量c，即块作用域中的变量会隐藏文件作用域中的同名变量
+……
+}
+</code></pre>
+<h4 id="静态内部链接"><a href="#静态内部链接" class="headerlink" title="静态内部链接"></a>静态内部链接</h4><pre><code class="language-c">static int a; //只会在当前这个源文件以及头文件中生效
+int main(void)
+</code></pre>
+<h4 id="静态无链接"><a href="#静态无链接" class="headerlink" title="静态无链接"></a>静态无链接</h4><p>使用 <code>static</code> 提供静态存储期</p>
+<pre><code class="language-c">void trystatic(void) //调用该函数多次
+{
+	int fade = 1;
+	static int stay = 1;
+	printf(&quot;fade = %d , stay = %d\n&quot;,fade++,stay++);
+} //结果fade不断重置，但stay只会被初始化一次
+</code></pre>
+<h3 id="存储期"><a href="#存储期" class="headerlink" title="存储期"></a>存储期</h3><h4 id="静态存储器"><a href="#静态存储器" class="headerlink" title="静态存储器"></a>静态存储器</h4><p>在程序执行期间一直存在</p>
+<h4 id="线程存储期"><a href="#线程存储期" class="headerlink" title="线程存储期"></a>线程存储期</h4><p>从声明到线程结束时都存在</p>
+<h4 id="自动存储期"><a href="#自动存储期" class="headerlink" title="自动存储期"></a>自动存储期</h4><p>程序进入定义这些变量的块时，为这些变量分配内存；退出这个块时，释放这些内存</p>
+<h4 id="动态分配存储期"><a href="#动态分配存储期" class="headerlink" title="动态分配存储期"></a>动态分配存储期</h4><p>用 <code>malloc()</code> 或 <code>calloc()</code> 分配内存，用 <code>free()</code> 释放内存</p>
+<h3 id="作用域"><a href="#作用域" class="headerlink" title="作用域"></a>作用域</h3><p>块作用域<br>文件作用域</p>
+<h3 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h3><p>外部链接：多个翻译单元（同一个项目下的所有文件）全局作用域<br>内部链接：一个翻译单元内（一个源文件以及其他头文件）文件作用域<br>无链接：一个源文件内</p>
+<h2 id="类型限定符"><a href="#类型限定符" class="headerlink" title="类型限定符"></a>类型限定符</h2><h3 id="恒常性-const"><a href="#恒常性-const" class="headerlink" title="恒常性 const"></a>恒常性 const</h3><pre><code class="language-c">const int *pt1; //pt指向一个不可被改变的指，但pt可以指向他处
+int * const pt2; //pt不能被改变，但可以改变pt指向的指
+const int * const pt3; //pt不能被改变切pt指向一个不可被改变的值
+</code></pre>
+<h3 id="易变性-volatile"><a href="#易变性-volatile" class="headerlink" title="易变性 volatile"></a>易变性 volatile</h3><p>非变量所在的程序（代理）可以改变该变量的值</p>
+<pre><code class="language-c">volatile int looc1;
+volatile int * ploc; //ploc指向一个可以被改变的值
+</code></pre>
+<h3 id="restrict"><a href="#restrict" class="headerlink" title="restrict"></a>restrict</h3><p>用 <code>register</code> ​ 请求使用寄存器来存放变量，可以使程序运行速度更快，但不能对该变量使用地址运算符（<code>&amp;</code>​）<br>而且可声明为寄存器变量的数据类型有限，因为寄存器可能没有足够大的空间</p>
+<h2 id="内存分配函数"><a href="#内存分配函数" class="headerlink" title="内存分配函数"></a>内存分配函数</h2><h3 id="malloc"><a href="#malloc" class="headerlink" title="malloc()"></a>malloc()</h3><h4 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h4><pre><code class="language-c">//void *malloc(size_t _Size)  void*代表一个任意类型的指针，所以要用强制类型变换来修改
+#include &lt;stdlib.h&gt;
+double * ptd;
+ptd = (double*)malloc(10 * sizeof(double)); //创建一个含有10个double的数组
+</code></pre>
+<h4 id="多维数组-1"><a href="#多维数组-1" class="headerlink" title="多维数组"></a>多维数组</h4><pre><code class="language-c">//T9.c Enter the number of how many words you want to input,and then enter your words
+int main(void)
+{
+    int size;
+    char **pt;
+    char *st;
+    ……
+    while (scanf(&quot;%d&quot;,&amp;size) == 1 &amp;&amp; size &gt; 0)
+    {
+        ……
+        pt = (char**)malloc(size * sizeof(char*));  //多维数组的使用
+        input_words(pt,size);
+        show_words(pt,size);
+        puts(&quot;How many words do you wish to enter ( &lt;1 to quit): &quot;);
+    }
+    return 0;
+}
+void input_words(char *pt[] , int size)
+{
+    ……
+    char temp[256];
+    for (i = 0 ; i &lt; size ; i++)
+    {
+        scanf(&quot;%255s&quot;,temp);
+        length = strlen(temp) + 1;
+        pt[i] = (char*)malloc(length * sizeof(char));  //存入字符串
+        if (pt[i] == NULL)
+            exit(EXIT_FAILURE);
+        else
+            strcpy(pt[i],temp);
+    }
+}
+void show_words(char *pt[] , int size)
+{
+    int i;
+    for (i = 0 ; i &lt; size ; i++)
+    {
+        puts(pt[i]);
+        free(pt[i]);  //注意使用完毕后要解除使用，避免内存泄漏
+    }
+    free(pt);
+    pt = NULL;  //防止空指
+}
+</code></pre>
+<h3 id="calloc"><a href="#calloc" class="headerlink" title="calloc()"></a>calloc()</h3><p>(void*) calloc(size,sizeof())<br>相当于把 <code>*</code>​换成<code>,</code>​</p>
+<h3 id="free"><a href="#free" class="headerlink" title="free()"></a>free()</h3><p>释放内存，不要忘了写</p>
+<h2 id="多源代码文件"><a href="#多源代码文件" class="headerlink" title="多源代码文件"></a>多源代码文件</h2><h3 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h3><p>自行编译的头文件<br>把函数原型和已定义的字符常量放在头文件中<br>注意重复引用的设置<br>数组不能重复声明</p>
+<pre><code class="language-c">#include &quot;myhead.h&quot;
+</code></pre>
+<hr>
+<h1 id="文件"><a href="#文件" class="headerlink" title="文件"></a>文件</h1><h2 id="文本模式和二进制模式"><a href="#文本模式和二进制模式" class="headerlink" title="文本模式和二进制模式"></a>文本模式和二进制模式</h2><p>所有文件的内容都以二进制形式存储，若文件使用二进制编码的字符表示文本则为<strong>文本文件</strong>；若文件中的二进制值表示机器语言代码或数值数据则为<strong>二进制文件</strong><br>读取文本文件时，阅读器会将二进制进行<strong>映射</strong>，，从而不同的阅读器打开含有相同二进制值的文件会显示不同的结果</p>
+<h2 id="命令行参数"><a href="#命令行参数" class="headerlink" title="命令行参数"></a>命令行参数</h2><h3 id="写法"><a href="#写法" class="headerlink" title="写法"></a>写法</h3><pre><code class="language-c">int main(int argc , char *argv[])
+</code></pre>
+<p>使用 cmd 命令面板或者 windowshell 运行程序时，在可执行程序后面加上字符串，则这些字符串就会被读入（以空格为分界）<br>用 <code>&quot; &quot;</code> 把用空格分开的字符串包裹，则视其为一个字符串</p>
+<h3 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h3><p>argc 代表传入字符串的个数（此处将程序名也视为一个字符串，也就是程序名算作第一个）<br>argv 存储每个字符串对应的地址，只要 <code>argv[n]</code> 就能访问</p>
+<h2 id="重定向"><a href="#重定向" class="headerlink" title="重定向"></a>重定向</h2><h3 id="输入-1"><a href="#输入-1" class="headerlink" title="输入"></a>输入</h3><p><code>./test &lt; data.txt</code> (windowshell)<br><code>test &lt; data.txt</code> (cmd)</p>
+<h3 id="输出-1"><a href="#输出-1" class="headerlink" title="输出"></a>输出</h3><p><code>./test &gt; data.txt</code> (windowshell)<br><code>test &gt; data.txt</code> (cmd)</p>
+<h2 id="标准-I-O"><a href="#标准-I-O" class="headerlink" title="标准 I&#x2F;O"></a>标准 I&#x2F;O</h2><h3 id="fopen"><a href="#fopen" class="headerlink" title="fopen()"></a>fopen()</h3><h4 id="函数原型-5"><a href="#函数原型-5" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>FILE *fopen(const char *__restrict__ _Filename, const char *__restrict__ _Mode)</code><br>来自 <code>&lt;stdio.h&gt;</code><br>需要将 fopen 返回的 FILE 指针赋给声明的 FILE 指针，方便使用</p>
+<h4 id="模式-Mode-字符串"><a href="#模式-Mode-字符串" class="headerlink" title="模式(Mode)字符串"></a>模式(Mode)字符串</h4><table>
+<thead>
+<tr>
+<th align="left">“r”</th>
+<th align="left">只读</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">“w”</td>
+<td align="left">只写，会删去原有数据，文件不存在则新建</td>
+</tr>
+<tr>
+<td align="left">“a”</td>
+<td align="left">只写，不会删去原有数据，可在文件末尾添加内容，文件不存在则新建</td>
+</tr>
+<tr>
+<td align="left">“r+”</td>
+<td align="left">更新，可读写</td>
+</tr>
+<tr>
+<td align="left">“w+”</td>
+<td align="left">更新，可读写，会删去原有数据，文件不存在则新建</td>
+</tr>
+<tr>
+<td align="left">“a+”</td>
+<td align="left">更新，可读写，只可以从末尾添加，不会删去原有数据，文件不存在则新建</td>
+</tr>
+<tr>
+<td align="left">“rb” “wb” “ab” rb+” “r+b” “wb+” “w+b” “ab+” “a+b”</td>
+<td align="left">以二进制模式打开</td>
+</tr>
+<tr>
+<td align="left">“wx” “wbx” “w+x” “wb+x” “w+bx”</td>
+<td align="left">如果文件已经存在或者以独占模式打开文件，则返回失败（就是一定会创建新的，如果以前存在过就不会操作，防止误删）</td>
+</tr>
+</tbody></table>
+<h3 id="fclose"><a href="#fclose" class="headerlink" title="fclose()"></a>fclose()</h3><h4 id="函数原型-6"><a href="#函数原型-6" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int fclose(FILE *_File)</code><br>来自 <code>&lt;stdio.h&gt;</code></p>
+<h4 id="作用-4"><a href="#作用-4" class="headerlink" title="作用"></a>作用</h4><p>关闭一个已经打开的文件，若关闭成功返回 <code>0</code></p>
+<h3 id="getc"><a href="#getc" class="headerlink" title="getc()"></a>getc()</h3><h4 id="函数原型-7"><a href="#函数原型-7" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int getc(FILE *_File)</code><br>来自 <code>&lt;stdio.h&gt;</code></p>
+<h4 id="作用-5"><a href="#作用-5" class="headerlink" title="作用"></a>作用</h4><p>从文件中读取单个字符</p>
+<h3 id="putc"><a href="#putc" class="headerlink" title="putc()"></a>putc()</h3><h4 id="函数原型-8"><a href="#函数原型-8" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int putc(int _Ch, FILE *_File)</code><br>来自 <code>&lt;stdio.h&gt;</code></p>
+<h4 id="作用-6"><a href="#作用-6" class="headerlink" title="作用"></a>作用</h4><p>写入一个字符到文件中</p>
+<h3 id="指向标准文件的指针"><a href="#指向标准文件的指针" class="headerlink" title="指向标准文件的指针"></a>指向标准文件的指针</h3><table>
+<thead>
+<tr>
+<th align="left">标准输入</th>
+<th align="left">stdin</th>
+<th align="left">键盘</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">标准输出</td>
+<td align="left">stdout</td>
+<td align="left">显示器</td>
+</tr>
+<tr>
+<td align="left">标准错误</td>
+<td align="left">stderr</td>
+<td align="left">显示器</td>
+</tr>
+</tbody></table>
+<h2 id="文本文件-I-O"><a href="#文本文件-I-O" class="headerlink" title="文本文件 I&#x2F;O"></a>文本文件 I&#x2F;O</h2><h3 id="fprintf"><a href="#fprintf" class="headerlink" title="fprintf()"></a>fprintf()</h3><h4 id="函数原型-9"><a href="#函数原型-9" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int fprintf(FILE *__restrict__ _File, const char *__restrict__ _Format, ...)</code></p>
+<h3 id="fscanf"><a href="#fscanf" class="headerlink" title="fscanf()"></a>fscanf()</h3><h4 id="函数原型-10"><a href="#函数原型-10" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int fscanf(FILE *__restrict__ _File, const char *__restrict__ _Format, ...)</code></p>
+<h3 id="fgets-1"><a href="#fgets-1" class="headerlink" title="fgets()"></a>fgets()</h3><h4 id="函数原型-11"><a href="#函数原型-11" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>char *fgets(char *__restrict__ _Buf, int _MaxCount, FILE *__restrict__ _File)</code></p>
+<h4 id="作用-7"><a href="#作用-7" class="headerlink" title="作用"></a>作用</h4><p>从文件读取一行长度最大为 <strong>MaxCount-1</strong>（需要存放 <code>\0</code>）的字符串（即读到 <code>\n</code> 停止），会读取\n，读取成功返回该字符串指针</p>
+<h3 id="fputs-1"><a href="#fputs-1" class="headerlink" title="fputs()"></a>fputs()</h3><h4 id="函数原型-12"><a href="#函数原型-12" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int fputs(const char *__restrict__ _Str, FILE *__restrict__ _File)</code></p>
+<h4 id="作用-8"><a href="#作用-8" class="headerlink" title="作用"></a>作用</h4><p>向文件中输入字符串，不会额外添加 <code>\n</code></p>
+<h2 id="二进制-I-O"><a href="#二进制-I-O" class="headerlink" title="二进制 I&#x2F;O"></a>二进制 I&#x2F;O</h2><h3 id="fread"><a href="#fread" class="headerlink" title="fread()"></a>fread()</h3><h4 id="函数原型-13"><a href="#函数原型-13" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>size_t fread(void *__restrict__ _DstBuf, size_t _ElementSize, size_t _Count, FILE *__restrict__ _File)</code></p>
+<h4 id="作用-9"><a href="#作用-9" class="headerlink" title="作用"></a>作用</h4><p>与 fwrite()数据流方向相反</p>
+<h3 id="fwrite"><a href="#fwrite" class="headerlink" title="fwrite()"></a>fwrite()</h3><h4 id="函数原型-14"><a href="#函数原型-14" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>size_t fwrite(const void *__restrict__ _Str, size_t _Size, size_t _Count, FILE *__restrict__ _File)</code></p>
+<h4 id="作用-10"><a href="#作用-10" class="headerlink" title="作用"></a>作用</h4><p>把二进制数据写入文件<br>返回成功写入项的数目<br><strong>Str</strong> 待写入数据块地址 void 表示数据类型不定（但都是指针）<br><strong>Size</strong> 待写入数据块大小（B）<br><strong>Count</strong> 待写入数据块数量<br><strong>File</strong> 待写入文件</p>
+<pre><code class="language-c">char buffer[256];
+fwrite(buffer, 256, 1, fp);
+double earning[10];
+fwrite(earning, sizeof(double), 10, fp);
+</code></pre>
+<h2 id="随机访问"><a href="#随机访问" class="headerlink" title="随机访问"></a>随机访问</h2><h3 id="rewind"><a href="#rewind" class="headerlink" title="rewind()"></a>rewind()</h3><h4 id="函数原型-15"><a href="#函数原型-15" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>void rewind(FILE *_File)</code></p>
+<h4 id="作用-11"><a href="#作用-11" class="headerlink" title="作用"></a>作用</h4><p>返回文件开始处(比如用了 fscanf())</p>
+<h3 id="fseek"><a href="#fseek" class="headerlink" title="fseek()"></a>fseek()</h3><h4 id="函数原型-16"><a href="#函数原型-16" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int fseek(FILE *_File, long _Offset, int _Origin)</code></p>
+<h4 id="作用-12"><a href="#作用-12" class="headerlink" title="作用"></a>作用</h4><p>可将文件看作数组，可以在 fopen()打开的文件中移动到任意位置<br>fseek(待查找文件 , 偏移量 , 起始点)<br>从起始点移动<strong>偏移量</strong>的位置<br>注意偏移量需要 long 类型的数据，如果输入常数需要在数值后面加 L（因为小写的 l 与 1 较难区别）<br>移动正常会返回 <code>0</code>，错误会 <code>-1</code></p>
+<h5 id="起始点模式"><a href="#起始点模式" class="headerlink" title="起始点模式"></a>起始点模式</h5><table>
+<thead>
+<tr>
+<th align="left">SEEK_SET</th>
+<th align="left">文件起始</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">SEEK_CUR</td>
+<td align="left">当前位置</td>
+</tr>
+<tr>
+<td align="left">SEEK_END</td>
+<td align="left">文件末尾</td>
+</tr>
+</tbody></table>
+<h3 id="ftell"><a href="#ftell" class="headerlink" title="ftell()"></a>ftell()</h3><h4 id="函数原型-17"><a href="#函数原型-17" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>long ftell(FILE *_File)</code></p>
+<h4 id="作用-13"><a href="#作用-13" class="headerlink" title="作用"></a>作用</h4><p>返回参数指向文件的当前位置距离文件开始处的字节数<br>适用于以二进制模式打开的文件</p>
+<h3 id="fgetpos"><a href="#fgetpos" class="headerlink" title="fgetpos()"></a>fgetpos()</h3><h4 id="函数原型-18"><a href="#函数原型-18" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int fgetpos(FILE *__restrict__ _File, fpos_t *__restrict__ _Pos)</code></p>
+<h4 id="作用-14"><a href="#作用-14" class="headerlink" title="作用"></a>作用</h4><p>因为 fseek()只能获取 long 范围内的文件长度，对于超大文件不适用，所以引入 fgetpos()以及 <code>fpos_t</code><br>调用函数时，它把 <strong>fpost</strong> 类型的值放在 pos 指向的位置上，该值描述了文件中的当前位置距离文件开头的字节数<br>如果成功，函数返回 <code>0</code>；失败返回非 0</p>
+<h3 id="fsetpos"><a href="#fsetpos" class="headerlink" title="fsetpos()"></a>fsetpos()</h3><h4 id="函数原型-19"><a href="#函数原型-19" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int fsetpos(FILE *_File, const fpos_t *_Pos)</code></p>
+<h4 id="作用-15"><a href="#作用-15" class="headerlink" title="作用"></a>作用</h4><p>调用该函数时，使用 pos 指向位置上的 <strong>fpost</strong> 类型值来设置文件指针指向偏移该值后指定的位置<br>成功返回 0；失败返回非 0<br>在调用该函数前，应该先用 fgetpos()获取 pos</p>
+<h2 id="其他标准-I-O"><a href="#其他标准-I-O" class="headerlink" title="其他标准 I&#x2F;O"></a>其他标准 I&#x2F;O</h2><h3 id="ungetc"><a href="#ungetc" class="headerlink" title="ungetc()"></a>ungetc()</h3><h4 id="函数原型-20"><a href="#函数原型-20" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int ungetc(int _Ch, FILE *_File)</code></p>
+<h4 id="作用-16"><a href="#作用-16" class="headerlink" title="作用"></a>作用</h4><p>把 <strong>ch</strong> 指定的字符放回输入流中（即下一次调用输入会获取该字符）</p>
+<h3 id="fflush"><a href="#fflush" class="headerlink" title="fflush()"></a>fflush()</h3><h4 id="函数原型-21"><a href="#函数原型-21" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int fflush(FILE *_File)</code></p>
+<h4 id="作用-17"><a href="#作用-17" class="headerlink" title="作用"></a>作用</h4><p>引起输出缓冲区中所有未写入数据被发送到指定输出文件中（即<strong>刷新缓冲区</strong>）<br>有时 printf()需要输出缓冲区满才会输出，导致程序运行过程中不显示<br>所以需要 fflush()强制刷新缓冲区，使得缓冲区中的内容输出</p>
+<h3 id="setvbuf"><a href="#setvbuf" class="headerlink" title="setvbuf()"></a>setvbuf()</h3><h4 id="函数原型-22"><a href="#函数原型-22" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int setvbuf(FILE *__restrict__ _File, char *__restrict__ _Buf, int _Mode, size_t _Size)</code></p>
+<h4 id="作用-18"><a href="#作用-18" class="headerlink" title="作用"></a>作用</h4><p>创建一个供标准 I&#x2F;O 函数替换使用的缓冲区（相当于独立开辟一个新区来操作文件）<br>操作成功返回 <code>0</code><br><strong>File</strong> 指向文件<br><strong>Buf</strong> 指向创建的区域，若为 <code>NULL</code>，则会自行分配<br><strong>Mode</strong> 选择创建模式<br><strong>Size</strong> 创建的缓冲区的大小，单位为 B</p>
+<h5 id="Mode"><a href="#Mode" class="headerlink" title="Mode"></a>Mode</h5><table>
+<thead>
+<tr>
+<th align="left">_IOFBF</th>
+<th align="left">完全缓冲（在缓冲区满时刷新）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">_IOLBF</td>
+<td align="left">行缓冲（缓冲区满或输入换行时刷新）</td>
+</tr>
+<tr>
+<td align="left">_IONBF</td>
+<td align="left">无缓冲</td>
+</tr>
+</tbody></table>
+<h3 id="feof"><a href="#feof" class="headerlink" title="feof()"></a>feof()</h3><h4 id="函数原型-23"><a href="#函数原型-23" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int feof(FILE *_File)</code></p>
+<h4 id="作用-19"><a href="#作用-19" class="headerlink" title="作用"></a>作用</h4><p>检测上一次输入是否到达文件结尾，是返回非零值；否，返回 <code>0</code></p>
+<h3 id="ferror"><a href="#ferror" class="headerlink" title="ferror()"></a>ferror()</h3><h4 id="函数原型-24"><a href="#函数原型-24" class="headerlink" title="函数原型"></a>函数原型</h4><p><code>int ferror(FILE *_File)</code></p>
+<h4 id="作用-20"><a href="#作用-20" class="headerlink" title="作用"></a>作用</h4><p>若读写出现错误，返回非零值；否，返回 <code>0</code></p>
+<h2 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h2><pre><code class="language-c">//T5.c change the 13.5 programme to command-line agrument method
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#define BUFSIZE 4096
+void append(FILE *source , FILE *dest);
+char * s_gets(char st[] , int n);
+int main(int argc, char * argv[])
+{
+    FILE *fa , *fs;
+    int files = 0;
+    int count = 2;
+    if (argc &gt; 2)
+    {
+        if ((fa = fopen(argv[1],&quot;a+&quot;)) == NULL)
+        {
+            fprintf(stderr,&quot;Can&#39;t open %s\n&quot;,argv[1]);
+            exit(EXIT_FAILURE);
+        }
+        if ((setvbuf(fa,NULL,_IOFBF,BUFSIZE)) != 0)
+        {
+            fputs(&quot;Can&#39;t create output buffer\n&quot;,stderr);
+            exit(EXIT_FAILURE);
+        }
+        while (argv[count])
+        {
+            if (strcmp(argv[1],argv[count]) == 0)
+                fputs(&quot;Can&#39;t append file to itself\n&quot;,stderr);
+            else if ((fs = fopen(argv[count],&quot;r&quot;)) == NULL)
+                fprintf(stderr,&quot;Can&#39;t open %s\n&quot;,argv[count]);
+            else
+            {
+                if (setvbuf(fs,NULL, _IOFBF , BUFSIZE) != 0)
+                {
+                    fputs(&quot;Can&#39;t create input buffer\n&quot;,stderr);
+                    continue;
+                }
+                append(fs,fa);
+                if (ferror(fs) != 0)
+                    fprintf(stderr,&quot;Error in reading file &amp;s.\n&quot;,argv[count]);
+                if (ferror(fa) != 0)
+                    fprintf(stderr,&quot;Error in writing file %s.\n&quot;,argv[1]);
+                fclose(fs);
+                printf(&quot;File %s appended.\n&quot; , argv[count]);
+                count++;
+                files++;
+                puts(&quot;Next file&quot;);
+            }
+        }
+    }
+    printf(&quot;Done appending. %d files appended.\n&quot;,argc-2);
+    rewind(fa);
+    printf(&quot;%s contents: \n&quot;,argv[1]);
+    while ((ch = getc(fa)) != EOF)//output the source file
+        putchar(ch);
+    puts(&quot;Done displaying.&quot;);
+    fclose(fa);
+    return 0;
+}
+void append(FILE *source , FILE *dest)
+{
+    size_t bytes;
+    static char temp[BUFSIZE];
+    while ((bytes = fread(temp,sizeof(char),BUFSIZE,source)) &gt; 0)
+        fwrite(temp,sizeof(char),bytes,dest);
+}
+char * s_gets(char st[] , int n)
+{
+    char * ret_val , *find;
+    ret_val = fgets(st,n,stdin);
+    if (ret_val)
+    {
+        find = strchr(st,&#39;\n&#39;);
+        if (find)
+            *find = &#39;\0&#39;;
+        else
+            while (getchar() != &#39;\n&#39;)
+                continue;
+    }
+    return ret_val;
+}
+</code></pre>
+<p>需要注意的是要判断对文件的各个操作是否成功</p>
+<hr>
+<h1 id="位操作"><a href="#位操作" class="headerlink" title="位操作"></a>位操作</h1><h2 id="进制"><a href="#进制" class="headerlink" title="进制"></a>进制</h2><h3 id="二进制"><a href="#二进制" class="headerlink" title="二进制"></a>二进制</h3><p>位<br>字节<br>八位组（8B）<br>高价位（7） 低阶位（0）<br>从低字节到高字节为 <code>小端顺序</code>​，相反则为 <code>大端顺序</code>​<br><img src="/assets/image-20231025205619-ppwbna8.png" alt="image"></p>
+<h4 id="有符号整数"><a href="#有符号整数" class="headerlink" title="有符号整数"></a>有符号整数</h4><p>符号量：最高位代表符号<br>二进制原码<br>二进制反码<br>二进制补码</p>
+<h3 id="八进制"><a href="#八进制" class="headerlink" title="八进制"></a>八进制</h3><p>0（零） <code>%o</code>​ <code>%#o</code>​（显示前缀）</p>
+<h3 id="十进制"><a href="#十进制" class="headerlink" title="十进制"></a>十进制</h3><p><code>%d</code>​</p>
+<h3 id="十六进制"><a href="#十六进制" class="headerlink" title="十六进制"></a>十六进制</h3><p>0x&#x2F;0X <code>%x</code>​ <code>%#x</code>​&#x2F;<code>%#X </code>​（显示前缀）</p>
+<h2 id="C-按位运算符"><a href="#C-按位运算符" class="headerlink" title="C 按位运算符"></a>C 按位运算符</h2><h3 id="按位取反"><a href="#按位取反" class="headerlink" title="按位取反~"></a>按位取反~</h3><p>~(11010010)<br>-&gt;00101101</p>
+<h3 id="按位与"><a href="#按位与" class="headerlink" title="按位与&amp;"></a>按位与&amp;</h3><p>(10010011) &amp; (00111101)<br>-&gt;00010001</p>
+<h4 id="掩码"><a href="#掩码" class="headerlink" title="掩码"></a>掩码</h4><table>
+<thead>
+<tr>
+<th>MASK</th>
+<th>0000,0011<br /></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FLAG</td>
+<td>1001,0110</td>
+<td></td>
+</tr>
+<tr>
+<td>OUT</td>
+<td>0000,0010</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>FLAG &amp; MASK<br>MASK 对应为 1 的位，FALG 会出原本的值</p>
+<h4 id="关闭位（清空位）"><a href="#关闭位（清空位）" class="headerlink" title="关闭位（清空位）"></a>关闭位（清空位）</h4><table>
+<thead>
+<tr>
+<th>MASK</th>
+<th>0000,1111</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FLAG</td>
+<td>1011,0110</td>
+<td></td>
+</tr>
+<tr>
+<td>OUT</td>
+<td>0000,1001</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>FLAG &amp; ~(MASK)</p>
+<h4 id="检查位"><a href="#检查位" class="headerlink" title="检查位"></a>检查位</h4><p>​<code>if ((flag &amp; mask) == mask)</code>​<br>只检查 mask 为 1 的位置</p>
+<h3 id="按位或"><a href="#按位或" class="headerlink" title="按位或 |"></a>按位或 |</h3><p>(10010011) | (00111101)<br>-&gt;10111111</p>
+<h4 id="打开位（设置位）"><a href="#打开位（设置位）" class="headerlink" title="打开位（设置位）"></a>打开位（设置位）</h4><table>
+<thead>
+<tr>
+<th>MASK</th>
+<th>0000,1111</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FLAG</td>
+<td>1011,0110</td>
+<td></td>
+</tr>
+<tr>
+<td>OUT</td>
+<td>1011,1111</td>
+<td></td>
+</tr>
+<tr>
+<td>FLAG</td>
+<td>MASK</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="按位异或"><a href="#按位异或" class="headerlink" title="按位异或 ^"></a>按位异或 ^</h3><p>(10010011)^(00111101)<br>-&gt;10101110</p>
+<h4 id="切换位"><a href="#切换位" class="headerlink" title="切换位"></a>切换位</h4><table>
+<thead>
+<tr>
+<th>MASK</th>
+<th>0000,1111</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FLAG</td>
+<td>1011,0110</td>
+<td></td>
+</tr>
+<tr>
+<td>OUT</td>
+<td>1011,1001</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>FLAG ^ MASK<br>切换 MASK 对应为 1 的位</p>
+<h5 id="选择性切换"><a href="#选择性切换" class="headerlink" title="选择性切换"></a>选择性切换</h5><pre><code class="language-c">//切换x的后i位，可以通过if来切换指定的位置
+int invert_end(int num, int bits)
+{
+    int x = 0;
+    int bitval = 1;
+    int n,i;
+    scanf(&quot;%d&quot;,&amp;n);
+    for (i = 0 ; i &lt; n ; i++)
+    {
+        x ^= bitval;
+        bitval &lt;&lt;= 1;
+    }
+    return x;
+}
+</code></pre>
+<h3 id="移位"><a href="#移位" class="headerlink" title="移位"></a>移位</h3><h4 id="左移"><a href="#左移" class="headerlink" title="左移"></a>左移</h4><p>用 0 填充空位，本身不变（需要赋值）<br>相当于*2（不溢出的情况下）</p>
+<h4 id="右移"><a href="#右移" class="headerlink" title="右移"></a>右移</h4><p>注意操作时将至转换成 <strong>unsigned</strong><br>对于 <code>无符号类型</code>​，用 0 填充<br>对于 <code>有符号类型</code>​，结果取决于机器，全都用 0 填充为 <code>逻辑位移</code>​；用符号位填充为 <code>算术位移</code>​<br>相当于&#x2F;2（非负且不溢出的情况下）</p>
+<h4 id="例-从整数-x-的二进制表示中取出从第-p-位（最右边为第-0-位）开始的-n-位"><a href="#例-从整数-x-的二进制表示中取出从第-p-位（最右边为第-0-位）开始的-n-位" class="headerlink" title="例: 从整数 x 的二进制表示中取出从第 p 位（最右边为第 0 位）开始的 n 位"></a>例: 从整数 x 的二进制表示中取出从第 p 位（最右边为第 0 位）开始的 n 位</h4><p>​<code>(x&gt;&gt;(p+1-n)) &amp; ~(~0&lt;&lt;n)</code>​<br>~ &gt; &lt;&lt;&#x2F;&gt;&gt; &gt; &amp; &gt; ^ &gt; |</p>
+<h2 id="位字段"><a href="#位字段" class="headerlink" title="位字段"></a>位字段</h2><h3 id="创建-4"><a href="#创建-4" class="headerlink" title="创建"></a>创建</h3><pre><code class="language-c">struct {
+	unsigned int a : 1;
+	unsigned int b : 2;
+	unsigned int c : 4;
+	unsigned int d : 8;
+} p;
+</code></pre>
+<p>通过 <code>p.a p.b</code> ​ 访问或赋值<br>要确保所赋的值不超过字段可容纳的范围<br>如果声明的总位数超过一个 <code>unsigned int</code>​(32B)会用到下一个 <code>unsigned int</code> ​ 的位置，但一个字段不允许跨越边界<br>所以要填充这样的“洞”</p>
+<pre><code class="language-c">struct {
+	unsigned int a : 1;
+	unsigned int   : 2;
+……
+}
+</code></pre>
+<h3 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h3><pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdbool.h&gt;
+//style of lines
+#define SOLID 0
+#define DOTTED 1
+#define DASHED 2
+//三原色
+#define BLUE 4
+#define GREEN 2
+#define RED 1
+//mixed colors
+#define BLACK 0
+#define YELLOW (RED | GREEN)
+#define MAGENTA (RED | BLUE)
+#define CYAN (GREEN | BLUE)
+#define WHITE (RED | GREEN | BLUE)
+const char * colors[8] = {&quot;black&quot;,&quot;red&quot;,&quot;green&quot;,&quot;yellow&quot;,&quot;blue&quot;,&quot;magenta&quot;,&quot;cyan&quot;,&quot;white&quot;};
+struct box_props
+{
+    bool opague : 1;
+    unsigned int fill_color : 3;
+    unsigned int : 4;
+    bool show_border : 1;
+    unsigned int border_color : 3;
+    unsigned int border_style : 2;
+    unsigned int : 2;
+};
+void show_setting(const struct box_props * pb);
+int main(void)
+{
+    struct box_props box = {true , YELLOW , true , GREEN , DASHED};
+    printf(&quot;Original box setting:\n&quot;);
+    show_setting(&amp;box);
+    box.opague = false;
+    box.fill_color = WHITE;
+    box.border_color = MAGENTA;
+    box.border_style = SOLID;
+    printf(&quot;\nModified box setting:\n&quot;);
+    show_setting(&amp;box);
+    return 0;
+}
+void show_setting(const struct box_props * pb)
+{
+    printf(&quot;Box is %s.\n&quot;,(pb -&gt; opague == true)?&quot;opague&quot;:&quot;transparent&quot;);
+    printf(&quot;The fill color is %s.\n&quot;,colors[pb -&gt; fill_color]);
+    printf(&quot;Border %s&#39;\n&quot;,(pb -&gt; show_border == true)?&quot;shown&quot;:&quot;not shown&quot;);
+    printf(&quot;The border color is  %s.\n&quot;,colors[pb -&gt; border_color]);
+    printf(&quot;The border style is &quot;);
+    switch (pb -&gt; border_style)
+    {
+        case SOLID: printf(&quot;solid.\n&quot;); break;
+        case DOTTED: printf(&quot;dotted.\n&quot;); break;
+        case DASHED: printf(&quot;dashed.\n&quot;); break;
+        default: printf(&quot;unknown type.\n&quot;); break;
+    }
+}
+</code></pre>
+<hr>
+<h1 id="预处理"><a href="#预处理" class="headerlink" title="预处理"></a>预处理</h1><h2 id="翻译程序"><a href="#翻译程序" class="headerlink" title="翻译程序"></a>翻译程序</h2><h3 id="映射字符"><a href="#映射字符" class="headerlink" title="映射字符"></a>映射字符</h3><p>编译器把源代码中出现的字符映射到原字符集，该过程处理 <code>多字节字符</code> ​ 和 <code>三字节字符</code>​</p>
+<h3 id="删去实际换行"><a href="#删去实际换行" class="headerlink" title="删去实际换行"></a>删去实际换行</h3><p>定位并删去实际输入的换行转换成一个逻辑行</p>
+<h3 id="划分文本"><a href="#划分文本" class="headerlink" title="划分文本"></a>划分文本</h3><p>把文本划分成预处理记号序列、空白序列、注释序列，编译器会用空格代替每条注释</p>
+<h3 id="预处理-1"><a href="#预处理-1" class="headerlink" title="预处理"></a>预处理</h3><p>查找#号并进行</p>
+<h2 id="宏定义-define​"><a href="#宏定义-define​" class="headerlink" title="宏定义 #define​"></a>宏定义 <code>#define</code>​</h2><p>预处理器只会处理一行，所以指令的长度仅限一行</p>
+<h3 id="定义明示常量"><a href="#定义明示常量" class="headerlink" title="定义明示常量"></a>定义明示常量</h3><p>​<code>#define a 10</code>​​</p>
+<h4 id="重定义常量"><a href="#重定义常量" class="headerlink" title="重定义常量"></a>重定义常量</h4><p>有需求用 const 吧<br>const 会创建一个占据数据空间的<strong>变量</strong><br><code>#define</code> 不会占据空间，只是单纯的文本替换</p>
+<pre><code class="language-c">#define S 2 * 3
+#define S 3 * 3 //可行
+#define S 2*3 //不可行，需要用#undef取消S的定义
+</code></pre>
+<h3 id="宏"><a href="#宏" class="headerlink" title="宏"></a>宏</h3><p>​<code>a</code> ​ 被称为 <code>宏</code>​，代表值的宏称为 <code>类对象宏</code>​，代表函数的宏称为 <code>类函数宏</code>​<br>​<code>10</code> ​ 所在部分称为 <code>替换列表</code> ​ 或 <code>替换体</code>​<br>从宏变为最终替换文本的过程称为 <code>宏展开</code>​​<br>宏不会占用内存（因为是文本的替换）</p>
+<h3 id="替换表达式"><a href="#替换表达式" class="headerlink" title="替换表达式"></a>替换表达式</h3><p>注意，预处理器不做计算，不对表达式求值，只进行替换</p>
+<h4 id="宏参数"><a href="#宏参数" class="headerlink" title="宏参数"></a>宏参数</h4><p>为了避免替换后导致的运算顺序问题，建议用括号括上每个变量以及整个表达式<br>​<code>((X) * (X))</code>​</p>
+<h5 id="用宏参数创建字符串"><a href="#用宏参数创建字符串" class="headerlink" title="用宏参数创建字符串"></a>用宏参数创建字符串</h5><pre><code class="language-c">#define PSQR(X) printf(&quot;The square of X is %d.\n&quot;,((X)*(X)));
+//若X=8,输出为：The square of X is 64
+#define PSQR(X) printf(&quot;The square of &quot; #X &quot; is %d.\n&quot;,((X)*(X))); //会进行拼接
+//若X=8,输出为：The square of 8 is 64 ，字符串化
+</code></pre>
+<h5 id="预处理黏合剂"><a href="#预处理黏合剂" class="headerlink" title="预处理黏合剂"></a>预处理黏合剂</h5><p>​<code>##</code> ​ 拥有强大的替换能力</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+#define XNAME(n) x ## n //若n=4，则宏展开结果为&quot;x4&quot;
+#define PRINT_XN(n) printf(&quot;x&quot; #n &quot; = %d \n&quot;,x ## n)
+int main(void)
+{
+    int XNAME(1) = 14; //become int x1 = 14;
+    int XNAME(2) = 20; //become int x2 = 20;
+    int x3 = 30;
+    PRINT_XN(1);  //become printf(&quot;x1 = %d\n&quot;,x1);
+    PRINT_XN(2);
+    PRINT_XN(3);
+    return 0;
+}
+/*
+x1 = 14
+x2 = 20
+x3 = 30
+*/
+</code></pre>
+<h4 id="记号"><a href="#记号" class="headerlink" title="记号"></a>记号</h4><p>可以把宏的替换体看作是 <code>记号型字符串</code> ​ 而不是 <code>字符型字符串</code>​<br>编译器会把 <code>2*2</code> ​ 看成一个记号<br>把 <code>2 * 2</code> ​ 看成 3 个记号<br>很复杂，别管了</p>
+<h3 id="变参宏"><a href="#变参宏" class="headerlink" title="变参宏"></a>变参宏</h3><p>通过把宏参数列表中最后的参数写成省略号（即三个点 <code>...</code>​），这样预定义宏 <code>__VA_ARGS__</code> ​ 可用在替换部分中</p>
+<pre><code class="language-c">#define PR(...) printf(__VA_ARGS__)
+PR(&quot;A&quot;);
+PR(&quot;B&quot;,&quot;C&quot;,&quot;D&quot;);
+/*
+ABCD
+*/
+</code></pre>
+<p>注意省略号只能代替最后的宏参数</p>
+<h3 id="换行写法"><a href="#换行写法" class="headerlink" title="换行写法"></a>换行写法</h3><pre><code class="language-c">#define OW &quot;jjjjjjjj\  //在末尾加反斜杠，且第二行要与第一行左对齐（就是第二行顶格写）
+iki&quot;
+</code></pre>
+<h2 id="取消宏定义-undef"><a href="#取消宏定义-undef" class="headerlink" title="取消宏定义#undef"></a>取消宏定义#undef</h2><pre><code class="language-c">#define LIMIT 42
+#undef LIMIT
+</code></pre>
+<p>将取消 <code>LIMIT</code> ​ 的定义，使它能被重新定义为新值。<br>即使原来没有定义 <code>LIMIT</code> ​ 也可以取消定义，如果想使用一个名称，又不确定之前是否已经用过，为安全起见可以用 <code>#undef</code> ​ 来取消改名字的定义</p>
+<h3 id="定义的概念"><a href="#定义的概念" class="headerlink" title="定义的概念"></a>定义的概念</h3><pre><code class="language-c">#define LIMIT 42 //defined
+#define GOOD //defined
+int a; //undefined
+#undef GOOD //undefined
+</code></pre>
+<p>宏的作用域从它在文件中的声明处开始，直到用 <code>#undef</code> ​ 取消宏或者文件结束，若宏通过头文件引入则开始位置取决于 <code>#include</code> ​ 的位置</p>
+<h2 id="条件编译"><a href="#条件编译" class="headerlink" title="条件编译"></a>条件编译</h2><h3 id="ifdef-else-endif​"><a href="#ifdef-else-endif​" class="headerlink" title="#ifdef #else #endif​"></a><code>#ifdef #else #endif</code>​</h3><pre><code class="language-c">#ifdef MAVIS //如果MAVIS已经被定义，则执行#else或#endif之前的所有指令（先出现哪个就停在哪里）
+	#include &quot;horse.h&quot;
+	#define STABLES 5
+#else  //如果MAVIS未被定义，则执行#else和#endif之间的所有指令（可以不存在）
+	#include &quot;cow.h&quot;
+	#define STABLES 15
+#endif //必须存在
+</code></pre>
+<p>可以不仅仅是写在程序开头，可以用在程序中间部分，方便调试程序</p>
+<pre><code class="language-c">#ifdef CHECKING
+	printf(&quot;aaa&quot;);
+#endif
+</code></pre>
+<h3 id="ifndef​"><a href="#ifndef​" class="headerlink" title="#ifndef​"></a><code>#ifndef</code>​</h3><pre><code class="language-c">#ifndef CHECK
+#define CHECK
+//other things
+#endif
+</code></pre>
+<h3 id="if-elif​"><a href="#if-elif​" class="headerlink" title="#if #elif​"></a><code>#if #elif</code>​</h3><pre><code class="language-c">#if SYS == 1   //#if后面跟整型常量表达式
+#include &quot;head.h&quot;
+#elif SYS == 2
+#include &quot;otherhead.h&quot;
+#else
+#include &quot;morehead.h&quot;
+#endif
+</code></pre>
+<h4 id="defined"><a href="#defined" class="headerlink" title="defined"></a>defined</h4><pre><code class="language-c">#if defined (YMCA)
+	#include &quot;YMCA.h&quot;
+......
+#endif
+</code></pre>
+<h2 id="文件包含-include​"><a href="#文件包含-include​" class="headerlink" title="文件包含 #include​"></a>文件包含 <code>#include</code>​</h2><pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &quot;myhead.h&quot; //优先查找当前文件夹
+#include &quot;/tools/C/Test_C/head.h&quot; //从制定文件夹中查找
+</code></pre>
+<h3 id="通常的习惯"><a href="#通常的习惯" class="headerlink" title="通常的习惯"></a>通常的习惯</h3><p>可执行代码放在源代码文件中<br>头文件存放函数原型、常量、结构声明、类型定义</p>
+<h2 id="预定义宏"><a href="#预定义宏" class="headerlink" title="预定义宏"></a>预定义宏</h2><table>
+<thead>
+<tr>
+<th>宏</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>​<code>__DATA__</code>​</td>
+<td>预处理日期（”Mmm dd yyyy”形式的字符串字面量，如 Oct 26 2023）</td>
+</tr>
+<tr>
+<td>​<code>__FILE__</code>​</td>
+<td>表示当前源代码文件名的字符串字面量</td>
+</tr>
+<tr>
+<td>​<code>__LINE__</code>​</td>
+<td>表示当前源代码文件中行号的整型常量</td>
+</tr>
+<tr>
+<td>​<code>__STDC__</code>​</td>
+<td>设置为 1 时，表示实现遵循 C 标准</td>
+</tr>
+<tr>
+<td>​<code>__STDC_HOSTED__</code>​</td>
+<td>本机环境设置为 1；否为 0</td>
+</tr>
+<tr>
+<td>​<code>__STDC_VERSION__</code>​</td>
+<td>支持 C99 标准则设置为 199901L；支持 C11 标准，设置为 201112L</td>
+</tr>
+<tr>
+<td>​<code>__TIME__</code>​</td>
+<td>翻译代码的时间（”hh:mm:ss”）</td>
+</tr>
+</tbody></table>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+void why_me(void);
+int main(void)
+{
+    printf(&quot;The file is %s\n&quot;,__FILE__);
+    printf(&quot;The date is %s\n&quot;,__DATE__);
+    printf(&quot;The time is %s\n&quot;,__TIME__);
+    printf(&quot;The version is %ld\n&quot;,__STDC_VERSION__);
+    printf(&quot;This is line %d\n&quot;,__LINE__);
+    printf(&quot;This fucction is %s\n&quot;,__func__);
+    printf(&quot;\n&quot;);
+    why_me();
+    return 0;
+}
+void why_me(void)
+{
+    printf(&quot;This function is %s\n&quot;,__func__);
+    printf(&quot;This is line %d\n&quot;,__LINE__);
+}
+</code></pre>
+<pre><code class="language-c">//output
+The file is test.c
+The date is Oct 26 2023
+The time is 10:48:44
+The version is 201710
+This is line 10
+This fucction is main
+This function is why_me
+This is line 21
+</code></pre>
+<h2 id="其他指令"><a href="#其他指令" class="headerlink" title="其他指令"></a>其他指令</h2><h3 id="line-​-和-error​"><a href="#line-​-和-error​" class="headerlink" title="#line ​ 和 #error​"></a><code>#line</code> ​ 和 <code>#error</code>​</h3><p>​<code>#line</code> ​ 重置 <code>__LINE__</code> ​ 和 <code>__FILE__</code> ​ 宏报告的行号和文件名</p>
+<pre><code class="language-c">#line 1000
+#line 10 &quot;cool.c&quot;
+</code></pre>
+<p>​<code>#error</code> ​ 让预处理器发出一条错误信息，该消息包含指令中的文本</p>
+<pre><code class="language-c">#if __STDC_VERSION__ != 201112L
+#error Not C11
+#endif
+</code></pre>
+<h3 id="pragma​"><a href="#pragma​" class="headerlink" title="#pragma​"></a><code>#pragma</code>​</h3><p>​<code>#pragma</code> ​ 把编译器指令放入源代码中，例如：</p>
+<pre><code class="language-c">#pragma c9x on
+</code></pre>
+<p>用处不大</p>
+<h2 id="泛型选择"><a href="#泛型选择" class="headerlink" title="泛型选择"></a>泛型选择</h2><p>指没有特定类型，但是一旦指定一种类型就可以转换成指定类型的代码</p>
+<pre><code class="language-c">_Generic(x , int: 0, float: 1, double: 2, default: 3)
+//x匹配哪一项整个泛型选择表达式就是哪一个值。注以下 \ 为换行标识符
+#define MYTYPE(X) _Generic((X),\
+	int: &quot;int&quot;,\
+	float: &quot;float&quot;,\
+	double: &quot;double&quot;,\
+	default: &quot;other&quot;\
+)
+//MYTYPE(1) 将返回&quot;int&quot;
+//可以使用自建的变量，这样子可操作空间将大大增加
+</code></pre>
+<h2 id="内联函数"><a href="#内联函数" class="headerlink" title="内联函数"></a>内联函数</h2><hr>
+<h1 id="库"><a href="#库" class="headerlink" title="库"></a>库</h1><h2 id="​"><a href="#​" class="headerlink" title="&lt;stdlib.h&gt;​"></a><code>&lt;stdlib.h&gt;</code>​</h2><h3 id="rand"><a href="#rand" class="headerlink" title="rand()"></a>rand()</h3><p>生成一个随机数，但是是伪随机，可以用 srand()更改“种子”</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+int main(void)
+{
+    int a;
+    srand((unsigned int) time(0));
+    a = rand();
+    for (int i = 0 ; i &lt; 10 ; i++)
+    {
+        printf(&quot;%d\n&quot;,a);
+        a = rand();  //若要生成1~n范围的数字，可以写成 a = rand() % n + 1;
+    }
+    return 0;
+}
+</code></pre>
+<h3 id="exit-atexit"><a href="#exit-atexit" class="headerlink" title="exit() atexit()"></a>exit() atexit()</h3><p>exit()会退出整个程序（main()结束时会隐式调用），可在括号内放入结束代码 <code>EXIT_SUCCESS</code>​ <code>EXIT_FAILURE</code>​<br>atexit()接受一个函数指针，注册该函数，在使用 <code>exit()</code> ​ 退出时会调用该函数<br>atexit()创建对应的函数列表（至少能存放 32 个），最后调用 exit()时会执行这些函数<br>需要注意执行顺序与列表中的函数顺序相反（栈）<br>atexit()注册的函数应该不带任何参数且返回类型为 <code>void</code>​</p>
+<pre><code class="language-c">#include &lt;stdlib.h&gt;
+……
+	atexit(myfuct);
+	exit(EXIT_FAILURE);
+……
+</code></pre>
+<h3 id="qsort"><a href="#qsort" class="headerlink" title="qsort()"></a>qsort()</h3><p>快速排序</p>
+<h4 id="原型及参数"><a href="#原型及参数" class="headerlink" title="原型及参数"></a>原型及参数</h4><p>​<code>void qsort(void *_Base, size_t _NumOfElements, size_t _SizeOfElements, int (*_PtFuncCompare)(const void *, const void *))</code>​<br>第一个参数为指针，指向待排序数组的首元素<br>第二个参数时待排序项的数目<br>第三个参数显式指明待排序数组中每个元素的大小（因为第一个参数将指针转换为 <code>void</code> ​ 了，所以需要另外传入元素大小）<br>第四个参数为一个指向函数的指针，用于确定升序还是降序</p>
+<h4 id="使用例"><a href="#使用例" class="headerlink" title="使用例"></a>使用例</h4><pre><code class="language-c">#include &lt;stdlib.h&gt;
+......
+int mycomp(const void * p1 , const void * p2);
+......
+	qsort(ar,NUM,sizeof(double),mycomp);//会改变ar
+......
+int mycomp(const void * p1 , const void * p2)//从小到大
+{
+//要使用指向double的指针来访问这两个值
+	const double * a1 = (const double * )p1;
+	const double * a2 = (const double * )p2;//需要强制转换
+	if (*a1 &lt; *a2)
+		return -1;
+	else if (*a1 == *a2)
+		return 0;
+	else
+		return 1;
+}
+</code></pre>
+<h2 id="-6"><a href="#-6" class="headerlink" title="&lt;limits.h&gt;"></a><code>&lt;limits.h&gt;</code></h2><p>提供了各种 <strong>int</strong> 类型的大小范围</p>
+<h2 id="-7"><a href="#-7" class="headerlink" title="&lt;float.h&gt;"></a><code>&lt;float.h&gt;</code></h2><p>提供了 <strong>float</strong> 类型的大小范围<br>​<code>DBL_MAX</code>​ double 最大绝对值，大于该值为 <code>上溢</code>​<br>​<code>DBL_MIN</code>​ double 最小绝对值，小于该值为 <code>下溢</code>​（会表示为 0）</p>
+<h2 id="-8"><a href="#-8" class="headerlink" title="&lt;math.h&gt;"></a><code>&lt;math.h&gt;</code></h2><p>提供了各种数学运算公式</p>
+<table>
+<thead>
+<tr>
+<th>原型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>double acos(double x)</td>
+<td>返回余弦值为 x 的角度（0~π）</td>
+</tr>
+<tr>
+<td>double asin(double x)</td>
+<td>返回正弦值为 x 的角度（-π&#x2F;2~π&#x2F;2）</td>
+</tr>
+<tr>
+<td>double atan(double x)</td>
+<td>返回正切值为 x 的角度（-π&#x2F;2~π&#x2F;2）</td>
+</tr>
+<tr>
+<td>double atan2(double y , double x)</td>
+<td>返回正切值为 y&#x2F;x 的角度（-π~π）</td>
+</tr>
+<tr>
+<td>double cos(double x)</td>
+<td>返回 x 的余弦值，弧度</td>
+</tr>
+<tr>
+<td>double sin(double x)</td>
+<td>返回 x 的正弦值，弧度</td>
+</tr>
+<tr>
+<td>double tan(double x)</td>
+<td>返回 x 的正切值，弧度</td>
+</tr>
+<tr>
+<td>double exp(double x)</td>
+<td>返回 $e^x$</td>
+</tr>
+<tr>
+<td>double log(double x)</td>
+<td>返回 $lnx$<br /></td>
+</tr>
+<tr>
+<td>double log10(double x)</td>
+<td>返回 $lgx$</td>
+</tr>
+<tr>
+<td>double pow(double x, double y)</td>
+<td>返回 $x^y$</td>
+</tr>
+<tr>
+<td>double sqrt(double x)</td>
+<td>返回 ​<img src="/assets/wps1-20231027151528-sgrp4m5.jpg"></td>
+</tr>
+<tr>
+<td>double cbrt(double x)</td>
+<td>返回 ​<img src="/assets/wps3-20231027151601-vzwv4hx.jpg"></td>
+</tr>
+<tr>
+<td>double ceil(double x)</td>
+<td>返回 $⌈x⌉$</td>
+</tr>
+<tr>
+<td>double fabs(double x)</td>
+<td>返回 $|x|$</td>
+</tr>
+<tr>
+<td>double floor(double x)</td>
+<td>返回 $[x]$ 或 $⌊x⌋$</td>
+</tr>
+</tbody></table>
+<h3 id="三角问题"><a href="#三角问题" class="headerlink" title="三角问题"></a>三角问题</h3><p>​<code>atan()</code> ​ 无法区分角度相同但方向相反的线，用 <code>atan2()</code> ​ 可以解决这个问题<br>所有三角函数返回的值的单位都是弧度，视情况转换成角度</p>
+<pre><code class="language-c">#define pi 4 * atan(1)  //the pi
+</code></pre>
+<h3 id="类型变体"><a href="#类型变体" class="headerlink" title="类型变体"></a>类型变体</h3><p>在原函数名后面加上 <code>f</code> ​ 或 <code>l</code> ​ 后缀，函数接收值的类型会发生改变<br>​<code>sqrtf()</code> ​ 为 float 版本<br>​<code>sqrtl()</code> ​ 为 long double 版本<br>使用 <code>泛型宏</code> ​ 来确定使用哪个版本的函数</p>
+<pre><code class="language-c">#define SQRT(X) _Generic((X),long double : sqrtl , default : sqrt , float : sqrtf)(X)
+//SQRT(X);
+</code></pre>
+<h3 id="​-1"><a href="#​-1" class="headerlink" title="&lt;tgmath.h&gt;​"></a><code>&lt;tgmath.h&gt;</code>​</h3><p>定义了泛型类型宏，如 <code>sqrt()</code> ​ 宏展开为 <code>sqrtf()</code>​ <code>sqrt()</code>​ <code>sqrtl()</code>​</p>
+<h3 id="​-2"><a href="#​-2" class="headerlink" title="&lt;complex.h&gt;​"></a><code>&lt;complex.h&gt;</code>​</h3><p>支持复数运算<br>相关函数在函数名前加 <code>c</code>​<br>​<code>csqrt()</code>​</p>
+<h2 id="​-3"><a href="#​-3" class="headerlink" title="&lt;ctype.h&gt;​"></a><code>&lt;ctype.h&gt;</code>​</h2><p>提供了各种判断、处理字符的函数</p>
+<h3 id="字符测试函数"><a href="#字符测试函数" class="headerlink" title="字符测试函数"></a>字符测试函数</h3><p>若符合则返回 <code>真</code></p>
+<table>
+<thead>
+<tr>
+<th align="left">isalnum()</th>
+<th align="left">字母或数字</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">isalpha()</td>
+<td align="left">字母</td>
+</tr>
+<tr>
+<td align="left">isblank()</td>
+<td align="left">标准空白字符（空格、水平制表符、换行符）或本地指定为空白的字符</td>
+</tr>
+<tr>
+<td align="left">iscntrl()</td>
+<td align="left">控制字符</td>
+</tr>
+<tr>
+<td align="left">isdigit()</td>
+<td align="left">数字</td>
+</tr>
+<tr>
+<td align="left">isgraph()</td>
+<td align="left">除空格以外的可打印字符</td>
+</tr>
+<tr>
+<td align="left">islower()</td>
+<td align="left">小写字母</td>
+</tr>
+<tr>
+<td align="left">isprint()</td>
+<td align="left">可打印字符</td>
+</tr>
+<tr>
+<td align="left">ispunct()</td>
+<td align="left">标点符号（除空格和字母和数字以外的可打印字符）</td>
+</tr>
+<tr>
+<td align="left">isspace()</td>
+<td align="left">空白字符（空格、换行符、换页符、回车符、垂直制表符、水平制表符、本地定义空白字符）</td>
+</tr>
+<tr>
+<td align="left">isupper()</td>
+<td align="left">大写字母</td>
+</tr>
+<tr>
+<td align="left">isxdigit()</td>
+<td align="left">十六进制数字符</td>
+</tr>
+</tbody></table>
+<h3 id="字符映射函数"><a href="#字符映射函数" class="headerlink" title="字符映射函数"></a>字符映射函数</h3><table>
+<thead>
+<tr>
+<th align="left">tolower()</th>
+<th align="left">大写改小写，原本为小写则不变</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">toupper()</td>
+<td align="left">小写改大写，原本为大写则不变</td>
+</tr>
+</tbody></table>
+<h2 id="​-4"><a href="#​-4" class="headerlink" title="&lt;assert.h&gt;​"></a><code>&lt;assert.h&gt;</code>​</h2><p>​<code>assert()</code> ​ 接受一个整型表达式作为参数，如果为非零，assert()宏就在 <code>stderr</code> ​ 中写入错误信息，并调用 <code>abort()</code> ​ 终止程序<br>会显示失败的测试、包含测试的文件名和行号</p>
+<h3 id="Static-assert"><a href="#Static-assert" class="headerlink" title="_Static_assert"></a>_Static_assert</h3><p>可以在编译时检查 assert()表达式<br>assert()会导致正在运行的程序终止<br>_Static_assert()会导致程序无法通过编译<br>_Static_assert()接受一个整型常量表达式（和 assert()不同，给 assert()的可以是一个表达式，在程序运行时编译）和一个字符串</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;limits.h&gt;
+_Static_assert(CHAR_BIT == 16, &quot;16-bit char falselt assumed&quot;);
+//接收的第一个参数需要能在编译的时候就能运行（即不需要做计算）
+int main(void)
+{
+    puts(&quot;char is 16 bits.&quot;);
+    return 0;
+}
+</code></pre>
+<p>输出即为错误信息<br><code>test.c:3:1: error: static assertion failed: &quot;16-bit char falselt assumed&quot;  _Static_assert(CHAR_BIT == 16, &quot;16-bit char falselt assumed&quot;);</code>​</p>
+<h2 id="​-5"><a href="#​-5" class="headerlink" title="&lt;string.h&gt;​"></a><code>&lt;string.h&gt;</code>​</h2><h3 id="memcpy-和-memmove"><a href="#memcpy-和-memmove" class="headerlink" title="memcpy()和 memmove()"></a>memcpy()和 memmove()</h3><h4 id="函数原型-25"><a href="#函数原型-25" class="headerlink" title="函数原型"></a>函数原型</h4><p>​<code>void *memcpy(void *__restrict__ _Dst, const void *__restrict__ _Src, size_t _Size)</code>​<br>​<code>void *memmove(void *_Dst, const void *_Src, size_t _Size)</code>​</p>
+<h4 id="作用-21"><a href="#作用-21" class="headerlink" title="作用"></a>作用</h4><p>两个函数的作用都是将 Source 数组的内容拷贝给 Dest 数组<br>不同的是 memcpy()指定的是 restrict，需要保证两个数组在内存区域中没有重叠<br>memmove()没有这个问题</p>
+<h4 id="参数-1"><a href="#参数-1" class="headerlink" title="参数"></a>参数</h4><p>Size 需要字节数，如 10*sizeof(double)</p>
+<h2 id="​-6"><a href="#​-6" class="headerlink" title="&lt;stdarg.h&gt;​"></a><code>&lt;stdarg.h&gt;</code>​</h2><p>提供可变参数</p>
+<ol>
+<li>提供一个使用省略号的函数原型（至少有一个形参和一个省略号）</li>
+<li>在函数定义中创建一个 va_list 类型的变量</li>
+<li>用宏把该变量初始化为一个参数列表</li>
+<li>用宏访问参数列表</li>
+<li>用宏完成清理工作</li>
+</ol>
+<pre><code class="language-c">void f1(int n,...);//valid
+int f2(const char *s , int k , ...);//valid
+char f3(char c1 , ... , char c2);//invalid
+oduble f4(...);//invalid
+</code></pre>
+<p>用 <code>parmN</code> ​ 描述省略号前的一个形参，传递给该形参的实际参数时省略号部分代表的参数数量</p>
+<pre><code class="language-c">f1(2 , 200 , 400);
+f1(4 , 13 , 42 , 76 , 100);
+double sum(int lim, ...)
+{
+	va_list ap;  //声明一个存储参数的对象
+	...
+	va_start(ap,lim); //使用在&lt;stdarg.h&gt;中的宏，把参数列表拷贝到va_list类型的变量中
+	//va_start(va_list , parmN);
+...
+</code></pre>
+<h3 id="访问参数列表"><a href="#访问参数列表" class="headerlink" title="访问参数列表"></a>访问参数列表</h3><pre><code class="language-c">double tic;
+int toc;
+...
+tic = va_arg(ap,double);
+toc = va_arg(ap,int);
+</code></pre>
+<p>​<code>va_arg()</code> ​ 接受两个参数，一个 va_list 变量和一个类型名，每次调用 va_arg()时会返回参数列表中的下一个参数。表示类型的参数指定了返回值的类型<br>传入的参数类型必须与宏参数的类型相匹配，否则可能报错</p>
+<h3 id="清理"><a href="#清理" class="headerlink" title="清理"></a>清理</h3><p>​<code>va_end(ap)</code>​<br>释放动态分配用于存储参数的内存</p>
+<h3 id="拷贝"><a href="#拷贝" class="headerlink" title="拷贝"></a>拷贝</h3><p>​<code>va_copy(ap_copy,ap_source)</code>​</p>
+<h3 id="使用例-1"><a href="#使用例-1" class="headerlink" title="使用例"></a>使用例</h3><pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdarg.h&gt;
+double sum(int lim , ...);
+int main(void)
+{
+    double s,t;
+    s = sum(3,1.1,2.5,13.3);
+    t = sum(6,1.1,2.1,13.1,4.1,5.1,6.1);
+    printf(&quot;return value for sum(3,1.1,2.5,13.3):     %g\n&quot;,s);
+    printf(&quot;return value for sum(6,1.1,2.1,13.1,4.1,5.1,6.1):     %g\n&quot;,t);
+    return 0;
+}
+double sum(int lim , ...)
+{
+    va_list ap;
+    int i;
+    double tot = 0;
+    va_start(ap , lim);
+    for (i = 0 ; i &lt; lim ; i++)
+        tot += va_arg(ap,double);
+    va_end(ap);
+    return tot;
+}
+</code></pre>
+<p>‍<br>‍</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://musuyin.github.io">Musuyin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://musuyin.github.io/cs/C/C%20Primer%20Plus/">https://musuyin.github.io/cs/C/C%20Primer%20Plus/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://musuyin.github.io" target="_blank">木素音的小站</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/C%E8%AF%AD%E8%A8%80/">C语言</a></div><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/cs/embedded-system/%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/" title="嵌入式系统概述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">嵌入式系统概述</div></div><div class="info-2"><div class="info-item-1">冯诺依曼架构核心组件 数据通路 控制器 内存（存储器） 输入 输出   处理器单板机：嵌入式微处理器（MPU） 微处理器是一种功能较强大的 CPU，通常电路板上必须包括 ROM、RAM、总线接口、各种外设等。 嵌入式微处理器及其存储器、总线、外设等安装在一块电路板上，称为单板计算机，如：树莓派。 常见的例子有 ARM 微处理器（如 SamSung S3C2440，Freescale M21&#x2F;MX 等），Intel 的 80x86 系列，Motorola 的 PowerPC、ARM Cortex-A 系列等  单片机：嵌入式微控制器（MCU） CPU 是计算设备的“大脑”，是指令执行的最终核心。 无论是 MCU 还是 MPU，最核心的计算部分都是一个或多个 CPU 核（如 ARM Cortex-M、Cortex-A、RISC-V 核心等）   MCU 是为控制和执行特定任务而设计的。 它将 CPU 大脑、记忆单元（RAM 和 Flash）、以及各种输入输出接口（如 GPIO、串口、ADC 等）全部集成在一颗芯片上     SoC（System on Chip）集成完备功能...</div></div></div></a><a class="pagination-related" href="/cs/interview/Spring/" title="Spring"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Spring</div></div><div class="info-2"><div class="info-item-1">Spring核心特性 IoC 容器：Spring 通过控制反转实现了对象的创建和对象间的依赖关系管理。开发者只需要定义好 Bean 及其依赖关系，Spring 容器负责创建和组装这些对象。 AOP：面向切面编程，允许开发者定义横切关注点，例如事务管理、安全控制等，独立于业务逻辑的代码。通过 AOP 可以将这些关注点模块化，提高代码的可维护性和可重用性。 事务管理：Spring 提供了一致的事务管理接口，支持声明式和编程式事务。开发者可以轻松地进行事务管理，而无需关心具体的事务 API。 MVC 框架：Spring MVC 是一个基于 Servlet API 构建的 Web 框架，采用了模型-视图-控制器（MVC）架构。它支持灵活的 URL 到页面控制器的映射，以及多种视图技术。  核心思想   核心思想 解决的问题 实现手段 典型应用场景    IoC 对象创建与依赖管理的高耦合 容器管理 Bean 生命周期 动态替换数据库实现、服务组装   DI 依赖关系的硬编码问题 Setter&#x2F;构造器&#x2F;注解注入 注入数据源、服务层依赖 DAO 层   AOP 横切逻辑分...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Musuyin</div><div class="author-info-description">Musuyin's Blog</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/musuyin"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/musuyin" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:musuyin@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">即使迷茫，也要前进！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE"><span class="toc-number">1.</span> <span class="toc-text">数据</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.</span> <span class="toc-text">基本数据类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E6%95%B0-int"><span class="toc-number">1.1.1.</span> <span class="toc-text">整数 int</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E9%A5%B0%E8%AF%8D"><span class="toc-number">1.1.1.1.</span> <span class="toc-text">修饰词</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AF%E7%A7%BB%E6%A4%8D%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.1.2.</span> <span class="toc-text">可移植类型</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0-float"><span class="toc-number">1.1.2.</span> <span class="toc-text">浮点数 float</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E4%B8%AD%E7%9A%84%E8%A1%A8%E7%A4%BA"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">存储中的表示</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A3%B0%E6%98%8E%E5%BD%A2%E5%BC%8F"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">声明形式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E9%A5%B0%E8%AF%8D-1"><span class="toc-number">1.1.2.3.</span> <span class="toc-text">修饰词</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0%E7%9A%84%E4%B8%8A%E6%BA%A2%E5%92%8C%E4%B8%8B%E6%BA%A2"><span class="toc-number">1.1.2.4.</span> <span class="toc-text">浮点数的上溢和下溢</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E5%9E%8B-char"><span class="toc-number">1.1.3.</span> <span class="toc-text">字符型 char</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96"><span class="toc-number">1.1.4.</span> <span class="toc-text">其他</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%83%E5%B0%94%E5%80%BC-Bool"><span class="toc-number">1.1.4.1.</span> <span class="toc-text">布尔值 Bool</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%8D%E6%95%B0-Complex"><span class="toc-number">1.1.4.2.</span> <span class="toc-text">复数 Complex</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%99%9A%E6%95%B0-Imaginary"><span class="toc-number">1.1.4.3.</span> <span class="toc-text">虚数 Imaginary</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B4%BE%E7%94%9F%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.2.</span> <span class="toc-text">派生数据类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E9%92%88"><span class="toc-number">1.2.1.</span> <span class="toc-text">指针 *</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A3%B0%E6%98%8E-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">声明&#x2F;初始化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">操作</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E2%80%93"><span class="toc-number">1.2.1.2.1.</span> <span class="toc-text">++&#x2F;–&#x2F;</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#n-n"><span class="toc-number">1.2.1.2.2.</span> <span class="toc-text">+n&#x2F;-n</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%8C%87%E9%92%88%E7%9B%B8%E5%87%8F"><span class="toc-number">1.2.1.2.3.</span> <span class="toc-text">指针相减</span></a></li><li class="toc-item toc-level-5"><a class="toc-link"><span class="toc-number">1.2.1.2.4.</span> <span class="toc-text">*</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#-1"><span class="toc-number">1.2.1.2.5.</span> <span class="toc-text">&amp;</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%87%E5%90%91%E5%A4%9A%E7%BB%B4%E6%95%B0%E7%BB%84%E7%9A%84%E6%8C%87%E9%92%88"><span class="toc-number">1.2.1.3.</span> <span class="toc-text">指向多维数组的指针</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84"><span class="toc-number">1.2.2.</span> <span class="toc-text">数组</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">定义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A3%B0%E6%98%8E-%E5%88%9D%E5%A7%8B%E5%8C%96-1"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">声明&#x2F;初始化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%98%E9%95%BF%E6%95%B0%E7%BB%84%EF%BC%88VLA%EF%BC%89"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">变长数组（VLA）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%9A%E7%BB%B4%E6%95%B0%E7%BB%84"><span class="toc-number">1.2.2.4.</span> <span class="toc-text">多维数组</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%81%8D%E5%8E%86%E6%95%B0%E7%BB%84"><span class="toc-number">1.2.2.5.</span> <span class="toc-text">遍历数组</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%8D%E5%90%88%E5%AD%97%E9%9D%A2%E9%87%8F"><span class="toc-number">1.2.2.6.</span> <span class="toc-text">复合字面量</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">1.2.3.</span> <span class="toc-text">字符串</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%AC%E8%B4%A8"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">本质</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89-1"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">定义</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B8%B8%E9%87%8F-string-constant"><span class="toc-number">1.2.3.2.1.</span> <span class="toc-text">字符串常量(string constant)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#char-%E7%B1%BB%E5%9E%8B%E6%95%B0%E7%BB%84"><span class="toc-number">1.2.3.2.2.</span> <span class="toc-text">char 类型数组</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%8C%87%E5%90%91-char-%E7%9A%84%E6%8C%87%E9%92%88"><span class="toc-number">1.2.3.2.3.</span> <span class="toc-text">指向 char 的指针</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C%E6%8C%87%E9%92%88%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.2.3.2.4.</span> <span class="toc-text">数组和指针的区别</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#I-O"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">I&#x2F;O</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#fgets"><span class="toc-number">1.2.3.3.1.</span> <span class="toc-text">fgets()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#gets-s"><span class="toc-number">1.2.3.3.2.</span> <span class="toc-text">gets_s</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#s-gets"><span class="toc-number">1.2.3.3.3.</span> <span class="toc-text">s_gets</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#scanf"><span class="toc-number">1.2.3.3.4.</span> <span class="toc-text">scanf()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#puts"><span class="toc-number">1.2.3.3.5.</span> <span class="toc-text">puts()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#fputs"><span class="toc-number">1.2.3.3.6.</span> <span class="toc-text">fputs()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#printf"><span class="toc-number">1.2.3.3.7.</span> <span class="toc-text">printf()</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.3.4.</span> <span class="toc-text">字符串函数</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#strlen"><span class="toc-number">1.2.3.4.1.</span> <span class="toc-text">strlen()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#strcat-strncat"><span class="toc-number">1.2.3.4.2.</span> <span class="toc-text">strcat() &#x2F; strncat()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#strcmp-strncmp"><span class="toc-number">1.2.3.4.3.</span> <span class="toc-text">strcmp() &#x2F; strncmp</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#strcpy-strncpy"><span class="toc-number">1.2.3.4.4.</span> <span class="toc-text">strcpy &#x2F; strncpy()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#sprintf"><span class="toc-number">1.2.3.4.5.</span> <span class="toc-text">sprintf()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#strchr-strrchr"><span class="toc-number">1.2.3.4.6.</span> <span class="toc-text">strchr() &#x2F; strrchr()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#strpbrk"><span class="toc-number">1.2.3.4.7.</span> <span class="toc-text">strpbrk()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#strstr"><span class="toc-number">1.2.3.4.8.</span> <span class="toc-text">strstr()</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%B8%8E%E6%95%B0%E5%80%BC%E8%BD%AC%E6%8D%A2"><span class="toc-number">1.2.3.5.</span> <span class="toc-text">字符串与数值转换</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#atoi-atof-atol"><span class="toc-number">1.2.3.5.1.</span> <span class="toc-text">atoi()atof()atol()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#strtol-strtoul-strtod"><span class="toc-number">1.2.3.5.2.</span> <span class="toc-text">strtol()strtoul()strtod()</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%84"><span class="toc-number">1.2.4.</span> <span class="toc-text">结构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA"><span class="toc-number">1.2.4.1.</span> <span class="toc-text">创建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%BF%E9%97%AE%E6%88%90%E5%91%98"><span class="toc-number">1.2.4.2.</span> <span class="toc-text">访问成员</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%93%E6%9E%84%E6%95%B0%E7%BB%84"><span class="toc-number">1.2.4.3.</span> <span class="toc-text">结构数组</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B5%8C%E5%A5%97%E7%BB%93%E6%9E%84"><span class="toc-number">1.2.4.4.</span> <span class="toc-text">嵌套结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%87%E5%90%91%E7%BB%93%E6%9E%84%E7%9A%84%E6%8C%87%E9%92%88"><span class="toc-number">1.2.4.5.</span> <span class="toc-text">指向结构的指针</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%91%E5%87%BD%E6%95%B0%E4%BC%A0%E9%80%92%E7%BB%93%E6%9E%84%E7%9A%84%E4%BF%A1%E6%81%AF"><span class="toc-number">1.2.4.6.</span> <span class="toc-text">向函数传递结构的信息</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BC%A0%E9%80%92%E7%BB%93%E6%9E%84%E6%9C%AC%E8%BA%AB"><span class="toc-number">1.2.4.6.1.</span> <span class="toc-text">传递结构本身</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BC%A0%E9%80%92%E7%BB%93%E6%9E%84%E6%8C%87%E9%92%88"><span class="toc-number">1.2.4.6.2.</span> <span class="toc-text">传递结构指针</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BC%A0%E9%80%92%E7%BB%93%E6%9E%84%E6%88%90%E5%91%98"><span class="toc-number">1.2.4.6.3.</span> <span class="toc-text">传递结构成员</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B5%8B%E5%80%BC"><span class="toc-number">1.2.4.7.</span> <span class="toc-text">赋值</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9C%A8%E7%BB%93%E6%9E%84%E5%86%85%E4%BD%BF%E7%94%A8%E6%8C%87%E9%92%88"><span class="toc-number">1.2.4.8.</span> <span class="toc-text">在结构内使用指针</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%93%E6%9E%84%E7%9A%84%E5%A4%8D%E5%90%88%E5%AD%97%E9%9D%A2%E9%87%8F"><span class="toc-number">1.2.4.9.</span> <span class="toc-text">结构的复合字面量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8C%BF%E5%90%8D%E7%BB%93%E6%9E%84"><span class="toc-number">1.2.4.10.</span> <span class="toc-text">匿名结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%B8%E7%BC%A9%E5%9E%8B%E6%95%B0%E7%BB%84%E6%88%90%E5%91%98"><span class="toc-number">1.2.4.11.</span> <span class="toc-text">伸缩型数组成员</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%9D%E5%AD%98%E7%BB%93%E6%9E%84%E5%88%B0%E6%96%87%E4%BB%B6%E4%B8%AD"><span class="toc-number">1.2.4.12.</span> <span class="toc-text">保存结构到文件中</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%81%94%E5%90%88"><span class="toc-number">1.2.5.</span> <span class="toc-text">联合</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA-1"><span class="toc-number">1.2.5.1.</span> <span class="toc-text">创建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8"><span class="toc-number">1.2.5.2.</span> <span class="toc-text">使用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8C%BF%E5%90%8D%E8%81%94%E5%90%88"><span class="toc-number">1.2.5.3.</span> <span class="toc-text">匿名联合</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%9A%E4%B8%BE"><span class="toc-number">1.2.6.</span> <span class="toc-text">枚举</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA-2"><span class="toc-number">1.2.6.1.</span> <span class="toc-text">创建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#enum-%E5%B8%B8%E9%87%8F"><span class="toc-number">1.2.6.2.</span> <span class="toc-text">enum 常量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-1"><span class="toc-number">1.2.6.3.</span> <span class="toc-text">使用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.3.</span> <span class="toc-text">高级数据类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#typedef"><span class="toc-number">1.4.</span> <span class="toc-text">typedef</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">2.</span> <span class="toc-text">运算符</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-number">2.1.</span> <span class="toc-text">优先级</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">2.2.</span> <span class="toc-text">基本运算符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0"><span class="toc-number">2.2.1.</span> <span class="toc-text">+ 加</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%8F-%E5%8F%96%E8%B4%9F"><span class="toc-number">2.2.2.</span> <span class="toc-text">- 减&#x2F;取负</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%8B%E5%80%BC-%E5%B7%A6%E5%80%BC-%E5%8F%B3%E5%80%BC"><span class="toc-number">2.2.3.</span> <span class="toc-text">&#x3D; 赋值 左值 &#x3D; 右值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B9%98"><span class="toc-number">2.2.4.</span> <span class="toc-text">* 乘</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%99%A4-%E6%95%B4%E6%95%B0-%E6%95%B4%E6%95%B0%E4%BB%8D%E4%B8%BA%E6%95%B4%E6%95%B0"><span class="toc-number">2.2.5.</span> <span class="toc-text">&#x2F; 除 整数&#x2F;整数仍为整数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">2.3.</span> <span class="toc-text">其他运算符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#sizeof"><span class="toc-number">2.3.1.</span> <span class="toc-text">sizeof()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#-2"><span class="toc-number">2.3.2.</span> <span class="toc-text">%</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%80%93-1"><span class="toc-number">2.3.3.</span> <span class="toc-text">++&#x2F;–</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#type"><span class="toc-number">2.3.4.</span> <span class="toc-text">(type)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#-3"><span class="toc-number">2.3.5.</span> <span class="toc-text">&amp;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#-4"><span class="toc-number">2.3.6.</span> <span class="toc-text">*</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B3%E7%B3%BB%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">2.4.</span> <span class="toc-text">关系运算符</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">2.5.</span> <span class="toc-text">逻辑运算符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8E"><span class="toc-number">2.5.1.</span> <span class="toc-text">&amp;&amp; 与</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%88%96"><span class="toc-number">2.5.2.</span> <span class="toc-text">|| 或</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9D%9E"><span class="toc-number">2.5.3.</span> <span class="toc-text">! 非</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E5%85%88%E7%BA%A7%E5%92%8C%E7%BB%93%E5%90%88%E5%BE%8B"><span class="toc-number">2.6.</span> <span class="toc-text">优先级和结合律</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#I-O-1"><span class="toc-number">3.</span> <span class="toc-text">I&#x2F;O</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2%E8%AF%B4%E6%98%8E-conversion-specification"><span class="toc-number">3.1.</span> <span class="toc-text">转换说明(conversion specification)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%84%8F%E4%B9%89"><span class="toc-number">3.1.1.</span> <span class="toc-text">意义</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%93%E5%85%A5"><span class="toc-number">3.2.</span> <span class="toc-text">输入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#scanf-1"><span class="toc-number">3.2.1.</span> <span class="toc-text">scanf()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B"><span class="toc-number">3.2.1.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BE%93%E5%85%A5%E6%A0%BC%E5%BC%8F"><span class="toc-number">3.2.1.2.</span> <span class="toc-text">输入格式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%94%E5%9B%9E%E5%80%BC"><span class="toc-number">3.2.1.3.</span> <span class="toc-text">返回值</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2%E4%BF%AE%E9%A5%B0%E7%AC%A6"><span class="toc-number">3.2.1.4.</span> <span class="toc-text">转换修饰符</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E7%82%B9"><span class="toc-number">3.2.1.5.</span> <span class="toc-text">特点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#getchar"><span class="toc-number">3.2.2.</span> <span class="toc-text">getchar()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-1"><span class="toc-number">3.2.2.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8"><span class="toc-number">3.2.2.2.</span> <span class="toc-text">作用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%93%E5%87%BA"><span class="toc-number">3.3.</span> <span class="toc-text">输出</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#printf-1"><span class="toc-number">3.3.1.</span> <span class="toc-text">printf()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-2"><span class="toc-number">3.3.1.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2%E4%BF%AE%E9%A5%B0%E7%AC%A6-1"><span class="toc-number">3.3.1.2.</span> <span class="toc-text">转换修饰符</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%87%E8%AE%B0"><span class="toc-number">3.3.1.3.</span> <span class="toc-text">标记</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#putchar"><span class="toc-number">3.3.2.</span> <span class="toc-text">putchar()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-3"><span class="toc-number">3.3.2.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-1"><span class="toc-number">3.3.2.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#puts-1"><span class="toc-number">3.3.3.</span> <span class="toc-text">puts()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-4"><span class="toc-number">3.3.3.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-2"><span class="toc-number">3.3.3.2.</span> <span class="toc-text">作用</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E8%AF%AD%E5%8F%A5"><span class="toc-number">4.</span> <span class="toc-text">控制语句</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AA%E7%8E%AF"><span class="toc-number">4.1.</span> <span class="toc-text">循环</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#for"><span class="toc-number">4.1.1.</span> <span class="toc-text">for</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#while"><span class="toc-number">4.1.2.</span> <span class="toc-text">while</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#do-while"><span class="toc-number">4.1.3.</span> <span class="toc-text">do {} while;</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%89%E6%8B%A9"><span class="toc-number">4.2.</span> <span class="toc-text">选择</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#if-else-if-else"><span class="toc-number">4.2.1.</span> <span class="toc-text">if&#x2F;else if&#x2F;else</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#switch"><span class="toc-number">4.2.2.</span> <span class="toc-text">switch</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#-5"><span class="toc-number">4.2.3.</span> <span class="toc-text">?:</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%BD%E6%95%B0-%E5%A4%9A%E6%96%87%E4%BB%B6"><span class="toc-number">5.</span> <span class="toc-text">函数&#x2F;多文件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E7%9A%84%E5%88%9B%E5%BB%BA%E5%8F%8A%E4%BD%BF%E7%94%A8"><span class="toc-number">5.1.</span> <span class="toc-text">函数的创建及使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E6%8C%87%E9%92%88"><span class="toc-number">5.2.</span> <span class="toc-text">函数指针</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA-3"><span class="toc-number">5.2.1.</span> <span class="toc-text">创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-3"><span class="toc-number">5.2.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%98%E9%87%8F%E7%9A%84%E5%AD%98%E5%82%A8%E7%B1%BB%E5%88%AB"><span class="toc-number">5.3.</span> <span class="toc-text">变量的存储类别</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%94%E7%A7%8D%E5%AD%98%E5%82%A8%E7%B1%BB%E5%88%AB"><span class="toc-number">5.3.1.</span> <span class="toc-text">五种存储类别</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E5%8F%98%E9%87%8F"><span class="toc-number">5.3.1.1.</span> <span class="toc-text">自动变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E5%8F%98%E9%87%8F"><span class="toc-number">5.3.1.2.</span> <span class="toc-text">寄存器变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E5%A4%96%E9%83%A8%E9%93%BE%E6%8E%A5"><span class="toc-number">5.3.1.3.</span> <span class="toc-text">静态外部链接</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E5%86%85%E9%83%A8%E9%93%BE%E6%8E%A5"><span class="toc-number">5.3.1.4.</span> <span class="toc-text">静态内部链接</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E6%97%A0%E9%93%BE%E6%8E%A5"><span class="toc-number">5.3.1.5.</span> <span class="toc-text">静态无链接</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E6%9C%9F"><span class="toc-number">5.3.2.</span> <span class="toc-text">存储期</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E5%AD%98%E5%82%A8%E5%99%A8"><span class="toc-number">5.3.2.1.</span> <span class="toc-text">静态存储器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BA%BF%E7%A8%8B%E5%AD%98%E5%82%A8%E6%9C%9F"><span class="toc-number">5.3.2.2.</span> <span class="toc-text">线程存储期</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E5%AD%98%E5%82%A8%E6%9C%9F"><span class="toc-number">5.3.2.3.</span> <span class="toc-text">自动存储期</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D%E5%AD%98%E5%82%A8%E6%9C%9F"><span class="toc-number">5.3.2.4.</span> <span class="toc-text">动态分配存储期</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="toc-number">5.3.3.</span> <span class="toc-text">作用域</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%BE%E6%8E%A5"><span class="toc-number">5.3.4.</span> <span class="toc-text">链接</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E9%99%90%E5%AE%9A%E7%AC%A6"><span class="toc-number">5.4.</span> <span class="toc-text">类型限定符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%81%92%E5%B8%B8%E6%80%A7-const"><span class="toc-number">5.4.1.</span> <span class="toc-text">恒常性 const</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%98%93%E5%8F%98%E6%80%A7-volatile"><span class="toc-number">5.4.2.</span> <span class="toc-text">易变性 volatile</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#restrict"><span class="toc-number">5.4.3.</span> <span class="toc-text">restrict</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E5%87%BD%E6%95%B0"><span class="toc-number">5.5.</span> <span class="toc-text">内存分配函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#malloc"><span class="toc-number">5.5.1.</span> <span class="toc-text">malloc()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8"><span class="toc-number">5.5.1.1.</span> <span class="toc-text">基本使用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%9A%E7%BB%B4%E6%95%B0%E7%BB%84-1"><span class="toc-number">5.5.1.2.</span> <span class="toc-text">多维数组</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#calloc"><span class="toc-number">5.5.2.</span> <span class="toc-text">calloc()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#free"><span class="toc-number">5.5.3.</span> <span class="toc-text">free()</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E6%BA%90%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6"><span class="toc-number">5.6.</span> <span class="toc-text">多源代码文件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6"><span class="toc-number">5.6.1.</span> <span class="toc-text">头文件</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%96%87%E4%BB%B6"><span class="toc-number">6.</span> <span class="toc-text">文件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E6%9C%AC%E6%A8%A1%E5%BC%8F%E5%92%8C%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%A8%A1%E5%BC%8F"><span class="toc-number">6.1.</span> <span class="toc-text">文本模式和二进制模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%8F%82%E6%95%B0"><span class="toc-number">6.2.</span> <span class="toc-text">命令行参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99%E6%B3%95"><span class="toc-number">6.2.1.</span> <span class="toc-text">写法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E6%95%B0"><span class="toc-number">6.2.2.</span> <span class="toc-text">参数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%87%8D%E5%AE%9A%E5%90%91"><span class="toc-number">6.3.</span> <span class="toc-text">重定向</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BE%93%E5%85%A5-1"><span class="toc-number">6.3.1.</span> <span class="toc-text">输入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BE%93%E5%87%BA-1"><span class="toc-number">6.3.2.</span> <span class="toc-text">输出</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%87%E5%87%86-I-O"><span class="toc-number">6.4.</span> <span class="toc-text">标准 I&#x2F;O</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#fopen"><span class="toc-number">6.4.1.</span> <span class="toc-text">fopen()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-5"><span class="toc-number">6.4.1.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E5%BC%8F-Mode-%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">6.4.1.2.</span> <span class="toc-text">模式(Mode)字符串</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fclose"><span class="toc-number">6.4.2.</span> <span class="toc-text">fclose()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-6"><span class="toc-number">6.4.2.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-4"><span class="toc-number">6.4.2.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#getc"><span class="toc-number">6.4.3.</span> <span class="toc-text">getc()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-7"><span class="toc-number">6.4.3.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-5"><span class="toc-number">6.4.3.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#putc"><span class="toc-number">6.4.4.</span> <span class="toc-text">putc()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-8"><span class="toc-number">6.4.4.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-6"><span class="toc-number">6.4.4.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E5%90%91%E6%A0%87%E5%87%86%E6%96%87%E4%BB%B6%E7%9A%84%E6%8C%87%E9%92%88"><span class="toc-number">6.4.5.</span> <span class="toc-text">指向标准文件的指针</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E6%9C%AC%E6%96%87%E4%BB%B6-I-O"><span class="toc-number">6.5.</span> <span class="toc-text">文本文件 I&#x2F;O</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#fprintf"><span class="toc-number">6.5.1.</span> <span class="toc-text">fprintf()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-9"><span class="toc-number">6.5.1.1.</span> <span class="toc-text">函数原型</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fscanf"><span class="toc-number">6.5.2.</span> <span class="toc-text">fscanf()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-10"><span class="toc-number">6.5.2.1.</span> <span class="toc-text">函数原型</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fgets-1"><span class="toc-number">6.5.3.</span> <span class="toc-text">fgets()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-11"><span class="toc-number">6.5.3.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-7"><span class="toc-number">6.5.3.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fputs-1"><span class="toc-number">6.5.4.</span> <span class="toc-text">fputs()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-12"><span class="toc-number">6.5.4.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-8"><span class="toc-number">6.5.4.2.</span> <span class="toc-text">作用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E8%BF%9B%E5%88%B6-I-O"><span class="toc-number">6.6.</span> <span class="toc-text">二进制 I&#x2F;O</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#fread"><span class="toc-number">6.6.1.</span> <span class="toc-text">fread()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-13"><span class="toc-number">6.6.1.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-9"><span class="toc-number">6.6.1.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fwrite"><span class="toc-number">6.6.2.</span> <span class="toc-text">fwrite()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-14"><span class="toc-number">6.6.2.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-10"><span class="toc-number">6.6.2.2.</span> <span class="toc-text">作用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9A%8F%E6%9C%BA%E8%AE%BF%E9%97%AE"><span class="toc-number">6.7.</span> <span class="toc-text">随机访问</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#rewind"><span class="toc-number">6.7.1.</span> <span class="toc-text">rewind()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-15"><span class="toc-number">6.7.1.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-11"><span class="toc-number">6.7.1.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fseek"><span class="toc-number">6.7.2.</span> <span class="toc-text">fseek()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-16"><span class="toc-number">6.7.2.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-12"><span class="toc-number">6.7.2.2.</span> <span class="toc-text">作用</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%B5%B7%E5%A7%8B%E7%82%B9%E6%A8%A1%E5%BC%8F"><span class="toc-number">6.7.2.2.1.</span> <span class="toc-text">起始点模式</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ftell"><span class="toc-number">6.7.3.</span> <span class="toc-text">ftell()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-17"><span class="toc-number">6.7.3.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-13"><span class="toc-number">6.7.3.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fgetpos"><span class="toc-number">6.7.4.</span> <span class="toc-text">fgetpos()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-18"><span class="toc-number">6.7.4.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-14"><span class="toc-number">6.7.4.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fsetpos"><span class="toc-number">6.7.5.</span> <span class="toc-text">fsetpos()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-19"><span class="toc-number">6.7.5.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-15"><span class="toc-number">6.7.5.2.</span> <span class="toc-text">作用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E6%A0%87%E5%87%86-I-O"><span class="toc-number">6.8.</span> <span class="toc-text">其他标准 I&#x2F;O</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ungetc"><span class="toc-number">6.8.1.</span> <span class="toc-text">ungetc()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-20"><span class="toc-number">6.8.1.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-16"><span class="toc-number">6.8.1.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fflush"><span class="toc-number">6.8.2.</span> <span class="toc-text">fflush()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-21"><span class="toc-number">6.8.2.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-17"><span class="toc-number">6.8.2.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#setvbuf"><span class="toc-number">6.8.3.</span> <span class="toc-text">setvbuf()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-22"><span class="toc-number">6.8.3.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-18"><span class="toc-number">6.8.3.2.</span> <span class="toc-text">作用</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Mode"><span class="toc-number">6.8.3.2.1.</span> <span class="toc-text">Mode</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#feof"><span class="toc-number">6.8.4.</span> <span class="toc-text">feof()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-23"><span class="toc-number">6.8.4.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-19"><span class="toc-number">6.8.4.2.</span> <span class="toc-text">作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ferror"><span class="toc-number">6.8.5.</span> <span class="toc-text">ferror()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-24"><span class="toc-number">6.8.5.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-20"><span class="toc-number">6.8.5.2.</span> <span class="toc-text">作用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="toc-number">6.9.</span> <span class="toc-text">代码示例</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%8D%E6%93%8D%E4%BD%9C"><span class="toc-number">7.</span> <span class="toc-text">位操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%9B%E5%88%B6"><span class="toc-number">7.1.</span> <span class="toc-text">进制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E8%BF%9B%E5%88%B6"><span class="toc-number">7.1.1.</span> <span class="toc-text">二进制</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%89%E7%AC%A6%E5%8F%B7%E6%95%B4%E6%95%B0"><span class="toc-number">7.1.1.1.</span> <span class="toc-text">有符号整数</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AB%E8%BF%9B%E5%88%B6"><span class="toc-number">7.1.2.</span> <span class="toc-text">八进制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%81%E8%BF%9B%E5%88%B6"><span class="toc-number">7.1.3.</span> <span class="toc-text">十进制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6"><span class="toc-number">7.1.4.</span> <span class="toc-text">十六进制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#C-%E6%8C%89%E4%BD%8D%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="toc-number">7.2.</span> <span class="toc-text">C 按位运算符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%89%E4%BD%8D%E5%8F%96%E5%8F%8D"><span class="toc-number">7.2.1.</span> <span class="toc-text">按位取反~</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%89%E4%BD%8D%E4%B8%8E"><span class="toc-number">7.2.2.</span> <span class="toc-text">按位与&amp;</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%A9%E7%A0%81"><span class="toc-number">7.2.2.1.</span> <span class="toc-text">掩码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B3%E9%97%AD%E4%BD%8D%EF%BC%88%E6%B8%85%E7%A9%BA%E4%BD%8D%EF%BC%89"><span class="toc-number">7.2.2.2.</span> <span class="toc-text">关闭位（清空位）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A3%80%E6%9F%A5%E4%BD%8D"><span class="toc-number">7.2.2.3.</span> <span class="toc-text">检查位</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%89%E4%BD%8D%E6%88%96"><span class="toc-number">7.2.3.</span> <span class="toc-text">按位或 |</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%93%E5%BC%80%E4%BD%8D%EF%BC%88%E8%AE%BE%E7%BD%AE%E4%BD%8D%EF%BC%89"><span class="toc-number">7.2.3.1.</span> <span class="toc-text">打开位（设置位）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%89%E4%BD%8D%E5%BC%82%E6%88%96"><span class="toc-number">7.2.4.</span> <span class="toc-text">按位异或 ^</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%87%E6%8D%A2%E4%BD%8D"><span class="toc-number">7.2.4.1.</span> <span class="toc-text">切换位</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%80%89%E6%8B%A9%E6%80%A7%E5%88%87%E6%8D%A2"><span class="toc-number">7.2.4.1.1.</span> <span class="toc-text">选择性切换</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A7%BB%E4%BD%8D"><span class="toc-number">7.2.5.</span> <span class="toc-text">移位</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A6%E7%A7%BB"><span class="toc-number">7.2.5.1.</span> <span class="toc-text">左移</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%B3%E7%A7%BB"><span class="toc-number">7.2.5.2.</span> <span class="toc-text">右移</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BE%8B-%E4%BB%8E%E6%95%B4%E6%95%B0-x-%E7%9A%84%E4%BA%8C%E8%BF%9B%E5%88%B6%E8%A1%A8%E7%A4%BA%E4%B8%AD%E5%8F%96%E5%87%BA%E4%BB%8E%E7%AC%AC-p-%E4%BD%8D%EF%BC%88%E6%9C%80%E5%8F%B3%E8%BE%B9%E4%B8%BA%E7%AC%AC-0-%E4%BD%8D%EF%BC%89%E5%BC%80%E5%A7%8B%E7%9A%84-n-%E4%BD%8D"><span class="toc-number">7.2.5.3.</span> <span class="toc-text">例: 从整数 x 的二进制表示中取出从第 p 位（最右边为第 0 位）开始的 n 位</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%8D%E5%AD%97%E6%AE%B5"><span class="toc-number">7.3.</span> <span class="toc-text">位字段</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA-4"><span class="toc-number">7.3.1.</span> <span class="toc-text">创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B"><span class="toc-number">7.3.2.</span> <span class="toc-text">实例</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A2%84%E5%A4%84%E7%90%86"><span class="toc-number">8.</span> <span class="toc-text">预处理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BF%BB%E8%AF%91%E7%A8%8B%E5%BA%8F"><span class="toc-number">8.1.</span> <span class="toc-text">翻译程序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%98%A0%E5%B0%84%E5%AD%97%E7%AC%A6"><span class="toc-number">8.1.1.</span> <span class="toc-text">映射字符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A0%E5%8E%BB%E5%AE%9E%E9%99%85%E6%8D%A2%E8%A1%8C"><span class="toc-number">8.1.2.</span> <span class="toc-text">删去实际换行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%92%E5%88%86%E6%96%87%E6%9C%AC"><span class="toc-number">8.1.3.</span> <span class="toc-text">划分文本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%84%E5%A4%84%E7%90%86-1"><span class="toc-number">8.1.4.</span> <span class="toc-text">预处理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8F%E5%AE%9A%E4%B9%89-define%E2%80%8B"><span class="toc-number">8.2.</span> <span class="toc-text">宏定义 #define​</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E6%98%8E%E7%A4%BA%E5%B8%B8%E9%87%8F"><span class="toc-number">8.2.1.</span> <span class="toc-text">定义明示常量</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%87%8D%E5%AE%9A%E4%B9%89%E5%B8%B8%E9%87%8F"><span class="toc-number">8.2.1.1.</span> <span class="toc-text">重定义常量</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8F"><span class="toc-number">8.2.2.</span> <span class="toc-text">宏</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9B%BF%E6%8D%A2%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-number">8.2.3.</span> <span class="toc-text">替换表达式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%8F%E5%8F%82%E6%95%B0"><span class="toc-number">8.2.3.1.</span> <span class="toc-text">宏参数</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%94%A8%E5%AE%8F%E5%8F%82%E6%95%B0%E5%88%9B%E5%BB%BA%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">8.2.3.1.1.</span> <span class="toc-text">用宏参数创建字符串</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%A2%84%E5%A4%84%E7%90%86%E9%BB%8F%E5%90%88%E5%89%82"><span class="toc-number">8.2.3.1.2.</span> <span class="toc-text">预处理黏合剂</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%B0%E5%8F%B7"><span class="toc-number">8.2.3.2.</span> <span class="toc-text">记号</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%98%E5%8F%82%E5%AE%8F"><span class="toc-number">8.2.4.</span> <span class="toc-text">变参宏</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8D%A2%E8%A1%8C%E5%86%99%E6%B3%95"><span class="toc-number">8.2.5.</span> <span class="toc-text">换行写法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%96%E6%B6%88%E5%AE%8F%E5%AE%9A%E4%B9%89-undef"><span class="toc-number">8.3.</span> <span class="toc-text">取消宏定义#undef</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">8.3.1.</span> <span class="toc-text">定义的概念</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%A1%E4%BB%B6%E7%BC%96%E8%AF%91"><span class="toc-number">8.4.</span> <span class="toc-text">条件编译</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ifdef-else-endif%E2%80%8B"><span class="toc-number">8.4.1.</span> <span class="toc-text">#ifdef #else #endif​</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ifndef%E2%80%8B"><span class="toc-number">8.4.2.</span> <span class="toc-text">#ifndef​</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#if-elif%E2%80%8B"><span class="toc-number">8.4.3.</span> <span class="toc-text">#if #elif​</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#defined"><span class="toc-number">8.4.3.1.</span> <span class="toc-text">defined</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB-include%E2%80%8B"><span class="toc-number">8.5.</span> <span class="toc-text">文件包含 #include​</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E5%B8%B8%E7%9A%84%E4%B9%A0%E6%83%AF"><span class="toc-number">8.5.1.</span> <span class="toc-text">通常的习惯</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%84%E5%AE%9A%E4%B9%89%E5%AE%8F"><span class="toc-number">8.6.</span> <span class="toc-text">预定义宏</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E6%8C%87%E4%BB%A4"><span class="toc-number">8.7.</span> <span class="toc-text">其他指令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#line-%E2%80%8B-%E5%92%8C-error%E2%80%8B"><span class="toc-number">8.7.1.</span> <span class="toc-text">#line ​ 和 #error​</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pragma%E2%80%8B"><span class="toc-number">8.7.2.</span> <span class="toc-text">#pragma​</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%9B%E5%9E%8B%E9%80%89%E6%8B%A9"><span class="toc-number">8.8.</span> <span class="toc-text">泛型选择</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E8%81%94%E5%87%BD%E6%95%B0"><span class="toc-number">8.9.</span> <span class="toc-text">内联函数</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BA%93"><span class="toc-number">9.</span> <span class="toc-text">库</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%80%8B"><span class="toc-number">9.1.</span> <span class="toc-text">&lt;stdlib.h&gt;​</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#rand"><span class="toc-number">9.1.1.</span> <span class="toc-text">rand()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exit-atexit"><span class="toc-number">9.1.2.</span> <span class="toc-text">exit() atexit()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#qsort"><span class="toc-number">9.1.3.</span> <span class="toc-text">qsort()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E5%9E%8B%E5%8F%8A%E5%8F%82%E6%95%B0"><span class="toc-number">9.1.3.1.</span> <span class="toc-text">原型及参数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E4%BE%8B"><span class="toc-number">9.1.3.2.</span> <span class="toc-text">使用例</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#-6"><span class="toc-number">9.2.</span> <span class="toc-text">&lt;limits.h&gt;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#-7"><span class="toc-number">9.3.</span> <span class="toc-text">&lt;float.h&gt;</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#-8"><span class="toc-number">9.4.</span> <span class="toc-text">&lt;math.h&gt;</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E8%A7%92%E9%97%AE%E9%A2%98"><span class="toc-number">9.4.1.</span> <span class="toc-text">三角问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E5%8F%98%E4%BD%93"><span class="toc-number">9.4.2.</span> <span class="toc-text">类型变体</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%80%8B-1"><span class="toc-number">9.4.3.</span> <span class="toc-text">&lt;tgmath.h&gt;​</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%80%8B-2"><span class="toc-number">9.4.4.</span> <span class="toc-text">&lt;complex.h&gt;​</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%80%8B-3"><span class="toc-number">9.5.</span> <span class="toc-text">&lt;ctype.h&gt;​</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E6%B5%8B%E8%AF%95%E5%87%BD%E6%95%B0"><span class="toc-number">9.5.1.</span> <span class="toc-text">字符测试函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E6%98%A0%E5%B0%84%E5%87%BD%E6%95%B0"><span class="toc-number">9.5.2.</span> <span class="toc-text">字符映射函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%80%8B-4"><span class="toc-number">9.6.</span> <span class="toc-text">&lt;assert.h&gt;​</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Static-assert"><span class="toc-number">9.6.1.</span> <span class="toc-text">_Static_assert</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%80%8B-5"><span class="toc-number">9.7.</span> <span class="toc-text">&lt;string.h&gt;​</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#memcpy-%E5%92%8C-memmove"><span class="toc-number">9.7.1.</span> <span class="toc-text">memcpy()和 memmove()</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B-25"><span class="toc-number">9.7.1.1.</span> <span class="toc-text">函数原型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8-21"><span class="toc-number">9.7.1.2.</span> <span class="toc-text">作用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%82%E6%95%B0-1"><span class="toc-number">9.7.1.3.</span> <span class="toc-text">参数</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%80%8B-6"><span class="toc-number">9.8.</span> <span class="toc-text">&lt;stdarg.h&gt;​</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BF%E9%97%AE%E5%8F%82%E6%95%B0%E5%88%97%E8%A1%A8"><span class="toc-number">9.8.1.</span> <span class="toc-text">访问参数列表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B8%85%E7%90%86"><span class="toc-number">9.8.2.</span> <span class="toc-text">清理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%B7%E8%B4%9D"><span class="toc-number">9.8.3.</span> <span class="toc-text">拷贝</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E4%BE%8B-1"><span class="toc-number">9.8.4.</span> <span class="toc-text">使用例</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/cloud/terraform/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" title="Terraform 基础知识">Terraform 基础知识</a><time datetime="2026-04-14T16:00:00.000Z" title="发表于 2026-04-15 00:00:00">2026-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/tool/obsidian/Mermaid%E4%BD%BF%E7%94%A8%E6%89%8B%E5%86%8C/" title="Mermaid使用">Mermaid使用</a><time datetime="2026-04-13T16:00:00.000Z" title="发表于 2026-04-14 00:00:00">2026-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8A%E4%BC%98%E5%85%88%E5%88%86%E6%9E%90/" title="自底向上优先分析">自底向上优先分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/LR%E5%88%86%E6%9E%90/" title="LR分析">LR分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/statistics-learning/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA/" title="支持向量机">支持向量机</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Musuyin</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,1310 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>密码学基础 | 木素音的小站</title><meta name="author" content="Musuyin"><meta name="copyright" content="Musuyin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="基本术语 加密（Encryption）-解密（Decryption） 密码体制（Crypto System） 明文（Plaintext）-密文（Ciphertext） 加密算法（Encryption Alogorithm） 无密钥密码（Keyless Cipher） $C&#x3D;E(P)$ $P&#x3D;D(C)$   对称（Symmetric）加密 $C&#x3D;E(K,P)$ $P&amp;#">
+<meta property="og:type" content="article">
+<meta property="og:title" content="密码学基础">
+<meta property="og:url" content="https://musuyin.github.io/cs/safty/%E5%AF%86%E7%A0%81%E5%AD%A6%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="木素音的小站">
+<meta property="og:description" content="基本术语 加密（Encryption）-解密（Decryption） 密码体制（Crypto System） 明文（Plaintext）-密文（Ciphertext） 加密算法（Encryption Alogorithm） 无密钥密码（Keyless Cipher） $C&#x3D;E(P)$ $P&#x3D;D(C)$   对称（Symmetric）加密 $C&#x3D;E(K,P)$ $P&amp;#">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://musuyin.github.io/img/butterfly-icon.png">
+<meta property="article:published_time" content="2025-11-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-15T06:23:33.230Z">
+<meta property="article:author" content="Musuyin">
+<meta property="article:tag" content="信息安全">
+<meta property="article:tag" content="密码学">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://musuyin.github.io/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "密码学基础",
+  "url": "https://musuyin.github.io/cs/safty/%E5%AF%86%E7%A0%81%E5%AD%A6%E5%9F%BA%E7%A1%80/",
+  "image": "https://musuyin.github.io/img/butterfly-icon.png",
+  "datePublished": "2025-11-05T16:00:00.000Z",
+  "dateModified": "2026-04-15T06:23:33.230Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Musuyin",
+      "url": "https://musuyin.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://musuyin.github.io/cs/safty/%E5%AF%86%E7%A0%81%E5%AD%A6%E5%9F%BA%E7%A1%80/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":null,"highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '密码学基础',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">木素音的小站</span></a><a class="nav-page-title" href="/"><span class="site-name">密码学基础</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">密码学基础</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-11-05T16:00:00.000Z" title="发表于 2025-11-06 00:00:00">2025-11-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-04-15T06:23:33.230Z" title="更新于 2026-04-15 14:23:33">2026-04-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8/">信息安全</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="基本术语"><a href="#基本术语" class="headerlink" title="基本术语"></a>基本术语</h1><ul>
+<li>加密（Encryption）-解密（Decryption）</li>
+<li>密码体制（Crypto System）</li>
+<li>明文（Plaintext）-密文（Ciphertext）</li>
+<li>加密算法（Encryption Alogorithm）</li>
+<li>无密钥密码（Keyless Cipher）<ul>
+<li>$C&#x3D;E(P)$</li>
+<li>$P&#x3D;D(C)$</li>
+</ul>
+</li>
+<li>对称（Symmetric）加密<ul>
+<li>$C&#x3D;E(K,P)$</li>
+<li>$P&#x3D;D(K,C)$</li>
+</ul>
+</li>
+<li>非对称（Asymmetric）加密<ul>
+<li>$C&#x3D;E(K_E,P)$</li>
+<li>$P&#x3D;D(K_D,C)$</li>
+</ul>
+</li>
+</ul>
+<p>![[images&#x2F;Pasted image 20251203173556.png]]</p>
+<h1 id="古典加密方法"><a href="#古典加密方法" class="headerlink" title="古典加密方法"></a>古典加密方法</h1><h2 id="替换法（Substitution）"><a href="#替换法（Substitution）" class="headerlink" title="替换法（Substitution）"></a>替换法（Substitution）</h2><h3 id="凯撒加密（Caesar-Cipher）"><a href="#凯撒加密（Caesar-Cipher）" class="headerlink" title="凯撒加密（Caesar Cipher）"></a>凯撒加密（Caesar Cipher）</h3><p>按照字母表顺序前移或后移</p>
+<p>$$<br>C_i&#x3D;E(P_i)&#x3D;(P_i+n)\ \text{mod}\ 26<br>$$</p>
+<p>$n$ 可以为任意整数</p>
+<p>破译点：</p>
+<ul>
+<li>空格、重复字母</li>
+<li>常用前缀、后缀，单词结构的分析</li>
+</ul>
+<h3 id="有密钥的替换密码"><a href="#有密钥的替换密码" class="headerlink" title="有密钥的替换密码"></a>有密钥的替换密码</h3><p>![[images&#x2F;Pasted image 20251203174218.png]]</p>
+<p>算法特点：</p>
+<ul>
+<li>采用密钥</li>
+<li>没有空格字母特征</li>
+<li>没有破坏重复结构、单词结构</li>
+</ul>
+<h3 id="一次一密乱码本"><a href="#一次一密乱码本" class="headerlink" title="一次一密乱码本"></a>一次一密乱码本</h3><h4 id="弗纳姆密码"><a href="#弗纳姆密码" class="headerlink" title="弗纳姆密码"></a>弗纳姆密码</h4><p>结合以下两种实现方式：</p>
+<ul>
+<li>长随机数序列（随机密钥）</li>
+<li>弗纳姆密码（Vernam Cipher）</li>
+</ul>
+<p>![[images&#x2F;Pasted image 20251203174416.png]]</p>
+<p>弗纳姆密码实例：</p>
+<p>![[images&#x2F;Pasted image 20251203174504.png]]</p>
+<h4 id="维吉尼亚密码"><a href="#维吉尼亚密码" class="headerlink" title="维吉尼亚密码"></a>维吉尼亚密码</h4><ul>
+<li>随机密钥密码本</li>
+<li>维吉尼亚表（Vigenere）</li>
+</ul>
+<p>加密过程：</p>
+<ul>
+<li>明文：行选择器</li>
+<li>密钥：列选择器</li>
+<li>密文：表中的值</li>
+</ul>
+<p>维吉尼亚表：</p>
+<ul>
+<li>表格的第一行（或第一列）是标准的英文字母表：<code>A B C D ... Z</code></li>
+<li>每一行都是前一行<strong>向左循环移位一位</strong>的结果：<ul>
+<li>第 0 行（A 行）：A B C D E … Z</li>
+<li>第 1 行（B 行）：B C D E F … A</li>
+<li>第 2 行（C 行）：C D E F G … B</li>
+<li>…</li>
+<li>第 25 行（Z 行）：Z A B C D … Y</li>
+</ul>
+</li>
+</ul>
+<p>这个表格本质上包含了 <strong>26 个凯撒密码表</strong>，每个对应一个偏移量（0 到 25）。</p>
+<ul>
+<li>加密算法：$C_i&#x3D;(P_i+K_i)\ \text{mod}\ 26$</li>
+<li>解密算法：$P_i&#x3D;(C_i-K_i+26)\ \text{mod}\ 26$</li>
+</ul>
+<h2 id="置换法（Transposition）"><a href="#置换法（Transposition）" class="headerlink" title="置换法（Transposition）"></a>置换法（Transposition）</h2><h3 id="简单列置换算法"><a href="#简单列置换算法" class="headerlink" title="简单列置换算法"></a>简单列置换算法</h3><ul>
+<li>加密：行入列出</li>
+<li>解密：列入行出</li>
+</ul>
+<p>加密过程：</p>
+<ul>
+<li><strong>选择一个密钥</strong>（通常是一个单词或数字序列），用于确定列的顺序，相同字母保留最左边。</li>
+<li>将明文按<strong>行</strong>写入一个固定列数的表格中（列数 &#x3D; 密钥长度）。</li>
+<li>如果明文长度不能整除列数，则在末尾<strong>填充占位符</strong>（如  <code>X</code>  或空格）。</li>
+<li>按照密钥指定的<strong>列顺序</strong>读取列，拼接得到密文。<ul>
+<li>列顺序由密钥排序后得到映射</li>
+</ul>
+</li>
+</ul>
+<p>可通过字母组分析进行破译：</p>
+<p>![[images&#x2F;Pasted image 20251203175332.png]]</p>
+<h1 id="私钥加密算法（对称加密）"><a href="#私钥加密算法（对称加密）" class="headerlink" title="私钥加密算法（对称加密）"></a>私钥加密算法（对称加密）</h1><p>安全的加密算法取决于：</p>
+<ul>
+<li>可靠的数学基础</li>
+<li>被证实是可靠的</li>
+<li>经过时间检验</li>
+<li>商业流行算法：DES、AES、RSA</li>
+</ul>
+<p>特性：</p>
+<ul>
+<li>混乱性（Confusion）</li>
+<li>扩散性（Diffusion）</li>
+</ul>
+<h2 id="流密码和块密码（分组密码）"><a href="#流密码和块密码（分组密码）" class="headerlink" title="流密码和块密码（分组密码）"></a>流密码和块密码（分组密码）</h2><p>![[images&#x2F;Pasted image 20251203181014.png]]</p>
+<table>
+<thead>
+<tr>
+<th><strong>比较维度</strong></th>
+<th><strong>流密码（Stream Cipher）</strong></th>
+<th><strong>块密码（Block Cipher）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>基本原理</strong></td>
+<td>逐位（或逐字节）加密明文，使用密钥流与明文进行异或（XOR）等操作。</td>
+<td>将明文划分为固定长度的块（如 64 位、128 位），对每个块整体加密。</td>
+</tr>
+<tr>
+<td><strong>加密单位</strong></td>
+<td>比特（bit）或字节（byte）</td>
+<td>固定大小的数据块（如 AES：128 位）</td>
+</tr>
+<tr>
+<td><strong>密钥流生成</strong></td>
+<td>通常由伪随机数生成器（PRNG）基于密钥和初始向量（IV）生成。</td>
+<td>每个块使用相同的密钥，但可通过不同模式（如 CBC、CTR）引入变化。</td>
+</tr>
+<tr>
+<td><strong>典型算法</strong></td>
+<td>RC4、ChaCha20、Salsa20、A5&#x2F;1（GSM）</td>
+<td>AES、DES、3DES、Blowfish、SM4</td>
+</tr>
+<tr>
+<td><strong>加密速度</strong></td>
+<td><strong>快</strong>，适合实时通信（如音视频流）</td>
+<td>相对较慢（尤其在软件实现中），但现代硬件加速后性能优异</td>
+</tr>
+<tr>
+<td><strong>内存&#x2F;资源需求</strong></td>
+<td><strong>低</strong>，适合嵌入式设备、物联网（IoT）</td>
+<td>较高（需缓存整个数据块）</td>
+</tr>
+<tr>
+<td><strong>错误传播</strong></td>
+<td><strong>无错误传播</strong>：1 位传输错误只影响对应明文位</td>
+<td>取决于工作模式： <br>- ECB&#x2F;CBC：错误可能扩散到整块或多块 <br>- CTR：类似流密码，无扩散</td>
+</tr>
+<tr>
+<td><strong>并行处理能力</strong></td>
+<td>通常<strong>不能并行加密</strong>（密钥流依赖前序状态） <br>（但 ChaCha20 等可并行）</td>
+<td>多数模式（如 ECB、CTR）支持<strong>并行加密&#x2F;解密</strong></td>
+</tr>
+<tr>
+<td><strong>安全性依赖</strong></td>
+<td>密钥流的<strong>不可预测性</strong>和<strong>不重复使用</strong>（重用密钥流&#x3D;灾难）</td>
+<td>密钥强度、块大小、工作模式选择</td>
+</tr>
+<tr>
+<td><strong>主要优点</strong></td>
+<td>- 转换速度快：每个字符（字节）都可以一读取就加密，加密一个字符（字节）的时间只依赖于加密算法本身，而不是接受明文的时间<br>- 低错误扩散率：每个字符（字节）都是单独编码，加密过程中的错误只影响对应的字符（字节）</td>
+<td>- 高扩散性：明文的信息被扩散到了几个密文符号中；一个密文分组可能依赖于几个明文字母<br>- 无法插入符号：符号按组加密，不可能把一个单独的符号插入到一个分组</td>
+</tr>
+<tr>
+<td><strong>主要缺点</strong></td>
+<td>- 密钥流重用会导致严重漏洞（如 WEP 破解） <br>- 难以认证完整性（需额外机制）<br>- 低扩散性：每个字符（字节）都是单独加密，该字符（字节）的所有信息都包含在密文的一个对应字符（字节）<br>- 易被恶意插入和篡改：每个字符（字节）都是单独加密的，截取者可以拼接报文，伪造可信的新报文</td>
+<td>- 需填充（若明文非整块） <br>- 某些模式（如 ECB）会暴露数据模式 <br>- 加密较慢，实时性较差<br>- 错误扩散：一个错误会影响到同一分组中其他字符的转换</td>
+</tr>
+<tr>
+<td><strong>典型应用场景</strong></td>
+<td>- 无线通信（蓝牙、Wi-Fi WPA-TKIP） <br>- TLS 中的 ChaCha20 <br>- 军事&#x2F;卫星通信</td>
+<td>- 文件&#x2F;磁盘加密（BitLocker, VeraCrypt） <br>- TLS&#x2F;AES <br>- 数据库存储加密 <br>- 区块链</td>
+</tr>
+</tbody></table>
+<h2 id="DES（Data-Encryption-Standard）"><a href="#DES（Data-Encryption-Standard）" class="headerlink" title="DES（Data Encryption Standard）"></a>DES（Data Encryption Standard）</h2><table>
+<thead>
+<tr>
+<th>属性</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>明文分组长度</strong></td>
+<td>64 位</td>
+</tr>
+<tr>
+<td><strong>密钥长度</strong></td>
+<td>64 位（实际有效密钥为  <strong>56 位</strong>，其余 8 位为奇偶校验位）</td>
+</tr>
+<tr>
+<td><strong>密文分组长度</strong></td>
+<td>64 位</td>
+</tr>
+<tr>
+<td><strong>加密轮数</strong></td>
+<td>16 轮（Feistel 结构）</td>
+</tr>
+<tr>
+<td><strong>算法类型</strong></td>
+<td>对称加密、分组密码、Feistel 网络</td>
+</tr>
+</tbody></table>
+<p>DES 采用 <strong>Feistel 结构</strong>：</p>
+<pre><code class="language-text">明文（64位）
+   ↓
+[初始置换 IP]
+   ↓
+(L₀, R₀) ← 将64位分为左右两半，各32位
+   ↓
+16轮 Feistel 迭代（每轮使用一个子密钥 Kᵢ）
+   ↓
+(R₁₆, L₁₆) ← 注意：最后一轮后左右不交换！
+   ↓
+[逆初始置换 IP⁻¹]
+   ↓
+密文（64位）
+</code></pre>
+<p>![[images&#x2F;Pasted image 20251203182540.png]]</p>
+<h3 id="加密步骤"><a href="#加密步骤" class="headerlink" title="加密步骤"></a>加密步骤</h3><p>![[images&#x2F;Pasted image 20251203182706.png]]</p>
+<h4 id="初始置换-（Initial-Permutation-IP）"><a href="#初始置换-（Initial-Permutation-IP）" class="headerlink" title="初始置换 （Initial Permutation, IP）"></a>初始置换 （Initial Permutation, IP）</h4><ul>
+<li>对 64 位明文进行<strong>固定位置重排</strong>（查 IP 表），无密钥参与。</li>
+<li>目的：打乱输入位顺序，增强扩散性。</li>
+<li>输出仍为 64 位，分为左半部分  L0​  和右半部分  R0​（各 32 位）。</li>
+</ul>
+<h4 id="16-轮-Feistel-迭代"><a href="#16-轮-Feistel-迭代" class="headerlink" title="16 轮 Feistel 迭代"></a>16 轮 Feistel 迭代</h4><p>每一轮 i（i&#x3D;1 到 16）执行以下操作：</p>
+<pre><code class="language-text">Lᵢ = Rᵢ₋₁
+Rᵢ = Lᵢ₋₁ ⊕ F(Rᵢ₋₁, Kᵢ)
+</code></pre>
+<p>其中：</p>
+<ul>
+<li>$L_{i−1}​,R_{i−1​}$：上一轮的左右半区</li>
+<li>$K_i$ ​：第  $i$  轮的 <strong>48 位子密钥</strong></li>
+<li>$F$：<strong>轮函数（Feistel Function）</strong></li>
+</ul>
+<h4 id="最终交换与逆初始置换"><a href="#最终交换与逆初始置换" class="headerlink" title="最终交换与逆初始置换"></a>最终交换与逆初始置换</h4><ul>
+<li>16 轮结束后，得到  $L_{16​},R_{16}​$。</li>
+<li><strong>注意</strong>：Feistel 结构通常在最后一轮<strong>不交换</strong>左右，因此拼接时为  $(R_{16}​,L_{16}​)$。</li>
+<li>对这 64 位进行  <strong>逆初始置换 IP⁻¹</strong>（IP 的逆操作），得到最终 64 位密文。</li>
+</ul>
+<p>将子密钥顺序倒过来使用即为解密过程</p>
+<h3 id="轮函数"><a href="#轮函数" class="headerlink" title="轮函数"></a>轮函数</h3><ol>
+<li><strong>扩展置换 E（Expansion）</strong><ul>
+<li>将 32 位  Ri−1​  扩展为 48 位（通过重复某些位，查 E 表）。</li>
+<li>目的：使输入与 48 位子密钥可进行异或。</li>
+</ul>
+</li>
+<li><strong>与子密钥异或</strong><ul>
+<li>$E(R_{i−1}​)⊕K_i​$ → 得到 48 位结果。</li>
+</ul>
+</li>
+<li><strong>S 盒替换（Substitution Boxes, S-boxes）</strong><ul>
+<li>将 48 位分为 8 组，每组 6 位 → 共 8 个 S 盒（S1~S8）。</li>
+<li>每个 6 位输入 → 通过 S 盒查表 → 输出 4 位 → 共输出 32 位。</li>
+<li><strong>S 盒是非线性核心</strong>，提供混淆（confusion），抵抗线性&#x2F;差分分析。</li>
+</ul>
+</li>
+<li><strong>P 盒置换（Permutation）</strong><ul>
+<li>对 32 位 S 盒输出进行固定位置重排（查 P 表），实现<strong>扩散（diffusion）</strong>：使每一位影响下一轮多个位置。</li>
+</ul>
+</li>
+</ol>
+<h2 id="AES（Advanced-Encryption-Standard）"><a href="#AES（Advanced-Encryption-Standard）" class="headerlink" title="AES（Advanced Encryption Standard）"></a>AES（Advanced Encryption Standard）</h2><ul>
+<li>字节替换、行移位、列混合</li>
+<li>加子密钥<ul>
+<li>$k_i&#x3D;\omega_1\omega_2\omega_3\omega_4$</li>
+<li>$k_{i+1}&#x3D;\omega_1’(\omega _2 \oplus \omega1’)(\omega _3 \oplus \omega_1’)(\omega _4 \oplus \omega_1’)$；$\omega_1’&#x3D;\omega_1 &lt;&lt; 8 \oplus C$</li>
+</ul>
+</li>
+<li>分块大小：128 位</li>
+<li>密钥长度：128、192、256 位</li>
+<li>循环次数：9、11、13 次</li>
+<li><strong>混淆（Confusion）</strong>：使密钥与密文之间的关系尽可能复杂（通过  <strong>S 盒</strong>  实现代换）。</li>
+<li><strong>扩散（Diffusion）</strong>：使明文每一位的变化影响密文中多个位（通过  <strong>行移位 + 列混合</strong>  实现）。</li>
+</ul>
+<p>AES 将 128 位（16 字节）明文组织为一个 <strong>4×4 的字节矩阵</strong>，称为 <strong>State</strong>：</p>
+<pre><code class="language-text">明文：b₀ b₁ b₂ ... b₁₅
+
+State 矩阵（按列填充）：
+[ b₀  b₄  b₈  b₁₂ ]
+[ b₁  b₅  b₉  b₁₃ ]
+[ b₂  b₆  b₁₀ b₁₄ ]
+[ b₃  b₇  b₁₁ b₁₅ ]
+</code></pre>
+<p>所有操作都在这个 State 上进行。</p>
+<blockquote>
+<p>以 AES-128 为例</p>
+</blockquote>
+<p>AES 加密 &#x3D; 初始轮 + 主轮（9 轮） + 最终轮（第 10 轮）</p>
+<pre><code class="language-text">明文 → AddRoundKey（轮密钥0）
+       ↓
+       [Round 1 to 9]:
+         SubBytes → ShiftRows → MixColumns → AddRoundKey
+       ↓
+       [Final Round 10]:
+         SubBytes → ShiftRows → AddRoundKey
+       ↓
+密文
+</code></pre>
+<p>最后一轮省略 MixColumns</p>
+<h3 id="密钥扩展"><a href="#密钥扩展" class="headerlink" title="密钥扩展"></a>密钥扩展</h3><ul>
+<li>输入：128&#x2F;192&#x2F;256 位主密钥</li>
+<li>输出：<strong>轮密钥序列</strong>（共 11&#x2F;13&#x2F;15 个 128 位密钥，对应 10&#x2F;12&#x2F;14 轮 + 初始轮）</li>
+<li>过程：<ol>
+<li>将主密钥划分为 4&#x2F;6&#x2F;8 个 32 位字（word）</li>
+<li>通过递推公式生成新字：<ul>
+<li>每第 4 个字（对 AES-128）会经过  <strong>RotWord → SubWord → XOR 轮常量（Rcon）</strong></li>
+</ul>
+</li>
+<li>每 4 个连续字组成一个轮密钥</li>
+</ol>
+</li>
+</ul>
+<h3 id="解密过程"><a href="#解密过程" class="headerlink" title="解密过程"></a>解密过程</h3><p>AES 解密 ≠ 加密的简单逆序，而是使用<strong>逆操作</strong></p>
+<table>
+<thead>
+<tr>
+<th>加密操作</th>
+<th>解密操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SubBytes</td>
+<td>InvSubBytes</td>
+</tr>
+<tr>
+<td>ShiftRows</td>
+<td>InvShiftRows（右移）</td>
+</tr>
+<tr>
+<td>MixColumns</td>
+<td>InvMixColumns</td>
+</tr>
+<tr>
+<td>AddRoundKey</td>
+<td>AddRoundKey（XOR 自反）</td>
+</tr>
+</tbody></table>
+<pre><code class="language-text">密文 → AddRoundKey(K₁₀)
+       ↓
+       InvShiftRows → InvSubBytes → AddRoundKey(K₉)
+       ↓
+       InvMixColumns → InvShiftRows → InvSubBytes → AddRoundKey(K₈)
+       ↓
+       ...（重复）
+       ↓
+       InvMixColumns → InvShiftRows → InvSubBytes → AddRoundKey(K₀)
+       ↓
+明文
+</code></pre>
+<h3 id="工作模式"><a href="#工作模式" class="headerlink" title="工作模式"></a>工作模式</h3><p>AES 本身只加密<strong>单个 128 位块</strong>。为加密任意长度数据，需配合<strong>工作模式</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>特点</th>
+<th>是否需要 IV</th>
+<th>并行</th>
+<th>认证</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ECB</strong></td>
+<td>简单但不安全（相同明文 → 相同密文）</td>
+<td>否</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>CBC</strong></td>
+<td>常用，需填充，错误传播</td>
+<td>是</td>
+<td>否（加密）</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>CTR</strong></td>
+<td>将块密码转为流密码，无需填充</td>
+<td>是（nonce）</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>GCM</strong></td>
+<td><strong>推荐！</strong>  提供加密+认证（AEAD）</td>
+<td>是</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td><strong>CCM</strong></td>
+<td>类似 GCM，但结构不同</td>
+<td>是</td>
+<td>否</td>
+<td>是</td>
+</tr>
+</tbody></table>
+<h1 id="公钥加密算法（非对称加密）"><a href="#公钥加密算法（非对称加密）" class="headerlink" title="公钥加密算法（非对称加密）"></a>公钥加密算法（非对称加密）</h1><p>公钥加密（Public-Key Cryptography），又称非对称加密（Asymmetric Cryptography），是现代密码学的一项革命性突破。它解决了对称加密中密钥分发困难的核心问题，并为数字签名、身份认证、安全通信等奠定了基础</p>
+<h2 id="核心思想"><a href="#核心思想" class="headerlink" title="核心思想"></a>核心思想</h2><p>公钥加密使用<strong>一对数学上相关但功能不同的密钥</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>密钥类型</th>
+<th>作用</th>
+<th>是否公开</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>公钥（Public Key）</strong></td>
+<td>用于<strong>加密</strong>或<strong>验证签名</strong></td>
+<td>可公开给任何人</td>
+</tr>
+<tr>
+<td><strong>私钥（Private Key）</strong></td>
+<td>用于<strong>解密</strong>或<strong>生成签名</strong></td>
+<td>必须严格保密</td>
+</tr>
+</tbody></table>
+<h2 id="对比对称加密"><a href="#对比对称加密" class="headerlink" title="对比对称加密"></a>对比对称加密</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>对称加密（如 AES）</th>
+<th>非对称加密（如 RSA）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>密钥数量</td>
+<td>1 个（双方共享）</td>
+<td>2 个（公钥 + 私钥）</td>
+</tr>
+<tr>
+<td>密钥保护</td>
+<td>必须保护</td>
+<td>公钥公开；私钥不可公开</td>
+</tr>
+<tr>
+<td>密钥分发</td>
+<td>困难（需安全通道）</td>
+<td>容易（公钥可公开）</td>
+</tr>
+<tr>
+<td>加密速度</td>
+<td>快（适合大数据）</td>
+<td>慢（适合小数据或密钥交换）</td>
+</tr>
+<tr>
+<td>主要用途</td>
+<td>数据加密</td>
+<td>密钥交换、数字签名、身份认证</td>
+</tr>
+<tr>
+<td>典型算法</td>
+<td>AES, DES, ChaCha20</td>
+<td>RSA, ECC, ElGamal, DH</td>
+</tr>
+</tbody></table>
+<h2 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h2><p>假设 Alice 想安全地发送消息给 Bob：</p>
+<ol>
+<li><strong>Bob 生成密钥对</strong>：<ul>
+<li>私钥  skB​（自己保管）</li>
+<li>公钥  pkB​（发布到网络、证书等）</li>
+</ul>
+</li>
+<li><strong>Alice 获取 Bob 的公钥 pkB​</strong>（从可信来源）</li>
+<li><strong>Alice 用 pkB​ 加密消息 M</strong>：<br>$$C&#x3D;Encrypt(pk_B​,M)$$</li>
+<li><strong>Alice 发送密文 C 给 Bob</strong></li>
+<li><strong>Bob 用自己的私钥 skB​ 解密</strong>：<br>$$M&#x3D;Decrypt(sk_B​,C)$$</li>
+</ol>
+<h2 id="RSA-加密算法"><a href="#RSA-加密算法" class="headerlink" title="RSA 加密算法"></a>RSA 加密算法</h2><p>RSA（Rivest–Shamir–Adleman）是<strong>第一个实用的公钥加密算法</strong>，由 Ron Rivest、Adi Shamir 和 Leonard Adleman 于 1977 年提出。它基于<strong>大整数分解难题</strong>，广泛用于<strong>加密、数字签名和密钥交换</strong>，是现代信息安全的基石之一。</p>
+<h4 id="核心思想-1"><a href="#核心思想-1" class="headerlink" title="核心思想"></a>核心思想</h4><p><strong>将两个大质数相乘很容易，但将它们的乘积分解回原始质数极其困难</strong>（当数字足够大时）</p>
+<p>利用这一“单向性”，RSA 构造了一对密钥：</p>
+<ul>
+<li><strong>公钥（Public Key）</strong>：用于加密或验证签名（可公开）</li>
+<li><strong>私钥（Private Key）</strong>：用于解密或生成签名（必须保密）</li>
+</ul>
+<h3 id="密钥生成流程"><a href="#密钥生成流程" class="headerlink" title="密钥生成流程"></a>密钥生成流程</h3><h4 id="选择两个大质数"><a href="#选择两个大质数" class="headerlink" title="选择两个大质数"></a>选择两个大质数</h4><p>随机选择两个<strong>大素数</strong> $p$ 和 $q$（通常为 1024 位或 2048 位）。</p>
+<blockquote>
+<p>示例（教学用小数）：<br>$p&#x3D;61, q&#x3D;53$</p>
+</blockquote>
+<h4 id="计算模数-n"><a href="#计算模数-n" class="headerlink" title="计算模数  n"></a>计算模数  n</h4><p>$$n&#x3D;p\times q$$</p>
+<ul>
+<li>$n$  是<strong>公钥和私钥的一部分</strong>，也称为<strong>模数（modulus）</strong>。</li>
+<li>加密&#x2F;解密都在模  $n$  下进行。</li>
+</ul>
+<blockquote>
+<p>示例：$n&#x3D;61×53&#x3D;3233$</p>
+</blockquote>
+<h4 id="计算欧拉函数-ϕ-n"><a href="#计算欧拉函数-ϕ-n" class="headerlink" title="计算欧拉函数  ϕ(n)"></a>计算欧拉函数  ϕ(n)</h4><p>$$ϕ(n)&#x3D;(p−1)(q−1)$$</p>
+<ul>
+<li>$ϕ(n)$  表示小于  $n$  且与  $n$  互质的正整数个数。</li>
+</ul>
+<blockquote>
+<p>示例：$ϕ(3233)&#x3D;60×52&#x3D;3120$</p>
+</blockquote>
+<h4 id="选择公钥指数-e"><a href="#选择公钥指数-e" class="headerlink" title="选择公钥指数  e"></a>选择公钥指数  e</h4><p>选择一个整数 $e$，满足：</p>
+<ul>
+<li>$1&lt;e&lt;ϕ(n)$</li>
+<li>$gcd(e,ϕ(n))&#x3D;1$（即  $e$  与  $ϕ(n)$  互质）</li>
+</ul>
+<blockquote>
+<p>常用值：e&#x3D;65537（&#x3D; 216+1），因其二进制含少量 1，加速加密。<br>示例：选 e&#x3D;17（因为 gcd(17,3120)&#x3D;1）</p>
+</blockquote>
+<p><strong>公钥 &#x3D; (e,n)</strong> → 可公开发布</p>
+<h4 id="计算私钥指数-d"><a href="#计算私钥指数-d" class="headerlink" title="计算私钥指数  d"></a>计算私钥指数  d</h4><p>求 $d$ 使得：</p>
+<p>$$d⋅e≡1(mod\ ϕ(n))$$</p>
+<p>即 $d$ 是 $e$ 在模 $ϕ(n)$ 下的<strong>乘法逆元</strong>。</p>
+<blockquote>
+<p>使用<strong>扩展欧几里得算法</strong>求解。<br>示例：解 $17d≡1(mod\ 3120)$ → d&#x3D;2753（因为 17×2753&#x3D;46801&#x3D;15×3120+1）</p>
+</blockquote>
+<p><strong>私钥 &#x3D; (d,n)</strong> → 必须严格保密</p>
+<p>实际中私钥常存储为 $(d,p,q)$ 等形式，便于使用中国剩余定理（CRT）加速解密</p>
+<h3 id="加密与解密"><a href="#加密与解密" class="headerlink" title="加密与解密"></a>加密与解密</h3><ul>
+<li>保密性转换：用接受者的公钥加密，接受者用自己的私钥解密</li>
+<li>真实性转换：用发送者的私钥加密，接受者用发送者的公钥解密</li>
+</ul>
+<h1 id="密码分析学：破译加密体系"><a href="#密码分析学：破译加密体系" class="headerlink" title="密码分析学：破译加密体系"></a>密码分析学：破译加密体系</h1><p>已知信息-破译方法：</p>
+<ul>
+<li>仅有密文<ul>
+<li>唯密文攻击（Ciphertext-only Attack）</li>
+</ul>
+</li>
+<li>全部或部分明文<ul>
+<li>已知明文（Known Plaintext）攻击</li>
+<li>可能明文（Probable Plaintext）攻击</li>
+</ul>
+</li>
+<li>任意明文的对应密文<ul>
+<li>选择明文（Chosen Plaintext）攻击</li>
+</ul>
+</li>
+<li>算法和密文<ul>
+<li>选择明文（Chosen Plaintext）攻击</li>
+</ul>
+</li>
+<li>缺陷</li>
+</ul>
+<h1 id="加密应用"><a href="#加密应用" class="headerlink" title="加密应用"></a>加密应用</h1><h2 id="Hash-函数"><a href="#Hash-函数" class="headerlink" title="Hash 函数"></a>Hash 函数</h2><p>密码哈希（Hash）函数（散列函数）</p>
+<ul>
+<li>Hash 函数是把可变长输入数据（消息）转换成固定长度输出数据的一种函数。<ul>
+<li>这个定长的输出数据称为输入数据的消息摘要，也称为该消息的 Hash 值、散列值、特征值或者数字指纹。</li>
+</ul>
+</li>
+<li>确认信息（文件、报文）的完整性。</li>
+<li>该函数必须依赖于被密封消息的所有位，这样，消息的每一位的变化都会影响到该消息的 Hash 值。</li>
+<li>使用最广的 Hash 函数：MD4（138 位）、MD5（138 位）和 SHA&#x2F;sHS(SecureHash Algorithm&#x2F;Standard，16O 位&#x2F;汉 56 位&#x2F;384 位&#x2F;512 位）</li>
+</ul>
+<h3 id="特征"><a href="#特征" class="headerlink" title="特征"></a>特征</h3><ul>
+<li>快速性：已知 $m$，计算 $c&#x3D;Hash(m)$ 是容易的</li>
+<li>单向性：从 Hash 值倒推原文是困难的，即已知 $c&#x3D;Hash(m)$，求 $m$ 是困难的</li>
+<li>抗碰撞性：已知 $Hash(m_1)&#x3D;c$，构造 $Hash(m_2)&#x3D;c$ 中的 $m_2$ 是困难的</li>
+<li>雪崩性：$c$ 的每一位都与 $m$ 的每一位有关，并有高度的敏感性，改变 $m$ 的任意一位都会对 $c$ 产生影响</li>
+<li>固定长度的输出：接受的输入数据没有长度限制，对输入任何长度的数据都能产生固定长度的输出</li>
+</ul>
+<h2 id="密钥交换"><a href="#密钥交换" class="headerlink" title="密钥交换"></a>密钥交换</h2><p>应用场合：</p>
+<ul>
+<li>用 Web 浏览器安全连接一个购物站点（HTTPS）</li>
+<li>加密的 Email</li>
+<li>安排两台主机建立加密受保护的信道</li>
+</ul>
+<p>为了建立一个加密的会话，就需要一个加密的手段来交换会话密钥（往往是对话双方共享的一个对称密钥）。</p>
+<h2 id="数字签名"><a href="#数字签名" class="headerlink" title="数字签名"></a>数字签名</h2><p>数字签名（Digital Signature）是<strong>公钥密码学</strong>的核心应用之一，用于实现信息的<strong>身份认证、数据完整性</strong>和<strong>不可否认性</strong></p>
+<table>
+<thead>
+<tr>
+<th>安全属性</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>身份认证（Authentication）</strong></td>
+<td>接收方能确认消息确实来自声称的发送方</td>
+</tr>
+<tr>
+<td><strong>数据完整性（Integrity）</strong></td>
+<td>消息在传输中未被篡改</td>
+</tr>
+<tr>
+<td><strong>不可否认性（Non-repudiation）</strong></td>
+<td>发送方事后不能否认自己签过该消息</td>
+</tr>
+</tbody></table>
+<p>数字签名 &#x3D; <strong>私钥签名 + 公钥验证</strong>，通常结合<strong>密码学哈希函数</strong>使用</p>
+<ol>
+<li><strong>签名</strong>：发送方计算消息 M 的哈希值 $h &#x3D; H(M)$，再用<strong>私钥</strong>加密 h，得到签名 $S &#x3D; D_{SK}(h)$；</li>
+<li><strong>发送</strong>：将 $(M, S)$ 发送给接收方；</li>
+<li><strong>验证</strong>：接收方用发送方<strong>公钥</strong>解密 $S$ 得 $h’$，同时计算 $H(M)$ 得 $h’’$，若 $h’ &#x3D;&#x3D; h’’$ 则验证通过。</li>
+</ol>
+<h2 id="消息认证"><a href="#消息认证" class="headerlink" title="消息认证"></a>消息认证</h2><p>消息认证是使消息接受者能验证收到的消息在传输过程中有没有被纂改、伪造和假冒，消息的完整性、有效性和真实性是否被破坏的过程。</p>
+<h3 id="基于-Hash-函数实现"><a href="#基于-Hash-函数实现" class="headerlink" title="基于 Hash 函数实现"></a>基于 Hash 函数实现</h3><p>![[images&#x2F;Pasted image 20251204132423.png]]</p>
+<p>![[images&#x2F;Pasted image 20251204132432.png]]</p>
+<h2 id="数字信封技术"><a href="#数字信封技术" class="headerlink" title="数字信封技术"></a>数字信封技术</h2><p><strong>数字信封（Digital Envelope）</strong> 是一种结合<strong>对称加密</strong>与<strong>公钥加密</strong>优势的混合加密技术，用于<strong>高效、安全地传输机密数据</strong>。其核心思想是：用对称密钥加密数据，再用接收方的公钥加密该<strong>对称密钥</strong>——这个被加密的对称密钥就称为“数字信封”</p>
+<p>结合两者优点：</p>
+<ul>
+<li>用  <strong>AES 快速加密大文件</strong></li>
+<li>用  <strong>RSA 安全传输 AES 密钥</strong></li>
+</ul>
+<h3 id="工作流程-1"><a href="#工作流程-1" class="headerlink" title="工作流程"></a>工作流程</h3><h4 id="生成会话密钥"><a href="#生成会话密钥" class="headerlink" title="生成会话密钥"></a>生成会话密钥</h4><ul>
+<li>Alice 随机生成一个<strong>一次性对称密钥</strong> $K_{session}$ ​（如 256 位 AES 密钥）</li>
+</ul>
+<h4 id="用对称密钥加密消息"><a href="#用对称密钥加密消息" class="headerlink" title="用对称密钥加密消息"></a>用对称密钥加密消息</h4><ul>
+<li>$C&#x3D;AES_{K_{session}}​​(M)$<br>→ 得到密文  $C$</li>
+</ul>
+<h4 id="用公钥加密会话密钥（创建“信封”）"><a href="#用公钥加密会话密钥（创建“信封”）" class="headerlink" title="用公钥加密会话密钥（创建“信封”）"></a>用公钥加密会话密钥（创建“信封”）</h4><p>注意是对<strong>密钥</strong>加密</p>
+<ul>
+<li>$E&#x3D;RSA_{pub_B}​​(K_{session​})$<br>→ $E$  就是<strong>数字信封</strong></li>
+</ul>
+<h4 id="发送（密文-数字信封）"><a href="#发送（密文-数字信封）" class="headerlink" title="发送（密文 + 数字信封）"></a>发送（密文 + 数字信封）</h4><ul>
+<li>Alice 发送给 Bob：$(C,E)$</li>
+</ul>
+<h4 id="解开数字信封并解密"><a href="#解开数字信封并解密" class="headerlink" title="解开数字信封并解密"></a>解开数字信封并解密</h4><ol>
+<li>用<strong>自己的私钥</strong>解密信封：<br>$K_{session​}&#x3D;RSA_{priv_B}​​(E)$</li>
+<li>用恢复出的会话密钥解密消息：<br>$M&#x3D;AES_{K_{session}​}^{−1}​(C)$</li>
+</ol>
+<h3 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>高效性</strong></td>
+<td>大数据用 AES 加密（快），仅小密钥用 RSA（可接受）</td>
+</tr>
+<tr>
+<td><strong>安全性</strong></td>
+<td>会话密钥一次一密，即使长期私钥泄露，单次会话仍安全（若配合前向安全协议）</td>
+</tr>
+<tr>
+<td><strong>可扩展性</strong></td>
+<td>可同时发给多人：为每人用其公钥加密同一会话密钥</td>
+</tr>
+<tr>
+<td><strong>标准化</strong></td>
+<td>广泛用于 S&#x2F;MIME、PGP、CMS（Cryptographic Message Syntax）等协议</td>
+</tr>
+</tbody></table>
+<h2 id="证书"><a href="#证书" class="headerlink" title="证书"></a>证书</h2><p>数字证书是一个<strong>由可信第三方签发的电子“身份证”</strong>，将<strong>公钥</strong>与<strong>身份信息</strong>（如域名、组织名）绑定在一起</p>
+<p>标准格式：X.509</p>
+<h3 id="X-509"><a href="#X-509" class="headerlink" title="X.509"></a>X.509</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>版本（Version）</strong></td>
+<td>v1, v2, v3（v3 支持扩展）</td>
+</tr>
+<tr>
+<td><strong>序列号（Serial Number）</strong></td>
+<td>证书唯一标识</td>
+</tr>
+<tr>
+<td><strong>签名算法</strong></td>
+<td>CA 签名所用算法（如 SHA256-RSA）</td>
+</tr>
+<tr>
+<td><strong>颁发者（Issuer）</strong></td>
+<td>签发该证书的 CA 名称</td>
+</tr>
+<tr>
+<td><strong>有效期（Validity）</strong></td>
+<td>Not Before &#x2F; Not After</td>
+</tr>
+<tr>
+<td><strong>主体（Subject）</strong></td>
+<td>证书持有者身份（如  <code>CN=www.example.com</code>）</td>
+</tr>
+<tr>
+<td><strong>主体公钥（Subject Public Key）</strong></td>
+<td>持有者的公钥 + 算法（如 RSA 2048）</td>
+</tr>
+<tr>
+<td><strong>扩展（Extensions）</strong></td>
+<td>（v3 特有）如： <br>• <strong>Key Usage</strong>（用途限制） <br>• <strong>Extended Key Usage</strong>（如 serverAuth, codeSigning） <br>• <strong>Subject Alternative Name (SAN)</strong>（支持多域名）</td>
+</tr>
+<tr>
+<td><strong>CA 签名</strong></td>
+<td>整个证书内容的数字签名（由 CA 私钥生成）</td>
+</tr>
+</tbody></table>
+<h3 id="公钥基础设施（PKI-Public-Key-Infrastructure）"><a href="#公钥基础设施（PKI-Public-Key-Infrastructure）" class="headerlink" title="公钥基础设施（PKI Public Key Infrastructure）"></a>公钥基础设施（PKI Public Key Infrastructure）</h3><p>PKI 是一套<strong>策略、流程、硬件、软件和标准</strong>的集合，用于创建、管理、分发、使用、存储和撤销数字证书。</p>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>终端实体（End Entity）</strong></td>
+<td>证书使用者（如 Web 服务器、用户、设备）</td>
+</tr>
+<tr>
+<td><strong>证书颁发机构（CA, Certificate Authority）</strong></td>
+<td>可信第三方，负责签发和吊销证书</td>
+</tr>
+<tr>
+<td><strong>注册机构（RA, Registration Authority）</strong></td>
+<td>可选，负责验证申请者身份（可与 CA 合并）</td>
+</tr>
+<tr>
+<td><strong>证书吊销列表（CRL, Certificate Revocation List）</strong></td>
+<td>CA 定期发布的已吊销证书列表</td>
+</tr>
+<tr>
+<td><strong>在线证书状态协议（OCSP, Online Certificate Status Protocol）</strong></td>
+<td>实时查询证书是否有效（替代 CRL）</td>
+</tr>
+<tr>
+<td><strong>证书存储库</strong></td>
+<td>存放证书和 CRL 的公共目录（如 LDAP、HTTP）</td>
+</tr>
+</tbody></table>
+<h3 id="证书链"><a href="#证书链" class="headerlink" title="证书链"></a>证书链</h3><p>大多数证书<strong>不是由根 CA 直接签发</strong>，而是通过<strong>中间 CA（Intermediate CA）</strong> 层级签发，形成一条信任链</p>
+<ul>
+<li><strong>安全隔离</strong>：根 CA 离线保存，永不联网，避免私钥泄露</li>
+<li><strong>灵活管理</strong>：不同业务用不同中间 CA（如 Web、邮件、代码签名）</li>
+<li><strong>吊销影响小</strong>：中间 CA 泄露只需吊销它，不影响根</li>
+</ul>
+<pre><code class="language-text">[终端实体证书] www.example.com
+        ↑ 由 Intermediate CA 1 签名
+[中间 CA 证书] Example Corp Intermediate CA
+        ↑ 由 Root CA 签名
+[根 CA 证书] Example Corp Root CA（自签名）
+</code></pre>
+<h3 id="验证过程"><a href="#验证过程" class="headerlink" title="验证过程"></a>验证过程</h3><ol>
+<li>浏览器收到服务器证书（含公钥）</li>
+<li>检查证书是否由<strong>受信任的根 CA</strong>签发<ul>
+<li>若直接由根签发 → 用内置根公钥验证</li>
+<li>若由中间 CA 签发 → 需同时提供<strong>中间证书</strong></li>
+</ul>
+</li>
+<li>浏览器逐级向上验证签名，直到找到<strong>本地信任库中的根证书</strong></li>
+<li>同时检查：<ul>
+<li>证书是否在有效期内</li>
+<li>域名是否匹配（SAN 或 CN）</li>
+<li>证书是否被吊销（通过 CRL 或 OCSP）</li>
+</ul>
+</li>
+</ol>
+<p>服务器配置 HTTPS 时，必须发送<strong>完整的证书链</strong>（终端 + 所有中间证书），否则客户端可能无法构建信任链</p>
+<h3 id="证书生命周期"><a href="#证书生命周期" class="headerlink" title="证书生命周期"></a>证书生命周期</h3><ol>
+<li><strong>申请</strong>：生成密钥对，提交 CSR（Certificate Signing Request）给 CA</li>
+<li><strong>验证</strong>：CA 验证申请者身份（域名控制、企业信息等）</li>
+<li><strong>签发</strong>：CA 用私钥签名，生成证书</li>
+<li><strong>部署</strong>：安装到服务器&#x2F;设备</li>
+<li><strong>使用</strong>：用于 TLS、签名等</li>
+<li><strong>吊销</strong>（如私钥泄露）：<ul>
+<li>通过 CRL 或 OCSP 发布吊销状态</li>
+</ul>
+</li>
+<li><strong>过期</strong>：自动失效（通常 90 天 ~ 1 年，Let’s Encrypt 为 90 天）</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://musuyin.github.io">Musuyin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://musuyin.github.io/cs/safty/%E5%AF%86%E7%A0%81%E5%AD%A6%E5%9F%BA%E7%A1%80/">https://musuyin.github.io/cs/safty/%E5%AF%86%E7%A0%81%E5%AD%A6%E5%9F%BA%E7%A1%80/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://musuyin.github.io" target="_blank">木素音的小站</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8/">信息安全</a><a class="post-meta__tags" href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a></div><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/cs/embedded-system/RISC-V%20%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/" title="RISC-V 汇编指令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">RISC-V 汇编指令</div></div><div class="info-2"><div class="info-item-1">指令概述 程序：计算机执行过程的序列，编写程序就是编写这个过程序列 指令集的规模 不宜过小：通过指令的排列组合，能达到高级编程语言的所有效果 不宜过大：指令集规模应精简，以免增加处理器电路的负担    指令格式基本格式&lt;opcode&gt; {&lt;cond&gt;}{S} &lt;Rd&gt;,&lt;Rn&gt;,{&lt;Op2&gt;}	; comment    &lt;&gt; 必须 {} 可选  指令存储形式 汇编代码格式一个完整的 ARM 汇编由两部分组成：声明和代码段。 声明 声明：在一个程序之前先要进行声明 声明代码段：用 AREA 指令定义一个段，说明所定义段的相关属性（段的名字和段的属性等） 声明 ARM 指令：用 CODE 来声明程序为 ARM 指令 声明程序入口：用 ENTRY 指令标识程序的入口点   在程序完成后要用 END 指令声明程序结束。每一个汇编程序段都必须有一条 END 指令，指示代码段的结束。  代码段 段：在 ARM 汇编语言程序中，以程序段为单位组织代码。段是相对独立的指令或数据序列，具有特定的名称。 代码段：代码段的内容为执...</div></div></div></a><a class="pagination-related" href="/cs/safty/%E4%BF%A1%E6%81%AF%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8%E6%A6%82%E8%AE%BA/" title="信息系统安全概论"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">信息系统安全概论</div></div><div class="info-2"><div class="info-item-1">计算机安全基本概念信息安全三要素C-I-A：机密性、完整性、可用性  机密性（Confidentiality）：也称保密性&#x2F;私密性，能够确保相关资源只被授权用户访问的系统能力 完整性（Integrity）：能确保相关资源只被授权用户修改，或者保证正确性、精确性或一致性的系统能力 可用性（Availability）：确保相关资源或者服务可以被任何授权用户有效使用的系统能力  其他特性 可认证性：能确认信息发送者身份的系统能力 不可否认性：能确保发送者不能对已发送过的信息进行抵赖的系统能力 可审计性：能追踪与给定资源相关联的所有行为的系统能力  攻击脆弱点-威胁-控制的范式 脆弱点是系统中的薄弱环节，如在过程、设计和实现中的缺陷，它会产生安全风险，也会被攻击者利用，作为攻击的入口点 威胁是指有可能引起系统损失或者损害的潜在安全风险。 可分为非人为威胁和人为威胁，人为威胁可以是非恶意的或者恶意的 大多数的计算机安全事件都与恶意的人为威胁有关，通常把这种恶意的人为威胁称为攻击   控制是指能消除或者减少系统脆弱点的动作、装置、程序、技术  脆弱点脆弱点：  硬件脆弱性 软件脆弱...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/cs/safty/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AE%89%E5%85%A8/" title="数据库安全"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-12-11</div><div class="info-item-2">数据库安全</div></div><div class="info-2"><div class="info-item-1">数据库完整性安全需求数据库优点 共享访问 最小冗余 数据一致性 数据完整性 访问控制  安全需求 数据库的物理和逻辑完整性 保护数据，使其不被外在的、非法的程序行为或外力破坏 保证只有授权个体可以执行对数据的更新，并保证修改的正确性 定期备份和异地备份 维护一个事务日志以便在故障点重建数据库   元素完整性 提供域检查功能 集中收集和控制数据，消除数据冗余 维护一个更改日志以便取消任何不正确的改变   可审计性 需要生成关于数据库所有访问的审计记录以协助维护数据库的完整性与安全性 审计追踪可以确定用户已经获得的数据线索，已确定是否允许用户做进一步的查询 为了有效地保持完整性，数据库的审计记录应该包括对记录、域、数据元素一级的访问   用户鉴别 访问控制 授权访问所有指定的数据，不允许访问禁止访问的数据 可能拥有的权限：读、改一个值，增、删整个域或记录，重建数据库 对推理攻击的控制一级较小的控制粒度，决定了数据库的访问控制比对其他对象的控制要难 访问控制可能会降低 DBMS 的性能   可用性  权衡完整性、机密性与可用性 每个元素以至于整个数据库都要求完整性，完整性是设计 DBM...</div></div></div></a><a class="pagination-related" href="/cs/safty/%E7%A8%8B%E5%BA%8F%E5%AE%89%E5%85%A8/" title="程序安全"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-12-04</div><div class="info-item-2">程序安全</div></div><div class="info-2"><div class="info-item-1">非恶意的程序漏洞 缓冲区溢出 危害：程序崩溃、执行恶意代码、提权等    ![[images&#x2F;Pasted image 20251204132810.png]]  不完全验证 检查时刻到使用时刻错误（TOCTTOU） 在检查某个状态（如文件权限）之后、实际使用之前，该状态被恶意修改。 解决：原子操作、减少检查与使用间隔、使用安全 API、以最小权限运行程序   未公开的访问点（后门） 整数溢出错误 未以空终止符结尾的字符串 参数长度、类型和数值错误 竞态条件 两个进程在相同时间间隔内进行竞争，并且此竞争会影响任务的完整性和正确性 资源竞争依赖于两个不同进程的执行顺序和时间，从而使得这些错误很难被发现和测试    计算机病毒概述 计算机病毒是一些能够自我复制的代码段，它能附着在应用程序或系统的其他可执行部分。在宿主程序执行的某些阶段，它能够获得执行控制权。 广义上讲，计算机病毒可以指所有对系统有干扰或破坏作用的代码。 计算机病毒分类 按寄生的方式不同，可分为系统引导型病毒、文件型病毒和复合型病毒三种 按其破坏、危害程度可分为良性病毒和恶性病毒 按传染途径可分为驻留内存型病...</div></div></div></a><a class="pagination-related" href="/cs/safty/%E4%BF%A1%E6%81%AF%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8%E6%A6%82%E8%AE%BA/" title="信息系统安全概论"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-06</div><div class="info-item-2">信息系统安全概论</div></div><div class="info-2"><div class="info-item-1">计算机安全基本概念信息安全三要素C-I-A：机密性、完整性、可用性  机密性（Confidentiality）：也称保密性&#x2F;私密性，能够确保相关资源只被授权用户访问的系统能力 完整性（Integrity）：能确保相关资源只被授权用户修改，或者保证正确性、精确性或一致性的系统能力 可用性（Availability）：确保相关资源或者服务可以被任何授权用户有效使用的系统能力  其他特性 可认证性：能确认信息发送者身份的系统能力 不可否认性：能确保发送者不能对已发送过的信息进行抵赖的系统能力 可审计性：能追踪与给定资源相关联的所有行为的系统能力  攻击脆弱点-威胁-控制的范式 脆弱点是系统中的薄弱环节，如在过程、设计和实现中的缺陷，它会产生安全风险，也会被攻击者利用，作为攻击的入口点 威胁是指有可能引起系统损失或者损害的潜在安全风险。 可分为非人为威胁和人为威胁，人为威胁可以是非恶意的或者恶意的 大多数的计算机安全事件都与恶意的人为威胁有关，通常把这种恶意的人为威胁称为攻击   控制是指能消除或者减少系统脆弱点的动作、装置、程序、技术  脆弱点脆弱点：  硬件脆弱性 软件脆弱...</div></div></div></a><a class="pagination-related" href="/cs/safty/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8%E4%B8%8E%E4%BF%9D%E6%8A%A4/" title="操作系统安全与保护"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-12-10</div><div class="info-item-2">操作系统安全与保护</div></div><div class="info-2"><div class="info-item-1">保护对象 内存 共享 I&#x2F;O 设备 共享程序或子程序 网络 共享数据  保护方法对象访问控制用户鉴别虚拟化技术安全操作系统设计</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Musuyin</div><div class="author-info-description">Musuyin's Blog</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/musuyin"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/musuyin" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:musuyin@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">即使迷茫，也要前进！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%9C%AF%E8%AF%AD"><span class="toc-number">1.</span> <span class="toc-text">基本术语</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%A4%E5%85%B8%E5%8A%A0%E5%AF%86%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">古典加密方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%BF%E6%8D%A2%E6%B3%95%EF%BC%88Substitution%EF%BC%89"><span class="toc-number">2.1.</span> <span class="toc-text">替换法（Substitution）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%AF%E6%92%92%E5%8A%A0%E5%AF%86%EF%BC%88Caesar-Cipher%EF%BC%89"><span class="toc-number">2.1.1.</span> <span class="toc-text">凯撒加密（Caesar Cipher）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%89%E5%AF%86%E9%92%A5%E7%9A%84%E6%9B%BF%E6%8D%A2%E5%AF%86%E7%A0%81"><span class="toc-number">2.1.2.</span> <span class="toc-text">有密钥的替换密码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E6%AC%A1%E4%B8%80%E5%AF%86%E4%B9%B1%E7%A0%81%E6%9C%AC"><span class="toc-number">2.1.3.</span> <span class="toc-text">一次一密乱码本</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%97%E7%BA%B3%E5%A7%86%E5%AF%86%E7%A0%81"><span class="toc-number">2.1.3.1.</span> <span class="toc-text">弗纳姆密码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%B4%E5%90%89%E5%B0%BC%E4%BA%9A%E5%AF%86%E7%A0%81"><span class="toc-number">2.1.3.2.</span> <span class="toc-text">维吉尼亚密码</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BD%AE%E6%8D%A2%E6%B3%95%EF%BC%88Transposition%EF%BC%89"><span class="toc-number">2.2.</span> <span class="toc-text">置换法（Transposition）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E5%88%97%E7%BD%AE%E6%8D%A2%E7%AE%97%E6%B3%95"><span class="toc-number">2.2.1.</span> <span class="toc-text">简单列置换算法</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%A7%81%E9%92%A5%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95%EF%BC%88%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">私钥加密算法（对称加密）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%81%E5%AF%86%E7%A0%81%E5%92%8C%E5%9D%97%E5%AF%86%E7%A0%81%EF%BC%88%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%EF%BC%89"><span class="toc-number">3.1.</span> <span class="toc-text">流密码和块密码（分组密码）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DES%EF%BC%88Data-Encryption-Standard%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">DES（Data Encryption Standard）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0%E5%AF%86%E6%AD%A5%E9%AA%A4"><span class="toc-number">3.2.1.</span> <span class="toc-text">加密步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E7%BD%AE%E6%8D%A2-%EF%BC%88Initial-Permutation-IP%EF%BC%89"><span class="toc-number">3.2.1.1.</span> <span class="toc-text">初始置换 （Initial Permutation, IP）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#16-%E8%BD%AE-Feistel-%E8%BF%AD%E4%BB%A3"><span class="toc-number">3.2.1.2.</span> <span class="toc-text">16 轮 Feistel 迭代</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%80%E7%BB%88%E4%BA%A4%E6%8D%A2%E4%B8%8E%E9%80%86%E5%88%9D%E5%A7%8B%E7%BD%AE%E6%8D%A2"><span class="toc-number">3.2.1.3.</span> <span class="toc-text">最终交换与逆初始置换</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AE%E5%87%BD%E6%95%B0"><span class="toc-number">3.2.2.</span> <span class="toc-text">轮函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AES%EF%BC%88Advanced-Encryption-Standard%EF%BC%89"><span class="toc-number">3.3.</span> <span class="toc-text">AES（Advanced Encryption Standard）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%86%E9%92%A5%E6%89%A9%E5%B1%95"><span class="toc-number">3.3.1.</span> <span class="toc-text">密钥扩展</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E5%AF%86%E8%BF%87%E7%A8%8B"><span class="toc-number">3.3.2.</span> <span class="toc-text">解密过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="toc-number">3.3.3.</span> <span class="toc-text">工作模式</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%AC%E9%92%A5%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95%EF%BC%88%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">公钥加密算法（非对称加密）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3"><span class="toc-number">4.1.</span> <span class="toc-text">核心思想</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9%E6%AF%94%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="toc-number">4.2.</span> <span class="toc-text">对比对称加密</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">4.3.</span> <span class="toc-text">工作流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RSA-%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95"><span class="toc-number">4.4.</span> <span class="toc-text">RSA 加密算法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3-1"><span class="toc-number">4.4.1.</span> <span class="toc-text">核心思想</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%86%E9%92%A5%E7%94%9F%E6%88%90%E6%B5%81%E7%A8%8B"><span class="toc-number">4.4.2.</span> <span class="toc-text">密钥生成流程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%89%E6%8B%A9%E4%B8%A4%E4%B8%AA%E5%A4%A7%E8%B4%A8%E6%95%B0"><span class="toc-number">4.4.2.1.</span> <span class="toc-text">选择两个大质数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E6%A8%A1%E6%95%B0-n"><span class="toc-number">4.4.2.2.</span> <span class="toc-text">计算模数  n</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E6%AC%A7%E6%8B%89%E5%87%BD%E6%95%B0-%CF%95-n"><span class="toc-number">4.4.2.3.</span> <span class="toc-text">计算欧拉函数  ϕ(n)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%89%E6%8B%A9%E5%85%AC%E9%92%A5%E6%8C%87%E6%95%B0-e"><span class="toc-number">4.4.2.4.</span> <span class="toc-text">选择公钥指数  e</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E7%A7%81%E9%92%A5%E6%8C%87%E6%95%B0-d"><span class="toc-number">4.4.2.5.</span> <span class="toc-text">计算私钥指数  d</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0%E5%AF%86%E4%B8%8E%E8%A7%A3%E5%AF%86"><span class="toc-number">4.4.3.</span> <span class="toc-text">加密与解密</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AF%86%E7%A0%81%E5%88%86%E6%9E%90%E5%AD%A6%EF%BC%9A%E7%A0%B4%E8%AF%91%E5%8A%A0%E5%AF%86%E4%BD%93%E7%B3%BB"><span class="toc-number">5.</span> <span class="toc-text">密码分析学：破译加密体系</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8A%A0%E5%AF%86%E5%BA%94%E7%94%A8"><span class="toc-number">6.</span> <span class="toc-text">加密应用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Hash-%E5%87%BD%E6%95%B0"><span class="toc-number">6.1.</span> <span class="toc-text">Hash 函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E5%BE%81"><span class="toc-number">6.1.1.</span> <span class="toc-text">特征</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%86%E9%92%A5%E4%BA%A4%E6%8D%A2"><span class="toc-number">6.2.</span> <span class="toc-text">密钥交换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D"><span class="toc-number">6.3.</span> <span class="toc-text">数字签名</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E8%AE%A4%E8%AF%81"><span class="toc-number">6.4.</span> <span class="toc-text">消息认证</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-Hash-%E5%87%BD%E6%95%B0%E5%AE%9E%E7%8E%B0"><span class="toc-number">6.4.1.</span> <span class="toc-text">基于 Hash 函数实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E5%AD%97%E4%BF%A1%E5%B0%81%E6%8A%80%E6%9C%AF"><span class="toc-number">6.5.</span> <span class="toc-text">数字信封技术</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B-1"><span class="toc-number">6.5.1.</span> <span class="toc-text">工作流程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E4%BC%9A%E8%AF%9D%E5%AF%86%E9%92%A5"><span class="toc-number">6.5.1.1.</span> <span class="toc-text">生成会话密钥</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E5%AF%B9%E7%A7%B0%E5%AF%86%E9%92%A5%E5%8A%A0%E5%AF%86%E6%B6%88%E6%81%AF"><span class="toc-number">6.5.1.2.</span> <span class="toc-text">用对称密钥加密消息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E5%85%AC%E9%92%A5%E5%8A%A0%E5%AF%86%E4%BC%9A%E8%AF%9D%E5%AF%86%E9%92%A5%EF%BC%88%E5%88%9B%E5%BB%BA%E2%80%9C%E4%BF%A1%E5%B0%81%E2%80%9D%EF%BC%89"><span class="toc-number">6.5.1.3.</span> <span class="toc-text">用公钥加密会话密钥（创建“信封”）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%91%E9%80%81%EF%BC%88%E5%AF%86%E6%96%87-%E6%95%B0%E5%AD%97%E4%BF%A1%E5%B0%81%EF%BC%89"><span class="toc-number">6.5.1.4.</span> <span class="toc-text">发送（密文 + 数字信封）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A3%E5%BC%80%E6%95%B0%E5%AD%97%E4%BF%A1%E5%B0%81%E5%B9%B6%E8%A7%A3%E5%AF%86"><span class="toc-number">6.5.1.5.</span> <span class="toc-text">解开数字信封并解密</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E7%82%B9"><span class="toc-number">6.5.2.</span> <span class="toc-text">特点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%81%E4%B9%A6"><span class="toc-number">6.6.</span> <span class="toc-text">证书</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#X-509"><span class="toc-number">6.6.1.</span> <span class="toc-text">X.509</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%AC%E9%92%A5%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD%EF%BC%88PKI-Public-Key-Infrastructure%EF%BC%89"><span class="toc-number">6.6.2.</span> <span class="toc-text">公钥基础设施（PKI Public Key Infrastructure）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%81%E4%B9%A6%E9%93%BE"><span class="toc-number">6.6.3.</span> <span class="toc-text">证书链</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E8%BF%87%E7%A8%8B"><span class="toc-number">6.6.4.</span> <span class="toc-text">验证过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%81%E4%B9%A6%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-number">6.6.5.</span> <span class="toc-text">证书生命周期</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/cloud/terraform/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" title="Terraform 基础知识">Terraform 基础知识</a><time datetime="2026-04-14T16:00:00.000Z" title="发表于 2026-04-15 00:00:00">2026-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/tool/obsidian/Mermaid%E4%BD%BF%E7%94%A8%E6%89%8B%E5%86%8C/" title="Mermaid使用">Mermaid使用</a><time datetime="2026-04-13T16:00:00.000Z" title="发表于 2026-04-14 00:00:00">2026-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8A%E4%BC%98%E5%85%88%E5%88%86%E6%9E%90/" title="自底向上优先分析">自底向上优先分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/LR%E5%88%86%E6%9E%90/" title="LR分析">LR分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/statistics-learning/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA/" title="支持向量机">支持向量机</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Musuyin</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,1038 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>关系型数据库设计 | 木素音的小站</title><meta name="author" content="Musuyin"><meta name="copyright" content="Musuyin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="设计规范有损分解有损分解（lossy decomposition）：无法通过自然连接重建原始关系元组的分解  将 employee(ID, name, street, city, salary)分解为 employee_attr1(ID, name)和 employee_attr2(name, street, city, salary)  name 无法作为 employee_attr2 关系的主">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关系型数据库设计">
+<meta property="og:url" content="https://musuyin.github.io/cs/database/%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:site_name" content="木素音的小站">
+<meta property="og:description" content="设计规范有损分解有损分解（lossy decomposition）：无法通过自然连接重建原始关系元组的分解  将 employee(ID, name, street, city, salary)分解为 employee_attr1(ID, name)和 employee_attr2(name, street, city, salary)  name 无法作为 employee_attr2 关系的主">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://musuyin.github.io/img/butterfly-icon.png">
+<meta property="article:published_time" content="2025-12-28T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-10T03:07:24.273Z">
+<meta property="article:author" content="Musuyin">
+<meta property="article:tag" content="数据库">
+<meta property="article:tag" content="数据库设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://musuyin.github.io/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "关系型数据库设计",
+  "url": "https://musuyin.github.io/cs/database/%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/",
+  "image": "https://musuyin.github.io/img/butterfly-icon.png",
+  "datePublished": "2025-12-28T16:00:00.000Z",
+  "dateModified": "2026-03-10T03:07:24.273Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Musuyin",
+      "url": "https://musuyin.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://musuyin.github.io/cs/database/%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":null,"highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '关系型数据库设计',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">木素音的小站</span></a><a class="nav-page-title" href="/"><span class="site-name">关系型数据库设计</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">关系型数据库设计</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-12-28T16:00:00.000Z" title="发表于 2025-12-29 00:00:00">2025-12-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-10T03:07:24.273Z" title="更新于 2026-03-10 11:07:24">2026-03-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="设计规范"><a href="#设计规范" class="headerlink" title="设计规范"></a>设计规范</h1><h2 id="有损分解"><a href="#有损分解" class="headerlink" title="有损分解"></a>有损分解</h2><p>有损分解（lossy decomposition）：无法通过<strong>自然连接</strong>重建原始关系元组的分解</p>
+<blockquote>
+<p>将 employee(ID, name, street, city, salary)分解为 employee_attr1(ID, name)和 employee_attr2(name, street, city, salary)</p>
+</blockquote>
+<p><code>name</code> 无法作为 employee_attr2 关系的主码，有可能会重名</p>
+<h2 id="无损分解"><a href="#无损分解" class="headerlink" title="无损分解"></a>无损分解</h2><p>无损分解（lossless decomposition）：可以通过<strong>自然连接</strong>重建原始关系元组的分解</p>
+<p>$$<br>r&#x3D;\prod_{A,B}(r)\bowtie \prod_{B,C}(r)<br>$$</p>
+<h1 id="函数依赖"><a href="#函数依赖" class="headerlink" title="函数依赖"></a>函数依赖</h1><h2 id="成立条件"><a href="#成立条件" class="headerlink" title="成立条件"></a>成立条件</h2><p>假设 $r(R)$ 是一个关系模式，$\alpha\subseteq R,\beta\subseteq R$，模式 $R$ 上的函数依赖：</p>
+<p>$$<br>\alpha \rightarrow \beta<br>$$</p>
+<p>成立条件为：对于任意关系实例 $r$ 中任意两个元组 $t_1$ 和 $t_2$，若两者的属性（集）$\alpha$ 取值相同，那么它们的属性（集）$\beta$ 取值也相同，即：</p>
+<p>$$<br>t_1[\alpha]&#x3D;t_2[\alpha] \Rightarrow t_1[\beta]&#x3D;t_2[\beta]<br>$$</p>
+<p>称为 $\alpha$ 函数确定 $\beta$；$\beta$ 函数依赖于 $\alpha$</p>
+<h2 id="函数依赖和码"><a href="#函数依赖和码" class="headerlink" title="函数依赖和码"></a>函数依赖和码</h2><h3 id="超码"><a href="#超码" class="headerlink" title="超码"></a>超码</h3><p>在某个关系中，一个或多个元素的集合 ${A_1,A_2,\dots,A_n}$ 函数决定该关系中的其他全部属性，则称该属性为该关系的<strong>超码</strong></p>
+<p>若属性组 $K$ 满足 $K\Rightarrow R$，则 $K$ 是关系模式 $R$ 的超码（$K$ 函数确定 $R$）</p>
+<h3 id="候选码"><a href="#候选码" class="headerlink" title="候选码"></a>候选码</h3><p>若集合 ${A_1,A_2,\dots,A_n}$ 的<strong>任何真子集</strong>均不能函数决定该关系中的其他属性，则此时集合 ${A_1,A_2,\dots,A_n}$ 是最小的超码，即候选码</p>
+<p>$$<br>K\rightarrow R: \text{且不存在}: \alpha\subset K: \text{满足}: \alpha \rightarrow R<br>$$</p>
+<h3 id="外码"><a href="#外码" class="headerlink" title="外码"></a>外码</h3><p>若关系模式 $R$ 中属性（组）$X$ 是另一类关系模式的<strong>主码</strong>，则称 $X$ 是 $R$ 的外码</p>
+<h2 id="函数依赖是码的概化"><a href="#函数依赖是码的概化" class="headerlink" title="函数依赖是码的概化"></a>函数依赖是码的概化</h2><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>决定什么？</th>
+<th>形式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>码（Key）</strong></td>
+<td>一个属性集  <strong>唯一确定整条记录</strong></td>
+<td>$K\rightarrow R$</td>
+</tr>
+<tr>
+<td><strong>函数依赖（FD）</strong></td>
+<td>一个属性集  <strong>唯一确定另一属性集</strong></td>
+<td>$X\rightarrow Y,\text{其中} Y\subseteq R$</td>
+</tr>
+</tbody></table>
+<h2 id="函数依赖使用"><a href="#函数依赖使用" class="headerlink" title="函数依赖使用"></a>函数依赖使用</h2><p>函数依赖在关系实例和关系模式上的体现区别：</p>
+<ul>
+<li>如果关系实例 $r$ 在函数依赖集 $F$ 上合法，则称 $r$ 满足 $F$</li>
+<li>如果模式 $R$ 上的所有合法关系实例都满足函数依赖集 $F$，则 $F$ 在关系模式 $R$ 上成立</li>
+</ul>
+<p>注意：即使函数依赖并没有对关系模式 $r(R)$ 的所有合法实例成立，这个关系模式的其中一个具体实例 r 可能满足函数依赖</p>
+<h2 id="平凡"><a href="#平凡" class="headerlink" title="平凡"></a>平凡</h2><p>有些函数依赖被称为<strong>平凡</strong>(trivial)的，因为它们在所有关系中都是满足的（用于描述在函数依赖中一种<strong>必然成立、无需额外信息即可判断为真</strong>的情况）</p>
+<blockquote>
+<p>例如：name -&gt; name；ID, name -&gt; ID</p>
+</blockquote>
+<p>通常，如果 $\beta \subseteq \alpha$，那么 $\alpha \rightarrow \beta$ 是<strong>平凡的函数依赖</strong></p>
+<ul>
+<li>若 $\alpha \rightarrow \beta$，则称 $\alpha$ 为<strong>决定因素</strong></li>
+<li>若 $\alpha \rightarrow \beta$ 但 $\beta \not\subseteq \alpha$，则 $\alpha \rightarrow \beta$ 是<strong>非平凡的函数依赖</strong></li>
+</ul>
+<p>部分依赖：函数依赖 $\alpha \rightarrow \beta$ 称为部分依赖的条件是：存在 $\alpha$ 的真子集 $\gamma$，使得 $\gamma \rightarrow \beta$</p>
+<ul>
+<li><p><strong>平凡的例子</strong>：</p>
+<ul>
+<li>${A, B} \rightarrow A$：因为 $A \subseteq {A, B}$，所以这是平凡的。</li>
+<li>${A, B, C} \rightarrow {B, C}$：右边是左边的子集，平凡。</li>
+<li>$A \rightarrow A$：最简单的平凡依赖。</li>
+</ul>
+</li>
+<li><p><strong>非平凡的例子</strong>：</p>
+<ul>
+<li>${A, B} \rightarrow C$：如果 $C \notin {A, B}$，这就是<strong>非平凡的函数依赖</strong>。</li>
+<li>$A \rightarrow B$（且 $B \neq A$）：也是非平凡的。</li>
+</ul>
+</li>
+<li><p><strong>完全非平凡（有时也称“真正非平凡”）</strong>：</p>
+<ul>
+<li>如果 $\alpha \cap \beta &#x3D; \emptyset$（即左右两边没有公共属性），则称为<strong>完全非平凡的函数依赖</strong></li>
+<li>例如：${\text{学号}} \rightarrow {\text{姓名}}$，通常学号和姓名无交集，属于完全非平凡。</li>
+</ul>
+</li>
+<li><p>平凡的函数依赖<strong>总是成立</strong>，无论数据内容如何。它们不携带任何关于数据语义的有用信息。</p>
+</li>
+<li><p>在研究函数依赖的推理（如 Armstrong 公理）、计算闭包或进行规范化时，我们主要关注<strong>非平凡的函数依赖</strong>，因为它们反映了数据之间的实际约束。</p>
+</li>
+<li><p>数据库设计和规范化过程中，可以忽略平凡依赖，重点分析非平凡依赖是否导致冗余或异常。</p>
+</li>
+</ul>
+<p><strong>平凡函数依赖 &#x3D; 右边 ⊆ 左边 → 必然成立，无信息量。</strong></p>
+<p><strong>非平凡函数依赖 &#x3D; 右边 ⊈ 左边 → 可能反映真实业务规则，需重点关注。</strong></p>
+<h2 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h2><p>函数依赖的<strong>闭包</strong>（Closure）是关系数据库规范化理论中的一个核心概念，主要用于：</p>
+<ul>
+<li>判断某个函数依赖是否被隐含（即是否可以从已知依赖推导出来）；</li>
+<li>计算属性集的“决定能力”；</li>
+<li>求候选码；</li>
+<li>进行模式分解等。</li>
+</ul>
+<p>闭包分为两类：</p>
+<ul>
+<li>函数依赖集的闭包 $F^+$</li>
+<li>属性集的闭包 $X^+$</li>
+</ul>
+<h3 id="函数依赖集的闭包"><a href="#函数依赖集的闭包" class="headerlink" title="函数依赖集的闭包"></a>函数依赖集的闭包</h3><p>给定一个关系模式 $R$ 和其上的一组函数依赖 $F$，$F^+$（读作 “F plus”）表示  <strong>由 $F$ 逻辑蕴含（可推导出）的所有函数依赖的集合</strong>。</p>
+<p>换句话说，$F^+$ 是在 Armstrong 公理系统下，从 $F$ 出发能推导出的所有合法函数依赖的全集。</p>
+<ul>
+<li>$F \subseteq F^+$</li>
+<li>$F^+$ 可能非常大（指数级），通常<strong>不显式计算整个 $F^+$</strong>。</li>
+<li>实际应用中更常使用 <strong>属性集的闭包</strong> 来间接判断某个 FD 是否属于$F^+$。</li>
+</ul>
+<h3 id="属性集的闭包"><a href="#属性集的闭包" class="headerlink" title="属性集的闭包"></a>属性集的闭包</h3><p>这是<strong>最常用、最实用</strong>的闭包概念。</p>
+<p>给定属性集 $X \subseteq R$ 和函数依赖集 $F$，<strong>$X^+$</strong>（读作 “X plus”）表示 <strong>在 $F$ 的约束下，由 $X$ 函数决定的所有属性的集合</strong>。</p>
+<p>即：</p>
+<p>$$<br>X^+ &#x3D; { A \in R \mid X \rightarrow A \text{ 被 } F \text{ 逻辑蕴含} }<br>$$</p>
+<h2 id="逻辑蕴含"><a href="#逻辑蕴含" class="headerlink" title="逻辑蕴含"></a>逻辑蕴含</h2><p><strong>函数依赖的逻辑蕴含</strong>（Logical Implication of Functional Dependencies）回答了这样一个问题：<strong>给定一组已知的函数依赖  $F$ ，能否推导出另一个函数依赖  $X\rightarrow Y$</strong></p>
+<p>如果能，就认为：$F$ 逻辑蕴含 $X\rightarrow Y$</p>
+<p>记作：</p>
+<p>$$<br>F \models X \rightarrow Y<br>$$</p>
+<h2 id="推理规则"><a href="#推理规则" class="headerlink" title="推理规则"></a>推理规则</h2><p>Armstrong 公理：</p>
+<ul>
+<li>自反律：如果 $\beta \subseteq \alpha$，则有 $\alpha \rightarrow \beta$</li>
+<li>增补律：如果 $\alpha \rightarrow \beta$，则有 $\gamma \alpha \rightarrow \gamma\beta$</li>
+<li>传递律：如果 $\alpha\rightarrow\beta$ 且 $\beta\rightarrow\gamma$，则有 $\alpha\rightarrow\gamma$</li>
+</ul>
+<p>可以使用 Armstrong 公理推导函数依赖集的闭包</p>
+<ul>
+<li>$F^+$：相当于可达边集</li>
+<li>$X^+$：相当于可达点集</li>
+</ul>
+<h3 id="计算-F"><a href="#计算-F" class="headerlink" title="计算 $F^+$"></a>计算 $F^+$</h3><ul>
+<li>从 $F$ 出发</li>
+<li>遍历现有函数依赖集中的单个函数依赖，应用自反律和增补律</li>
+<li>遍历现有函数依赖集中的一对函数依赖，应用传递律（if can）</li>
+<li>重复，直到结果不再变化</li>
+</ul>
+<p>二级定理：</p>
+<ul>
+<li>合并律：若有 $\alpha\rightarrow\beta$ 且 $\alpha\rightarrow\gamma$，则有 $\alpha\rightarrow\beta\gamma$</li>
+<li>分解律：若有 $\alpha\rightarrow\beta\gamma$，则有 $\alpha\rightarrow\beta$ 且 $\alpha\rightarrow\gamma$</li>
+<li>伪传递律：若有 $\alpha\rightarrow\beta$ 且 $\gamma\beta\rightarrow\delta$，则有 $\alpha\gamma\rightarrow\delta$</li>
+</ul>
+<h3 id="计算-X"><a href="#计算-X" class="headerlink" title="计算 $X^+$"></a>计算 $X^+$</h3><p>遍历函数依赖集 $F$，所有出现在 $F$ 中的函数依赖（记为 $\alpha\rightarrow\beta$），若 $\alpha$ 出现在给定的属性集 $X$ 中，则将其加入 $X^+$</p>
+<pre><code class="language-text">result := x
+while (result is changed) {
+	for each a-&gt;b in F {
+		if a in result {
+			result += b
+		}
+	}
+}
+return result
+</code></pre>
+<h4 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h4><ul>
+<li><strong>判断超码</strong>：如果 $X^+$ 包含 $R$ 中<strong>所有属性</strong>，则 $X$ 为超码</li>
+<li>验证函数依赖：<ul>
+<li>检验函数依赖 $\alpha\rightarrow\beta$ 是否成立（即是否在 $F^+$ 中）</li>
+<li>只需计算 $X^+$，查看是否包含 $\beta$</li>
+</ul>
+</li>
+<li>计算 $F$ 闭包：<ul>
+<li>对于 $\alpha\subseteq R$，计算闭包 $\alpha^+$</li>
+<li>遍历 $\alpha^+$（即对任意 $\beta\subseteq\alpha^+$），输出一个函数依赖 $\alpha\rightarrow\beta$</li>
+</ul>
+</li>
+</ul>
+<h1 id="规范化（Normalization）"><a href="#规范化（Normalization）" class="headerlink" title="规范化（Normalization）"></a>规范化（Normalization）</h1><h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>在关系模式不是“好”的情况下，将其分解为关系模式集 ${R_1,R_2,\dots,R_n}$，关系模式集满足：</p>
+<ul>
+<li>每个关系模式都是“好”的：无数据冗余，符合一定范式</li>
+<li>分解是<strong>无损连接分解</strong></li>
+<li>最好能使<strong>分解保持依赖</strong></li>
+</ul>
+<h2 id="范式-Normal-Form"><a href="#范式-Normal-Form" class="headerlink" title="范式 Normal Form"></a>范式 Normal Form</h2><p>$$<br>1NF\subset 2NF \subset 3NF \subset BCNF \subset 4NF \subset 5NF<br>$$</p>
+<p>某一关系模式 $R$ 最高属于第 $n$ 范式，则可称为 $R\in nNF$</p>
+<h3 id="第一范式"><a href="#第一范式" class="headerlink" title="第一范式"></a>第一范式</h3><ul>
+<li>如果某个域的元素被认为是<strong>不可分</strong>的单元，那么这个域就是<strong>原子</strong>的</li>
+<li>如果一个关系模式 $R$ 的<strong>所有属性域都是原子</strong>的，称关系模式 $R$ 属于第一范式</li>
+<li>非原子的值会造成复杂存储和数据冗余</li>
+</ul>
+<h3 id="第二范式"><a href="#第二范式" class="headerlink" title="第二范式"></a>第二范式</h3><p>建立在第一范式（1NF）的基础上，旨在<strong>消除部分函数依赖</strong>，从而减少数据冗余和更新异常</p>
+<ul>
+<li>若关系模式 $R\in 1NF$，且在 $F^+$ 中每一个<strong>非主属性</strong>完全函数依赖于候选码，则 $R\in 2NF$</li>
+</ul>
+<h4 id="部分依赖"><a href="#部分依赖" class="headerlink" title="部分依赖"></a>部分依赖</h4><ul>
+<li>如果主键是复合的（比如由两个或更多属性组成），</li>
+<li>而某个非主属性<strong>只由主键的一部分决定</strong>，而不是整个主键，</li>
+<li>这就是“部分依赖”。</li>
+</ul>
+<blockquote>
+<p>选课(学号, 课程号, 学生姓名, 课程名称, 成绩)</p>
+<p>候选码：{学号，课程号}；非主属性：学生姓名、课程名称、成绩</p>
+</blockquote>
+<ul>
+<li>{学号，课程号}-&gt;成绩：完全依赖</li>
+<li>学号-&gt;学生姓名：部分依赖</li>
+<li>课程号-&gt;课程名称：部分依赖</li>
+</ul>
+<p>问题：</p>
+<ul>
+<li>学生姓名随学号重复存储（选了多门课就存多次）→ <strong>数据冗余</strong></li>
+<li>修改学生姓名需更新多行 → <strong>更新异常</strong></li>
+<li>删除某门课可能误删学生信息 → <strong>删除异常</strong></li>
+</ul>
+<h3 id="第三范式"><a href="#第三范式" class="headerlink" title="第三范式"></a>第三范式</h3><p>在第二范式（2NF）的基础上进一步消除<strong>传递函数依赖</strong>，从而更有效地减少数据冗余和更新异常</p>
+<p>对 $F^+$ 中所有形如 $\alpha\rightarrow\beta$ 的函数依赖中，至少有以下条件之一成立：</p>
+<ul>
+<li>$\alpha\rightarrow\beta$ 是一个<strong>平凡</strong>的函数依赖（即 $\beta\subseteq\alpha$）</li>
+<li>$\alpha$ 是 $R$ 的一个<strong>超码</strong></li>
+<li>$\beta-\alpha$ 中的每个属性 $A$ 都包含在 $R$ 的候选码中（可能包含在不同的候选码）</li>
+</ul>
+<p>第三个条件是 BCNF 的一个最小放宽：<strong>3NF 允许主属性被非超码决定</strong>，而 BCNF 不允许。</p>
+<blockquote>
+<p>Student(学号, 姓名, 系名, 系主任)</p>
+</blockquote>
+<p>函数依赖：</p>
+<ul>
+<li>学号-&gt;系名</li>
+<li>系名-&gt;系主任</li>
+</ul>
+<p>学号是候选码，系名、系主任是非主属性。系主任不直接依赖于候选码，而是通过系名传递依赖于候选码</p>
+<p>这种依赖会导致：</p>
+<ul>
+<li>同一系的所有学生都重复存储“系主任” → <strong>冗余</strong>；</li>
+<li>更换系主任需更新多行 → <strong>更新异常</strong>。</li>
+</ul>
+<h3 id="Boyce-Codd-范式（BCNF）"><a href="#Boyce-Codd-范式（BCNF）" class="headerlink" title="Boyce-Codd 范式（BCNF）"></a>Boyce-Codd 范式（BCNF）</h3><p>BC 范式比第三范式（3NF）更严格，旨在<strong>彻底消除由函数依赖引起的冗余和异常</strong>。不仅处理非主属性，还要确保<strong>所有属性（包括主属性）</strong>  都不会因非超码的决定因素而产生冗余。</p>
+<p>一个关系模式  $R$ 属于  <strong>BCNF</strong>，当且仅当：对于 $R$  上的<strong>每一个非平凡的函数依赖</strong> $X \rightarrow Y$ （即  $Y \not\subseteq X$）</p>
+<ul>
+<li>$X$ 必须是  $R$  的一个<strong>超码</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>第三范式（3NF）</th>
+<th>BCNF</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>要求</td>
+<td>对每个 FD $X \rightarrow A$，满足：<br>1. $X$ 是超码，或<br>2. $A$ 是主属性（属于某个候选码）</td>
+<td>对每个 FD $X \rightarrow A$，必须满足：<br>$X$ 是超码</td>
+</tr>
+<tr>
+<td>宽松程度</td>
+<td>较宽松（允许主属性被非超码决定）</td>
+<td>更严格（不允许任何非超码作为决定因素）</td>
+</tr>
+<tr>
+<td>冗余控制</td>
+<td>可能仍有少量冗余（主属性间）</td>
+<td>基本消除所有由 FD 引起的冗余</td>
+</tr>
+</tbody></table>
+<h1 id="函数依赖理论"><a href="#函数依赖理论" class="headerlink" title="函数依赖理论"></a>函数依赖理论</h1><h2 id="正则覆盖"><a href="#正则覆盖" class="headerlink" title="正则覆盖"></a>正则覆盖</h2><ul>
+<li>函数依赖集可能存在<strong>冗余依赖</strong>（这些依赖可以从其他依赖中推导出来）</li>
+<li>函数依赖集的一部分也可能是冗余的</li>
+</ul>
+<p>令 $F$ 的正则覆盖 $F_c$ 没有任何冗余依赖或存在冗余部分的依赖</p>
+<p>$F_c$ 具有和 $F$ 相同的函数依赖集闭包。其意义在于：验证 $F_c$ 比验证 $F$ 更加容易、3NF 算法必备</p>
+<blockquote>
+<p>${A\rightarrow B,B\rightarrow C, A\rightarrow C}$</p>
+</blockquote>
+<p>其中 $A\rightarrow C$ 是冗余的，可以由另两个函数依赖推出</p>
+<blockquote>
+<p>${A\rightarrow B,B\rightarrow C, A\rightarrow CD}$</p>
+</blockquote>
+<p>可以简化为 ${A\rightarrow B,B\rightarrow C, A\rightarrow D}$</p>
+<blockquote>
+<p>${A\rightarrow B,B\rightarrow C, AC\rightarrow D}$</p>
+</blockquote>
+<p>可以简化为 ${A\rightarrow B,B\rightarrow C, A\rightarrow D}$</p>
+<h2 id="无关属性"><a href="#无关属性" class="headerlink" title="无关属性"></a>无关属性</h2><p>如果去除函数依赖中的一个属性不改变该函数依赖集的闭包，则称该属性是<strong>无关属性</strong>（extraneous）</p>
+<p>形式化定义：考虑函数依赖集 $F$ 及 $F$ 中的函数依赖 $\alpha\rightarrow\beta$</p>
+<ul>
+<li>如果 $A\in \alpha$ 且 $F$ <strong>逻辑蕴含</strong>$(F-{\alpha\rightarrow \beta})\cup {(\alpha-A)\rightarrow \beta}$，则属性 $A$ 在 $\alpha$ 中是无关的</li>
+<li>如果 $A\in \beta$ 且函数依赖集 $(F-{\alpha\rightarrow \beta})\cup {\alpha\rightarrow (\beta-A)}$ <strong>逻辑蕴含</strong> $F$，则 $A$ 在 $\beta$ 中是无关的</li>
+</ul>
+<p>也就是去掉该函数依赖，或者去掉函数依赖一侧的元素 $A$，这样形成的函数依赖仍然能保持闭包不变</p>
+<blockquote>
+<p>给定 $F&#x3D;{A\rightarrow C, AB\rightarrow C}$</p>
+</blockquote>
+<p>对于 $AB\rightarrow C$ 去掉 $B$，得到 $A\rightarrow C$，因为 ${A\rightarrow C, AB\rightarrow C}$ 逻辑蕴含 $A\rightarrow C$，所以 $B$ 是 $AB\rightarrow C$ 中的无关属性</p>
+<blockquote>
+<p>给定 $F&#x3D;{A\rightarrow C, AB\rightarrow CD}$</p>
+</blockquote>
+<p>对于 $AB\rightarrow CD$，去掉 $C$ 得到 $AB\rightarrow D$，再加上原来的 ${A\rightarrow C}$，得到的新函数依赖集逻辑蕴含 $F$，即 $C$ 是 $AB\rightarrow CD$ 的无关属性</p>
+<h3 id="无关属性的验证"><a href="#无关属性的验证" class="headerlink" title="无关属性的验证"></a>无关属性的验证</h3><p>考虑函数依赖集 $F$ 及 $F$ 中的函数依赖 $\alpha\rightarrow\beta$</p>
+<p>验证属性 $A\in \alpha$</p>
+<ul>
+<li>使用 $F$ 中的函数依赖计算属性集闭包 $(\alpha-A)^+$</li>
+<li>如果该属性集闭包中包含 $\beta$，则 $A$ 在 $\alpha$ 中是多余属性</li>
+</ul>
+<p>验证属性 $A\in \beta$</p>
+<ul>
+<li>使用函数依赖集 $F’&#x3D;(F-{\alpha\rightarrow\beta})\cup {\alpha\rightarrow (\beta-A)}$ 计算 $\alpha’^+$</li>
+<li>如果 $\alpha^+$ 包含 $A$，则 $A$ 在 $\beta$ 中是多余属性</li>
+</ul>
+<h2 id="正则覆盖的计算"><a href="#正则覆盖的计算" class="headerlink" title="正则覆盖的计算"></a>正则覆盖的计算</h2><pre><code class="language-text">Fc = F
+do {
+	使用合并律将 Fc 中的 a1-&gt;b1 和 a1-&gt;b2 替换为 a1-&gt;b1b2（寻找左侧相同）
+	在 Fc 中找出在 a 或 b 中含无关属性的函数依赖 a-&gt;b
+	若发现无关属性，将其从 Fc 的 a-&gt;b 中删除
+} while (Fc is changed);
+</code></pre>
+<p>$F$ 的正则覆盖 $F_c$ 是一个函数依赖集，具有如下特性：</p>
+<ul>
+<li>$F$ 逻辑蕴涵 $F_c$ 中的所有函数依赖</li>
+<li>$F_c$ 逻辑蕴涵 $F$ 中的所有函数依赖</li>
+<li>$F_c$ 中任何函数依赖都不含无关属性</li>
+<li>$F_c$ 中函数依赖的<strong>左半部都是不同的</strong></li>
+</ul>
+<blockquote>
+<p>示例：$R &#x3D; (A, B, C),F &#x3D; { A \rightarrow BC，B \rightarrow C，A \rightarrow B，AB \rightarrow C }$</p>
+</blockquote>
+<p>初始化 $F_c&#x3D;F&#x3D;{ A \rightarrow BC，B \rightarrow C，A \rightarrow B，AB \rightarrow C}$</p>
+<p>寻找左侧相同的函数依赖：$A\rightarrow BC$ 和 $A\rightarrow B$，替换为 $A\rightarrow BC$，此时 $F_{c1}&#x3D;{ A \rightarrow BC，B \rightarrow C，AB \rightarrow C}$</p>
+<p>寻找无关属性，先尝试删去左侧元素，再删去右侧元素</p>
+<ul>
+<li>对于 $AB\rightarrow C$，$\alpha&#x3D;AB,\beta&#x3D;C$<ul>
+<li>删去 $A$，对 $(AB-A)^+&#x3D;B$ 用 $F$ 中的函数依赖计算属性闭包<ul>
+<li>$R’&#x3D;{B,C}$，$R’$ 包含 $C$，即 $R’$ 逻辑蕴含 $\beta$</li>
+<li>所以 $A$ 是该函数依赖的无关属性，删去得到 $B\rightarrow C$</li>
+<li>更新 $F_{c2}&#x3D;{A\rightarrow BC, B\rightarrow C}$</li>
+</ul>
+</li>
+<li>也可以删去 $B$，也可以得到 $B$ 是无关属性，因为本质上都可以由 $A\rightarrow BC$ 推理得到，二者选一即可</li>
+</ul>
+</li>
+<li>对于 $A\rightarrow BC$：$\alpha&#x3D;A,\beta&#x3D;BC$<ul>
+<li>删去 $B$，对 $F’&#x3D;(F-{A\rightarrow BC})\cup {A\rightarrow C}&#x3D;{A\rightarrow C, B\rightarrow C}$ 计算属性闭包（删除原本函数依赖，加上新函数依赖）<ul>
+<li>$R’’&#x3D;{A,B,C}$ 包含 $B$，所以 $B$ 是无关属性</li>
+<li>更新 $F_{c3}&#x3D;{A\rightarrow B, B\rightarrow C}$</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>最后结果即为：$F_{c}&#x3D;{A\rightarrow B, B\rightarrow C}$</p>
+<h2 id="无损分解-1"><a href="#无损分解-1" class="headerlink" title="无损分解"></a>无损分解</h2><p>对于 $R&#x3D;(R_1,R_2)$，要求模式 $R$ 上的所有可能关系 $r$ 都有：</p>
+<p>$$<br>r&#x3D;\prod_{R_1}(r)\bowtie \prod_{R_2}(r)<br>$$</p>
+<p>如果下面的依赖中<strong>至少有一个</strong>属于 $F^+$，那么将 $R$ 分解为 $R_1$ 和 $R_2$ 是<strong>无损连接分解</strong>：</p>
+<ul>
+<li>$R_1\cap R_2\rightarrow R_1$</li>
+<li>$R_1\cap R_2\rightarrow R_2$</li>
+<li>$R_1\cap R_2$ 是 $R_1$ 或 $R_2$ 的<strong>超码</strong></li>
+</ul>
+<p>上述函数依赖测试只是无损连接分解的一个充分条件；只有当所有约束都是函数依赖时，它才是必要条件</p>
+<blockquote>
+<p>$R&#x3D;{A,B,C},F&#x3D;{A\rightarrow B, B\rightarrow C}$</p>
+</blockquote>
+<p>方式一：$R_1&#x3D;(A,B),R_2&#x3D;(B,C)$</p>
+<ul>
+<li>检验：$R_1\cap R_2&#x3D;{B},B\rightarrow BC$</li>
+</ul>
+<p>方式二：$R_1&#x3D;(A,B),R_2&#x3D;(A,C)$</p>
+<ul>
+<li>检验：$R_1\cap R_2&#x3D;{A},A\rightarrow AB$</li>
+</ul>
+<h2 id="保持依赖"><a href="#保持依赖" class="headerlink" title="保持依赖"></a>保持依赖</h2><p>$F$ 为模式 $R$ 上的一个函数依赖集，$R_1 ,R_2 , \dots, R_n$ 为 $R$ 的一个分解。$F$ 在 $R_i$ 上的限定是 $F ^+$ 中所有只包含 $R_i$ 中属性的函数依赖的集合$F_i$</p>
+<p>令 $F’&#x3D;F_1\cap F_2\cap\dots\cap F_n$，$F’$ 是模式 $R$ 上的一个函数依赖集</p>
+<ul>
+<li>如果 $(F’)^+&#x3D;F^+$ 成立，则该分解是<strong>保持依赖</strong>的</li>
+<li>具有上述性质的分解称为<strong>保持依赖的分解</strong></li>
+</ul>
+<p>即不需要进行表的连接，就可以查询到每个函数依赖对应的数据</p>
+<h3 id="检验"><a href="#检验" class="headerlink" title="检验"></a>检验</h3><p>当 $R$ 分解成 $R_1 ,R_2 , \dots, R_n$ 后，验证每一个函数依赖 $\alpha\rightarrow\beta$ 是否被保持：</p>
+<pre><code class="language-text">result = a
+while (result is changed) {
+	for each Ri {
+		t = (result ∩ Ri)^+ ∩ Ri
+		result = result ∪ t
+	}
+}
+</code></pre>
+<ul>
+<li>如果 result 包含 $\beta$ 中的所有属性，那么函数依赖 $\alpha\rightarrow\beta$ 被保持</li>
+</ul>
+<blockquote>
+<p>$R&#x3D;{A,B,C},F&#x3D;{A\rightarrow B, B\rightarrow C}$</p>
+</blockquote>
+<p>方式一：$R_1&#x3D;(A,B),R_2&#x3D;(B,C)$，保持依赖</p>
+<p>方式二：$R_1&#x3D;(A,B),R_2&#x3D;(A,C)$，不保持依赖</p>
+<h1 id="BCNF-分解算法"><a href="#BCNF-分解算法" class="headerlink" title="BCNF 分解算法"></a>BCNF 分解算法</h1><p>BCNF 是关系数据库规范化中的一种高级范式，用于消除函数依赖引起的冗余和异常。一个关系模式 $R$ 属于 BCNF，当且仅当对于其每一个非平凡的函数依赖 $X \rightarrow Y$，$X$ 都是 $R$ 的超码。</p>
+<p>当关系模式不满足 BCNF 时，可通过以下步骤进行无损连接的 BCNF 分解：</p>
+<h2 id="分解步骤"><a href="#分解步骤" class="headerlink" title="分解步骤"></a>分解步骤</h2><ul>
+<li><p><strong>输入</strong>：一个关系模式 $R$ 及其函数依赖集 $F$</p>
+</li>
+<li><p><strong>输出</strong>：$R$ 的一个 BCNF 分解 $\rho &#x3D; {R_1, R_2, \dots, R_n}$，满足<strong>无损连接性</strong></p>
+</li>
+<li><p>检查当前关系模式 $R$ 是否满足 BCNF：</p>
+<ul>
+<li>对 $F^+$ 中的每一个非平凡函数依赖 $X \rightarrow Y$：<ul>
+<li>若 $X$ <strong>不是 $R$ 的超码</strong>，则 $R$ 不满足 BCNF，需进行分解</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>若 <strong>R</strong> 不满足 BCNF：</p>
+<ul>
+<li>找到一个违反 BCNF 的函数依赖 $X \rightarrow Y$（即 $X$ 不是超码）</li>
+<li>将 $R$ 分解为两个子模式：<ul>
+<li>$R_1 &#x3D; X \cup Y$</li>
+<li>$R_2 &#x3D; R − (Y − X)$（即保留 $X$ 和其余不在 $Y$ 中的属性）</li>
+</ul>
+</li>
+<li>对 $R_1$ 和 $R_2$ 分别递归执行 BCNF 分解</li>
+</ul>
+</li>
+<li><p>若 $R$ 已满足 BCNF：</p>
+<ul>
+<li>将 $R$ 加入结果分解集合 $\rho$</li>
+</ul>
+</li>
+<li><p>最终得到的分解 $\rho$ 满足：</p>
+<ul>
+<li>每个子模式<strong>都属于 BCNF</strong></li>
+<li>分解具有<strong>无损连接性</strong>（但<strong>不一定保持函数依赖</strong>）</li>
+</ul>
+</li>
+</ul>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><ul>
+<li>BCNF 分解总是可以达到无损连接，但可能无法保持所有原始函数依赖</li>
+<li>分解结果可能不唯一，取决于选择违反 BCNF 的函数依赖的顺序</li>
+<li>实际应用中，若保持依赖更重要，可考虑使用 3NF 而非 BCNF</li>
+</ul>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><blockquote>
+<p>$R&#x3D;(A, B, C, D, E),F&#x3D;{A\rightarrow BC,CD\rightarrow E,B\rightarrow D,E\rightarrow A}$</p>
+</blockquote>
+<p>对于每个函数依赖，判断左侧是否为 $R$ 的超码</p>
+<p>先找出所有超码：$(A),(E),(CD)$，就是判断能否从一个左侧元素集开始扩展到整个模式 $R$</p>
+<p>所以只有 $B\rightarrow D$ 左侧不是 $R$ 的超码，不满足 BCNF，需要进行分解</p>
+<p>分解为：</p>
+<ul>
+<li>$R_1&#x3D;X\cup Y&#x3D;{B,D}$</li>
+<li>$R_2&#x3D;R-(Y-X)&#x3D;{A,B,C,E}$</li>
+</ul>
+<p>根据新的模式集和 $F$，判断是否满足 BCNF，注意此时的 $F$ 需要根据新的模式集删去不存在的元素</p>
+<p>如：</p>
+<ul>
+<li>对于 $R_1$，$F_1&#x3D;{B\rightarrow D}$，因为其他 $A,C,E$ 都不存在了，而 $B$ 是 $F_1$ 的超码，所以 $R_1$ 满足 BCNF，不需要再分解</li>
+<li>对于 $R_2$，$F_2&#x3D;{A\rightarrow BC, E\rightarrow A}$，可以发现 $E$ 是超码，但是 $A$ 不是，所以对于 $A\rightarrow BC$ 还需要进行分解</li>
+</ul>
+<p>分解：</p>
+<ul>
+<li>$R_{21}&#x3D;X\cup Y&#x3D;{A, B, C}$，$F_{21}&#x3D;{A\rightarrow BC}$，$A$ 为超码，满足 BCNF</li>
+<li>$R_{22}&#x3D;R_{2}-(Y-X)&#x3D;{A,E}$，$F_{22}&#x3D;{E\rightarrow A}$，$E$ 为超码，满足 BCNF</li>
+</ul>
+<p>所以综上，需要将 $R$ 分解为：${(B,D),(A,B,C),(A,E)}$</p>
+<h1 id="3NF-分解"><a href="#3NF-分解" class="headerlink" title="3NF 分解"></a>3NF 分解</h1><p>第三范式（3NF）是关系数据库规范化中的一个重要级别，它在保留函数依赖的前提下，有效减少数据冗余和更新异常。一个关系模式 $R$ 属于 3NF，当且仅当对于其每一个非平凡函数依赖 $X \rightarrow A$（其中 $A$ 是单个属性），以下至少一项成立：</p>
+<ul>
+<li>$X$ 是 $R$ 的<strong>超码</strong>，或</li>
+<li>$A$ 是<strong>主属性</strong>（即 $A$ 属于某个候选码）</li>
+</ul>
+<p>与 BCNF 不同，3NF 允许某些<strong>非超码决定主属性</strong>，因此更容易在保持函数依赖的同时实现无损连接分解。</p>
+<h2 id="分解目标"><a href="#分解目标" class="headerlink" title="分解目标"></a>分解目标</h2><ul>
+<li>输入：关系模式 $R$ 及其函数依赖集 $F$</li>
+<li>输出：$R$ 的一个分解 $\rho &#x3D; {R_1, R_2, \dots, R_k}$，满足：<ul>
+<li>每个 $R_i$ 属于 3NF</li>
+<li>分解具有<strong>无损连接性</strong></li>
+<li>分解<strong>保持函数依赖</strong></li>
+</ul>
+</li>
+</ul>
+<h2 id="分解步骤（基于规范覆盖的合成算法）"><a href="#分解步骤（基于规范覆盖的合成算法）" class="headerlink" title="分解步骤（基于规范覆盖的合成算法）"></a>分解步骤（基于规范覆盖的合成算法）</h2><ul>
+<li><p>计算 $F$ 的<strong>最小覆盖</strong>（也称规范覆盖）$F_c$：</p>
+<ul>
+<li><strong>合并右部相同的依赖</strong>（如 $X\rightarrow A$, $X\rightarrow B$ 合并为 $X\rightarrow AB$）</li>
+<li><strong>去除左部冗余属性</strong>（若 $(X−A)\rightarrow Y$ 仍能推出原依赖，则 $A$ 冗余）</li>
+<li><strong>去除冗余依赖</strong>（若移除某依赖后 $F^+$ 不变，则该依赖冗余）</li>
+</ul>
+</li>
+<li><p>对 $F_c$ 中的每个函数依赖 $X \rightarrow A_1A_2\dots A_n$：</p>
+<ul>
+<li>创建一个关系模式 $R_i &#x3D; X \cup {A_1, A_2, \dots, A_n}$</li>
+</ul>
+</li>
+<li><p>检查是否已有模式包含 $R$ 的某个候选键：</p>
+<ul>
+<li>若没有，则任选一个候选键 $K$，添加一个新关系模式 $R_k &#x3D; K$</li>
+</ul>
+</li>
+<li><p>（可选）去除被其他模式包含的关系模式（即若 $R_i \subseteq R_j$，则删除 $R_i$）</p>
+</li>
+</ul>
+<h2 id="特点说明"><a href="#特点说明" class="headerlink" title="特点说明"></a>特点说明</h2><ul>
+<li>该算法保证分解结果既<strong>保持函数依赖</strong>又具有<strong>无损连接性</strong></li>
+<li>所有生成的子模式自动满足 3NF</li>
+<li>最小覆盖确保了分解的简洁性和无冗余</li>
+<li>添加候选键是为了保证无损连接（因为仅靠依赖可能无法覆盖全部属性或重建原关系）</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://musuyin.github.io">Musuyin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://musuyin.github.io/cs/database/%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/">https://musuyin.github.io/cs/database/%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://musuyin.github.io" target="_blank">木素音的小站</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/">数据库设计</a></div><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/cs/database/%E4%BA%8B%E5%8A%A1%E7%AE%A1%E7%90%86%E5%92%8C%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6%E4%B8%8E%E6%81%A2%E5%A4%8D/" title="事务管理和并发控制与恢复"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">事务管理和并发控制与恢复</div></div><div class="info-2"><div class="info-item-1">事务概念 事务是构成单一逻辑工作单元的操作集合 事务是访问并可能更新各种数据项的一个程序执行单元 事务由事务开始（begin transaction）与事务结束（end transaction）之间执行的全体操作组成 事务管理主要处理的两个主要问题 各类故障恢复，如硬件故障，系统崩溃等 多个事务的并发执行    ACID事务是访问并可能更新各种数据项的一个程序执行单元 为保证数据的完整性，数据库系统必须保证:  原子性（ Atomicity ）：事务的所有操作在数据库中要么全部反映出来，要么完全不反映 一致性（ Consistency ）：事务隔离执行时（即在没有其他事务并发执行的情况下）保持数据库的一致性 隔离性（ Isolation ）：尽管多个事务可能并发执行，但是每个事务都感觉不到系统中有其他事务在并发的执行 对于任何一对事务 $T_i$ 和 $T_j$ ，在 $T_i$ 看来，$T_j$ 或者在 $T_i$ 开始之前已经完成执行，或者在 $T_i$ 完成之后开始执行   持久性（ Durability ）：一个事务成功完成后，它对数据库的改变是永久的，即使系统出现故障时...</div></div></div></a><a class="pagination-related" href="/cs/safty/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" title="网络安全"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">网络安全</div></div><div class="info-2"><div class="info-item-1">网络威胁网络脆弱性 匿名性 攻击点多：攻击目标多、发动攻击的地点多 共享性 系统复杂性 未知边界 未知路径  攻击前奏 端口扫描、网络嗅探 社会工程学 侦查 操作系统与应用程序特征 BBS 与聊天室 文档的可用性  窃听与偷听假冒攻击 通过猜测突破鉴别 以偷听或窃听突破鉴别 避开鉴别 众所周知的鉴别 可信任的鉴别  网络欺诈 钓鱼网站 DNS 欺骗+网络钓鱼   中间人攻击（Man-in-the-Middle Attack, MITM） 通过拦截正常的网络通信数据，并进行数据嗅探甚至篡改（主动窃听） ARP 攻击、会话劫持、DNS 欺骗、代理中间人攻击都是典型中间人攻击手段    中间人攻击PKI 和证书机制 ARP 攻击代理服务器代理中间人攻击拒绝服务攻击（DoS）基本类型 基于容量的攻击 基于应用的攻击 基于通信故障的攻击  常见手段 传输故障 连接洪泛 死亡之 Ping Smurf 攻击 Chargen 反射放大攻击 TCP 洪泛（同步洪泛）攻击 流量重定向攻击（路由器） DNS 攻击（欺骗） ARP 攻击    分布式拒绝服务攻击（DDoS） 两阶段攻击方式 乘数效应（流...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/cs/database/MySQL/MySQL-%E5%9F%BA%E7%A1%80/" title="MySQL 基础篇"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-02</div><div class="info-item-2">MySQL 基础篇</div></div><div class="info-2"><div class="info-item-1">MySQL 相关概念 ​​ 使用启动和停止在 Win + R 中输入 services.msc ​ 或在命令行（管理员模式）中输入： net start mysql80 net stop mysql80  注意：此处 mysql80 是在安装时指定的名称 客户端连接 方法一：MySQL 提供的客户端命令行工具  在菜单栏中寻找 MySQL Command Line Client 启动后输入密码    方法二：系统自带的命令行工具执行指令  ​mysql [-h 127.0.0.1] [-P 3306] -u root -p​ 注意：需要配置环境变量    关系型数据库建立在关系模型基础上，由多张相互连接的二维表组成的数据库 数据模型 DBMS：一个数据库管理系统 图形化界面工具配置信息 展开数据库 数据库操作创建数据库 表操作创建表 插入元素 对表的其他操作 使用 SQL 代码 SQL通用语法 字段类型数值类型 无符号表示需要写在类型后方，如：int unsigned​ 对于浮点数需要设置精度和标度，精度是数字最长整体长度，标度是保留小数点位数，如：double(4,1)​，整数...</div></div></div></a><a class="pagination-related" href="/cs/database/SQL/" title="SQL"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-10</div><div class="info-item-2">SQL</div></div><div class="info-2"><div class="info-item-1">数据库操作数据库连接启动、停止数据库net start mysql80 net stop mysql80  客户端连接mysql [-h 127.0.0.1] [-P 3306] -u root -p  查询所有数据库SHOW DATABASES;  查询当前数据库SELECT DATABASE();  创建数据库CREATE DATABASE &lt;database_name&gt;;	-- if database exists, it will report error  CREATE DATABASE IF NOT EXISTS &lt;database_name&gt;; 	-- if database exists, it will not report error  CREATE DATABASE &lt;database_name&gt; DEFAULT CHARSET utf8mb4; -- 指定字符集  删除数据库DROP DATABASE IF EXISTS &lt;database_name&gt;;  选择数据库USE &lt;database_name...</div></div></div></a><a class="pagination-related" href="/cs/safty/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AE%89%E5%85%A8/" title="数据库安全"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-12-11</div><div class="info-item-2">数据库安全</div></div><div class="info-2"><div class="info-item-1">数据库完整性安全需求数据库优点 共享访问 最小冗余 数据一致性 数据完整性 访问控制  安全需求 数据库的物理和逻辑完整性 保护数据，使其不被外在的、非法的程序行为或外力破坏 保证只有授权个体可以执行对数据的更新，并保证修改的正确性 定期备份和异地备份 维护一个事务日志以便在故障点重建数据库   元素完整性 提供域检查功能 集中收集和控制数据，消除数据冗余 维护一个更改日志以便取消任何不正确的改变   可审计性 需要生成关于数据库所有访问的审计记录以协助维护数据库的完整性与安全性 审计追踪可以确定用户已经获得的数据线索，已确定是否允许用户做进一步的查询 为了有效地保持完整性，数据库的审计记录应该包括对记录、域、数据元素一级的访问   用户鉴别 访问控制 授权访问所有指定的数据，不允许访问禁止访问的数据 可能拥有的权限：读、改一个值，增、删整个域或记录，重建数据库 对推理攻击的控制一级较小的控制粒度，决定了数据库的访问控制比对其他对象的控制要难 访问控制可能会降低 DBMS 的性能   可用性  权衡完整性、机密性与可用性 每个元素以至于整个数据库都要求完整性，完整性是设计 DBM...</div></div></div></a><a class="pagination-related" href="/cs/database/MongoDB/SpringBoot%E9%9B%86%E6%88%90/" title="MongoDB SpringBoot集成"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-02</div><div class="info-item-2">MongoDB SpringBoot集成</div></div><div class="info-2"><div class="info-item-1">MongoDB 集成导入依赖&lt;dependency&gt;     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;     &lt;artifactId&gt;spring-boot-starter-data-mongodb&lt;/artifactId&gt; &lt;/dependency&gt;  远程连接配置#MongoDB连接配置 spring.data.mongodb.uri: mongodb://172.30.138.31:27017/chat_memory_db  使用创建实体类import lombok.AllArgsConstructor; import lombok.Data; import lombok.NoArgsConstructor; import org.springframework.data.annotation.Id; import org.springframework.data.mongodb.core.mapping.Document; @Data @AllArgsC...</div></div></div></a><a class="pagination-related" href="/cs/database/MySQL/MySQL-%E8%BF%9B%E9%98%B6/" title="MySQL 进阶篇"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-02</div><div class="info-item-2">MySQL 进阶篇</div></div><div class="info-2"><div class="info-item-1">体系结构 连接层  最上层，负责客户端和连接服务，完成连接处理、授权认证以及相关的安全方案 为安全接入的客户端验证其所具有的操作权限   服务层  完成大多数核心服务功能，如 SQL 接口 完成缓存的查询 SQL 的分析和优化 部分内置函数的执行 所有夸存储引擎的功能（过程、函数）   引擎层  存储引擎真正负责了 MySQL 中数据的存储和提取 服务器通过 API 和存储引擎进行通信 不同的存储引擎具有不同的功能（且索引也不同）   存储层  将数据存储在文件系统之上 完成与存储引擎的交互     存储引擎概述存储数据、简历索引、更新&#x2F;查询数据等技术的实现方式， 查询使用的存储引擎show engines;  InnoDB兼顾高可靠性和高性能的通用存储引擎，在 MySQL 5.5 之后，为默认存储引擎  支持事务（DML 操作遵循 ACID 模型：原子性、一致性、持久性、隔离性） 行级锁，提高并发访问性能 支持外键约束  使用 .idb ​ 文件存储数据，每一张表都对应一个表空间文件，存储该表的表结构（frm，sdi）、数据、索引 逻辑存储结构 Tablespace ...</div></div></div></a><a class="pagination-related" href="/cs/database/%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%92%8C%E7%B4%A2%E5%BC%95/" title="存储管理和索引"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-02</div><div class="info-item-2">存储管理和索引</div></div><div class="info-2"><div class="info-item-1">文件和记录的组织数据库是以一系列文件的形式存储的。每个文件在逻辑上组织成为记录的一个序列  每个文件分为定长的存储单元：块（block） 块是存储分配和数据传输的基本单元，一般大小为 4-8KB  记录在文件中是定长或可变长的 定长记录删除记录，维护记录列表方法：  逐位移动 末尾记录移动到空缺位置 记录空闲列表 用链表存储空闲地址    变长记录出现方式 多种记录类型存储在一个文件中 允许一个或多个字段是变长的记录类型 允许可重复字段的记录类型  特点 属性按照顺序存储 以固定大小表示可变长度的属性（偏移量，长度），实际数据存储在所有固定长度的属性后 记录末尾有记录终止符  分槽的页结构分槽页块头结构 块中记录条目个数 块中空闲空间的末尾处 由包含记录位置和大小的记录条目组成的数组  存储特点 记录可以在页中移动，来保持连续存储 记录相互间没有空闲空间，如果删除记录需要移动记录数据  ![[images&#x2F;Pasted image 20260110105108.png]] 文件中记录的组织 堆文件组织：一个记录可以放在文件中的任何地方，只要那个地方有空间存放这条记录 顺...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Musuyin</div><div class="author-info-description">Musuyin's Blog</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/musuyin"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/musuyin" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:musuyin@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">即使迷茫，也要前进！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%BE%E8%AE%A1%E8%A7%84%E8%8C%83"><span class="toc-number">1.</span> <span class="toc-text">设计规范</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%89%E6%8D%9F%E5%88%86%E8%A7%A3"><span class="toc-number">1.1.</span> <span class="toc-text">有损分解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A0%E6%8D%9F%E5%88%86%E8%A7%A3"><span class="toc-number">1.2.</span> <span class="toc-text">无损分解</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E4%BE%9D%E8%B5%96"><span class="toc-number">2.</span> <span class="toc-text">函数依赖</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%88%90%E7%AB%8B%E6%9D%A1%E4%BB%B6"><span class="toc-number">2.1.</span> <span class="toc-text">成立条件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E4%BE%9D%E8%B5%96%E5%92%8C%E7%A0%81"><span class="toc-number">2.2.</span> <span class="toc-text">函数依赖和码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B6%85%E7%A0%81"><span class="toc-number">2.2.1.</span> <span class="toc-text">超码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%80%99%E9%80%89%E7%A0%81"><span class="toc-number">2.2.2.</span> <span class="toc-text">候选码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%96%E7%A0%81"><span class="toc-number">2.2.3.</span> <span class="toc-text">外码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E4%BE%9D%E8%B5%96%E6%98%AF%E7%A0%81%E7%9A%84%E6%A6%82%E5%8C%96"><span class="toc-number">2.3.</span> <span class="toc-text">函数依赖是码的概化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E4%BE%9D%E8%B5%96%E4%BD%BF%E7%94%A8"><span class="toc-number">2.4.</span> <span class="toc-text">函数依赖使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B3%E5%87%A1"><span class="toc-number">2.5.</span> <span class="toc-text">平凡</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AD%E5%8C%85"><span class="toc-number">2.6.</span> <span class="toc-text">闭包</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E4%BE%9D%E8%B5%96%E9%9B%86%E7%9A%84%E9%97%AD%E5%8C%85"><span class="toc-number">2.6.1.</span> <span class="toc-text">函数依赖集的闭包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B1%9E%E6%80%A7%E9%9B%86%E7%9A%84%E9%97%AD%E5%8C%85"><span class="toc-number">2.6.2.</span> <span class="toc-text">属性集的闭包</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%BB%E8%BE%91%E8%95%B4%E5%90%AB"><span class="toc-number">2.7.</span> <span class="toc-text">逻辑蕴含</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A8%E7%90%86%E8%A7%84%E5%88%99"><span class="toc-number">2.8.</span> <span class="toc-text">推理规则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97-F"><span class="toc-number">2.8.1.</span> <span class="toc-text">计算 $F^+$</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97-X"><span class="toc-number">2.8.2.</span> <span class="toc-text">计算 $X^+$</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E9%80%94"><span class="toc-number">2.8.2.1.</span> <span class="toc-text">用途</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%84%E8%8C%83%E5%8C%96%EF%BC%88Normalization%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">规范化（Normalization）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87"><span class="toc-number">3.1.</span> <span class="toc-text">目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8C%83%E5%BC%8F-Normal-Form"><span class="toc-number">3.2.</span> <span class="toc-text">范式 Normal Form</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E8%8C%83%E5%BC%8F"><span class="toc-number">3.2.1.</span> <span class="toc-text">第一范式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E8%8C%83%E5%BC%8F"><span class="toc-number">3.2.2.</span> <span class="toc-text">第二范式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%83%A8%E5%88%86%E4%BE%9D%E8%B5%96"><span class="toc-number">3.2.2.1.</span> <span class="toc-text">部分依赖</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E8%8C%83%E5%BC%8F"><span class="toc-number">3.2.3.</span> <span class="toc-text">第三范式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Boyce-Codd-%E8%8C%83%E5%BC%8F%EF%BC%88BCNF%EF%BC%89"><span class="toc-number">3.2.4.</span> <span class="toc-text">Boyce-Codd 范式（BCNF）</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E4%BE%9D%E8%B5%96%E7%90%86%E8%AE%BA"><span class="toc-number">4.</span> <span class="toc-text">函数依赖理论</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E5%88%99%E8%A6%86%E7%9B%96"><span class="toc-number">4.1.</span> <span class="toc-text">正则覆盖</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A0%E5%85%B3%E5%B1%9E%E6%80%A7"><span class="toc-number">4.2.</span> <span class="toc-text">无关属性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A0%E5%85%B3%E5%B1%9E%E6%80%A7%E7%9A%84%E9%AA%8C%E8%AF%81"><span class="toc-number">4.2.1.</span> <span class="toc-text">无关属性的验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E5%88%99%E8%A6%86%E7%9B%96%E7%9A%84%E8%AE%A1%E7%AE%97"><span class="toc-number">4.3.</span> <span class="toc-text">正则覆盖的计算</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A0%E6%8D%9F%E5%88%86%E8%A7%A3-1"><span class="toc-number">4.4.</span> <span class="toc-text">无损分解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%9D%E6%8C%81%E4%BE%9D%E8%B5%96"><span class="toc-number">4.5.</span> <span class="toc-text">保持依赖</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A3%80%E9%AA%8C"><span class="toc-number">4.5.1.</span> <span class="toc-text">检验</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#BCNF-%E5%88%86%E8%A7%A3%E7%AE%97%E6%B3%95"><span class="toc-number">5.</span> <span class="toc-text">BCNF 分解算法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E8%A7%A3%E6%AD%A5%E9%AA%A4"><span class="toc-number">5.1.</span> <span class="toc-text">分解步骤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">5.2.</span> <span class="toc-text">注意事项</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B"><span class="toc-number">5.3.</span> <span class="toc-text">示例</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3NF-%E5%88%86%E8%A7%A3"><span class="toc-number">6.</span> <span class="toc-text">3NF 分解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E8%A7%A3%E7%9B%AE%E6%A0%87"><span class="toc-number">6.1.</span> <span class="toc-text">分解目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E8%A7%A3%E6%AD%A5%E9%AA%A4%EF%BC%88%E5%9F%BA%E4%BA%8E%E8%A7%84%E8%8C%83%E8%A6%86%E7%9B%96%E7%9A%84%E5%90%88%E6%88%90%E7%AE%97%E6%B3%95%EF%BC%89"><span class="toc-number">6.2.</span> <span class="toc-text">分解步骤（基于规范覆盖的合成算法）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E8%AF%B4%E6%98%8E"><span class="toc-number">6.3.</span> <span class="toc-text">特点说明</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/cloud/terraform/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" title="Terraform 基础知识">Terraform 基础知识</a><time datetime="2026-04-14T16:00:00.000Z" title="发表于 2026-04-15 00:00:00">2026-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/tool/obsidian/Mermaid%E4%BD%BF%E7%94%A8%E6%89%8B%E5%86%8C/" title="Mermaid使用">Mermaid使用</a><time datetime="2026-04-13T16:00:00.000Z" title="发表于 2026-04-14 00:00:00">2026-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8A%E4%BC%98%E5%85%88%E5%88%86%E6%9E%90/" title="自底向上优先分析">自底向上优先分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/LR%E5%88%86%E6%9E%90/" title="LR分析">LR分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/statistics-learning/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA/" title="支持向量机">支持向量机</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Musuyin</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

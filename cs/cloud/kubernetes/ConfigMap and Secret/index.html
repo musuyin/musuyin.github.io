@@ -1,0 +1,775 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Kubernetes ConfigMap and Secret | 木素音的小站</title><meta name="author" content="Musuyin"><meta name="copyright" content="Musuyin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Concept of ConfigMap![[images&#x2F;截屏2026-03-25 16.16.53.png]] ConfigMap provides a way to store configuration information and provides it to containers.  Provides a way to inject configuration data i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kubernetes ConfigMap and Secret">
+<meta property="og:url" content="https://musuyin.github.io/cs/cloud/kubernetes/ConfigMap%20and%20Secret/index.html">
+<meta property="og:site_name" content="木素音的小站">
+<meta property="og:description" content="Concept of ConfigMap![[images&#x2F;截屏2026-03-25 16.16.53.png]] ConfigMap provides a way to store configuration information and provides it to containers.  Provides a way to inject configuration data i">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://musuyin.github.io/img/butterfly-icon.png">
+<meta property="article:published_time" content="2026-03-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-27T06:10:24.287Z">
+<meta property="article:author" content="Musuyin">
+<meta property="article:tag" content="Cloud">
+<meta property="article:tag" content="Kubernetes">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://musuyin.github.io/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Kubernetes ConfigMap and Secret",
+  "url": "https://musuyin.github.io/cs/cloud/kubernetes/ConfigMap%20and%20Secret/",
+  "image": "https://musuyin.github.io/img/butterfly-icon.png",
+  "datePublished": "2026-03-24T16:00:00.000Z",
+  "dateModified": "2026-03-27T06:10:24.287Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Musuyin",
+      "url": "https://musuyin.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://musuyin.github.io/cs/cloud/kubernetes/ConfigMap%20and%20Secret/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":null,"highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Kubernetes ConfigMap and Secret',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">木素音的小站</span></a><a class="nav-page-title" href="/"><span class="site-name">Kubernetes ConfigMap and Secret</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Kubernetes ConfigMap and Secret</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-24T16:00:00.000Z" title="发表于 2026-03-25 00:00:00">2026-03-25</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-27T06:10:24.287Z" title="更新于 2026-03-27 14:10:24">2026-03-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/Cloud/">Cloud</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/Cloud/Kubernetes/">Kubernetes</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Concept-of-ConfigMap"><a href="#Concept-of-ConfigMap" class="headerlink" title="Concept of ConfigMap"></a>Concept of ConfigMap</h1><p>![[images&#x2F;截屏2026-03-25 16.16.53.png]]</p>
+<p><em>ConfigMap</em> provides a way to store configuration information and provides it to containers.</p>
+<ul>
+<li>Provides a way to inject configuration data into a container.</li>
+<li>Can store entire files or provide key-value pairs<ul>
+<li>Store in a File.</li>
+<li>Key is the filename, value is the file contents</li>
+<li>Can be JSON, XML, k-v, …</li>
+</ul>
+</li>
+</ul>
+<p>ConfigMap can be accessed from a Pod with:</p>
+<ul>
+<li>Environment variables (k-v)</li>
+<li>ConfigMap Volume (access as files)</li>
+</ul>
+<p>![[images&#x2F;截屏2026-03-25 16.21.04.png]]</p>
+<h1 id="Create-ConfigMap"><a href="#Create-ConfigMap" class="headerlink" title="Create ConfigMap"></a>Create ConfigMap</h1><pre><code class="language-shell"># Create from a ConfigMap mainfest
+kubectl create -f [yaml_name.yaml]
+# Create a ConfigMap using data from a config file
+kubectl create configmap [cm_name] --from-file=[file_path]
+# Create a ConfigMap from an env file
+kubectl create configmap [cm_name] --from-env-file=[file_path]
+# Create a configMap from individual data values
+kubectl create configmap [cm_name] --from-literal=[key]=[value]
+</code></pre>
+<h2 id="ConfigMap-Mainfest"><a href="#ConfigMap-Mainfest" class="headerlink" title="ConfigMap Mainfest"></a>ConfigMap Mainfest</h2><pre><code class="language-yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-settings
+  labels:
+    app: app-settings
+data:
+  enemies: aliens
+  lives: &quot;3&quot;
+  enemies.cheat: &quot;true&quot;
+  enemies.cheat.level: noGoodRotten
+</code></pre>
+<p>![[images&#x2F;截屏2026-03-25 16.22.31.png]]</p>
+<pre><code class="language-shell">kubectl create -f [yaml_name.yaml]
+</code></pre>
+<h2 id="Key-Value-Pairs-in-File"><a href="#Key-Value-Pairs-in-File" class="headerlink" title="Key-Value Pairs in File"></a>Key-Value Pairs in File</h2><p>![[images&#x2F;截屏2026-03-25 16.23.03.png]]</p>
+<pre><code class="language-shell"># Create a ConfigMap using adata from a file
+kubectl create configmap [cm_name] --from-file=[file_path]
+</code></pre>
+<p>![[images&#x2F;截屏2026-03-25 16.24.33.png]]</p>
+<h2 id="Env-File"><a href="#Env-File" class="headerlink" title="Env File"></a>Env File</h2><p>![[images&#x2F;截屏2026-03-25 16.27.59.png]]</p>
+<pre><code class="language-shell"># Create a env ConfigMap using data from a file
+kubectl create configmap [cm_name] --from-env-file=[file_path]
+</code></pre>
+<h1 id="Use-ConfigMap"><a href="#Use-ConfigMap" class="headerlink" title="Use ConfigMap"></a>Use ConfigMap</h1><h2 id="kubectl"><a href="#kubectl" class="headerlink" title="kubectl"></a>kubectl</h2><pre><code class="language-shell"># Get a ConfigMap
+kubectl get cm [cm_name] -o yaml
+kubectl describe cm [cm_name]
+</code></pre>
+<h2 id="Select-Keys-to-Use-as-Env-Vars"><a href="#Select-Keys-to-Use-as-Env-Vars" class="headerlink" title="Select Keys to Use as Env Vars"></a>Select Keys to Use as Env Vars</h2><p>Load keys that the Pod needs.</p>
+<p>![[images&#x2F;截屏2026-03-25 16.58.47.png]]</p>
+<h2 id="Use-All-Keys-as-Env-Vars"><a href="#Use-All-Keys-as-Env-Vars" class="headerlink" title="Use All Keys as Env Vars"></a>Use All Keys as Env Vars</h2><p><code>envFrom</code> can be used to load all ConfigMap keys-values into environment variables.</p>
+<p>![[images&#x2F;截屏2026-03-25 17.01.58.png]]</p>
+<h2 id="Mount-to-Container-Volume"><a href="#Mount-to-Container-Volume" class="headerlink" title="Mount to Container (Volume)"></a>Mount to Container (Volume)</h2><p>Each key is converted to a file; value is added into the file</p>
+<p>![[images&#x2F;截屏2026-03-25 17.07.32.png]]</p>
+<h1 id="Secret-Concept"><a href="#Secret-Concept" class="headerlink" title="Secret Concept"></a>Secret Concept</h1><p>A <em>Secret</em> is an objec that contains a small amount of sensitive data such as a password, a token, or a key.</p>
+<ul>
+<li>Kubernetes can store sensitive information (pwd, keys, certificates, …)</li>
+<li>Avoids storing secrets in container images, in files, or in deployment manifests.</li>
+<li>Mount secrets into pods as files or as environment variables</li>
+<li>Kubernetes only makes secrets available to Nodes that hava a Pod requesting the secret.</li>
+<li>Secrets are stored in tmpfs on a Node (not on disk)</li>
+</ul>
+<p>Secrets best practices:</p>
+<ul>
+<li>Enable encryption at rest for cluster data.</li>
+<li>Limit access to etcd (where Secret are stored) to only admin users.</li>
+<li>Use SSL&#x2F;TLS for etcd peer-to-peer communication.</li>
+<li>Manifest (YAML&#x2F;JSON) files only base64 encode the Secret.</li>
+<li>Pods can access Secrets so secure which users can create Pods. Role-based access control (RBAC) can be used.</li>
+</ul>
+<h1 id="Create-Secret"><a href="#Create-Secret" class="headerlink" title="Create Secret"></a>Create Secret</h1><h2 id="kubectl-1"><a href="#kubectl-1" class="headerlink" title="kubectl"></a>kubectl</h2><pre><code class="language-shell"># Create a secret and store securly in Kubernetes
+kubectl create secret generic [secret_name] --from-literal=[key]=[value]
+# Create a secret from a file
+kubectl create secret generic [secret_name] --from-file=[key]=[value]
+# Create a secret from a key pair
+kubectl create secret tls [secret_name] --cert=path/to/tls.cert --key=path/to/tls.key
+</code></pre>
+<h2 id="YAML"><a href="#YAML" class="headerlink" title="YAML"></a>YAML</h2><p>For security, any secret data is only base64 encoded in the manifest file. But the file still has the risk of leaking the secret, so it should be careful to store secret in the manifest files.</p>
+<p>![[images&#x2F;截屏2026-03-25 17.52.14.png]]</p>
+<h1 id="Use-Secret"><a href="#Use-Secret" class="headerlink" title="Use Secret"></a>Use Secret</h1><h2 id="List-Secret-Keys"><a href="#List-Secret-Keys" class="headerlink" title="List Secret Keys"></a>List Secret Keys</h2><pre><code class="language-shell"># Get Secrets
+kubectl get secrets
+# Get YAML for specific secret
+kubectl get secrets db-passwords -o yaml
+</code></pre>
+<h2 id="Env-Vars"><a href="#Env-Vars" class="headerlink" title="Env Vars"></a>Env Vars</h2><p>![[images&#x2F;截屏2026-03-27 13.26.34.png]]</p>
+<h2 id="Volumes"><a href="#Volumes" class="headerlink" title="Volumes"></a>Volumes</h2><p>Each key is converted to a file. Value is added into the file.</p>
+<p>![[images&#x2F;截屏2026-03-27 13.28.13.png]]</p>
+<h1 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h1><pre><code class="language-yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: mongo-secrets-env
+  name: mongo-secrets-env
+data:
+  MONGODB_DBNAME: codeWithDan
+  MONGO_INITDB_ROOT_USERNAME: admin
+
+---
+
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+# The reclaim policy applies to the persistent volumes not the storage class itself.
+# pvs and pvcs that are created using that storage class will inherit the reclaim policy set here.
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+
+---
+
+# Note: While a local storage PV works, going with a more durable solution (NFS, cloud option, etc.) is recommended
+# Adding this for demo purposes to run on Docker Desktop Kubernetes since it only supports a single Node
+# https://kubernetes.io/blog/2018/04/13/local-persistent-volumes-beta/
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongo-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  # StorageClass has a reclaim policy default so it&#39;ll be &quot;inherited&quot; by the PV
+  # persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  hostPath:
+    path: /private/tmp/data/db
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - docker-desktop
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: mongo
+  name: mongo
+spec:
+  serviceName: mongo
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      volumes:
+      - name: mongo-volume
+        persistentVolumeClaim:
+          claimName: mongo-pvc
+        # Example only - environment vars actually used here
+      - name: secrets
+        secret:
+          secretName: db-passwords
+      containers:
+      - env:
+        - name: MONGODB_DBNAME
+          valueFrom:
+            configMapKeyRef:
+              key: MONGODB_DBNAME
+              name: mongo-secrets-env
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: mongo-secrets-env
+              key: MONGO_INITDB_ROOT_USERNAME
+        # Pull password from secrets
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-passwords
+              key: db-password
+        image: mongo
+        name: mongo
+        ports:
+        - containerPort: 27017
+        resources: {}
+        volumeMounts:
+        - name: mongo-volume
+          mountPath: /data/db
+        # Example only - environment vars actually used here
+        - name: secrets
+          mountPath: /etc/db-passwords
+          readOnly: true
+</code></pre>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://musuyin.github.io">Musuyin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://musuyin.github.io/cs/cloud/kubernetes/ConfigMap%20and%20Secret/">https://musuyin.github.io/cs/cloud/kubernetes/ConfigMap%20and%20Secret/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://musuyin.github.io" target="_blank">木素音的小站</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Cloud/">Cloud</a><a class="post-meta__tags" href="/tags/Kubernetes/">Kubernetes</a></div><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/cs/compiler-theory/lab/lex/" title="Flex &amp; Bison"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Flex & Bison</div></div><div class="info-2"><div class="info-item-1">一、macOS + VSCode 配置 Flex&#x2F;Bison 完整步骤（你已用 brew 安装）1. 确认版本与环境变量（关键：mac 自带旧版，必须用 brew 新版）打开终端： # 查看 flex/bison 路径（必须是 /usr/local/opt 或 /opt/homebrew/opt） which flex bison  # 查看版本（flex ≥2.6，bison ≥3.8） flex --version bison --version   Intel Mac：brew 路径 → /usr/local/opt/flex/bin、/usr/local/opt/bison/bin Apple Silicon (M1&#x2F;M4)：brew 路径 → /opt/homebrew/opt/flex/bin、/opt/homebrew/opt/bison/bin  配置环境变量（覆盖系统旧版）： # Intel Mac echo &#39;export PATH=&quot;/usr/local/opt/flex/bin:/usr/local/opt/bison...</div></div></div></a><a class="pagination-related" href="/cs/cloud/kubernetes/Service/" title="Kubernetes Service"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Kubernetes Service</div></div><div class="info-2"><div class="info-item-1">Concept![[images&#x2F;截屏2026-03-24 14.50.56.png]] A Service provides a single point of entry for accessing one or more Pods. Can’t rely on Pod IP  Pods are motral and may only live a short time. (ephemeral) Pod IP address may not stay the same. Pods can be horizontally scaled so each Pod gets its own IP address. A Pod gets an IP address after it has been scheduled (no way for clients to know IP ahead of time).  Service Do Services abstract Pod IP addresses from consumers. Load balances betwee...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/cs/cloud/kubernetes/Service/" title="Kubernetes Service"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-24</div><div class="info-item-2">Kubernetes Service</div></div><div class="info-2"><div class="info-item-1">Concept![[images&#x2F;截屏2026-03-24 14.50.56.png]] A Service provides a single point of entry for accessing one or more Pods. Can’t rely on Pod IP  Pods are motral and may only live a short time. (ephemeral) Pod IP address may not stay the same. Pods can be horizontally scaled so each Pod gets its own IP address. A Pod gets an IP address after it has been scheduled (no way for clients to know IP ahead of time).  Service Do Services abstract Pod IP addresses from consumers. Load balances betwee...</div></div></div></a><a class="pagination-related" href="/cs/cloud/kubernetes/Storage/" title="Kubernetes Storage"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-24</div><div class="info-item-2">Kubernetes Storage</div></div><div class="info-2"><div class="info-item-1">Concept![[images&#x2F;截屏2026-03-24 16.45.32.png]] A Volume can be used to hold data and state for Pods and containers.  A Pod can have multiple Volumes attached to it. Containers rely on a mountPath to access a volume.  Storage Types Volumes PersistentVolumes PersistentVolumeClaims StorageClasses  Volumes A Volume references a storage location Must have a unique name Attached to a Pod and may or may not be tied to the Pod’s lifetime (depending on the Volume type) A Volume Mount references a V...</div></div></div></a><a class="pagination-related" href="/cs/cloud/kubernetes/Deployment/" title="Kubernetes Deployment"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-24</div><div class="info-item-2">Kubernetes Deployment</div></div><div class="info-2"><div class="info-item-1">Concepts![[images&#x2F;截屏2026-03-24 11.44.48.png]] A ReplicaSets is a declarative way to manage Pods. A Deployment is a declarative way to manage Pods using a ReplicaSet.  Deployments are a higher-level resource that define one or more Pod templates. Deployments and ReplicaSets ensure Pods stay running and can be used to scale Pods.  ReplicaSetsReplicaSets act as a Pod controller  Self-healing mechanism Ensure the requested number of Pods are available Provide fault-tolerance Can be used to s...</div></div></div></a><a class="pagination-related" href="/cs/cloud/kubernetes/Pod/" title="Kubernetes Pod"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-10</div><div class="info-item-2">Kubernetes Pod</div></div><div class="info-2"><div class="info-item-1">Concept![[images&#x2F;截屏2026-03-20 14.24.38.png]] A Pod is the basic execution unit of a Kubernetes application.  The smallest and simplest unit in the Kubernetes object model that can be created or deployed. Environment for containers organize application “parts” into Pods (server, caching, APIs, database…) Containers run within Pods and share a Pod’s memory, IP, volumes, and more Scale horizontally by adding Pod replicas Pods live and die but never come back to life If a pod get sick, Kuber...</div></div></div></a><a class="pagination-related" href="/cs/cloud/kubernetes/Overview/" title="Kubernetes Overview"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-10</div><div class="info-item-2">Kubernetes Overview</div></div><div class="info-2"><div class="info-item-1">Feature![[images&#x2F;24a08702-ae93-4466-83d7-1520ebc1f938.png]] Kubernetes is an open-source system for automating deployment scaling, and management of containerized applications. Kubernetes 提供了一个可弹性运行分布式系统的框架  Service Discovery &#x2F; Load Balancing Storage Orchestration Automate Rollouts &#x2F; Rollbacks Self-healing Secret and Configuration Management Horizontal Scaling  Infrastructure$$\text{K8S Cluster} &#x3D; N\ \text{Master Nodes} + N\ \text{Worker Nodes} (N\geq1)$$ ![[images&#x2F;截屏...</div></div></div></a><a class="pagination-related" href="/cs/cloud/cloud-computing/Cloud-Computing/" title="Cloud Computing"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-11</div><div class="info-item-2">Cloud Computing</div></div><div class="info-2"><div class="info-item-1">Overview Time-share Distributed Computing  Characteristics On-demand Connect via the internet Use only what you need when you need it Scale up or back as needed Pay per use  Deployment Models Private Cloud Public Cloud Community Cloud Muticloud Hybrid Cloud  Delivery Models SaaS: Software as a service. PaaS: Platform as a service. IaaS: Infrastructure as a service.  SaaS An application you rent over the open Internet. Replace Traditional enterprise applications such as CRMs and ERPs. Unlimite...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Musuyin</div><div class="author-info-description">Musuyin's Blog</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/musuyin"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/musuyin" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:musuyin@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">即使迷茫，也要前进！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Concept-of-ConfigMap"><span class="toc-number">1.</span> <span class="toc-text">Concept of ConfigMap</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Create-ConfigMap"><span class="toc-number">2.</span> <span class="toc-text">Create ConfigMap</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ConfigMap-Mainfest"><span class="toc-number">2.1.</span> <span class="toc-text">ConfigMap Mainfest</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Key-Value-Pairs-in-File"><span class="toc-number">2.2.</span> <span class="toc-text">Key-Value Pairs in File</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Env-File"><span class="toc-number">2.3.</span> <span class="toc-text">Env File</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Use-ConfigMap"><span class="toc-number">3.</span> <span class="toc-text">Use ConfigMap</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#kubectl"><span class="toc-number">3.1.</span> <span class="toc-text">kubectl</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Select-Keys-to-Use-as-Env-Vars"><span class="toc-number">3.2.</span> <span class="toc-text">Select Keys to Use as Env Vars</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Use-All-Keys-as-Env-Vars"><span class="toc-number">3.3.</span> <span class="toc-text">Use All Keys as Env Vars</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Mount-to-Container-Volume"><span class="toc-number">3.4.</span> <span class="toc-text">Mount to Container (Volume)</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Secret-Concept"><span class="toc-number">4.</span> <span class="toc-text">Secret Concept</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Create-Secret"><span class="toc-number">5.</span> <span class="toc-text">Create Secret</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#kubectl-1"><span class="toc-number">5.1.</span> <span class="toc-text">kubectl</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#YAML"><span class="toc-number">5.2.</span> <span class="toc-text">YAML</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Use-Secret"><span class="toc-number">6.</span> <span class="toc-text">Use Secret</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#List-Secret-Keys"><span class="toc-number">6.1.</span> <span class="toc-text">List Secret Keys</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Env-Vars"><span class="toc-number">6.2.</span> <span class="toc-text">Env Vars</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Volumes"><span class="toc-number">6.3.</span> <span class="toc-text">Volumes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Example"><span class="toc-number">7.</span> <span class="toc-text">Example</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/cloud/terraform/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" title="Terraform 基础知识">Terraform 基础知识</a><time datetime="2026-04-14T16:00:00.000Z" title="发表于 2026-04-15 00:00:00">2026-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/tool/obsidian/Mermaid%E4%BD%BF%E7%94%A8%E6%89%8B%E5%86%8C/" title="Mermaid使用">Mermaid使用</a><time datetime="2026-04-13T16:00:00.000Z" title="发表于 2026-04-14 00:00:00">2026-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8A%E4%BC%98%E5%85%88%E5%88%86%E6%9E%90/" title="自底向上优先分析">自底向上优先分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/LR%E5%88%86%E6%9E%90/" title="LR分析">LR分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/statistics-learning/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA/" title="支持向量机">支持向量机</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Musuyin</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

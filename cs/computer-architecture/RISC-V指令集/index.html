@@ -1,0 +1,1044 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>RISC-V Instruction Set | 木素音的小站</title><meta name="author" content="Musuyin"><meta name="copyright" content="Musuyin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="RISC-V Instruction Set(ISA)RISC Fixed-length instructions Load-store architecture: Only load (lw) and store (sw) instructions access memory All ALU operations work on registers only.    Data StoreRegi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RISC-V Instruction Set">
+<meta property="og:url" content="https://musuyin.github.io/cs/computer-architecture/RISC-V%E6%8C%87%E4%BB%A4%E9%9B%86/index.html">
+<meta property="og:site_name" content="木素音的小站">
+<meta property="og:description" content="RISC-V Instruction Set(ISA)RISC Fixed-length instructions Load-store architecture: Only load (lw) and store (sw) instructions access memory All ALU operations work on registers only.    Data StoreRegi">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://musuyin.github.io/img/butterfly-icon.png">
+<meta property="article:published_time" content="2025-11-25T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-15T06:35:07.165Z">
+<meta property="article:author" content="Musuyin">
+<meta property="article:tag" content="RISC-V">
+<meta property="article:tag" content="汇编">
+<meta property="article:tag" content="计算机系统结构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://musuyin.github.io/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "RISC-V Instruction Set",
+  "url": "https://musuyin.github.io/cs/computer-architecture/RISC-V%E6%8C%87%E4%BB%A4%E9%9B%86/",
+  "image": "https://musuyin.github.io/img/butterfly-icon.png",
+  "datePublished": "2025-11-25T16:00:00.000Z",
+  "dateModified": "2026-04-15T06:35:07.165Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Musuyin",
+      "url": "https://musuyin.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://musuyin.github.io/cs/computer-architecture/RISC-V%E6%8C%87%E4%BB%A4%E9%9B%86/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":null,"highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'RISC-V Instruction Set',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">木素音的小站</span></a><a class="nav-page-title" href="/"><span class="site-name">RISC-V Instruction Set</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">RISC-V Instruction Set</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-11-25T16:00:00.000Z" title="发表于 2025-11-26 00:00:00">2025-11-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-04-15T06:35:07.165Z" title="更新于 2026-04-15 14:35:07">2026-04-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84/">计算机系统结构</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="RISC-V-Instruction-Set-ISA"><a href="#RISC-V-Instruction-Set-ISA" class="headerlink" title="RISC-V Instruction Set(ISA)"></a>RISC-V Instruction Set(ISA)</h1><h2 id="RISC"><a href="#RISC" class="headerlink" title="RISC"></a>RISC</h2><ul>
+<li>Fixed-length instructions</li>
+<li>Load-store architecture: Only load (<code>lw</code>) and store (<code>sw</code>) instructions access memory<ul>
+<li>All ALU operations work on registers only.</li>
+</ul>
+</li>
+</ul>
+<h2 id="Data-Store"><a href="#Data-Store" class="headerlink" title="Data Store"></a>Data Store</h2><h3 id="Register-Operands"><a href="#Register-Operands" class="headerlink" title="Register Operands"></a>Register Operands</h3><p>RISC-V has a 32 $\times$ 64-bit register file: x0 to x31</p>
+<ul>
+<li>Use for frequently accessed data</li>
+<li>word: 32-bit data</li>
+<li>double word: 64-bit data</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Register(s)</th>
+<th>Purpose</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>x0</td>
+<td>the constant value 0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>x1</td>
+<td>return address</td>
+<td>ra</td>
+</tr>
+<tr>
+<td>x2</td>
+<td>stack pointer</td>
+<td>sp</td>
+</tr>
+<tr>
+<td>x3</td>
+<td>global pointer</td>
+<td></td>
+</tr>
+<tr>
+<td>x4</td>
+<td>thread pointer</td>
+<td></td>
+</tr>
+<tr>
+<td>x5-x7</td>
+<td>temporaries</td>
+<td>t0-t2</td>
+</tr>
+<tr>
+<td>x8</td>
+<td>frame pointer</td>
+<td></td>
+</tr>
+<tr>
+<td>x9</td>
+<td>saved registers</td>
+<td></td>
+</tr>
+<tr>
+<td>x10-x11</td>
+<td>function arguments&#x2F;results</td>
+<td></td>
+</tr>
+<tr>
+<td>x12-x17</td>
+<td>function arguments</td>
+<td></td>
+</tr>
+<tr>
+<td>x18-x27</td>
+<td>saved registers</td>
+<td></td>
+</tr>
+<tr>
+<td>x28-x31</td>
+<td>temporaries</td>
+<td></td>
+</tr>
+</tbody></table>
+<ul>
+<li>x5 – x7, x28 – x31: temporary registers<ul>
+<li>Not preserved by the callee</li>
+</ul>
+</li>
+<li>x8 – x9, x18 – x27: saved registers<ul>
+<li>If used, the callee saves and restores them</li>
+</ul>
+</li>
+</ul>
+<h3 id="Memory-Operands"><a href="#Memory-Operands" class="headerlink" title="Memory Operands"></a>Memory Operands</h3><ul>
+<li>Main memory used for composite data<ul>
+<li>Arrays, structures, dynamic data</li>
+</ul>
+</li>
+<li>To apply arithmetic operations<ul>
+<li>Load values from memory into registers</li>
+<li>Store result from register to memory</li>
+</ul>
+</li>
+<li>Memory is byte addressed<ul>
+<li>Each address identifies an 8-bit byte</li>
+</ul>
+</li>
+<li>RISC-V is Little Endian<ul>
+<li>Least-significant byte at least address of a word</li>
+</ul>
+</li>
+<li>RISC-V does not require words to be aligned in memory</li>
+</ul>
+<pre><code class="language-assembly">ld x9, 64(x22)
+sd x9, 46(x22)
+</code></pre>
+<p>Compare Registers and Memory:</p>
+<ul>
+<li>Registers are faster to access than memory</li>
+<li>Operating on memory data requires loads and stores</li>
+<li>Compiler must use registers for variables as much as possible</li>
+</ul>
+<h1 id="Format-of-Instructions"><a href="#Format-of-Instructions" class="headerlink" title="Format of Instructions"></a>Format of Instructions</h1><p>All RISC-V base instructions are <strong>32 bits long</strong>, encoded in one standard formats.</p>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Purpose</th>
+<th>Key Fields (bit layout, [31:0])</th>
+<th>Immediate Reassembly</th>
+<th>Opcode (hex)</th>
+<th>Opcode (bin)</th>
+<th>Mnemonic Examples</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>R-type</strong></td>
+<td>Register-register ALU ops <br>（寄存器-寄存器运算）</td>
+<td><code>[funct7][rs2][rs1][funct3][rd][opcode]</code> <br><code>(7)(5)(5)(3)(5)(7)</code></td>
+<td>(no immediate)</td>
+<td><code>0x33</code></td>
+<td><code>0110011</code></td>
+<td><code>add</code>, <code>sub</code>, <code>and</code>…</td>
+</tr>
+<tr>
+<td><strong>I-type</strong></td>
+<td>Immediate ALU, loads <br>（立即数运算、加载）</td>
+<td><code>[imm[11:0]][rs1][funct3][rd][opcode]</code> <br><code>(12)(5)(3)(5)(7)</code></td>
+<td><code>imm = sign_extend(imm[11:0])</code></td>
+<td><code>0x13</code></td>
+<td><code>0010011</code></td>
+<td><code>addi</code>, <code>ori</code>, <code>lw</code></td>
+</tr>
+<tr>
+<td><strong>S-type</strong></td>
+<td>Store instructions <br>（存储指令）</td>
+<td><code>[imm[11:5]][rs2][rs1][funct3][imm[4:0]][opcode]</code> <br><code>(7)(5)(5)(3)(5)(7)</code></td>
+<td><code>imm = sign_extend(imm[11:5] | imm[4:0])</code></td>
+<td><code>0x23</code></td>
+<td><code>0100011</code></td>
+<td><code>sw</code>, <code>sh</code>, <code>sb</code></td>
+</tr>
+<tr>
+<td><strong>SB-type</strong></td>
+<td>Branches <br>（条件分支）</td>
+<td><code>[imm[12]][imm[10:5]][rs2][rs1][funct3][imm[4:1]][imm[11]][opcode]</code> <br><code>(1)(6)(5)(5)(3)(4)(1)(7)</code></td>
+<td><code>imm = sign_extend(imm[12] | imm[11] | imm[10:5] | imm[4:1] | 0)</code> <br>→ <strong>lowest bit is always 0</strong>（对齐到半字）</td>
+<td><code>0x63</code></td>
+<td><code>1100011</code></td>
+<td><code>beq</code>, <code>bne</code>, <code>blt</code>…</td>
+</tr>
+<tr>
+<td><strong>U-type</strong></td>
+<td>LUI, AUIPC <br>（加载高 20 位）</td>
+<td><code>[imm[31:12]][rd][opcode]</code> <br><code>(20)(5)(7)</code></td>
+<td><code>imm = imm[31:12] &lt;&lt; 12</code></td>
+<td><code>0x37</code> &#x2F; <code>0x17</code></td>
+<td><code>0110111</code> &#x2F; <code>0010111</code></td>
+<td><code>lui</code> &#x2F; <code>auipc</code></td>
+</tr>
+<tr>
+<td><strong>UJ-type</strong></td>
+<td>JAL (jump and link) <br>（无条件跳转并链接）</td>
+<td><code>[imm[20]][imm[10:1]][imm[11]][imm[19:12]][rd][opcode]</code> <br><code>(1)(10)(1)(8)(5)(7)</code></td>
+<td><code>imm = sign_extend(imm[20] | imm[19:12] | imm[11] | imm[10:1] | 0)</code> <br>→ <strong>lowest bit is always 0</strong></td>
+<td><code>0x6F</code></td>
+<td><code>1101111</code></td>
+<td><code>jal</code></td>
+</tr>
+</tbody></table>
+<h2 id="R-format"><a href="#R-format" class="headerlink" title="R-format"></a>R-format</h2><p>![[images&#x2F;Pasted image 20251126161123.png]]</p>
+<table>
+<thead>
+<tr>
+<th>Fields</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>opcode</td>
+<td>operation code</td>
+</tr>
+<tr>
+<td>rd</td>
+<td>destination register number</td>
+</tr>
+<tr>
+<td>funct3</td>
+<td>3-bit function code (additional opcode)</td>
+</tr>
+<tr>
+<td>rs1</td>
+<td>the first source register number</td>
+</tr>
+<tr>
+<td>rs2</td>
+<td>the second source register number</td>
+</tr>
+<tr>
+<td>funct7</td>
+<td>7-bit function code (addtional opcode)</td>
+</tr>
+</tbody></table>
+<pre><code class="language-assembly">add x9, x20, x21
+</code></pre>
+<p>![[images&#x2F;Pasted image 20251126161335.png]]</p>
+<h2 id="I-format"><a href="#I-format" class="headerlink" title="I-format"></a>I-format</h2><p>![[images&#x2F;Pasted image 20251126161414.png]]</p>
+<p>Immediate arithmetic and load instructions</p>
+<table>
+<thead>
+<tr>
+<th>Fields</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>rs1</td>
+<td>source or base address register number</td>
+</tr>
+<tr>
+<td>immediate</td>
+<td>constant operand, or offset added to base address 2s-complement, sign extended</td>
+</tr>
+</tbody></table>
+<h2 id="S-format"><a href="#S-format" class="headerlink" title="S-format"></a>S-format</h2><p>![[images&#x2F;Pasted image 20251126161558.png]]<br>Different immediate format for store instructions</p>
+<table>
+<thead>
+<tr>
+<th>Fields</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>rs1</td>
+<td>base address register number</td>
+</tr>
+<tr>
+<td>rs2</td>
+<td>source operand register number</td>
+</tr>
+<tr>
+<td>immediate</td>
+<td>offset added to base address</td>
+</tr>
+</tbody></table>
+<h1 id="Core-Instructions"><a href="#Core-Instructions" class="headerlink" title="Core Instructions"></a>Core Instructions</h1><h2 id="Arithmetic-Logic"><a href="#Arithmetic-Logic" class="headerlink" title="Arithmetic &amp; Logic"></a>Arithmetic &amp; Logic</h2><p>R-type</p>
+<pre><code class="language-assembly">add  x1, x2, x3    # x1 = x2 + x3
+sub  x1, x2, x3    # x1 = x2 - x3
+mul  x1, x2, x3    # x1 = x2 * x3
+and  x1, x2, x3    # bitwise AND
+or   x1, x2, x3    # bitwise OR
+slt  x1, x2, x3    # set if less than (signed): x1 = (x2 &lt; x3) ? 1 : 0
+sltu x1, x2, x3    # set if less than (unsigned)
+</code></pre>
+<ul>
+<li>Uses two source registers (<code>rs1</code>, <code>rs2</code>) and one destination (<code>rd</code>).</li>
+<li><code>funct3</code> &#x2F; <code>funct7</code> distinguish between <code>add</code> &#x2F; <code>sub</code>, <code>slt</code> &#x2F; <code>sltu</code></li>
+</ul>
+<h2 id="Immediate-Operands"><a href="#Immediate-Operands" class="headerlink" title="Immediate Operands"></a>Immediate Operands</h2><p>I-type</p>
+<p>Constant data specified in an instruction</p>
+<pre><code class="language-assembly">addi x1, x2, 10    # x1 = x2 + 10
+andi x1, x2, 0xF   # x1 = x2 &amp; 0xF
+ori  x1, x2, 1     # x1 = x2 | 1
+slli x1, x2, 3	   # x1 = x2 &lt;&lt; 3
+srli x1, x2, 3	   # x1 = x2 &gt;&gt; 3
+</code></pre>
+<h2 id="Memory-Access"><a href="#Memory-Access" class="headerlink" title="Memory Access"></a>Memory Access</h2><h3 id="Load-Word"><a href="#Load-Word" class="headerlink" title="Load Word"></a>Load Word</h3><p>I-type</p>
+<pre><code class="language-assmebly">lw x1, 8(x2)	# x1 = Mem[x2 + 8] as int32, load word, need sign extension
+ld x1, 8(x2)	# x1 = Mem[x2 + 8] as int64, load double word
+</code></pre>
+<h3 id="Store-Word"><a href="#Store-Word" class="headerlink" title="Store Word"></a>Store Word</h3><p>S-type</p>
+<pre><code class="language-assmebly">sw x1, 8(x2)	# Mem[x2 + 8] = x1, load low 32-bit to memory
+sd x1, 8(x2)	# Mem[x2 + 8] = x1
+</code></pre>
+<p><strong>Important</strong>: RISC-V uses <strong>base + offset</strong> addressing. No register indirect or scaled indexing in base ISA.</p>
+<p><strong>Load 扩展看符号，Store 原样写内存</strong></p>
+<h2 id="Control-Flow"><a href="#Control-Flow" class="headerlink" title="Control Flow"></a>Control Flow</h2><h3 id="Conditional-Branches"><a href="#Conditional-Branches" class="headerlink" title="Conditional Branches"></a>Conditional Branches</h3><p>SB-type</p>
+<pre><code class="language-assmebly">beq  x1, x2, Label   # branch if x1 == x2
+bne  x1, x2, Label   # branch if x1 != x2
+blt  x1, x2, Label   # branch if x1 &lt; x2 (signed)
+bge  x1, x2, Label   # branch if x1 &gt;= x2
+bltu x1, x2, Label   # unsigned comparison
+</code></pre>
+<ul>
+<li>Offset is <strong>PC-relative</strong>, in multiples of 2 bytes (must be even).</li>
+<li>Encoded as a <strong>12-bit signed offset</strong>, shifted left by 1 (so actual range: ±4 KiB).</li>
+</ul>
+<h3 id="Unconditional-Jumps"><a href="#Unconditional-Jumps" class="headerlink" title="Unconditional Jumps"></a>Unconditional Jumps</h3><pre><code class="language-assmebly">jal  x1, Label	# jump and link: x1 = PC+4; PC = Label
+jalr x0, 0(x1)	# jump register (often used for return, x1 is ra): PC = x1 + 0
+</code></pre>
+<h3 id="Recursive"><a href="#Recursive" class="headerlink" title="Recursive"></a>Recursive</h3><pre><code class="language-assmebly">addi sp, sp, -16    # Allocate 16 bytes on stack
+
+sd ra, 8(sp)        # Save return address at sp + 8
+sd s0, 0(sp)        # Save callee-saved register s0 at sp + 0
+
+ld ra, 8(sp)        # Restore return address
+ld s0, 0(sp)        # Restore s0
+addi sp, sp, 16     # Deallocate 16 bytes (move sp back up)
+</code></pre>
+<ul>
+<li>When your function calls another function (e.g., recursively), the <code>jal</code> instruction overwrites <code>ra</code>.</li>
+<li>So you must <strong>save the original <code>ra</code></strong> before making the call.</li>
+<li>On RV64, pointers&#x2F;addresses are 8 bytes → needs 8 bytes in memory.</li>
+</ul>
+<pre><code class="language-c">long long int fact(long long int n) {
+	if (n &lt; 1) return 1;
+	else return n * fact(n - 1);
+}
+</code></pre>
+<p>To assmebly:</p>
+<pre><code class="language-assmebly">fact:
+	addi sp,sp,-16 		# Save return address and n on stack
+	sd x1,8(sp)
+	sd x10,0(sp)
+	addi x5,x10,-1 		# x5 = n - 1
+	bge x5,x0,L1 		# if n &gt;= 1, go to L1
+	addi x10,x0,1 		# Else, set return value to 1
+	addi sp,sp,16 		# Pop stack, don’t bother restoring values
+	jalr x0,0(x1) 		# Return
+L1: addi x10,x10,-1 	# n = n - 1
+	jal x1,fact 		# call fact(n-1)
+	addi x6,x10,0 		# move result of fact(n - 1) to x6
+	ld x10,0(sp) 		# Restore caller’s n
+	ld x1,8(sp) 		# Restore caller’s return address
+	addi sp,sp,16 		# Pop stack
+	mul x10,x10,x6 		# return n * fact(n-1)
+	jalr x0,0(x1) 		# return
+</code></pre>
+<p>递归时需要手动移动栈顶指针，存储函数返回地址（<code>x1</code>），以及函数的返回值（在这里指定为 <code>x10</code>）</p>
+<h1 id="Number-Representation"><a href="#Number-Representation" class="headerlink" title="Number Representation"></a>Number Representation</h1><h2 id="Two’s-Complement"><a href="#Two’s-Complement" class="headerlink" title="Two’s Complement"></a>Two’s Complement</h2><ul>
+<li><strong>Unsigned</strong>: Range $0$ to $2^n−1$</li>
+<li><strong>Two’s Complement Signed</strong>（补码有符号整数）: Range $−2^{n−1}$ to $2^{n−1}−1$</li>
+</ul>
+<h2 id="Sign-Extension"><a href="#Sign-Extension" class="headerlink" title="Sign Extension"></a>Sign Extension</h2><ul>
+<li>When loading a <strong>byte</strong> into a 64-bit register:<ul>
+<li><code>lb</code> (load byte): <strong>sign-extends</strong> the byte → preserves signed value</li>
+<li><code>lbu</code> (load byte unsigned): <strong>zero-extends</strong> → treats as unsigned</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-assmebly"># x2 = 0xFF
+lb x1, 0(x2) # x1 = 0xFFFFFFFFFFFFFFFF (= -1)
+lbu x1, 0(x2)	# x1 = 0x00000000000000FF (= 255)
+</code></pre>
+<h2 id="Hexadecimal"><a href="#Hexadecimal" class="headerlink" title="Hexadecimal"></a>Hexadecimal</h2><ul>
+<li>Instructions are stored in memory as <strong>32-bit binary words</strong>.</li>
+<li>For readability, we use <strong>hexadecimal</strong>（十六进制）:<ul>
+<li>Each hex digit &#x3D; 4 bits → 8 hex digits per instruction</li>
+<li>Example: <code>0x00128313</code> might decode to <code>addi x6, x5, 1</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="Little-Big-Endian"><a href="#Little-Big-Endian" class="headerlink" title="Little&#x2F;Big-Endian"></a>Little&#x2F;Big-Endian</h2><p>Little-Endian:</p>
+<ul>
+<li><strong>Least Significant Byte (LSB)</strong> is stored at the <strong>lowest memory address</strong>.</li>
+<li><strong>Most Significant Byte (MSB)</strong> is stored at the <strong>highest memory address</strong>.</li>
+<li>Used by: <strong>x86, x86-64, RISC-V (by default), ARM (configurable but often little-endian)</strong>.</li>
+</ul>
+<p>Big-Endian:</p>
+<ul>
+<li><strong>Most Significant Byte (MSB)</strong> is stored at the <strong>lowest memory address</strong>.</li>
+<li><strong>Least Significant Byte (LSB)</strong> is stored at the <strong>highest memory address</strong>.</li>
+<li>Used by: <strong>Motorola 68k, SPARC (historically), network protocols (TCP&#x2F;IP &#x3D; “network byte order” &#x3D; big-endian)</strong>.</li>
+</ul>
+<blockquote>
+<p>Show how the value 0xabcdef12 would be arranged in memory of a little-endian  and a big-endian machine. Assume the data are stored starting at address 0 and that  the word size is 4 Bytes.</p>
+</blockquote>
+<p>First, split the value to: AB, CD, EF, 12</p>
+<p>In little-endian, it would be:</p>
+<table>
+<thead>
+<tr>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>12</td>
+<td>EF</td>
+<td>CD</td>
+<td>AB</td>
+</tr>
+</tbody></table>
+<p>In big-endian, it would be:</p>
+<table>
+<thead>
+<tr>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AB</td>
+<td>CD</td>
+<td>EF</td>
+<td>12</td>
+</tr>
+</tbody></table>
+<h1 id="Exam"><a href="#Exam" class="headerlink" title="Exam"></a>Exam</h1><blockquote>
+<p>Translate the following C code to RISC-V.  Assume that the variables f , g , h , i , and j are assigned to registers x5, x6, x7, x28, and x29, respectively. Assume that the base address of the arrays A and B are in registers x10 and x11, respectively. Assume that the elements of the arrays A and B are 8-byte words:</p>
+<p><code>B[8] = A[i] + A[j]</code>;</p>
+</blockquote>
+<p>we need:</p>
+<ul>
+<li><code>ld</code>: load double word from arrays A and B. Notes: <code>ld rd, offset(rs1)</code>，offset 必须是 12 位有符号立即数</li>
+<li><code>add</code>: calculate the result.</li>
+<li><code>sd</code>: store double word to array B.</li>
+<li><code>slli</code>: convert index to offset. offset &#x3D; index $\times$ 8. Can be replaced by <code>mul</code></li>
+</ul>
+<p>We can use <code>x5</code> - <code>x7</code> &#x2F; <code>x28</code> - <code>x31</code> to store temporary variables.</p>
+<pre><code class="language-assembly"># get offset
+slli x30, x28, 3	# x30 = x28 &lt;&lt; 3 = x28 * 8
+slli x31, x29, 3	# x31 = x29 &lt;&lt; 3 = x29 * 8
+
+# get address
+add x30, x10, x30	# x30 = x10 + x30 = &amp;A + x30 = &amp;A[i]
+add x31, x10, x31	# x31 = &amp;A[j]
+
+# load from arrays
+ld x5, 0(x30)		# x5 = A[i]
+ld x6, 0(x31)		# x6 = A[j]
+
+# add
+add x7, x5, x6		# x7 = x5 + x6
+
+# store to arrays
+sd x7, 64(x11)		# B[8] = x7
+</code></pre>
+<blockquote>
+<p>Translate the following RISC-V code to C. Assume that the variables f , g , h , i , and j are assigned to registers x5, x6, x7, x28,  and x29 , respectively. Assume that the base address of the arrays A and B are in  registers x10 and x11 , respectively.</p>
+<p>addi x30, x10, 8 <br>addi x31, x10, 0 <br>sd x31, 0(x30)<br>ld x30, 0(x30)<br>add x5,x30, x31 </p>
+</blockquote>
+<pre><code class="language-c">long long int x30 = &amp;A[1];
+long long int x31 = &amp;A[0];
+
+x31 = *(x30);
+x30 = *(x30);
+f = x30 + x31;
+</code></pre>
+<blockquote>
+<p>Find the shortest sequence of RISC-V instructions that extracts bits 16 down to 11  from register x5 and uses the value of this field to replace bits 31 down to 26 in  register x6 without changing the other bits of registers x5 or x6 . (Be sure to test your  code using x5 &#x3D; 0 and x6 &#x3D; 0xffffffffffffffff . Doing so may reveal a common  oversight.)</p>
+</blockquote>
+<pre><code class="language-assembly">srli a0, x5, 11
+andi a0, a0, 0x3f
+slli a0, a0, 26
+
+li a1, 0x3f
+slli a1, a1, 26
+not a1, a1
+and x6, x6, a1
+
+or x6, x6, a0
+</code></pre>
+<blockquote>
+<p>Suppose the program counter (PC) is set to 0x20000000 . </p>
+<p>a) What range of addresses can be reached using the RISC-V jump-and-link ( jal )  instruction? (In other words, what is the set of possible values for the PC after the  jump instruction executes?) </p>
+<p>b)  What range of addresses can be reached using the RISC-V branch if equal ( beq )  instruction? (In other words, what is the set of possible values for the PC after the  branch instruction executes?)</p>
+</blockquote>
+<p><code>jal</code> 使用 20-bit 有符号立即数，跳转范围为 $[-2^{19},2^{19}-1]$，立即数左移 1 位，得</p>
+<p>$$<br>[-2^{20},2^{20}-2]<br>$$</p>
+<p><code>beq</code> 使用 12-bit 有符号立即数，跳转范围为 $[-2^{11}, 2^{11}-1]$，立即数左移 1 位，得</p>
+<p>$$<br>[-2^{12},2^{12}-2]<br>$$</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://musuyin.github.io">Musuyin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://musuyin.github.io/cs/computer-architecture/RISC-V%E6%8C%87%E4%BB%A4%E9%9B%86/">https://musuyin.github.io/cs/computer-architecture/RISC-V%E6%8C%87%E4%BB%A4%E9%9B%86/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://musuyin.github.io" target="_blank">木素音的小站</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%B1%87%E7%BC%96/">汇编</a><a class="post-meta__tags" href="/tags/RISC-V/">RISC-V</a><a class="post-meta__tags" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84/">计算机系统结构</a></div><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/cs/computer-architecture/%E5%A4%84%E7%90%86%E5%99%A8/" title="The Processor"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">The Processor</div></div><div class="info-2"><div class="info-item-1">单周期处理器核心子集 存储器访问指令：ld 和 sd 算术逻辑指令：add &#x2F; sub &#x2F; and &#x2F; or 条件分支指令：beq  指令执行核心逻辑 程序计数器（PC）发送到指令所在的存储单元，并从中取出指令 根据指令的某些字段选择要读取的一个或两个寄存器 对于 ld 指令，只需要读取一个寄存器，但大多数其他指令需要读取两个寄存器   所有类型的指令在读取寄存器后都使用算术逻辑单元（ALU）进行运算 经过 ALU 后完成各类指令的所需操作都不同  基础的抽象电路图![[images&#x2F;Pasted image 20260113211749.png]]  PC 的数据来自两个加法器中的一个，需要根据一个数据选择器（multiplexor）进行选择 ALU 的第二个输入来自寄存器或者立即数，也需要一个数据选择器进行选择 ALU 的控制线会根据指令的字段来设置，从而控制 ALU 的运算类型  加入选择器的电路图![[images&#x2F;Pasted image 20260113212133.png]]  上面的 Mux 控制 PC，当 ALU...</div></div></div></a><a class="pagination-related" href="/cs/interview/Hot100-Java/" title="Hot100-Java"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Hot100-Java</div></div><div class="info-2"><div class="info-item-1">数组T14. 除自身以外数组的乘积 Given an integer array nums, return an array answer such that answer[i] is equal to the product of all the elements of nums except nums[i]. The product of any prefix or suffix of nums is guaranteed to fit in a 32-bit integer. You must write an algorithm that runs in O(n) time and without using the division operation.  如果是遍历每个数，令每个数在每个位置上相乘，则时间复杂度为 $O(n^2)$，不满足题意 使用 lmul 和 rmul 记录：当前这个数左侧所有数的乘积与当前这个数右侧所有数的乘积，就能使用 lmul[i]*rmul[i] 得到对应位置的乘积 public class Solution {     public in...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/cs/embedded-system/RISC-V%20%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4/" title="RISC-V 汇编指令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-07</div><div class="info-item-2">RISC-V 汇编指令</div></div><div class="info-2"><div class="info-item-1">指令概述 程序：计算机执行过程的序列，编写程序就是编写这个过程序列 指令集的规模 不宜过小：通过指令的排列组合，能达到高级编程语言的所有效果 不宜过大：指令集规模应精简，以免增加处理器电路的负担    指令格式基本格式&lt;opcode&gt; {&lt;cond&gt;}{S} &lt;Rd&gt;,&lt;Rn&gt;,{&lt;Op2&gt;}	; comment    &lt;&gt; 必须 {} 可选  指令存储形式 汇编代码格式一个完整的 ARM 汇编由两部分组成：声明和代码段。 声明 声明：在一个程序之前先要进行声明 声明代码段：用 AREA 指令定义一个段，说明所定义段的相关属性（段的名字和段的属性等） 声明 ARM 指令：用 CODE 来声明程序为 ARM 指令 声明程序入口：用 ENTRY 指令标识程序的入口点   在程序完成后要用 END 指令声明程序结束。每一个汇编程序段都必须有一条 END 指令，指示代码段的结束。  代码段 段：在 ARM 汇编语言程序中，以程序段为单位组织代码。段是相对独立的指令或数据序列，具有特定的名称。 代码段：代码段的内容为执...</div></div></div></a><a class="pagination-related" href="/cs/computer-architecture/%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%80%A7%E8%83%BD/" title="CPU Performance"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-26</div><div class="info-item-2">CPU Performance</div></div><div class="info-2"><div class="info-item-1">CPU PerformancePerformanceDefine. $$\text{Performance}&#x3D;\frac{1}{\text{Execution Time}}$$ X is $n$ time faster than Y Equals to: $$\frac{\text{Performance}{x}}{\text{Performance}{y}}&#x3D;\frac{\text{Execution Time}{y}}{\text{Execution Time}{x}}&#x3D;n$$ Measuring Execution Time Elapsed time Total response time, including all aspects Processing, I&#x2F;O, OS overhread, idle time   Determines system performance   CPU time Time spent processing a given job Discounts I&#x2F;O time, other job...</div></div></div></a><a class="pagination-related" href="/cs/computer-architecture/%E5%A4%84%E7%90%86%E5%99%A8/" title="The Processor"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-26</div><div class="info-item-2">The Processor</div></div><div class="info-2"><div class="info-item-1">单周期处理器核心子集 存储器访问指令：ld 和 sd 算术逻辑指令：add &#x2F; sub &#x2F; and &#x2F; or 条件分支指令：beq  指令执行核心逻辑 程序计数器（PC）发送到指令所在的存储单元，并从中取出指令 根据指令的某些字段选择要读取的一个或两个寄存器 对于 ld 指令，只需要读取一个寄存器，但大多数其他指令需要读取两个寄存器   所有类型的指令在读取寄存器后都使用算术逻辑单元（ALU）进行运算 经过 ALU 后完成各类指令的所需操作都不同  基础的抽象电路图![[images&#x2F;Pasted image 20260113211749.png]]  PC 的数据来自两个加法器中的一个，需要根据一个数据选择器（multiplexor）进行选择 ALU 的第二个输入来自寄存器或者立即数，也需要一个数据选择器进行选择 ALU 的控制线会根据指令的字段来设置，从而控制 ALU 的运算类型  加入选择器的电路图![[images&#x2F;Pasted image 20260113212133.png]]  上面的 Mux 控制 PC，当 ALU...</div></div></div></a><a class="pagination-related" href="/cs/computer-architecture/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%AE%97%E6%9C%AF/" title="Arithmetic For Computer"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-11-26</div><div class="info-item-2">Arithmetic For Computer</div></div><div class="info-2"><div class="info-item-1">Arithmetic Logic Unit (ALU)The ALU executes all arithmetic and logical operations defined by the ISA:  Arithmetic: add, sub, mul, div Logical: and, or, xor, shifts (sll, srl) Comparisons: Used in branch instructions like beq, bne, blt, bge  Overflow Detection Overflow occurs when the result of an operation cannot be represented within the fixed bit-width (e.g., 64 bits). In RISC-V, overflow in signed operations (e.g., add, addi, sub) triggers a hardware exception, and the Exception Program Co...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Musuyin</div><div class="author-info-description">Musuyin's Blog</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/musuyin"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/musuyin" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:musuyin@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">即使迷茫，也要前进！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#RISC-V-Instruction-Set-ISA"><span class="toc-number">1.</span> <span class="toc-text">RISC-V Instruction Set(ISA)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RISC"><span class="toc-number">1.1.</span> <span class="toc-text">RISC</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Data-Store"><span class="toc-number">1.2.</span> <span class="toc-text">Data Store</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Register-Operands"><span class="toc-number">1.2.1.</span> <span class="toc-text">Register Operands</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Memory-Operands"><span class="toc-number">1.2.2.</span> <span class="toc-text">Memory Operands</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Format-of-Instructions"><span class="toc-number">2.</span> <span class="toc-text">Format of Instructions</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#R-format"><span class="toc-number">2.1.</span> <span class="toc-text">R-format</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#I-format"><span class="toc-number">2.2.</span> <span class="toc-text">I-format</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#S-format"><span class="toc-number">2.3.</span> <span class="toc-text">S-format</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Core-Instructions"><span class="toc-number">3.</span> <span class="toc-text">Core Instructions</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Arithmetic-Logic"><span class="toc-number">3.1.</span> <span class="toc-text">Arithmetic &amp; Logic</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Immediate-Operands"><span class="toc-number">3.2.</span> <span class="toc-text">Immediate Operands</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Memory-Access"><span class="toc-number">3.3.</span> <span class="toc-text">Memory Access</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Load-Word"><span class="toc-number">3.3.1.</span> <span class="toc-text">Load Word</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Store-Word"><span class="toc-number">3.3.2.</span> <span class="toc-text">Store Word</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Control-Flow"><span class="toc-number">3.4.</span> <span class="toc-text">Control Flow</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Conditional-Branches"><span class="toc-number">3.4.1.</span> <span class="toc-text">Conditional Branches</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Unconditional-Jumps"><span class="toc-number">3.4.2.</span> <span class="toc-text">Unconditional Jumps</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Recursive"><span class="toc-number">3.4.3.</span> <span class="toc-text">Recursive</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Number-Representation"><span class="toc-number">4.</span> <span class="toc-text">Number Representation</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Two%E2%80%99s-Complement"><span class="toc-number">4.1.</span> <span class="toc-text">Two’s Complement</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Sign-Extension"><span class="toc-number">4.2.</span> <span class="toc-text">Sign Extension</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Hexadecimal"><span class="toc-number">4.3.</span> <span class="toc-text">Hexadecimal</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Little-Big-Endian"><span class="toc-number">4.4.</span> <span class="toc-text">Little&#x2F;Big-Endian</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Exam"><span class="toc-number">5.</span> <span class="toc-text">Exam</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/cloud/terraform/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" title="Terraform 基础知识">Terraform 基础知识</a><time datetime="2026-04-14T16:00:00.000Z" title="发表于 2026-04-15 00:00:00">2026-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/tool/obsidian/Mermaid%E4%BD%BF%E7%94%A8%E6%89%8B%E5%86%8C/" title="Mermaid使用">Mermaid使用</a><time datetime="2026-04-13T16:00:00.000Z" title="发表于 2026-04-14 00:00:00">2026-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8A%E4%BC%98%E5%85%88%E5%88%86%E6%9E%90/" title="自底向上优先分析">自底向上优先分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/LR%E5%88%86%E6%9E%90/" title="LR分析">LR分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/statistics-learning/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA/" title="支持向量机">支持向量机</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Musuyin</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

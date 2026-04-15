@@ -1,0 +1,759 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>系统控制 | 木素音的小站</title><meta name="author" content="Musuyin"><meta name="copyright" content="Musuyin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="功能组件复位控制复位 Reset：用手动或自动的方法发信号给硬件特定接口，使软件恢复到特定的程序段运行 复位源不同的嵌入式系统有不同的复位源，按照复位源的不同可以将复位分为系统复位、电源复位 ![[images&#x2F;Pasted image 20260109151730.png]] 一般系统存在多个复位源：  外部复位引脚 内部看门狗复位 通过 NVIC（嵌套向量中断控制器）产生的软件复位">
+<meta property="og:type" content="article">
+<meta property="og:title" content="系统控制">
+<meta property="og:url" content="https://musuyin.github.io/cs/embedded-system/%E7%B3%BB%E7%BB%9F%E6%8E%A7%E5%88%B6/index.html">
+<meta property="og:site_name" content="木素音的小站">
+<meta property="og:description" content="功能组件复位控制复位 Reset：用手动或自动的方法发信号给硬件特定接口，使软件恢复到特定的程序段运行 复位源不同的嵌入式系统有不同的复位源，按照复位源的不同可以将复位分为系统复位、电源复位 ![[images&#x2F;Pasted image 20260109151730.png]] 一般系统存在多个复位源：  外部复位引脚 内部看门狗复位 通过 NVIC（嵌套向量中断控制器）产生的软件复位">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://musuyin.github.io/img/butterfly-icon.png">
+<meta property="article:published_time" content="2026-01-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-10T03:07:24.274Z">
+<meta property="article:author" content="Musuyin">
+<meta property="article:tag" content="嵌入式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://musuyin.github.io/img/butterfly-icon.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "系统控制",
+  "url": "https://musuyin.github.io/cs/embedded-system/%E7%B3%BB%E7%BB%9F%E6%8E%A7%E5%88%B6/",
+  "image": "https://musuyin.github.io/img/butterfly-icon.png",
+  "datePublished": "2026-01-08T16:00:00.000Z",
+  "dateModified": "2026-03-10T03:07:24.274Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Musuyin",
+      "url": "https://musuyin.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://musuyin.github.io/cs/embedded-system/%E7%B3%BB%E7%BB%9F%E6%8E%A7%E5%88%B6/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":null,"highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '系统控制',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">木素音的小站</span></a><a class="nav-page-title" href="/"><span class="site-name">系统控制</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 娱乐</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li><li><a class="site-page child" href="/games/"><i class="fa-fw fas fa-game"></i><span> 游戏</span></a></li><li><a class="site-page child" href="/animes/"><i class="fa-fw fas fa-video"></i><span> 番剧</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">系统控制</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-01-08T16:00:00.000Z" title="发表于 2026-01-09 00:00:00">2026-01-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-10T03:07:24.274Z" title="更新于 2026-03-10 11:07:24">2026-03-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E5%B5%8C%E5%85%A5%E5%BC%8F/">嵌入式</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="功能组件"><a href="#功能组件" class="headerlink" title="功能组件"></a>功能组件</h1><h2 id="复位控制"><a href="#复位控制" class="headerlink" title="复位控制"></a>复位控制</h2><p>复位 Reset：用手动或自动的方法发信号给硬件特定接口，使软件恢复到特定的程序段运行</p>
+<h3 id="复位源"><a href="#复位源" class="headerlink" title="复位源"></a>复位源</h3><p>不同的嵌入式系统有不同的复位源，按照复位源的不同可以将复位分为<strong>系统复位、电源复位</strong></p>
+<p>![[images&#x2F;Pasted image 20260109151730.png]]</p>
+<p>一般系统存在多个复位源：</p>
+<ul>
+<li>外部复位引脚</li>
+<li>内部看门狗复位</li>
+<li>通过 NVIC（嵌套向量中断控制器）产生的软件复位</li>
+<li>上电&#x2F;掉电复位</li>
+<li>低电压检测电路产生的复位信号</li>
+</ul>
+<h3 id="系统复位"><a href="#系统复位" class="headerlink" title="系统复位"></a>系统复位</h3><h4 id="外部复位"><a href="#外部复位" class="headerlink" title="外部复位"></a>外部复位</h4><p>如果应用程序仅使用内部上电复位（POR）电路，那么 RESET 输入端必须通过一个可选的上拉电阻（1 ～ 100kΩ）连接到电源（VDD）</p>
+<p>![[images&#x2F;Pasted image 20260109152048.png]]</p>
+<h4 id="看门狗复位"><a href="#看门狗复位" class="headerlink" title="看门狗复位"></a>看门狗复位</h4><ul>
+<li>在看门狗计数器发生溢出时，可以事先设定程序下一步的去向，避免溢出时程序运行的不确定性，增加程序的可靠性</li>
+<li>看门狗计数发生溢出时仅将程序计数器清零，而不是像上电复位那样，将所有的寄存器都要清零</li>
+</ul>
+<h4 id="软件复位"><a href="#软件复位" class="headerlink" title="软件复位"></a>软件复位</h4><ul>
+<li>软件复位则是通过软件触发让 MCU 自己对自己进行复位，软件复位是一种通过执行某个指令来触发 MCU 复位的系统复位</li>
+<li>软件复位可以复位某个特定的外设或者复位整个微控制器，包括内核在内的整个微控制器，均可以通过设置中断和复位控制寄存器的相应位实现复位</li>
+</ul>
+<h3 id="电源复位"><a href="#电源复位" class="headerlink" title="电源复位"></a>电源复位</h3><h4 id="上电复位"><a href="#上电复位" class="headerlink" title="上电复位"></a>上电复位</h4><p>![[images&#x2F;Pasted image 20260109152157.png]]</p>
+<h4 id="掉电复位"><a href="#掉电复位" class="headerlink" title="掉电复位"></a>掉电复位</h4><ul>
+<li>如果嵌入式系统在运行过程中电源电压突然发生跌落，会导致程序运行的不确定，所以此时需要将硬件板复位，使其处于一个确定的状态</li>
+<li>当电压跌落到一定的阈值以下时内部的掉电复位控制器中的条件检测位（BOR）就会被置为 1，表示将执行掉电复位程序</li>
+</ul>
+<h2 id="时钟控制"><a href="#时钟控制" class="headerlink" title="时钟控制"></a>时钟控制</h2><ul>
+<li>硬件板上电路的时钟越快，功耗越大，且其抗电磁干扰能力也会减弱，所以不可能一味地提高时钟频率来满足各种设备的需求</li>
+<li>因此较为复杂的 MCU 一般都采取多时钟源的方法来解决这个问题</li>
+</ul>
+<h3 id="输入时钟"><a href="#输入时钟" class="headerlink" title="输入时钟"></a>输入时钟</h3><ul>
+<li>从时钟源频率分为<strong>高速时钟</strong>和<strong>低速时钟</strong><ul>
+<li>高速外部时钟和高速内部时钟都属于高速时钟</li>
+<li>低速外部时钟和低速内部时钟都属于低速时钟</li>
+</ul>
+</li>
+<li>从芯片角度分为片内时钟和片外时钟<ul>
+<li>片内时钟由芯片<strong>内部 RC 振荡器</strong>产生，具有起振较快的优点，因此在系统刚刚启动的时候默认采用内部高速时钟</li>
+<li>片外时钟通常由<strong>外部晶体振荡器</strong>输入，在精度和稳定性上都具有较大的优势。上电后通过软件配置的方式将系统时钟转而采用高速外部时钟信号</li>
+</ul>
+</li>
+</ul>
+<p>时钟使用：</p>
+<ul>
+<li>高速外部时钟<ul>
+<li>高速外部时钟通常以外部晶体作为时钟源，常用的晶体频率根据芯片的不同而发生变化</li>
+</ul>
+</li>
+<li>高速内部时钟<ul>
+<li>高速内部时钟由芯片内 RC 电阻、电容时钟振荡器产生，常见频率参数有 5MHz，8MHz 等，虽然不稳定，但是它的启动时间比 HSE 晶体振荡器短</li>
+<li>然而，即使在校准之后它的时钟频率精度仍较差，Cortex-M4 从上电开始即采用 HIS 作为初始的系统时钟</li>
+</ul>
+</li>
+<li>低速外部时钟<ul>
+<li>低速外部时钟通常以外部晶振作为时钟源，晶体一般选择一个低速外部晶体或陶瓷谐振器</li>
+<li>常见频率参数有 32.768kHz，11.0592kHz 等</li>
+<li>它为实时时钟或者其他定时功能提供一个低功耗且精确的时钟源。</li>
+</ul>
+</li>
+<li>低速内部时钟<ul>
+<li>低速内部时钟由片内 RC 电阻、电容时钟振荡器产生，LSI RC 担当一个低功耗时钟源的角色</li>
+<li>常见频率参数有 10kHz、32.768kHz、128kHz 等</li>
+<li>可以提供给实时时钟模块和看门狗模块</li>
+</ul>
+</li>
+</ul>
+<h3 id="系统时钟"><a href="#系统时钟" class="headerlink" title="系统时钟"></a>系统时钟</h3><ul>
+<li>系统时钟 SYSCLK 由多路选择器 SW 根据用户设置来选择 PLLCLK、HSE 或者 HIS 中的一路作为输出而得，SYSCLK 是片上大部分部件的时钟来源。</li>
+<li>为了让用户能够实时检测系统时钟是否运行正常， Cortex-M4 系列的微控制器专门提供了引脚 MCO。用户可以通过软件编程的方式，选择 SYSCLK、PLLCLK、 HSE 或者 HIS 中的一路在 MCO 上输出以供检测</li>
+</ul>
+<h3 id="系统时钟分频得到其他时钟"><a href="#系统时钟分频得到其他时钟" class="headerlink" title="系统时钟分频得到其他时钟"></a>系统时钟分频得到其他时钟</h3><ul>
+<li>HCLK：HCLK 是高速总线 AHB 时钟，AHB 主要用于高性能模块，如 CPU、DMA 和 DSP 等之间的连接。</li>
+<li>FCLK：Cortex-M4 内核的“自由运行”时钟，同样由系统时钟 SYSCLK 经过 AHB 预分频器分频后直接得到，并且与 HCLK 互相同步。</li>
+<li>PCLK1：外设时钟，由系统时钟 SYSCLK 经过 AHB 预分频器，再经过 APB1 预分频器分频后得到。其主要作用是为挂载在 APB1 总线上的时钟提供时钟信号</li>
+</ul>
+<h2 id="电源控制"><a href="#电源控制" class="headerlink" title="电源控制"></a>电源控制</h2><p>微控制器依靠低功耗模式降低处理器功耗，常见的低功耗模式包括：</p>
+<ul>
+<li>睡眠模式</li>
+<li>停机模式</li>
+<li>待机模式</li>
+</ul>
+<h3 id="睡眠模式"><a href="#睡眠模式" class="headerlink" title="睡眠模式"></a>睡眠模式</h3><ul>
+<li>状态：Cortex 的内核停止工作，但<strong>外设还在继续工作</strong></li>
+<li>进入：执行了 WFE 或 WFI 指令</li>
+<li>退出：某个外设产生事件或者中断请求，内核才会被唤醒，从而退出睡眠模式</li>
+</ul>
+<h3 id="停机模式"><a href="#停机模式" class="headerlink" title="停机模式"></a>停机模式</h3><ul>
+<li>状态：内核和外设均停止工作</li>
+<li>进入：电源控制寄存器中的相应位清零时，遇到 WFE 或 WFI 指令，就会进入停机模式</li>
+<li>退出：任意一个外部中断&#x2F;事件控制（EXTI）信号唤醒</li>
+</ul>
+<h3 id="待机模式"><a href="#待机模式" class="headerlink" title="待机模式"></a>待机模式</h3><ul>
+<li>状态：内核和外设都停止工作，而且内部的电压调压器也被关闭</li>
+<li>进入：电源控制寄存器中的相应位置位时，遇到 WFE 或 WFI 指令，就会进入待机模式</li>
+<li>退出：&#x2F;RESET 引脚上的外部复位信号或者 RTC 的闹钟事件。</li>
+</ul>
+<h2 id="中断控制"><a href="#中断控制" class="headerlink" title="中断控制"></a>中断控制</h2><h3 id="嵌套向量中断控制器"><a href="#嵌套向量中断控制器" class="headerlink" title="嵌套向量中断控制器"></a>嵌套向量中断控制器</h3><p>嵌套向量中断控制器（Nested Vectored Interrupt Controller, NVIC），控制着整个芯片中断相关的功能，它跟内核紧密耦合</p>
+<h3 id="中断"><a href="#中断" class="headerlink" title="中断"></a>中断</h3><p>当出现了某个特殊事件时， CPU 会终止当前程序的执行，转而去执行该事件的处理程序（中断服务程序），待中断服务程序执行完毕，在返回断点继续执行原来的程序，这个过程称为中断</p>
+<h3 id="中断源"><a href="#中断源" class="headerlink" title="中断源"></a>中断源</h3><p>能引发中断的事件称为中断源。</p>
+<p>通常一个微控制器系统上，中断源可以是由微处理器异常引发的系统异常中断，也可以由外设引发的外部中断。</p>
+<p>系统异常中断因素包括非屏蔽中断、存储器管理、总线故障等，外部中断因素包括定时器溢出、串口收到数据等</p>
+<h3 id="中断屏蔽"><a href="#中断屏蔽" class="headerlink" title="中断屏蔽"></a>中断屏蔽</h3><p>在微控制器中，程序员可以通过设置相应的中断屏蔽位，禁止 CPU 响应某个中断，从而实现中断屏蔽。</p>
+<p>一个中断源能否被响应，一般由<strong>总中断允许控制位</strong>和该中断<strong>自身的中断允许控制位</strong>共同决定，这两个中断控制位中的任何一个被关闭，该中断就无法被响应</p>
+<h3 id="中断处理过程"><a href="#中断处理过程" class="headerlink" title="中断处理过程"></a>中断处理过程</h3><h4 id="中断响应"><a href="#中断响应" class="headerlink" title="中断响应"></a>中断响应</h4><ul>
+<li>保护现场：保护现场是为了在中断处理完成后，可以返回断点处继续执行下去而必须做的操作，微处理器系统保护现场通常是通过将 CPU 寄存器的值进栈实现的</li>
+<li>查找中断服务程序地址：中断发生后，CPU 根据中断向量表准确地找到这个中断对应的处理程序</li>
+<li>中断向量表：按中断号从小到大依次存放着所有中断处理程序的入口地址</li>
+</ul>
+<h4 id="执行中断服务程序"><a href="#执行中断服务程序" class="headerlink" title="执行中断服务程序"></a>执行中断服务程序</h4><p>每个中断都有自己的对应的中断服务程序，用来处理中断，CPU 响应中断后转而执行对应的中断服务程序，通常中断服务程序又称为中断服务函数，由用户根据具体的应用使用汇编语言或 C 语言编写，用来实现对中断真正的处理操作</p>
+<h4 id="中断返回"><a href="#中断返回" class="headerlink" title="中断返回"></a>中断返回</h4><p>CPU 执行中断服务程序完毕后，通过恢复现场，即 CPU 关键寄存器出栈实现中断返回，从断点处继续执行源程序</p>
+<h3 id="中断优先级"><a href="#中断优先级" class="headerlink" title="中断优先级"></a>中断优先级</h3><p>中断的优先级是根据中断实时性、重要性、软件处理的方便性预先设定的。当同时有多个中断请求产生时，CPU 会优先响应优先级较高的中断请求</p>
+<h4 id="中断嵌套"><a href="#中断嵌套" class="headerlink" title="中断嵌套"></a>中断嵌套</h4><p>中断优先级不仅用于并发中断，还用于嵌套中断。</p>
+<p>中断嵌套是指当系统正在执行一个中断服务时，又有新的中断事件发生而产生了新的中断请求。当新发生的中断的优先级高于正在处理的中断时，CPU 可以<strong>终止执行优先级低的当前中断处理程序</strong>，转去执行新发生的、优先级较高的中断，处理完毕后才返回原来的中断处理程序继续执行</p>
+<h3 id="中断原理"><a href="#中断原理" class="headerlink" title="中断原理"></a>中断原理</h3><p>![[images&#x2F;Pasted image 20260109160045.png]]</p>
+<h3 id="中断配置"><a href="#中断配置" class="headerlink" title="中断配置"></a>中断配置</h3><ul>
+<li>建立中断向量表<ul>
+<li>中断向量表的建立必须在用户应用程序执行前完成，用户可以根据应用需求，选择在 Flash 或在 RAM 中建立中断向量表</li>
+</ul>
+</li>
+<li>分配栈空间并初始化<ul>
+<li>栈的初始化工作通常是在微处理器上电复位后执行复位程序完成的。栈空间的分配通常位于启动代码的起始位置</li>
+</ul>
+</li>
+<li>设置中断优先级<ul>
+<li>设置中断优先级是用户在应用程序中编写代码配置 NVIC 实现的，首先设置中断优先级的分组位数，然后设置中断的抢占优先级和子优先级</li>
+</ul>
+</li>
+<li>使能中断<ul>
+<li>在设置完中断的优先级后，通过失效前面提及的中断屏蔽寄存器中的总中断屏蔽位，可以使能对应的中断</li>
+</ul>
+</li>
+<li>编写对应的中断服务代码<ul>
+<li>具体内容由用户根据需求编写，实现对中断的具体处理</li>
+</ul>
+</li>
+</ul>
+<h2 id="DMA-控制"><a href="#DMA-控制" class="headerlink" title="DMA 控制"></a>DMA 控制</h2><h3 id="传输要求"><a href="#传输要求" class="headerlink" title="传输要求"></a>传输要求</h3><ul>
+<li>传输源： DMA 传输的数据来源</li>
+<li>传输目标： DMA 数据传输的目标地址</li>
+<li>传输单位和需要传输的数据量</li>
+<li>触发信号： 用于触发一次数据传输的动作，可以用来控制数据传输的时机</li>
+</ul>
+<h3 id="传输过程"><a href="#传输过程" class="headerlink" title="传输过程"></a>传输过程</h3><ul>
+<li>DMA 请求，CPU 初始化 DMA 控制器，外设 I&#x2F;O 接口向 DMA 控制器发出 DMA 请求</li>
+<li>DMA 响应，DMA 控制器判断 DMA 请求的优先级，决定是否屏蔽 DMA 请求，如果接受请求则向总线仲裁器提出总线请求。当 CPU 执行完当前总线周期时，可释放总线控制权。此时，总线仲裁器输出总线应答，表示 DMA 已经响应，DMA 控制器从 CPU 接管对总线的控制，并通知外设开始 DMA 传输</li>
+<li>DMA 传输，DMA 数据以规定的传输单位，通常是字进行传输。每个单位的数据传送完成后，DMA 控制器修改地址，并对数据量的传送单位个数进行计数，继而开始下一个单位数据的传送。如此循环往复，直至达到预先设定的传送单位数量为止</li>
+<li>DMA 结束，当规定数量的 DMA 数据传输完成后， DMA 控制器通知外设停止传输，并向 CPU 发送一个信号，例如，产生中断或事件，报告 DMA 数据传输操作结束，同时释放总线控制权</li>
+</ul>
+<h3 id="传输模式"><a href="#传输模式" class="headerlink" title="传输模式"></a>传输模式</h3><ul>
+<li>停止 CPU 访问内存</li>
+<li>周期挪用<ul>
+<li>当 I&#x2F;O 设备没有 DMA 请求、CPU 按程序要求访问内存时，一旦 I&#x2F;O 设备有 DMA 请求，则由 I&#x2F;O 设备挪用一个或几个内存周期，这就是周期挪用方式</li>
+<li>周期挪用的方法既实现了 I&#x2F;O 传送，又较好地发挥了内存和 CPU 的效率，是一种更为广泛采用的方法</li>
+<li>周期挪用的方法适用于 I&#x2F;O 设备读写周期大于内存存储周期的情况</li>
+</ul>
+</li>
+<li>DMA 与 CPU 交替访内存<ul>
+<li>如果 CPU 的工作周期比内存存取周期长很多，此 时采用交替访内的方法可以使 DMA 传送和 CPU 同时 发挥最高的效率</li>
+</ul>
+</li>
+</ul>
+<h3 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h3><ul>
+<li>触发通道<ul>
+<li>微控制器有两个 DMA，每个 DMA 有不同数量的触发通道</li>
+</ul>
+</li>
+<li>优先级<ul>
+<li>与中断的中断源类似，对于 DMA 的每个通道也可以赋予优先级。</li>
+<li>在每个 DMA 中，DMA 的仲裁器根据通道请求的优先级来启动外设&#x2F;存储器的访问，同一时刻一个 DMA 的多个通道可以同时发起 DMA 传送请求，但对于一个 DMA 控制器来说只能允许有一个请求有效</li>
+</ul>
+</li>
+</ul>
+<h3 id="DMA-特点及应用"><a href="#DMA-特点及应用" class="headerlink" title="DMA 特点及应用"></a>DMA 特点及应用</h3><ul>
+<li>DMA 优点<ul>
+<li>减轻了 CPU 的负担</li>
+<li>提高了数据传输的效率</li>
+<li>减少了用户开发的代码量</li>
+</ul>
+</li>
+<li>DMA 使用场合<ul>
+<li>实时性较强的嵌入式系统</li>
+<li>需要高速传送成组数据的系统</li>
+</ul>
+</li>
+</ul>
+<h1 id="初始化配置"><a href="#初始化配置" class="headerlink" title="初始化配置"></a>初始化配置</h1><h2 id="片级初始化"><a href="#片级初始化" class="headerlink" title="片级初始化"></a>片级初始化</h2><ul>
+<li>完成嵌入式微处理器的初始化</li>
+<li>将默认状态逐步设置成系统所要求的工作状态</li>
+<li>纯硬件的初始化过程</li>
+</ul>
+<h2 id="板级初始化"><a href="#板级初始化" class="headerlink" title="板级初始化"></a>板级初始化</h2><ul>
+<li>初始化其他硬件设备</li>
+<li>设置某些软件的数据结构和参数</li>
+<li>包含软件和硬件的初始化过程</li>
+</ul>
+<h2 id="系统初始化"><a href="#系统初始化" class="headerlink" title="系统初始化"></a>系统初始化</h2><p>系统初始化过程以软件初始化为主，主要进行操作系统的初始化。初始化代码完成的操作与具有的硬件平台相关，但大都包括以下内容：</p>
+<ul>
+<li>初始化中断向量表</li>
+<li>初始化存储器系统</li>
+<li>存储器类型、时序和总线宽度的配置</li>
+<li>存储器地址的配置和重映射</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://musuyin.github.io">Musuyin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://musuyin.github.io/cs/embedded-system/%E7%B3%BB%E7%BB%9F%E6%8E%A7%E5%88%B6/">https://musuyin.github.io/cs/embedded-system/%E7%B3%BB%E7%BB%9F%E6%8E%A7%E5%88%B6/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://musuyin.github.io" target="_blank">木素音的小站</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">嵌入式</a></div><div class="post-share"><div class="social-share" data-image="/img/butterfly-icon.png" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/cs/compiler-theory/%E6%A6%82%E8%BF%B0/" title="编译原理概述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">编译原理概述</div></div><div class="info-2"><div class="info-item-1">编译程序一个编译程序就是一个语言翻译程序，把一种语言（源语言）书写的程序翻译成另一种语言（目标语言） ![[images&#x2F;截屏2026-03-29 10.51.27.png]] 预处理程序一个源程序可能分为多个模块存放在不同文件中，通过预处理程序将所有源程序进行汇集 编译类型 一趟编译 多趟编译 具有调试和优化功能的编译  编译过程 词法分析 语法分析 语义分析 中间代码生成 代码优化 目标代码生成  ![[images&#x2F;截屏2026-03-29 10.54.47.png]] 词法分析从左到右一个字符一个字符地读入源程序，并进行扫描和分解，识别出单词（或称为符号） 类别：  标识符 保留字 算符 界符  语法分析在词法分析的基础上将单词序列分解为各类语法短语，可以表示成语法树 ![[images&#x2F;截屏2026-03-29 10.57.51.png]] 语法分析依据语言的语法规则，确定输入串是否构成一个在语法上正确的程序 程序的结构通常由递归规则表示  任何标识符是表达式 任何常数是表达式 若表达式 A 和表达式 B 都是表达式，则以下都是表达式： 4...</div></div></div></a><a class="pagination-related" href="/cs/embedded-system/%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/" title="嵌入式软件设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">嵌入式软件设计</div></div><div class="info-2"><div class="info-item-1">嵌入式系统软件组成无操作系统的嵌入式应用软件无操作系统的嵌入式应用软件采用单任务程序实现系统功能，此单任务程序通常由一段用汇编语言编写的启动代 BootLoader 和用高级语言（如 C、C++等）编写的驱动程序和系统应用程序组成 ![[images&#x2F;Pasted image 20260111192342.png]] 包含操作系统的嵌入式应用软件![[images&#x2F;Pasted image 20260111192408.png]] 初始化引导程序 BootLoader微控制器上电后，无法从硬件上定位 main 函数的入口地址，所以每一种微控制器（处理器）都必须有初始化引导程序。初始化引导程序负责微控制器从“复位”到“开始执行 main 函数”中间这段启动过程。 Cortex-M4 内核的启动代码可以有以下三种执行模式。  通过 boot 引脚设置可以将中断向量表定位于 SRAM 区，即起始地址为 0x2000000，同时复位后 PC 指针位于 0x2000000 处 通过 boot 引脚设置可以将中断向量表定位于用户 Flash 区，即起始地址为 0x8000...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/cs/embedded-system/ARM%E5%A4%84%E7%90%86%E5%99%A8/" title="ARM处理器"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-31</div><div class="info-item-2">ARM处理器</div></div><div class="info-2"><div class="info-item-1">ARM 处理器概述 ARM（Advanced RISC Machine）既是对一类微处理器的统称，也是一个公司的名字，还是一类技术的名称 ARM 处理器采用 RISC（精简指令集）架构，RISC 处理器简化了处理器结构、减少了复杂功能的指令，同时支持处理器扩展  特点 小体积、低功耗、低成本、高性能 支持 Thumb（16bit）&#x2F; ARM（32bit）双指令集，能很好地兼顾性能与代码密度 大量使用寄存器，指令执行速度更快 大多数数据操作都在寄存器中完成，更多单周期指令，便于指令流水线执行 寻址方式灵活简单，执行效率高 指令长度固定  发展历史 架构是“设计蓝图” ：定义了指令集、编程模型等基础规则 处理器是“具体产品”：基于某一版本架构实现的具体硬件内核    ARMv4：嵌入式时代的基石 首个被广泛采用的架构。其标志性创新是引入了 Thumb 指令集，它允许处理器在 16 位和 32 位指令之间切换。 在多数情况下，使用 16 位 Thumb 指令可以显著提高代码密度（节省约 30%的存储空间），这对成本敏感的嵌入式设备至关重要   ARMv7：现代 Cortex ...</div></div></div></a><a class="pagination-related" href="/cs/embedded-system/%E5%A4%96%E8%AE%BE/" title="外设"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-09</div><div class="info-item-2">外设</div></div><div class="info-2"><div class="info-item-1">通信基础通信三要素 电气特性（电压、电流、阻抗） 时序协议（起始位、波特率、时钟相位） 数据格式（帧结构、校验位、停止位）  通信分类   分类维度 类型 说明    同步性 同步通信 有共享时钟（SPI, I²C）    异步通信 无时钟，靠波特率约定（UART）   数据线数 串行 1～2 根数据线（节省引脚）    并行 多根数据线（速度快，引脚多）   方向性 单工 单向（如广播）    半双工 双向，但不能同时（如对讲机）    全双工 双向同时（如电话、UART）   基础外设GPIOGPIO(General Purpose I&#x2F;O)，通用输入输出端口 应用GPIO 基本都是用于芯片与片外器件或设备的交互  检测数字输入，如键盘或开关信号； 驱动 LED，蜂鸣器或 LCD 等其他指示器； 控制片外器件，较高级的使用可以用它们（通过程序）模拟很多器件的时序达到控制相应器件的目的，比如模拟 SPI 和模拟总线等。  特性GPIO 是 MCU 与外界交互的重要途径，它具有如下的特性：  可以独立控制每个 GPIO 口的方向（输入&#x2F;输出模式） 可以独立设置...</div></div></div></a><a class="pagination-related" href="/cs/embedded-system/%E5%B5%8C%E5%85%A5%E5%BC%8F%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="嵌入式操作系统"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-09</div><div class="info-item-2">嵌入式操作系统</div></div><div class="info-2"><div class="info-item-1">嵌入式操作系统常见嵌入式操作系统 VxWorks μC&#x2F;OS-II ThreadX 嵌入式 Linux FreeRTOS mbed OS  实时操作系统 RTOS内核：是一个操作系统的核心。是基于硬件的第一层软件扩充，提供操作系统的最基本的功能，是操作系统工作的基础，它负责管理系统的进程、内存、设备驱动程序、文件和网络系统，决定着系统的性能和稳定性 软实时系统：仅要求事件响应是实时的，并不要求限定某一任务必须在多长时间内完成，例如： 音频-视频播放系统、网页服务等 硬实时系统：不仅要求任务响应要实时，而且要求在规定的时间内完成事件的处理，例如：核动力装置控制、安全气囊控制系统和车辆防抱死系统（ABS）等 RTOS 的优势 硬件资源的充分管理，提高资源的利用率 确定的堆栈使用，方便管理每个任务，实现可预测的内存使用 实现软件系统的多任务机制，开发时只需将重心放在程序流和事件响应中 多任务的并发执行，增加了系统的吞吐量和硬件使用的效率 应用程序代码的可移植性和可重用性更高 由于 RTOS 高可靠性使得嵌入式系统的可靠性和可行性更高 应用程序的开发人员无须再多关心系统的硬件细...</div></div></div></a><a class="pagination-related" href="/cs/embedded-system/%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1/" title="嵌入式软件设计"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-09</div><div class="info-item-2">嵌入式软件设计</div></div><div class="info-2"><div class="info-item-1">嵌入式系统软件组成无操作系统的嵌入式应用软件无操作系统的嵌入式应用软件采用单任务程序实现系统功能，此单任务程序通常由一段用汇编语言编写的启动代 BootLoader 和用高级语言（如 C、C++等）编写的驱动程序和系统应用程序组成 ![[images&#x2F;Pasted image 20260111192342.png]] 包含操作系统的嵌入式应用软件![[images&#x2F;Pasted image 20260111192408.png]] 初始化引导程序 BootLoader微控制器上电后，无法从硬件上定位 main 函数的入口地址，所以每一种微控制器（处理器）都必须有初始化引导程序。初始化引导程序负责微控制器从“复位”到“开始执行 main 函数”中间这段启动过程。 Cortex-M4 内核的启动代码可以有以下三种执行模式。  通过 boot 引脚设置可以将中断向量表定位于 SRAM 区，即起始地址为 0x2000000，同时复位后 PC 指针位于 0x2000000 处 通过 boot 引脚设置可以将中断向量表定位于用户 Flash 区，即起始地址为 0x8000...</div></div></div></a><a class="pagination-related" href="/cs/embedded-system/%E5%AD%98%E5%82%A8%E5%99%A8/" title="存储器"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-01-09</div><div class="info-item-2">存储器</div></div><div class="info-2"><div class="info-item-1">存储器概述 处理器芯片是高度集成的用于计算的电路 存储器芯片是高度集成的用于存储的电路  ![[images&#x2F;Pasted image 20260109184930.png]] 存储器分类当前计算机中，CPU 缓存、内存、外存这三类存储器并存  CPU 缓存：SRAM 内存：DRAM 外存：Flash  RAMRAM（Random Access Memory）随机存储器 随机存取指的是当存储器中的信息被读取或写入时，所需要的时间与这段信息所在的位置无关 根据 RAM 的存储机制，又分为静态随机存储器 SRAM（Static RAM）以及动态随机存储器 DRAM（Dynamic RAM）两种 SRAM SRAM 是靠双稳态触发器来存储一位信息的，因此只要工作电压不存在，存储单元的状态就立即消失，当再次上电时，由于触发器的状态是不稳定的，原来的信息不能恢复 因此 SRAM 最大的特点就是信息的易失性，即掉电后 RAM 中信息全部丢失。   SRAM 不需要刷新电路即能保存它内部存储的数据 存储 1bit 的信息需要 4-6 只晶体管，成本高，性能快  DRAM![[imag...</div></div></div></a><a class="pagination-related" href="/cs/embedded-system/%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/" title="嵌入式系统概述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-10-24</div><div class="info-item-2">嵌入式系统概述</div></div><div class="info-2"><div class="info-item-1">冯诺依曼架构核心组件 数据通路 控制器 内存（存储器） 输入 输出   处理器单板机：嵌入式微处理器（MPU） 微处理器是一种功能较强大的 CPU，通常电路板上必须包括 ROM、RAM、总线接口、各种外设等。 嵌入式微处理器及其存储器、总线、外设等安装在一块电路板上，称为单板计算机，如：树莓派。 常见的例子有 ARM 微处理器（如 SamSung S3C2440，Freescale M21&#x2F;MX 等），Intel 的 80x86 系列，Motorola 的 PowerPC、ARM Cortex-A 系列等  单片机：嵌入式微控制器（MCU） CPU 是计算设备的“大脑”，是指令执行的最终核心。 无论是 MCU 还是 MPU，最核心的计算部分都是一个或多个 CPU 核（如 ARM Cortex-M、Cortex-A、RISC-V 核心等）   MCU 是为控制和执行特定任务而设计的。 它将 CPU 大脑、记忆单元（RAM 和 Flash）、以及各种输入输出接口（如 GPIO、串口、ADC 等）全部集成在一颗芯片上     SoC（System on Chip）集成完备功能...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Musuyin</div><div class="author-info-description">Musuyin's Blog</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">74</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">55</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">24</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/musuyin"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/musuyin" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:musuyin@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">即使迷茫，也要前进！</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8A%9F%E8%83%BD%E7%BB%84%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">功能组件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%8D%E4%BD%8D%E6%8E%A7%E5%88%B6"><span class="toc-number">1.1.</span> <span class="toc-text">复位控制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%8D%E4%BD%8D%E6%BA%90"><span class="toc-number">1.1.1.</span> <span class="toc-text">复位源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E5%A4%8D%E4%BD%8D"><span class="toc-number">1.1.2.</span> <span class="toc-text">系统复位</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%96%E9%83%A8%E5%A4%8D%E4%BD%8D"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">外部复位</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9C%8B%E9%97%A8%E7%8B%97%E5%A4%8D%E4%BD%8D"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">看门狗复位</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E5%A4%8D%E4%BD%8D"><span class="toc-number">1.1.2.3.</span> <span class="toc-text">软件复位</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%B5%E6%BA%90%E5%A4%8D%E4%BD%8D"><span class="toc-number">1.1.3.</span> <span class="toc-text">电源复位</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%8A%E7%94%B5%E5%A4%8D%E4%BD%8D"><span class="toc-number">1.1.3.1.</span> <span class="toc-text">上电复位</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%89%E7%94%B5%E5%A4%8D%E4%BD%8D"><span class="toc-number">1.1.3.2.</span> <span class="toc-text">掉电复位</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%B6%E9%92%9F%E6%8E%A7%E5%88%B6"><span class="toc-number">1.2.</span> <span class="toc-text">时钟控制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BE%93%E5%85%A5%E6%97%B6%E9%92%9F"><span class="toc-number">1.2.1.</span> <span class="toc-text">输入时钟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%97%B6%E9%92%9F"><span class="toc-number">1.2.2.</span> <span class="toc-text">系统时钟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%97%B6%E9%92%9F%E5%88%86%E9%A2%91%E5%BE%97%E5%88%B0%E5%85%B6%E4%BB%96%E6%97%B6%E9%92%9F"><span class="toc-number">1.2.3.</span> <span class="toc-text">系统时钟分频得到其他时钟</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%B5%E6%BA%90%E6%8E%A7%E5%88%B6"><span class="toc-number">1.3.</span> <span class="toc-text">电源控制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9D%A1%E7%9C%A0%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.3.1.</span> <span class="toc-text">睡眠模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%81%9C%E6%9C%BA%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.3.2.</span> <span class="toc-text">停机模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%85%E6%9C%BA%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.3.3.</span> <span class="toc-text">待机模式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E6%8E%A7%E5%88%B6"><span class="toc-number">1.4.</span> <span class="toc-text">中断控制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B5%8C%E5%A5%97%E5%90%91%E9%87%8F%E4%B8%AD%E6%96%AD%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="toc-number">1.4.1.</span> <span class="toc-text">嵌套向量中断控制器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD"><span class="toc-number">1.4.2.</span> <span class="toc-text">中断</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E6%BA%90"><span class="toc-number">1.4.3.</span> <span class="toc-text">中断源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E5%B1%8F%E8%94%BD"><span class="toc-number">1.4.4.</span> <span class="toc-text">中断屏蔽</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86%E8%BF%87%E7%A8%8B"><span class="toc-number">1.4.5.</span> <span class="toc-text">中断处理过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E5%93%8D%E5%BA%94"><span class="toc-number">1.4.5.1.</span> <span class="toc-text">中断响应</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E4%B8%AD%E6%96%AD%E6%9C%8D%E5%8A%A1%E7%A8%8B%E5%BA%8F"><span class="toc-number">1.4.5.2.</span> <span class="toc-text">执行中断服务程序</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E8%BF%94%E5%9B%9E"><span class="toc-number">1.4.5.3.</span> <span class="toc-text">中断返回</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-number">1.4.6.</span> <span class="toc-text">中断优先级</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E5%B5%8C%E5%A5%97"><span class="toc-number">1.4.6.1.</span> <span class="toc-text">中断嵌套</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E5%8E%9F%E7%90%86"><span class="toc-number">1.4.7.</span> <span class="toc-text">中断原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E9%85%8D%E7%BD%AE"><span class="toc-number">1.4.8.</span> <span class="toc-text">中断配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DMA-%E6%8E%A7%E5%88%B6"><span class="toc-number">1.5.</span> <span class="toc-text">DMA 控制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%A0%E8%BE%93%E8%A6%81%E6%B1%82"><span class="toc-number">1.5.1.</span> <span class="toc-text">传输要求</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%A0%E8%BE%93%E8%BF%87%E7%A8%8B"><span class="toc-number">1.5.2.</span> <span class="toc-text">传输过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%A0%E8%BE%93%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.5.3.</span> <span class="toc-text">传输模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">1.5.4.</span> <span class="toc-text">工作原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DMA-%E7%89%B9%E7%82%B9%E5%8F%8A%E5%BA%94%E7%94%A8"><span class="toc-number">1.5.5.</span> <span class="toc-text">DMA 特点及应用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">初始化配置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%89%87%E7%BA%A7%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">2.1.</span> <span class="toc-text">片级初始化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9D%BF%E7%BA%A7%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">2.2.</span> <span class="toc-text">板级初始化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">2.3.</span> <span class="toc-text">系统初始化</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/cloud/terraform/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" title="Terraform 基础知识">Terraform 基础知识</a><time datetime="2026-04-14T16:00:00.000Z" title="发表于 2026-04-15 00:00:00">2026-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/tool/obsidian/Mermaid%E4%BD%BF%E7%94%A8%E6%89%8B%E5%86%8C/" title="Mermaid使用">Mermaid使用</a><time datetime="2026-04-13T16:00:00.000Z" title="发表于 2026-04-14 00:00:00">2026-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8A%E4%BC%98%E5%85%88%E5%88%86%E6%9E%90/" title="自底向上优先分析">自底向上优先分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/compiler-theory/LR%E5%88%86%E6%9E%90/" title="LR分析">LR分析</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/cs/statistics-learning/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA/" title="支持向量机">支持向量机</a><time datetime="2026-04-12T16:00:00.000Z" title="发表于 2026-04-13 00:00:00">2026-04-13</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By Musuyin</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const loadMathjax = () => {
+    if (!window.MathJax) {
+      window.MathJax = {
+        loader: {
+          load: [
+            // Four font extension packages (optional)
+            //- '[tex]/bbm',
+            //- '[tex]/bboldx',
+            //- '[tex]/dsfont',
+            '[tex]/mhchem'
+          ],
+          paths: {
+            'mathjax-newcm': '[mathjax]/../@mathjax/mathjax-newcm-font',
+
+            //- // Four font extension packages (optional)
+            //- 'mathjax-bbm-extension': '[mathjax]/../@mathjax/mathjax-bbm-font-extension',
+            //- 'mathjax-bboldx-extension': '[mathjax]/../@mathjax/mathjax-bboldx-font-extension',
+            //- 'mathjax-dsfont-extension': '[mathjax]/../@mathjax/mathjax-dsfont-font-extension',
+            'mathjax-mhchem-extension': '[mathjax]/../@mathjax/mathjax-mhchem-font-extension'
+          }
+        },
+        output: {
+          font: 'mathjax-newcm',
+        },
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          tags: 'none',
+          packages: {
+            '[+]': [
+              'mhchem'
+            ]
+          }
+        },
+        chtml: {
+          scale: 1.1
+        },
+        options: {
+          enableMenu: true,
+          menuOptions: {
+            settings: {
+              enrich: false  // Turn off Braille and voice narration text automatic generation
+            }
+          },
+          renderActions: {
+            findScript: [10, doc => {
+              for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+                const display = !!node.type.match(/; *mode=display/)
+                const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+                const text = document.createTextNode('')
+                node.parentNode.replaceChild(text, node)
+                math.start = {node: text, delim: '', n: 0}
+                math.end = {node: text, delim: '', n: 0}
+                doc.math.push(math)
+              }
+            }, '']
+          }
+        }
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@4.1.0/tex-mml-chtml.min.js'
+      script.id = 'MathJax-script'
+      script.async = true
+      document.head.appendChild(script)
+    } else {
+      MathJax.startup.document.state(0)
+      MathJax.texReset()
+      MathJax.typesetPromise()
+    }
+  }
+
+  btf.addGlobalFn('encrypt', loadMathjax, 'mathjax')
+  window.pjax ? loadMathjax() : window.addEventListener('load', loadMathjax)
+})()</script><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.outerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        if (typeof svg === 'string') {
+          openSvgInNewTab({ source: svg, initViewBox })
+          return
+        }
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+
+    // Avoid binding multiple times on themeChange/pjax
+    if (wrap.__mermaidGestureBound) return
+    wrap.__mermaidGestureBound = true
+
+    // Helper: map client (viewport) coordinate -> viewBox coordinate
+    const clientToViewBox = (clientX, clientY) => {
+      const rect = svg.getBoundingClientRect()
+      const vb = wrap.__mermaidCurViewBox || getSvgViewBox(svg)
+      const x = vb[0] + (clientX - rect.left) * (vb[2] / rect.width)
+      const y = vb[1] + (clientY - rect.top) * (vb[3] / rect.height)
+      return { x, y, rect, vb }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      startCenter: null
+    }
+
+    const clampVb = vb => {
+      const init = wrap.__mermaidInitViewBox || vb
+      const minW = init[2] * 0.1
+      const maxW = init[2] * 10
+      const minH = init[3] * 0.1
+      const maxH = init[3] * 10
+      vb[2] = clamp(vb[2], minW, maxW)
+      vb[3] = clamp(vb[3], minH, maxH)
+      return vb
+    }
+
+    const setCurVb = vb => {
+      vb = clampVb(vb)
+      wrap.__mermaidCurViewBox = vb
+      setSvgViewBox(svg, vb)
+    }
+
+    const onPointerDown = e => {
+      // Allow only primary button for mouse
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      if (state.pointers.size === 1) {
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        state.startCenter = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 }
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+      // Pan with 1 pointer
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = [...state.pointers.values()][0]
+        const prev = { x: e.clientX - e.movementX, y: e.clientY - e.movementY }
+        // movementX/Y unreliable on touch, compute from stored last position
+        const last = wrap.__mermaidLastSinglePointer || p
+        const dxClient = p.x - last.x
+        const dyClient = p.y - last.y
+        wrap.__mermaidLastSinglePointer = p
+
+        const { rect } = clientToViewBox(p.x, p.y)
+        const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+        const dx = dxClient * (vb[2] / rect.width)
+        const dy = dyClient * (vb[3] / rect.height)
+        setCurVb([vb[0] - dx, vb[1] - dy, vb[2], vb[3]])
+        return
+      }
+
+      // Pinch zoom with 2 pointers
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist // dist bigger => zoom in (viewBox smaller)
+
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const centerClient = { x: cx, y: cy }
+
+        const pxy = clientToViewBox(centerClient.x, centerClient.y)
+        const cpx = pxy.x
+        const cpy = pxy.y
+
+        const vb = zoomAtPoint(state.startVb, factor, cpx, cpy)
+        setCurVb(vb)
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+        state.startCenter = null
+        wrap.__mermaidLastSinglePointer = null
+      } else if (state.pointers.size === 1) {
+        // reset single pointer baseline to avoid jump
+        wrap.__mermaidLastSinglePointer = [...state.pointers.values()][0]
+      }
+    }
+
+    // Wheel zoom (mouse/trackpad)
+    const onWheel = e => {
+      // ctrlKey on mac trackpad pinch; we treat both as zoom
+      e.preventDefault()
+      const delta = e.deltaY
+      const zoomFactor = delta > 0 ? 1.1 : 0.9
+      const { x, y } = clientToViewBox(e.clientX, e.clientY)
+      const vb = (wrap.__mermaidCurViewBox || getSvgViewBox(svg)).slice()
+      setCurVb(zoomAtPoint(vb, zoomFactor, x, y))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (!init) return
+      wrap.__mermaidCurViewBox = init.slice()
+      setSvgViewBox(svg, init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown)
+    svg.addEventListener('pointermove', onPointerMove)
+    svg.addEventListener('pointerup', onPointerUpOrCancel)
+    svg.addEventListener('pointercancel', onPointerUpOrCancel)
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    svg.addEventListener('dblclick', onDblClick)
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+
+      // Clear old render (themeChange/pjax will rerun)
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      item.__mermaidGestureBound = false
+
+      const config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+
+      // mermaid v9 and v10 compatibility
+      typeof renderFn === 'string' ? renderMermaid(renderFn) : renderFn.then(({ svg }) => renderMermaid(svg))
+    })
+  }
+
+  const codeToMermaid = () => {
+    const codeMermaidEle = document.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    if (false) codeToMermaid()
+    const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
