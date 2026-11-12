@@ -1,0 +1,339 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Autonomous Agents · Musuyin&#39; Home</title><meta name="description" content="自治 Agent 在 WORK 与 IDLE 之间循环：空闲时扫描依赖满足且未认领的任务，认领后执行，完成后继续寻找工作。自治提高调度效率，但仍依赖共享状态的一致更新。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/autonomous-task-claiming/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Autonomous Agents · Musuyin' Home"><meta property="og:description" content="自治 Agent 在 WORK 与 IDLE 之间循环：空闲时扫描依赖满足且未认领的任务，认领后执行，完成后继续寻找工作。自治提高调度效率，但仍依赖共享状态的一致更新。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/autonomous-task-claiming/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Autonomous Agents</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-07-22">2026-07-22</time></dd></div><div><dt>字数</dt><dd>2224</dd></div><div><dt>预计阅读</dt><dd>8 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a><a href="/tags/Subagent/">#Subagent</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Autonomous Agents</h1><time datetime="2026-07-22">2026-07-22</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a><a href="/tags/Subagent/">#Subagent</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>自治 Agent 在 WORK 与 IDLE 之间循环：空闲时扫描依赖满足且未认领的任务，认领后执行，完成后继续寻找工作。自治提高调度效率，但仍依赖共享状态的一致更新。</p>
+<p><a id="reference-autonomous-agents--自己看板自己认领"></a></p>
+<h2 id="autonomous-agents--自己看板自己认领">Autonomous Agents — 自己看板，自己认领</h2>
+<blockquote>
+<p><em>“自己看板，自己认领”</em>——空闲时轮询，有活就干。</p>
+<p><strong>Harness 层</strong>：自治——队友自组织，不依赖 Lead 分配。</p>
+</blockquote>
+<p><a id="reference-问题"></a></p>
+<h3 id="问题">问题</h3>
+<p>S16 的队友能通信、能握手关机。但每个队友等 Lead 分配任务——如果任务看板上有 10 个未认领任务，Lead 得手动 assign 10 次。这不能扩展。队友应该自己看任务看板，发现没人做的任务就认领，做完再找下一个。</p>
+<p><a id="reference-解决方案"></a></p>
+<h3 id="解决方案">解决方案</h3>
+<p><img alt="IMG-20260928133931345" loading="lazy" decoding="async" width="760" height="470" src="/_astro/IMG-20260928133931345.BojzAyNU_Z3kSRg.svg"></p>
+<p>沿用 S16 的教学版 MessageBus 和协议工具。本章新增：<strong>idle_poll</strong>（空闲时每 5 秒轮询一次）、<strong>scan_unclaimed_tasks</strong>（扫描看板上可认领的任务）、<strong>自动认领</strong>（找到任务就 claim，不用 Lead 操心）。</p>
+<p>队友生命周期从两阶段变成三阶段：</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>行为</th>
+<th>退出条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WORK</td>
+<td>inbox → LLM → 工具循环</td>
+<td><code>stop_reason != tool_use</code></td>
+</tr>
+<tr>
+<td>IDLE</td>
+<td>每 5s 轮询 inbox + 任务板</td>
+<td>60s 超时</td>
+</tr>
+<tr>
+<td>SHUTDOWN</td>
+<td>发 summary，退出</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-工作原理"></a></p>
+<h3 id="工作原理">工作原理</h3>
+<p><a id="reference-idle_poll-空闲轮询"></a></p>
+<h4 id="idle_poll-空闲轮询">idle_poll: 空闲轮询</h4>
+<p>队友完成当前任务后不退出，进入 IDLE 阶段——每 5 秒检查一次有没有新工作：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">IDLE_POLL_INTERVAL</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 5</span><span style="color:#6A737D;--shiki-dark:#6A737D">   # seconds</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">IDLE_TIMEOUT</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 60</span><span style="color:#6A737D;--shiki-dark:#6A737D">         # seconds</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> idle_poll</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(name, messages, role) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    """Return 'work', 'shutdown', or 'timeout'."""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _ </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">IDLE_TIMEOUT</span><span style="color:#D73A49;--shiki-dark:#F97583"> //</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> IDLE_POLL_INTERVAL</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        time.sleep(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">IDLE_POLL_INTERVAL</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # ① 检查收件箱（优先）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        inbox </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> BUS</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.read_inbox(name)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> inbox:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            # shutdown_request 立即处理</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> msg </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> inbox:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> msg.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "shutdown_request"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">                    # ... 回复 shutdown_response</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                    return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "shutdown"</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            # 普通消息注入上下文，回到 WORK</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            messages.append(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "work"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # ② 扫描任务看板</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        unclaimed </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> scan_unclaimed_tasks()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> unclaimed:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            task </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> unclaimed[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            result </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> claim_task(task[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">], name)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Claimed"</span><span style="color:#D73A49;--shiki-dark:#F97583"> in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                messages.append(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "work"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "timeout"</span></span></code></pre>
+<p>inbox 优先（可能包含 shutdown_request 等协议消息），任务板其次。IDLE 阶段收到 shutdown_request 会直接回复并退出，不等到下一轮 WORK。</p>
+<p><a id="reference-scan_unclaimed_tasks-扫描任务看板"></a></p>
+<h4 id="scan_unclaimed_tasks-扫描任务看板">scan_unclaimed_tasks: 扫描任务看板</h4>
+<p>找 pending 状态、无 owner、所有依赖已完成（<code>can_start</code>）的任务：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> scan_unclaimed_tasks</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() -&gt; list[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    unclaimed </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> sorted</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">TASKS_DIR</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.glob(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"task_*.json"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        task </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> json.loads(f.read_text())</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (task.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"status"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "pending"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                and</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> task.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"owner"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> can_start(task[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">])):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            unclaimed.append(task)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> unclaimed</span></span></code></pre>
+<p>三个条件：必须是 pending、没有 owner、所有 blockedBy 依赖已完成。<code>can_start</code> 检查依赖任务的状态——有依赖不代表不能做，只有被未完成的任务阻塞才不能做。教学版按文件名排序取第一个；CC 用文件锁防止多个队友同时认领同一个任务。</p>
+<p><a id="reference-claim_task-owner-检查"></a></p>
+<h4 id="claim_task-owner-检查">claim_task: owner 检查</h4>
+<p>自动认领时检查 claim 结果，不把失败当成功：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> claim_task</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(task_id: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, owner: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "agent"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    task </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> load_task(task_id)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> task.status </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "pending"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Task </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">task_id</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> is </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">task.status</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">, cannot claim"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> task.owner:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Task </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">task_id</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> already owned by </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">task.owner</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> can_start(task_id):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Blocked by: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">deps</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    task.owner </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> owner</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    task.status </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "in_progress"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    save_task(task)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Claimed </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">task.id</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> (</span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">task.subject</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">)"</span></span></code></pre>
+<p>教学版没有文件锁，并发认领可能出现竞争。但至少 <code>task.owner</code> 检查避免了最明显的“后写覆盖”问题。CC 用 <code>proper-lockfile</code> 保护任务文件，<code>claimTask</code> 在文件锁内完成读-改-写（<code>utils/tasks.ts:541-612</code>）。</p>
+<p><a id="reference-队友生命周期-work--idle--shutdown"></a></p>
+<h4 id="队友生命周期-work--idle--shutdown">队友生命周期: WORK → IDLE → SHUTDOWN</h4>
+<p>s16 的队友做完任务就退出。s17 加了 IDLE 阶段，队友在外层循环中反复 WORK → IDLE：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Outer loop: WORK → IDLE cycle</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">while</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # WORK phase: 内层循环（最多 10 轮 LLM 调用）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _ </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 检查 inbox、处理协议消息、调 LLM、执行工具</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        ...</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.stop_reason </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "tool_use"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            break</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # WORK 阶段结束</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # IDLE phase</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    idle_result </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> idle_poll(name, messages, role)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> idle_result </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "shutdown"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        break</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> idle_result </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "timeout"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        break</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 60s 超时 → SHUTDOWN</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># SHUTDOWN: 发 summary 给 Lead</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">BUS</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.send(name, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"lead"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, summary, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"result"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p>关键设计：</p>
+<ul>
+<li><strong>外层 while True</strong>：WORK 和 IDLE 交替进行，直到超时或收到关机请求</li>
+<li><strong>内层 for 10</strong>：WORK 阶段最多 10 轮 LLM 调用（防止无限循环）</li>
+<li><strong>IDLE 超时 60 秒</strong>：12 次轮询 × 5 秒 = 60 秒。超时后发送 summary 并退出</li>
+<li><strong>shutdown_request 两阶段都能响应</strong>：WORK 阶段通过 <code>handle_inbox_message</code> 分发；IDLE 阶段 <code>idle_poll</code> 直接检查并回复</li>
+</ul>
+<p><a id="reference-身份重注入"></a></p>
+<h4 id="身份重注入">身份重注入</h4>
+<p>autoCompact（S08）之后，队友的 messages 列表可能被压缩成一段摘要。每次进入新的 WORK 阶段时检查：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages) </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    messages.insert(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"&lt;identity&gt;You are '</span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">name</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">', role: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">role</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">. "</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                   f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Continue your work.&lt;/identity&gt;"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span></code></pre>
+<p>消息过短说明发生了压缩，此时重新注入身份信息。真实 CC 中 context compaction 会保留 system prompt，教学版的简化实现需要手动处理。</p>
+<p><a id="reference-consume_lead_inbox-统一-inbox-消费"></a></p>
+<h4 id="consume_lead_inbox-统一-inbox-消费">consume_lead_inbox: 统一 inbox 消费</h4>
+<p><code>check_inbox</code> 工具和主循环末尾都调用同一个 <code>consume_lead_inbox()</code> 函数：先路由协议 response 更新状态，再把所有消息注入 Lead 的对话历史。队友发来的 summary/result 不会只打印在终端，Lead 的 LLM 能看到并协调下一步。</p>
+<p><a id="reference-合起来跑"></a></p>
+<h4 id="合起来跑">合起来跑</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>1. Lead: "搭建后端——任务太多，让队友自己认领"</span></span>
+<span class="line"><span>2. Lead → create_task("创建数据库 schema")</span></span>
+<span class="line"><span>3. Lead → create_task("写 API 路由")</span></span>
+<span class="line"><span>4. Lead → create_task("写单元测试")</span></span>
+<span class="line"><span>5. Lead → spawn_teammate("alice", "backend", "你是后端开发者")</span></span>
+<span class="line"><span>6. Lead → spawn_teammate("bob", "backend", "你是后端开发者")</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>7. alice 线程启动 → WORK: 没有初始 inbox → 空转 → IDLE</span></span>
+<span class="line"><span>8. bob 线程启动 → WORK: 没有初始 inbox → 空转 → IDLE</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>9. alice IDLE 第 1 次轮询 → scan_unclaimed → 发现"创建数据库 schema"</span></span>
+<span class="line"><span>10. alice → claim_task → "创建数据库 schema" → 回到 WORK</span></span>
+<span class="line"><span>11. bob IDLE 第 1 次轮询 → scan_unclaimed → 发现"写 API 路由"</span></span>
+<span class="line"><span>12. bob → claim_task → "写 API 路由" → 回到 WORK</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>13. alice WORK: write_file("schema.sql", ...) → complete_task → WORK 结束</span></span>
+<span class="line"><span>14. alice IDLE → scan → "写单元测试" → claim → WORK</span></span>
+<span class="line"><span>15. alice WORK: write_file("test_api.py", ...) → complete_task → WORK 结束</span></span>
+<span class="line"><span>16. alice IDLE → 60s 无新任务 → SHUTDOWN</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>17. bob 类似流程 → 做完 → SHUTDOWN</span></span>
+<span class="line"><span>18. Lead consume_lead_inbox → 看到 alice 和 bob 的 summary</span></span></code></pre>
+<p>两个队友并行认领、并行工作。Lead 只需要创建任务和启动队友，不需要手动分配。</p>
+<p><a id="reference-相对-s16-的变更"></a></p>
+<h3 id="相对-s16-的变更">相对 S16 的变更</h3>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s16)</th>
+<th>之后 (s17)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>任务分配</td>
+<td>Lead 手动 assign</td>
+<td>队友自动认领（can_start 检查依赖）</td>
+</tr>
+<tr>
+<td>队友状态</td>
+<td>WORK 或退出</td>
+<td>WORK → IDLE（轮询 60s） → SHUTDOWN</td>
+</tr>
+<tr>
+<td>claim_task</td>
+<td>无 owner 检查</td>
+<td>拒绝已有 owner 的任务</td>
+</tr>
+<tr>
+<td>IDLE 阶段关机</td>
+<td>不处理 shutdown_request</td>
+<td>直接 dispatch shutdown 并退出</td>
+</tr>
+<tr>
+<td>Lead inbox</td>
+<td>只打印，不进上下文</td>
+<td>consume_lead_inbox 统一注入 history</td>
+</tr>
+<tr>
+<td>新函数</td>
+<td>—</td>
+<td>idle_poll, scan_unclaimed_tasks, consume_lead_inbox</td>
+</tr>
+<tr>
+<td>身份保持</td>
+<td>仅 system prompt</td>
+<td>压缩后自动重注入</td>
+</tr>
+<tr>
+<td>Lead 工具</td>
+<td>14 (S16)</td>
+<td>14（不变）</td>
+</tr>
+<tr>
+<td>队友工具</td>
+<td>5</td>
+<td>8（+ list_tasks, claim_task, complete_task）</td>
+</tr>
+<tr>
+<td>队友退出条件</td>
+<td>完成任务即退出</td>
+<td>60s 无新任务才退出</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-试一下"></a></p>
+<h3 id="试一下">试一下</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> learn-claude-code</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">python</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> s17_autonomous_agents/code.py</span></span></code></pre>
+<p>试试这个 prompt：</p>
+<p><code>Create 3 tasks on the board, then spawn alice and bob. Watch them auto-claim and work.</code></p>
+<p>观察重点：</p>
+<ul>
+<li>队友是否自动认领了未分配的任务？</li>
+<li>有 blockedBy 依赖的任务是否在前置完成后被正确认领？</li>
+<li>空闲超时后是否自动关机？</li>
+<li>IDLE 阶段收到 shutdown_request 是否立即响应？</li>
+<li><code>.tasks/</code> 目录下的任务状态如何变化？</li>
+</ul>
+<p><a id="reference-接下来"></a></p>
+<h3 id="接下来">接下来</h3>
+<p>队友自组织了。但 Alice 和 Bob 都在同一个目录下工作——Alice 改 <code>config.py</code>，Bob 也改 <code>config.py</code>，互相覆盖。</p>
+<p>S18 Worktree Isolation → 每个任务有自己的工作目录，互不干扰。</p>
+<p><a id="reference-claude-code"></a></p>
+<h2 id="claude-code">Claude Code</h2>
+<blockquote>
+<p>教学说明：本章的 idle_poll + auto-claim 机制是教学设计，用统一的轮询函数演示“空闲后找活干”。CC 的实际实现是多个机制的组合，但目标一致——减少 Lead 的手动分配负担。</p>
+</blockquote>
+<p><a id="reference-cc-的空闲机制组合路径不是单一轮询"></a></p>
+<h3 id="cc-的空闲机制组合路径不是单一轮询">CC 的空闲机制：组合路径，不是单一轮询</h3>
+<p>教学版用一个 <code>idle_poll()</code> 统一处理空闲时的 inbox 检查和任务认领。CC 的实际实现是四个机制的组合：</p>
+<p><strong>idle_notification</strong>：队友完成一轮工作后，<code>sendIdleNotification()</code>（<code>inProcessRunner.ts:569-589</code>）向 Lead 发送空闲通知。Lead 知道队友可用了，可以分配新任务或请求关机。</p>
+<p><strong>mailbox 轮询</strong>：<code>waitForNextPromptOrShutdown()</code>（<code>inProcessRunner.ts:689-868</code>）是一个 <strong>500ms 轮询循环</strong>，持续检查三类来源：pending user messages、mailbox 文件消息、task list。shutdown_request 被优先处理（<code>inProcessRunner.ts:768-804</code>），不会被普通消息饿死。</p>
+<p><strong>task watcher</strong>：<code>useTaskListWatcher</code>（<code>hooks/useTaskListWatcher.ts:34-189</code>）用 <code>fs.watch()</code> 监听 <code>.claude/tasks/</code> 目录变化，1 秒 debounce，当新任务创建或依赖解锁时触发检查。依赖判断（<code>L197-207</code>）是“blockedBy 中没有未完成的任务”，不是“blockedBy 为空”。</p>
+<p><strong>主动 claim</strong>：轮询循环内部也会调用 <code>tryClaimNextTask()</code>（<code>inProcessRunner.ts:853-860</code>）——在等待期间主动从 task list 领取任务。所以“队友不主动轮询任务”不准确，CC 同时有被动通知和主动认领。</p>
+<p><a id="reference-任务认领文件锁--原子操作"></a></p>
+<h3 id="任务认领文件锁--原子操作">任务认领：文件锁 + 原子操作</h3>
+<p><code>claimTask()</code>（<code>utils/tasks.ts:541-612</code>）用 <code>proper-lockfile</code> 的任务文件锁，在锁内完成读-检查-改-写。检查项：owner 是否已存在（<code>L575-576</code>）、是否已完成（<code>L580-581</code>）、blockedBy 中是否有未完成任务（<code>L585-594</code>）。<code>claimTaskWithBusyCheck()</code>（<code>utils/tasks.ts:614-692</code>）用 task-list 级别锁，把 busy check 和 claim 做成原子操作，避免 TOCTOU。</p>
+<p><code>findAvailableTask()</code>（<code>inProcessRunner.ts:595-604</code>）的依赖判断也是“所有 blockedBy 已完成”，用 <code>task.blockedBy.every(id =&gt; !unresolvedTaskIds.has(id))</code> 实现。<code>tryClaimNextTask()</code>（<code>inProcessRunner.ts:624-657</code>）在认领后把状态更新为 <code>in_progress</code>，让 UI 立即反映变化。</p>
+<p><a id="reference-教学版-vs-cc-对比"></a></p>
+<h3 id="教学版-vs-cc-对比">教学版 vs CC 对比</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>教学版 (S17)</th>
+<th>CC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空闲机制</td>
+<td>idle_poll 统一轮询（5s）</td>
+<td>idle_notification + 500ms mailbox 轮询 + task watcher</td>
+</tr>
+<tr>
+<td>任务发现</td>
+<td>scan_unclaimed_tasks（轮询）</td>
+<td>useTaskListWatcher（文件监听）+ tryClaimNextTask（主动轮询）</td>
+</tr>
+<tr>
+<td>依赖判断</td>
+<td>can_start（所有 blockedBy 已完成）</td>
+<td>findAvailableTask（同样语义）</td>
+</tr>
+<tr>
+<td>并发安全</td>
+<td>owner 检查（无文件锁）</td>
+<td>proper-lockfile 任务锁 + task-list 锁</td>
+</tr>
+<tr>
+<td>shutdown 处理</td>
+<td>IDLE 直接分发，WORK 通过 handle_inbox_message</td>
+<td>500ms 轮询中优先处理 shutdown_request</td>
+</tr>
+<tr>
+<td>超时退出</td>
+<td>60s 无新任务</td>
+<td>无固定超时，Lead 手动 shutdown</td>
+</tr>
+<tr>
+<td>身份保持</td>
+<td>messages 长度检测</td>
+<td>context compaction 保留 system prompt</td>
+</tr>
+<tr>
+<td>claim 失败处理</td>
+<td>检查返回值，失败不注入</td>
+<td>文件锁保证原子性</td>
+</tr>
+</tbody>
+</table>
+<p>教学版的 <code>idle_poll()</code> 把 CC 的四个机制合并成一个轮询函数——简化合理，因为核心语义（空闲时找活干、依赖解锁后可认领、shutdown 优先）是一致的。</p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>解释 owner 检查与原子认领之间的差别；再说明空闲等待与真正关闭如何区分。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续理解相关机制：<a href="/notes/computer-science/agent/framework/learn-claude-code/agent-worktree-isolation/">S18-Worktree Isolation</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#autonomous-agents--自己看板自己认领">Autonomous Agents — 自己看板，自己认领</a></li><li style="--depth: 1"><a href="#问题">问题</a></li><li style="--depth: 1"><a href="#解决方案">解决方案</a></li><li style="--depth: 1"><a href="#工作原理">工作原理</a></li><li style="--depth: 2"><a href="#idle_poll-空闲轮询">idle_poll: 空闲轮询</a></li><li style="--depth: 2"><a href="#scan_unclaimed_tasks-扫描任务看板">scan_unclaimed_tasks: 扫描任务看板</a></li><li style="--depth: 2"><a href="#claim_task-owner-检查">claim_task: owner 检查</a></li><li style="--depth: 2"><a href="#队友生命周期-work--idle--shutdown">队友生命周期: WORK → IDLE → SHUTDOWN</a></li><li style="--depth: 2"><a href="#身份重注入">身份重注入</a></li><li style="--depth: 2"><a href="#consume_lead_inbox-统一-inbox-消费">consume_lead_inbox: 统一 inbox 消费</a></li><li style="--depth: 2"><a href="#合起来跑">合起来跑</a></li><li style="--depth: 1"><a href="#相对-s16-的变更">相对 S16 的变更</a></li><li style="--depth: 1"><a href="#试一下">试一下</a></li><li style="--depth: 1"><a href="#接下来">接下来</a></li><li style="--depth: 0"><a href="#claude-code">Claude Code</a></li><li style="--depth: 1"><a href="#cc-的空闲机制组合路径不是单一轮询">CC 的空闲机制：组合路径，不是单一轮询</a></li><li style="--depth: 1"><a href="#任务认领文件锁--原子操作">任务认领：文件锁 + 原子操作</a></li><li style="--depth: 1"><a href="#教学版-vs-cc-对比">教学版 vs CC 对比</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

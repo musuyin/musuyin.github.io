@@ -1,0 +1,154 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Channel · Musuyin&#39; Home</title><meta name="description" content="Channel 同时提供数据传输与同步语义，适合明确移交工作和状态所有权。分析阻塞时先检查 nil、容量、收发配对与关闭状态，再看等待队列和 select 的实现。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/go/golang/channels/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Channel · Musuyin' Home"><meta property="og:description" content="Channel 同时提供数据传输与同步语义，适合明确移交工作和状态所有权。分析阻塞时先检查 nil、容量、收发配对与关闭状态，再看等待队列和 select 的实现。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/go/golang/channels/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Channel</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-23">2026-08-23</time></dd></div><div><dt>字数</dt><dd>2151</dd></div><div><dt>预计阅读</dt><dd>8 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Go/">#Go</a><a href="/tags/%E5%B9%B6%E5%8F%91/">#并发</a><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Channel</h1><time datetime="2026-08-23">2026-08-23</time><p class="tags"><a href="/tags/Go/">#Go</a><a href="/tags/%E5%B9%B6%E5%8F%91/">#并发</a><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a></p></header><div class="prose"><p>Channel 同时提供数据传输与同步语义，适合明确移交工作和状态所有权。分析阻塞时先检查 nil、容量、收发配对与关闭状态，再看等待队列和 select 的实现。</p>
+<p><a id="reference-面试追问通过通信共享内存"></a></p>
+<h2 id="面试追问通过通信共享内存">面试追问：通过通信共享内存</h2>
+<p>这句话不是禁止 mutex，而是建议把某份可变状态的<strong>所有权</strong>交给一个 goroutine，其他 goroutine 用 channel 发送命令/数据，由所有者串行修改状态；channel 同时传递数据并建立 happens-before 关系。共享读多写少的结构、性能敏感路径或外部资源仍可用 <code>sync.Mutex/RWMutex/atomic</code>，关键是清晰定义所有权、生命周期和取消。</p>
+<p><a id="reference-csp"></a></p>
+<h2 id="csp">CSP</h2>
+<p>CSP（Communicating Sequential Processes，通信顺序进程）并发编程模型，它的核心思想是：通过<strong>通信</strong>共享内存，而不是通过共享内存来通信。Go 语言的 Goroutine 和 Channel 机制，就是 CSP 的经典实现，具有以下特点：</p>
+<ol>
+<li>避免共享内存：协程（Goroutine）不直接修改变量，而是通过 Channel 通信</li>
+<li>天然同步：Channel 的发送/接收自带同步机制，无需手动加锁</li>
+<li>易于组合：Channel 可以嵌套使用，构建复杂并发模式（如管道、超时控制）</li>
+</ol>
+<p><a id="reference-channel-底层原理"></a></p>
+<h2 id="channel-底层原理">Channel 底层原理</h2>
+<p><a id="reference-数据结构"></a></p>
+<h3 id="数据结构">数据结构</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> hchan</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// chan 里元素数量</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	qcount </span><span style="color:#D73A49;--shiki-dark:#F97583">uint</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// chan 底层循环数组的长度</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	dataqsiz </span><span style="color:#D73A49;--shiki-dark:#F97583">uint</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 指向底层循环数组的指针</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 只针对有缓冲的 channel</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	buf </span><span style="color:#6F42C1;--shiki-dark:#B392F0">unsafe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Pointer</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// chan 中元素大小</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	elemsize </span><span style="color:#D73A49;--shiki-dark:#F97583">uint16</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// chan 是否被关闭的标志</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	closed </span><span style="color:#D73A49;--shiki-dark:#F97583">uint32</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// chan 中元素类型</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	elemtype </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">_type</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // element type</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 已发送元素在循环数组中的索引</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	sendx </span><span style="color:#D73A49;--shiki-dark:#F97583">uint</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // send index</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 已接收元素在循环数组中的索引</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	recvx </span><span style="color:#D73A49;--shiki-dark:#F97583">uint</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // receive index</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 等待接收的 goroutine 队列</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	recvq </span><span style="color:#6F42C1;--shiki-dark:#B392F0">waitq</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // list of recv waiters</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 等待发送的 goroutine 队列</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	sendq </span><span style="color:#6F42C1;--shiki-dark:#B392F0">waitq</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // list of send waiters</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 保护 hchan 中所有字段</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	lock </span><span style="color:#6F42C1;--shiki-dark:#B392F0">mutex</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>环形缓冲区：有缓冲 channel 内部维护一个固定大小的环形队列，用<code>buf</code>指针指向缓冲区，<code>sendx</code>和<code>recvx</code>分别记录发送和接收的位置索引。这样设计能高效利用内存，避免数据搬移。</li>
+<li>两个等待队列：<code>sendq</code> 和 <code>recvq</code>，用来管理阻塞的 goroutine。
+<ul>
+<li><code>sendq</code> 存储因 channel 满而阻塞的发送者</li>
+<li><code>recvq</code> 存储因 channel 空而阻塞的接收者</li>
+<li>这些队列用双向链表实现，当条件满足时会唤醒对应的 goroutine</li>
+</ul>
+</li>
+<li>互斥锁：内部有个 mutex，所有的发送、接收操作都需要先获取锁，用来保证并发安全。虽然看起来可能影响性能，但 Go 的调度器做了优化，大多数情况下锁竞争并不激烈</li>
+</ul>
+<p><a id="reference-数据发送过程"></a></p>
+<h3 id="数据发送过程">数据发送过程</h3>
+<p>向 channel 发送数据的整个过程都会在 mutex 保护下进行，保证并发安全</p>
+<ol>
+<li>检查是否有等待的接受者：如果 <code>recvq</code> 队列不为空，说明有 goroutine 在等待接收数据，这时会直接把数据传递给等待的接收者，<strong>跳过缓冲区</strong>，这是最高效的路径。同时会唤醒对应的 goroutine 继续执行。</li>
+<li>如果没有<strong>等待接受者</strong>，尝试写入缓冲区：检查缓冲区是否还有空间，如果 <code>qcount &lt; dataqsiz</code>，就把数据复制到 <code>buf[sendx]</code> 位置，然后更新 <code>sendx</code> 索引和 <code>qcount</code> 计数。这是无缓冲或缓冲区未满时的正常流径。</li>
+<li>缓冲区满，则阻塞等待：创建一个 <code>sudog</code> 结构体包装当前 goroutine 和要发送的数据，加入到 <code>sendq</code> 等待队列中，然后调用 <code>gopark</code> 让当前 goroutine 进入阻塞状态，让出 CPU 给其他 goroutine。</li>
+<li>被唤醒后继续执行：当有接收者从 channel 读取数据后，会从 <code>sendq</code> 中唤醒一个等待的发送者，被唤醒的 goroutine 会完成数据发送并继续执行。</li>
+</ol>
+<p>向已关闭的 channel 发送数据会直接 panic：向已关闭的 channel 发送数据时，runtime 会检测到 channel 的 <code>closed</code> 标志位已经设置，立即抛出 <code>send on closed channel</code> 的 panic。这个检查发生在发送操作的最开始阶段，甚至在获取 mutex 锁之前就会进行判断，所以不会有任何数据写入的尝试，直接就 panic 了。</p>
+<p><a id="reference-数据读取过程"></a></p>
+<h3 id="数据读取过程">数据读取过程</h3>
+<ol>
+<li>检查是否有等待的发送者：如果 <code>sendq</code> 队列不为空，说明有 goroutine 在等待发送数据。对于无缓冲 channel，会直接从发送者那里接收数据；对于有缓冲 channel，会先从缓冲区取数据，然后把等待发送者的数据放入缓冲区，这样保持 FIFO 顺序。</li>
+<li>如果没有<strong>等待发送者</strong>，尝试从缓冲区中读取：检查 <code>qcount &gt; 0</code>，如果缓冲区有数据，就从 <code>buf[recvx]</code> 位置取出数据，然后更新 <code>recvx</code> 索引和 <code>qcount</code> 计数。这是缓冲区有数据时的正常路径。</li>
+<li>缓冲区空，则阻塞等待：创建 <code>sudog</code> 结构体包装当前 goroutine，加入到 <code>recvq</code> 等待队列，调用 <code>gopark</code> 进入阻塞状态。当有发送者写入数据时会被唤醒继续执行。</li>
+</ol>
+<p><strong>从已关闭 channel 读取有特殊处理</strong>。如果 channel 已关闭且缓冲区为空，会返回零值和 false 标志；如果缓冲区还有数据，可以正常读取直到清空</p>
+<p><code>v, ok := &lt;-ch</code> 中的 ok 能判断 channel 状态</p>
+<p><a id="reference-内存泄漏"></a></p>
+<h3 id="内存泄漏">内存泄漏</h3>
+<ul>
+<li>Channel 引起内存泄漏最常见的是引起 goroutine 泄漏从而导致的间接内存泄漏：当 goroutine 阻塞在 channel 操作上永远无法退出时，<strong>goroutine 本身和它引用的所有变量都无法被 GC 回收</strong>。
+<ul>
+<li>比如一个 goroutine 在等待接收数据，但发送者已经退出了，这个接收者就会永远阻塞下去。</li>
+</ul>
+</li>
+<li><strong>select 语句使用不当</strong>：在没有 default 分支的 select 中，如果所有 case 都无法执行，goroutine 会永远阻塞，出现内存泄漏</li>
+</ul>
+<p><a id="reference-对已关闭的-channel-操作"></a></p>
+<h3 id="对已关闭的-channel-操作">对已关闭的 channel 操作</h3>
+<ul>
+<li>重复关闭、关闭 <code>nil</code>、关闭只读：panic</li>
+<li>向已关闭写：panic</li>
+<li>从已关闭读：<code>val, ok := &lt;-ch</code>，<code>ok == false</code></li>
+</ul>
+<p><a id="reference-select"></a></p>
+<h2 id="select">select</h2>
+<p>select 是 Go 语言专门为 channel 操作设计的多路复用控制结构，类似于网络编程中的 select 系统调用。</p>
+<p>核心作用是同时监听多个 channel 操作。当有多个 channel 都可能有数据收发时，select 能够选择其中一个可执行的 case 进行操作，而不是按顺序逐个尝试。比如同时监听数据输入、超时信号、取消信号等。</p>
+<p><a id="reference-执行机制"></a></p>
+<h3 id="执行机制">执行机制</h3>
+<p>select 的执行机制是<strong>随机选择</strong>。</p>
+<ul>
+<li>如果多个 case 同时满足条件，Go 会随机选择一个执行，这避免了饥饿问题。</li>
+<li>如果没有 case 能执行就会执行 default。</li>
+<li>如果没有 default，当前 goroutine 会阻塞等待。</li>
+</ul>
+<p><a id="reference-实现原理"></a></p>
+<h3 id="实现原理">实现原理</h3>
+<p><a id="reference-数据结构-1"></a></p>
+<h4 id="数据结构-1">数据结构</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> scase</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	c           </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">hchan</span><span style="color:#6A737D;--shiki-dark:#6A737D">         // channel指针</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	elem        </span><span style="color:#6F42C1;--shiki-dark:#B392F0">unsafe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Pointer</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // 数据元素指针，用于存放发送/接收的数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	kind        </span><span style="color:#D73A49;--shiki-dark:#F97583">uint16</span><span style="color:#6A737D;--shiki-dark:#6A737D">         // case类型：caseNil、caseRecv、caseSend、caseDefault</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	pc          </span><span style="color:#D73A49;--shiki-dark:#F97583">uintptr</span><span style="color:#6A737D;--shiki-dark:#6A737D">        // 程序计数器，用于调试</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	releasetime </span><span style="color:#D73A49;--shiki-dark:#F97583">int64</span><span style="color:#6A737D;--shiki-dark:#6A737D">          // 释放时间，用于竞态检测</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>Go 语言实现 <code>select</code> 时，定义了一个数据结构 <code>scase</code> 表示每个 <code>case</code> 语句(包含 <code>default</code>)。<code>scase</code> 结构包含 channel 指针、操作类型等信息。<code>select</code> 操作的整个过程通过 <code>selectgo</code> 函数在 runtime 层面实现。</p>
+<ul>
+<li>Go 运行时会将所有 case 进行<strong>随机排序</strong>，这是为了避免饥饿问题。</li>
+<li>然后执行<strong>两轮扫描策略</strong>
+<ul>
+<li><strong>第一轮</strong>：直接检查每个 channel 是否可读写，如果找到就绪的立即执行；</li>
+<li>如果都没就绪，<strong>第二轮</strong>就把当前 goroutine 加入到<strong>所有 channel 的发送或接收队列</strong>中，然后调用 <code>gopark</code> 进入睡眠状态，使<strong>当前 goroutine 让出 CPU</strong>。</li>
+</ul>
+</li>
+<li>当某个 channel 变为可操作时，调度器会唤醒对应的 goroutine，此时需要<strong>从其他 channel 的等待队列中清理掉这个 goroutine</strong>，然后执行对应的 case 分支。</li>
+</ul>
+<p>核心原理是：case 随机化 + 双重循环检测</p>
+<p><a id="reference-生命周期"></a></p>
+<h4 id="生命周期">生命周期</h4>
+<ol>
+<li>创建 select</li>
+<li>注册 case</li>
+<li>执行 select</li>
+<li>释放 select</li>
+</ol>
+<p>在默认的情况下，select 语句会在编译阶段经过如下过程的处理：</p>
+<ol>
+<li>将所有的 <code>case</code> 转换成包含 channel 以及类型等信息的 <code>scase</code> 结构体；</li>
+<li>调用运行时函数 <code>selectgo</code> 获取被选择的 <code>scase</code> 结构体索引，如果当前的 <code>scase</code> 是一个接收数据的操作，还会返回一个指示当前 <code>case</code> 是否是接收的布尔值；</li>
+<li>通过 <code>for</code> 循环生成一组 <code>if</code> 语句，在语句中判断自己是不是被选中的 <code>case</code>。</li>
+</ol>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>对 nil、已关闭和普通空 channel 的接收分别会怎样？</li>
+<li>select 同时有多个就绪分支时是否保证业务优先级？</li>
+<li>关闭 channel 为什么通常由发送方负责？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#面试追问通过通信共享内存">面试追问：通过通信共享内存</a></li><li style="--depth: 0"><a href="#csp">CSP</a></li><li style="--depth: 0"><a href="#channel-底层原理">Channel 底层原理</a></li><li style="--depth: 1"><a href="#数据结构">数据结构</a></li><li style="--depth: 1"><a href="#数据发送过程">数据发送过程</a></li><li style="--depth: 1"><a href="#数据读取过程">数据读取过程</a></li><li style="--depth: 1"><a href="#内存泄漏">内存泄漏</a></li><li style="--depth: 1"><a href="#对已关闭的-channel-操作">对已关闭的 channel 操作</a></li><li style="--depth: 0"><a href="#select">select</a></li><li style="--depth: 1"><a href="#执行机制">执行机制</a></li><li style="--depth: 1"><a href="#实现原理">实现原理</a></li><li style="--depth: 2"><a href="#数据结构-1">数据结构</a></li><li style="--depth: 2"><a href="#生命周期">生命周期</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

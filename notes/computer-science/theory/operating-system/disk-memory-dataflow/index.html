@@ -1,0 +1,284 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>硬盘与内存之间的数据流动 · Musuyin&#39; Home</title><meta name="description" content="磁盘与内存之间的数据流要同时看硬件搬运和操作系统缓存。读路径先查页缓存，写路径可能先形成脏页；完成系统调用与真正持久化是不同阶段。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/operating-system/disk-memory-dataflow/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="硬盘与内存之间的数据流动 · Musuyin' Home"><meta property="og:description" content="磁盘与内存之间的数据流要同时看硬件搬运和操作系统缓存。读路径先查页缓存，写路径可能先形成脏页；完成系统调用与真正持久化是不同阶段。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/operating-system/disk-memory-dataflow/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">硬盘与内存之间的数据流动</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-26">2026-08-26</time></dd></div><div><dt>字数</dt><dd>1200</dd></div><div><dt>预计阅读</dt><dd>4 分钟</dd></div></dl></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>硬盘与内存之间的数据流动</h1><time datetime="2026-08-26">2026-08-26</time></header><div class="prose"><p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>磁盘与内存之间的数据流要同时看硬件搬运和操作系统缓存。读路径先查页缓存，写路径可能先形成脏页；完成系统调用与真正持久化是不同阶段。</p>
+<p><a id="reference-硬件层数据是怎么物理传输的"></a></p>
+<h2 id="硬件层数据是怎么物理传输的">硬件层：数据是怎么物理传输的</h2>
+<p><a id="reference-存储介质读取原理"></a></p>
+<h3 id="存储介质读取原理">存储介质读取原理</h3>
+<p><strong>HDD（机械硬盘）</strong></p>
+<ul>
+<li>磁头悬浮在旋转盘片上方，通过电磁感应读取磁性信号</li>
+<li>寻道（seek）= 磁头移到目标磁道，延迟约 5–10ms</li>
+<li>旋转等待（rotational latency）= 等扇区转到磁头下方，平均约 4ms</li>
+<li>数据以 <strong>512B 或 4KB 扇区</strong> 为最小单位读取</li>
+</ul>
+<p><strong>SSD（固态硬盘）</strong></p>
+<ul>
+<li>NAND Flash 存储，无机械运动</li>
+<li>内部有 <strong>FTL（Flash Translation Layer）</strong> 做逻辑地址到物理页的映射</li>
+<li>最小读写单位：<strong>页（Page）= 4KB~16KB</strong>，擦除单位：<strong>块（Block）= 128~512 页</strong></li>
+</ul>
+<p><a id="reference-数据传输通道"></a></p>
+<h3 id="数据传输通道">数据传输通道</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>存储介质</span></span>
+<span class="line"><span>   │</span></span>
+<span class="line"><span>   ▼</span></span>
+<span class="line"><span>存储控制器（SSD主控 / HDD控制芯片）</span></span>
+<span class="line"><span>   │  接口协议：NVMe（PCIe）/ SATA / SAS</span></span>
+<span class="line"><span>   ▼</span></span>
+<span class="line"><span>主机总线适配器 / PCIe控制器</span></span>
+<span class="line"><span>   │</span></span>
+<span class="line"><span>   ▼</span></span>
+<span class="line"><span>CPU南桥 / PCH（Platform Controller Hub）</span></span>
+<span class="line"><span>   │  系统总线</span></span>
+<span class="line"><span>   ▼</span></span>
+<span class="line"><span>内存控制器（集成在CPU内）</span></span>
+<span class="line"><span>   │</span></span>
+<span class="line"><span>   ▼</span></span>
+<span class="line"><span>DRAM（内存）</span></span></code></pre>
+<p><strong>DMA（Direct Memory Access）是关键</strong>：</p>
+<ul>
+<li>磁盘控制器通过 DMA 直接将数据写入内存，<strong>CPU 不参与数据搬运本身</strong></li>
+<li>CPU 只负责下达命令（写 I/O 寄存器）和处理完成中断</li>
+<li>数据路径：磁盘 → DMA 控制器 → 内存总线 → DRAM</li>
+</ul>
+<p><a id="reference-io-完成通知"></a></p>
+<h3 id="io-完成通知">I/O 完成通知</h3>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>原理</th>
+<th>场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>轮询（Polling）</td>
+<td>CPU 反复查询状态寄存器</td>
+<td>NVMe 高性能场景（io_uring）</td>
+</tr>
+<tr>
+<td>中断（IRQ）</td>
+<td>设备完成后发硬件中断</td>
+<td>传统 HDD/SATA</td>
+</tr>
+<tr>
+<td>MSI-X</td>
+<td>PCIe 消息中断，支持多队列</td>
+<td>NVMe SSD</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-操作系统层软件如何管理"></a></p>
+<h2 id="操作系统层软件如何管理">操作系统层：软件如何管理</h2>
+<p><a id="reference-页缓存page-cache"></a></p>
+<h3 id="页缓存page-cache">页缓存（Page Cache）</h3>
+<p>Linux 内核在内存中维护一个 <strong>Page Cache</strong>，所有文件 I/O 默认经过它：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>用户进程 read(fd)</span></span>
+<span class="line"><span>      │</span></span>
+<span class="line"><span>      ▼</span></span>
+<span class="line"><span>  VFS（虚拟文件系统）</span></span>
+<span class="line"><span>      │</span></span>
+<span class="line"><span>      ▼</span></span>
+<span class="line"><span>  Page Cache 命中？</span></span>
+<span class="line"><span>   ├── 是 → 直接 memcpy 到用户空间（零磁盘 I/O）</span></span>
+<span class="line"><span>   └── 否 → 触发缺页 / 预读，从磁盘加载到 Page Cache，再返回</span></span></code></pre>
+<p>Page Cache 的本质：</p>
+<ul>
+<li>每个文件的内容被拆成 <strong>4KB 页</strong> 缓存在内存</li>
+<li>用 <strong>基数树（radix tree）/ XArray</strong> 以文件偏移为索引组织</li>
+<li>读命中率极高时，大量 I/O 其实只是内存操作</li>
+</ul>
+<p><a id="reference-读流程磁盘--内存"></a></p>
+<h3 id="读流程磁盘--内存">读流程（磁盘 → 内存）</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>① 进程调用 read(fd, buf, n)</span></span>
+<span class="line"><span>② 系统调用进入内核，VFS 查 Page Cache</span></span>
+<span class="line"><span>③ 未命中 → 分配物理页，构造 bio（块 I/O 请求）</span></span>
+<span class="line"><span>④ bio 送入 I/O 调度器队列</span></span>
+<span class="line"><span>⑤ I/O 调度器合并/排序请求，发给块设备驱动</span></span>
+<span class="line"><span>⑥ 驱动向磁盘控制器写命令寄存器</span></span>
+<span class="line"><span>⑦ 磁盘控制器 DMA 把数据写入步骤③分配的物理页</span></span>
+<span class="line"><span>⑧ 磁盘发中断通知 CPU 完成</span></span>
+<span class="line"><span>⑨ 中断处理：唤醒阻塞的进程</span></span>
+<span class="line"><span>⑩ 内核从 Page Cache 页 memcpy 到用户缓冲区</span></span></code></pre>
+<p><a id="reference-写流程内存--磁盘"></a></p>
+<h3 id="写流程内存--磁盘">写流程（内存 → 磁盘）</h3>
+<p>写有两种模式：</p>
+<p><strong>写回（Write-back，默认）</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>write(fd) → 修改 Page Cache 中的页，标记为 dirty</span></span>
+<span class="line"><span>                        │</span></span>
+<span class="line"><span>                        （稍后异步刷盘）</span></span>
+<span class="line"><span>                        ▼</span></span>
+<span class="line"><span>              pdflush / writeback 线程</span></span>
+<span class="line"><span>                        │</span></span>
+<span class="line"><span>              满足条件时下刷到磁盘</span></span></code></pre>
+<p><strong>写穿（Write-through / O_SYNC）</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>write(fd) → 修改 Page Cache → 立即同步写磁盘 → 返回</span></span></code></pre>
+<p><strong>dirty 页的刷盘触发条件</strong>（Linux 内核）：</p>
+<table>
+<thead>
+<tr>
+<th>条件</th>
+<th>参数</th>
+<th>默认值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dirty 数据超过内存比例</td>
+<td><code>dirty_background_ratio</code></td>
+<td>10%</td>
+</tr>
+<tr>
+<td>dirty 数据绝对量</td>
+<td><code>dirty_background_bytes</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>强制刷盘阈值（触发阻塞）</td>
+<td><code>dirty_ratio</code></td>
+<td>20%</td>
+</tr>
+<tr>
+<td>页面“脏龄”超时</td>
+<td><code>dirty_expire_centisecs</code></td>
+<td>3000（30s）</td>
+</tr>
+<tr>
+<td>定期唤醒 writeback</td>
+<td><code>dirty_writeback_centisecs</code></td>
+<td>500（5s）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>writeback 的优先级逻辑</strong>：</p>
+<ol>
+<li>最老的 dirty 页优先（按 dirtied 时间戳排序）</li>
+<li>超过 <code>dirty_ratio</code> 时，发起 write 的进程本身会被阻塞来做 writeback（back-pressure）</li>
+<li>内存压力大时，kswapd 会触发更激进的回收，也包括刷 dirty 页</li>
+</ol>
+<p><a id="reference-io-调度器请求怎么排序"></a></p>
+<h3 id="io-调度器请求怎么排序">I/O 调度器：请求怎么排序</h3>
+<p>内核在把 bio 发给驱动前会经过 <strong>I/O 调度器</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>调度器</th>
+<th>策略</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>None</strong></td>
+<td>直接 FIFO</td>
+<td>NVMe SSD（本身并发，无需调度）</td>
+</tr>
+<tr>
+<td><strong>mq-deadline</strong></td>
+<td>按截止时间调度，防饥饿</td>
+<td>SATA SSD、通用</td>
+</tr>
+<tr>
+<td><strong>BFQ</strong></td>
+<td>按进程分配带宽，类 CFQ</td>
+<td>桌面、交互场景</td>
+</tr>
+<tr>
+<td><strong>Kyber</strong></td>
+<td>低延迟优先</td>
+<td>高性能 SSD</td>
+</tr>
+</tbody>
+</table>
+<p>HDD 时代的 CFQ/Elevator 算法（电梯调度）会把随机请求排序成顺序访问，大幅减少寻道时间——SSD 无机械结构，随机访问无差别，所以现代 SSD 用 None 或 mq-deadline。</p>
+<p><a id="reference-内存回收page-cache-怎么被驱逐"></a></p>
+<h3 id="内存回收page-cache-怎么被驱逐">内存回收：Page Cache 怎么被驱逐</h3>
+<p>内存不足时，内核用 <strong>LRU 双链表</strong>（active list + inactive list）管理页面：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>新读入的页 → inactive list</span></span>
+<span class="line"><span>多次访问后 → 提升到 active list</span></span>
+<span class="line"><span>内存紧张时 → 从 inactive list 尾部驱逐</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>dirty 页被驱逐前必须先刷盘（writeback）</span></span>
+<span class="line"><span>clean 页可直接丢弃（反正磁盘上有）</span></span></code></pre>
+<ul>
+<li><strong>kswapd</strong>：后台内核线程，周期性扫描 LRU，提前回收，避免同步等待</li>
+<li><strong>OOM Killer</strong>：实在没内存时，按启发式算法杀进程</li>
+</ul>
+<p><a id="reference-完整路径"></a></p>
+<h2 id="完整路径">完整路径</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>用户进程</span></span>
+<span class="line"><span>  │  系统调用（read/write/mmap）</span></span>
+<span class="line"><span>  ▼</span></span>
+<span class="line"><span>VFS（统一文件接口）</span></span>
+<span class="line"><span>  │</span></span>
+<span class="line"><span>  ▼</span></span>
+<span class="line"><span>Page Cache（4KB页，基数树索引）</span></span>
+<span class="line"><span>  │   命中 → 直接返回/修改（纯内存操作）</span></span>
+<span class="line"><span>  │   未命中 / dirty刷盘</span></span>
+<span class="line"><span>  ▼</span></span>
+<span class="line"><span>块设备层（bio 构造）</span></span>
+<span class="line"><span>  │</span></span>
+<span class="line"><span>  ▼</span></span>
+<span class="line"><span>I/O 调度器（合并、排序、限流）</span></span>
+<span class="line"><span>  │</span></span>
+<span class="line"><span>  ▼</span></span>
+<span class="line"><span>块设备驱动（NVMe / SATA / SCSI）</span></span>
+<span class="line"><span>  │   写命令寄存器，触发 DMA</span></span>
+<span class="line"><span>  ▼</span></span>
+<span class="line"><span>DMA 控制器 ←──────────────────┐</span></span>
+<span class="line"><span>  │                           │</span></span>
+<span class="line"><span>  │   数据直接在内存↔设备间流动  │</span></span>
+<span class="line"><span>  ▼                           │</span></span>
+<span class="line"><span>存储控制器（SSD主控 / HDD控制器）</span></span>
+<span class="line"><span>  │</span></span>
+<span class="line"><span>  ▼</span></span>
+<span class="line"><span>物理存储介质（NAND Flash / 磁盘）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>完成后 → 硬件中断 → 唤醒等待进程</span></span></code></pre>
+<p><a id="reference-关键优先级总结"></a></p>
+<h2 id="关键优先级总结">关键优先级总结</h2>
+<table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>处理逻辑</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>读请求</strong></td>
+<td>先查 Page Cache，命中则不碰磁盘</td>
+</tr>
+<tr>
+<td><strong>写请求</strong></td>
+<td>写 Page Cache（dirty），异步刷盘</td>
+</tr>
+<tr>
+<td><strong>内存回收</strong></td>
+<td>clean 页直接丢 &gt; dirty 页先刷再丢</td>
+</tr>
+<tr>
+<td><strong>I/O 调度</strong></td>
+<td>SSD 直接下发；HDD 按截止时间/带宽公平调度</td>
+</tr>
+<tr>
+<td><strong>back-pressure</strong></td>
+<td>dirty 超阈值时，写进程自己承担刷盘代价</td>
+</tr>
+</tbody>
+</table>
+<p>核心设计思想：<strong>读靠缓存命中减少磁盘 I/O，写靠延迟合并批量下刷，DMA 让 CPU 从数据搬运中解放出来</strong>。</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>页缓存命中时省去哪些硬件步骤？脏页为什么不能按普通干净缓存直接丢弃？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#硬件层数据是怎么物理传输的">硬件层：数据是怎么物理传输的</a></li><li style="--depth: 1"><a href="#存储介质读取原理">存储介质读取原理</a></li><li style="--depth: 1"><a href="#数据传输通道">数据传输通道</a></li><li style="--depth: 1"><a href="#io-完成通知">I/O 完成通知</a></li><li style="--depth: 0"><a href="#操作系统层软件如何管理">操作系统层：软件如何管理</a></li><li style="--depth: 1"><a href="#页缓存page-cache">页缓存（Page Cache）</a></li><li style="--depth: 1"><a href="#读流程磁盘--内存">读流程（磁盘 → 内存）</a></li><li style="--depth: 1"><a href="#写流程内存--磁盘">写流程（内存 → 磁盘）</a></li><li style="--depth: 1"><a href="#io-调度器请求怎么排序">I/O 调度器：请求怎么排序</a></li><li style="--depth: 1"><a href="#内存回收page-cache-怎么被驱逐">内存回收：Page Cache 怎么被驱逐</a></li><li style="--depth: 0"><a href="#完整路径">完整路径</a></li><li style="--depth: 0"><a href="#关键优先级总结">关键优先级总结</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

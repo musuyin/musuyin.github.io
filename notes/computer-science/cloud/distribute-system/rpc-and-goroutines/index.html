@@ -1,0 +1,360 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>RPC and Threads · Musuyin&#39; Home</title><meta name="description" content="RPC 让远端操作形成调用接口，goroutine 让一个进程同时处理多项等待与计算。并发程序必须明确共享状态、同步和失败返回，不能把远端调用理解成本地函数一样可靠。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/distribute-system/rpc-and-goroutines/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="RPC and Threads · Musuyin' Home"><meta property="og:description" content="RPC 让远端操作形成调用接口，goroutine 让一个进程同时处理多项等待与计算。并发程序必须明确共享状态、同步和失败返回，不能把远端调用理解成本地函数一样可靠。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/distribute-system/rpc-and-goroutines/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">RPC and Threads</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-05-14">2026-05-14</time></dd></div><div><dt>字数</dt><dd>1540</dd></div><div><dt>预计阅读</dt><dd>6 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">#分布式</a><a href="/tags/RPC/">#RPC</a><a href="/tags/%E7%BA%BF%E7%A8%8B/">#线程</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>RPC and Threads</h1><time datetime="2026-05-14">2026-05-14</time><p class="tags"><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">#分布式</a><a href="/tags/RPC/">#RPC</a><a href="/tags/%E7%BA%BF%E7%A8%8B/">#线程</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>RPC 让远端操作形成调用接口，goroutine 让一个进程同时处理多项等待与计算。并发程序必须明确共享状态、同步和失败返回，不能把远端调用理解成本地函数一样可靠。</p>
+<p><a id="reference-why-use-go"></a></p>
+<h2 id="why-use-go">Why Use Go</h2>
+<ul>
+<li>Good support for threads</li>
+<li>Convenient RPC</li>
+<li>Type- and memory-safe</li>
+<li>Garbage-collected (no use-after-free problems)</li>
+<li>Threads + GC is particularly attractive</li>
+<li>Not too complex</li>
+<li>Widely used in distributed systems</li>
+</ul>
+<p><a id="reference-threads"></a></p>
+<h2 id="threads">Threads</h2>
+<p>A <em>thread</em> (“thread of execution”) is a useful structuring tool, though tricky to use correctly. Go calls them <em>goroutines</em>.</p>
+<ul>
+<li>Threads allow one program to do many things at once</li>
+<li>Each thread executes serially, just like a non-threaded program</li>
+<li>Threads <strong>share memory</strong></li>
+<li>Each thread has its own per-thread state: program counter, registers, stack</li>
+</ul>
+<p><a id="reference-why-threads"></a></p>
+<h3 id="why-threads">Why Threads</h3>
+<ul>
+<li><strong>I/O concurrency</strong> — while waiting for disk/network for client X, process a request from client Y
+<ul>
+<li>Client sends requests to many servers in parallel and waits for replies</li>
+<li>Server processes many simultaneous client requests, each of which may block</li>
+</ul>
+</li>
+<li><strong>Multicore performance</strong> — execute code in parallel on several cores</li>
+<li><strong>Convenience</strong> — e.g., once per second in the background, check whether each worker is still alive</li>
+</ul>
+<p><a id="reference-event-driven-the-alternative-to-threads"></a></p>
+<h3 id="event-driven-the-alternative-to-threads">Event-driven: The Alternative to Threads</h3>
+<p>Event-driven is an alternative concurrency model that uses a <strong>single thread</strong> with a single event loop.</p>
+<p>The loop:</p>
+<ol>
+<li>Waits for any input or event that might trigger processing</li>
+<li>Does the next step for each activity</li>
+<li>Updates per-activity state (e.g., a table keyed by client request)</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Threads</th>
+<th>Event-driven</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I/O concurrency</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Multi-core speedup</td>
+<td>✓</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Programming complexity</td>
+<td>Medium</td>
+<td>High (explicit interleaving)</td>
+</tr>
+<tr>
+<td>Thread overhead</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-threading-challenges"></a></p>
+<h3 id="threading-challenges">Threading Challenges</h3>
+<p><a id="reference-shared-data-safety"></a></p>
+<h4 id="shared-data-safety">Shared Data Safety</h4>
+<p><em>Race condition</em>: two threads access the same memory concurrently, and at least one writes.</p>
+<p>Solutions:</p>
+<ul>
+<li>Use locks: Go’s <code>sync.Mutex</code></li>
+<li>Avoid sharing mutable data altogether</li>
+</ul>
+<p><a id="reference-coordination-between-threads"></a></p>
+<h4 id="coordination-between-threads">Coordination Between Threads</h4>
+<p>One thread produces data, another consumes it. How does the consumer wait (releasing the CPU), and how does the producer wake it up?</p>
+<p>Go primitives:</p>
+<ul>
+<li><code>chan</code> — Go channels</li>
+<li><code>sync.Cond</code> — condition variable</li>
+<li><code>sync.WaitGroup</code> — wait for a group of goroutines to finish</li>
+</ul>
+<p><a id="reference-deadlock"></a></p>
+<h4 id="deadlock">Deadlock</h4>
+<p>A cycle of threads waiting for each other — can happen via locks, channels, or RPC.</p>
+<p><a id="reference-web-crawler"></a></p>
+<h2 id="web-crawler">Web Crawler</h2>
+<p><strong>Goal:</strong> given a starting URL, recursively fetch all reachable web pages (a DAG).</p>
+<p>Constraints:</p>
+<ul>
+<li>Don’t fetch a given page more than once</li>
+<li>Don’t get stuck in cycles</li>
+</ul>
+<p><a id="reference-challenges"></a></p>
+<h3 id="challenges">Challenges</h3>
+<ul>
+<li><strong>I/O concurrency:</strong> network latency (~0.1s) dominates throughput → fetch many pages in parallel</li>
+<li><strong>Deduplication:</strong> remember which URLs have been visited</li>
+<li><strong>Termination:</strong> know when all pages are fetched</li>
+</ul>
+<p><a id="reference-solution-1-serial"></a></p>
+<h3 id="solution-1-serial">Solution 1: Serial</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Serial</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">url</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">fetcher</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Fetcher</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">fetched</span><span style="color:#D73A49;--shiki-dark:#F97583"> map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fetched[url] {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	fetched[url] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	urls, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fetcher.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fetch</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(url)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, u </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> urls {</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">		Serial</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(u, fetcher, fetched)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>Depth-first traversal via recursion</li>
+<li><code>fetched</code> map (passed by reference) avoids repeats and breaks cycles</li>
+<li><strong>Problem:</strong> fetches one page at a time — slow</li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> simply adding <code>go</code> before <code>Serial()</code> breaks correctness — when <code>main()</code> exits, spawned goroutines may be killed before finishing.</p>
+</blockquote>
+<p><a id="reference-solution-2-concurrent-mutex-shared-state"></a></p>
+<h3 id="solution-2-concurrent-mutex-shared-state">Solution 2: Concurrent Mutex (Shared State)</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> fetchState</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	mu      </span><span style="color:#6F42C1;--shiki-dark:#B392F0">sync</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Mutex</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	fetched </span><span style="color:#D73A49;--shiki-dark:#F97583">map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#E36209;--shiki-dark:#FFAB70">fs </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">fetchState</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">testAndSet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">url</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	fs.mu.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Lock</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	defer</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fs.mu.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Unlock</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	r </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fs.fetched[url]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	fs.fetched[url] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> r</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ConcurrentMutex</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">url</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">fetcher</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Fetcher</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">fs</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">fetchState</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fs.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">testAndSet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(url) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	urls, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fetcher.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fetch</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(url)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> done </span><span style="color:#6F42C1;--shiki-dark:#B392F0">sync</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">WaitGroup</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, u </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> urls {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		done.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		go</span><span style="color:#D73A49;--shiki-dark:#F97583"> func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">u</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">			ConcurrentMutex</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(u, fetcher, fs)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">			done.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Done</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		}(u)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	done.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Wait</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>Spawns a goroutine for each page fetch → many concurrent fetches</li>
+<li><code>fs.fetched</code> is shared across goroutines; the mutex protects it</li>
+</ul>
+<p><strong>Why the mutex in <code>testAndSet()</code>?</strong></p>
+<p>Without it: T1 and T2 both read <code>fetched[url] == false</code> simultaneously (because two different pages link to the same URL), and both proceed to fetch — duplicate fetch.</p>
+<p>With the mutex: one thread waits while the other atomically checks-and-sets, so only one sees <code>false</code>.</p>
+<blockquote>
+<p>The code between <code>Lock()</code> and <code>Unlock()</code> is called a <em>critical section</em>. Note: Go does <strong>not</strong> enforce any relationship between locks and data — it’s the programmer’s responsibility.</p>
+</blockquote>
+<p><strong>WaitGroup:</strong> <code>done.Wait()</code> blocks until all <code>Add(1)</code> calls are balanced by <code>Done()</code> calls, i.e., all child goroutines finish.</p>
+<p><a id="reference-detecting-races"></a></p>
+<h4 id="detecting-races">Detecting Races</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> run</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --race</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> crawler.go</span></span></code></pre>
+<p>Go’s race detector instruments memory accesses at runtime and reports concurrent unsynchronized accesses — <strong>even when the output happens to be correct</strong>. It only detects races on the specific execution path that was run, so it may miss races that require a different scheduling.</p>
+<p><a id="reference-solution-3-concurrent-channels"></a></p>
+<h3 id="solution-3-concurrent-channels">Solution 3: Concurrent Channels</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> worker</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">url</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">ch</span><span style="color:#D73A49;--shiki-dark:#F97583"> chan</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">fetcher</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Fetcher</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	urls, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fetcher.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fetch</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(url)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		ch </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;-</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	} </span><span style="color:#D73A49;--shiki-dark:#F97583">else</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		ch </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;-</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> urls</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> coordinator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">ch</span><span style="color:#D73A49;--shiki-dark:#F97583"> chan</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">fetcher</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Fetcher</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	n </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	fetched </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> make</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> urls </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ch {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, u </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> urls {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">			if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fetched[u] </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> false</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">				fetched[u] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">				n </span><span style="color:#D73A49;--shiki-dark:#F97583">+=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">				go</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> worker</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(u, ch, fetcher)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">			}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		n </span><span style="color:#D73A49;--shiki-dark:#F97583">-=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> n </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">			break</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ConcurrentChannel</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">url</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">fetcher</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Fetcher</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	ch </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> make</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">chan</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	go</span><span style="color:#D73A49;--shiki-dark:#F97583"> func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		ch </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;-</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{url}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}()</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">	coordinator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ch, fetcher)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>Channel basics:</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> make</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">chan</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;-</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x      </span><span style="color:#6A737D;--shiki-dark:#6A737D">// sender blocks until a receiver is ready</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">y </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;-</span><span style="color:#24292E;--shiki-dark:#E1E4E8">ch    </span><span style="color:#6A737D;--shiki-dark:#6A737D">// receiver blocks until a sender sends</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> y </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ch  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// receive until channel is closed</span></span></code></pre>
+<ul>
+<li>A channel both <strong>communicates values</strong> and <strong>synchronizes</strong> goroutines</li>
+<li>Send + receive costs less than a microsecond — fairly cheap</li>
+<li>Multiple goroutines can send/receive on the same channel safely</li>
+</ul>
+<p><strong>How <code>coordinator()</code> works:</strong></p>
+<ul>
+<li><code>coordinator</code> creates a worker goroutine for each new URL</li>
+<li>Each worker sends exactly one <code>[]string</code> (the fetched URLs) back on the channel</li>
+<li><code>coordinator</code> tracks in-flight workers with counter <code>n</code>; when <code>n == 0</code>, all work is done</li>
+<li>The <code>fetched</code> map is <strong>not shared</strong> — only <code>coordinator</code> uses it, so no lock needed</li>
+</ul>
+<p><strong>Is there a race between worker writing the URL slice and coordinator reading it?</strong></p>
+<p>No — the worker writes the slice <em>before</em> sending, and the coordinator reads it <em>after</em> receiving. The channel send/receive enforces the happens-before relationship.</p>
+<p><strong>Why does <code>ConcurrentChannel</code> wrap the first send in a goroutine?</strong></p>
+<p>Because <code>ch &lt;- []string{url}</code> would block (unbuffered channel) until <code>coordinator</code> is ready to receive. Without the goroutine, it would deadlock.</p>
+<p><a id="reference-shared-state-vs-channels"></a></p>
+<h4 id="shared-state-vs-channels">Shared State vs. Channels</h4>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Preferred approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Protecting shared state</td>
+<td><code>sync.Mutex</code> / <code>sync.Cond</code></td>
+</tr>
+<tr>
+<td>Communicating between goroutines</td>
+<td>Channels</td>
+</tr>
+</tbody>
+</table>
+<p>Most problems can be solved either way — choose based on how you think about the problem. For the 6.824 labs, <code>sync.Mutex</code> / <code>sync.Cond</code> is recommended for shared state.</p>
+<p><a id="reference-remote-procedure-call-rpc"></a></p>
+<h2 id="remote-procedure-call-rpc">Remote Procedure Call (RPC)</h2>
+<p><em>RPC</em> is a key mechanism in distributed systems. The goal: make client/server communication as easy as a local function call.</p>
+<p>RPC handles:</p>
+<ul>
+<li>Hiding network protocol details</li>
+<li><em>Marshalling</em>: converting data (strings, arrays, maps, etc.) into wire format</li>
+<li>Portability and interoperability</li>
+</ul>
+<p><a id="reference-message-flow"></a></p>
+<h3 id="message-flow">Message Flow</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Client              Server</span></span>
+<span class="line"><span>  |  --- request --&gt; |</span></span>
+<span class="line"><span>  |  &lt;-- response -- |</span></span></code></pre>
+<p>Software layers:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>client app         handler fns</span></span>
+<span class="line"><span>stub fns           dispatcher</span></span>
+<span class="line"><span>RPC lib            RPC lib</span></span>
+<span class="line"><span>net -------------- net</span></span></code></pre>
+<p><a id="reference-go-rpc-example-keyvalue-store"></a></p>
+<h3 id="go-rpc-example-keyvalue-store">Go RPC Example (key/value store)</h3>
+<p>A toy key/value server supporting <code>Put(key, value)</code> and <code>Get(key) → value</code>.</p>
+<p><strong>Common:</strong> declare <code>Args</code> and <code>Reply</code> structs for each handler.</p>
+<p><strong>Client side:</strong></p>
+<ul>
+<li><code>Dial()</code> creates a TCP connection to the server</li>
+<li><code>get()</code> / <code>put()</code> are client <em>stubs</em></li>
+<li><code>Call()</code> asks the RPC library to perform the call — marshalls args, sends request, waits, unmarshalls reply</li>
+<li>Return value of <code>Call()</code> indicates whether a reply was received; <code>reply.Err</code> indicates service-level failure</li>
+</ul>
+<p><strong>Server side:</strong></p>
+<ul>
+<li>Declare an object with methods as RPC handlers, register it with the RPC library</li>
+<li>Server accepts TCP connections and hands them to the RPC library</li>
+<li>For each request, the RPC library:
+<ol>
+<li>Creates a new goroutine</li>
+<li>Unmarshalls the request</li>
+<li>Looks up the named object (via <code>Register()</code>)</li>
+<li>Calls the named method (dispatch)</li>
+<li>Marshalls the reply and writes it back</li>
+</ol>
+</li>
+</ul>
+<blockquote>
+<p>The <code>Get()</code> and <code>Put()</code> handlers <strong>must lock</strong>, because the RPC library creates a new goroutine per request.</p>
+</blockquote>
+<p><a id="reference-marshalling-details"></a></p>
+<h3 id="marshalling-details">Marshalling Details</h3>
+<ul>
+<li>Go RPC can pass strings, arrays, objects, maps, etc.</li>
+<li>Pointers are passed by <strong>copying</strong> the pointed-to data</li>
+<li><strong>Cannot</strong> pass channels or functions</li>
+<li>Only <strong>exported fields</strong> (capitalized) are marshalled</li>
+</ul>
+<p><a id="reference-rpc-failure-handling"></a></p>
+<h3 id="rpc-failure-handling">RPC Failure Handling</h3>
+<p><strong>What failures look like to the client:</strong> <code>Call()</code> never gets a response. The client cannot tell:</p>
+<ul>
+<li>Whether the server received the request at all</li>
+<li>Whether the server executed and crashed before replying</li>
+<li>Whether the reply was lost in transit</li>
+</ul>
+<p>This is a fundamental difference from local procedure calls.</p>
+<p><a id="reference-failure-semantics"></a></p>
+<h4 id="failure-semantics">Failure Semantics</h4>
+<p><strong>Best-effort RPC:</strong></p>
+<ul>
+<li><code>Call()</code> waits for a response; if none arrives, re-sends a few times, then returns an error</li>
+<li>Simple, but dangerous for non-idempotent operations</li>
+</ul>
+<blockquote>
+<p><strong>Bad scenario:</strong> two <code>Put("k", 10)</code> / <code>Put("k", 20)</code> calls, a timeout on the first, re-send — server may execute <code>Put("k", 10)</code> twice. <code>Get("k")</code> could yield <code>10</code> instead of <code>20</code>.</p>
+</blockquote>
+<p>Best-effort is acceptable only for <strong>read-only</strong> or <strong>idempotent</strong> operations (e.g., DB checks whether a record already exists).</p>
+<p><strong>At-most-once RPC</strong> (Go’s default):</p>
+<ul>
+<li>Uses a single TCP connection; never re-sends a request</li>
+<li>Server won’t see duplicate requests</li>
+<li>If no reply arrives (timeout, server crash, network failure), <code>Call()</code> returns an error</li>
+<li><strong>Drawback:</strong> too restrictive for replicated servers — ideally, retry at another replica if the first fails</li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>分别给共享内存访问和 RPC 超时设计处理方式；锁保护什么，重试又可能造成什么重复副作用？</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>衔接机制或实践：<a href="/notes/computer-science/cloud/distribute-system/go-threads-and-raft/">Go, Threads, and Raft</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#why-use-go">Why Use Go</a></li><li style="--depth: 0"><a href="#threads">Threads</a></li><li style="--depth: 1"><a href="#why-threads">Why Threads</a></li><li style="--depth: 1"><a href="#event-driven-the-alternative-to-threads">Event-driven: The Alternative to Threads</a></li><li style="--depth: 1"><a href="#threading-challenges">Threading Challenges</a></li><li style="--depth: 2"><a href="#shared-data-safety">Shared Data Safety</a></li><li style="--depth: 2"><a href="#coordination-between-threads">Coordination Between Threads</a></li><li style="--depth: 2"><a href="#deadlock">Deadlock</a></li><li style="--depth: 0"><a href="#web-crawler">Web Crawler</a></li><li style="--depth: 1"><a href="#challenges">Challenges</a></li><li style="--depth: 1"><a href="#solution-1-serial">Solution 1: Serial</a></li><li style="--depth: 1"><a href="#solution-2-concurrent-mutex-shared-state">Solution 2: Concurrent Mutex (Shared State)</a></li><li style="--depth: 2"><a href="#detecting-races">Detecting Races</a></li><li style="--depth: 1"><a href="#solution-3-concurrent-channels">Solution 3: Concurrent Channels</a></li><li style="--depth: 2"><a href="#shared-state-vs-channels">Shared State vs. Channels</a></li><li style="--depth: 0"><a href="#remote-procedure-call-rpc">Remote Procedure Call (RPC)</a></li><li style="--depth: 1"><a href="#message-flow">Message Flow</a></li><li style="--depth: 1"><a href="#go-rpc-example-keyvalue-store">Go RPC Example (key/value store)</a></li><li style="--depth: 1"><a href="#marshalling-details">Marshalling Details</a></li><li style="--depth: 1"><a href="#rpc-failure-handling">RPC Failure Handling</a></li><li style="--depth: 2"><a href="#failure-semantics">Failure Semantics</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

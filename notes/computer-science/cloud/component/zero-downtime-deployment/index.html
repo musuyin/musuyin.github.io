@@ -1,0 +1,125 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>零停机部署策略 · Musuyin&#39; Home</title><meta name="description" content="蓝绿、滚动和金丝雀通过不同方式安排版本与流量。无停机需要准备好可接流量的新实例、兼容的数据与协议、连接排空和回退路径，不能只靠切换路由实现。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/component/zero-downtime-deployment/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="零停机部署策略 · Musuyin' Home"><meta property="og:description" content="蓝绿、滚动和金丝雀通过不同方式安排版本与流量。无停机需要准备好可接流量的新实例、兼容的数据与协议、连接排空和回退路径，不能只靠切换路由实现。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/component/zero-downtime-deployment/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">零停机部署策略</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-04-03">2026-04-03</time></dd></div><div><dt>字数</dt><dd>671</dd></div><div><dt>预计阅读</dt><dd>3 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/%E9%83%A8%E7%BD%B2/">#部署</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>零停机部署策略</h1><time datetime="2026-04-03">2026-04-03</time><p class="tags"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/%E9%83%A8%E7%BD%B2/">#部署</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>蓝绿、滚动和金丝雀通过不同方式安排版本与流量。无停机需要准备好可接流量的新实例、兼容的数据与协议、连接排空和回退路径，不能只靠切换路由实现。</p>
+<p><a id="reference-blue-green-deployment"></a></p>
+<h2 id="blue-green-deployment">Blue-Green Deployment</h2>
+<p>核心思想：同时维护两套完全相同的生产环境</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>┌─────────────────────────────────────────────────────────┐</span></span>
+<span class="line"><span>│                    用户流量                              │</span></span>
+<span class="line"><span>│                        ↓                                │</span></span>
+<span class="line"><span>│                  负载均衡器                              │</span></span>
+<span class="line"><span>│                        ↓                                │</span></span>
+<span class="line"><span>│         ┌──────────────┴──────────────┐                │</span></span>
+<span class="line"><span>│         ↓                              ↓                │</span></span>
+<span class="line"><span>│  🔵 Blue 环境                   🟢 Green 环境           │</span></span>
+<span class="line"><span>│  (当前生产版本 v1.0)             (新版本 v2.0)           │</span></span>
+<span class="line"><span>│  ✅ 接收 100% 流量              ⏸️   待命中               │</span></span>
+<span class="line"><span>└─────────────────────────────────────────────────────────┘</span></span></code></pre>
+<p><a id="reference-部署流程"></a></p>
+<h3 id="部署流程">部署流程</h3>
+<p><a id="reference-第-1-步初始状态"></a></p>
+<h4 id="第-1-步初始状态">第 1 步：初始状态</h4>
+<ul>
+<li>Blue (v1.0) ← 100% 流量 ✅ 运行中</li>
+<li>Green (空) ⚪ 空闲</li>
+</ul>
+<p><a id="reference-第-2-步在-green-环境部署新版本"></a></p>
+<h4 id="第-2-步在-green-环境部署新版本">第 2 步：在 Green 环境部署新版本</h4>
+<ul>
+<li>Blue (v1.0) ← 100% 流量 ✅ 用户继续正常使用</li>
+<li>Green (v2.0) 🔨 部署中，不接收流量</li>
+</ul>
+<p><a id="reference-第-3-步切换流量秒级完成"></a></p>
+<h4 id="第-3-步切换流量秒级完成">第 3 步：切换流量（秒级完成）</h4>
+<ul>
+<li>Blue (v1.0) ⏸️ 保留作为备份</li>
+<li>Green (v2.0) ← 100% 流量 ✅ 切换完成</li>
+</ul>
+<p><a id="reference-第-4-步如果发现问题立即回滚"></a></p>
+<h4 id="第-4-步如果发现问题立即回滚">第 4 步：如果发现问题，立即回滚</h4>
+<ul>
+<li>Blue (v1.0) ← 100% 流量 ↩️ 切换回去（秒级）</li>
+<li>Green (v2.0) ❌ 有问题，停用</li>
+</ul>
+<p><a id="reference-第-5-步稳定后blue-变成下一次的-green"></a></p>
+<h4 id="第-5-步稳定后blue-变成下一次的-green">第 5 步：稳定后，Blue 变成下一次的 Green</h4>
+<ul>
+<li>Blue (v2.0) ← 100% 流量 ✅ Green 内容复制到 Blue</li>
+<li>Green (空) 🔄 准备下次部署</li>
+</ul>
+<p><a id="reference-canary-deployment"></a></p>
+<h2 id="canary-deployment">Canary Deployment</h2>
+<p>核心思想：逐步放量，小范围试错</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>┌─────────────────────────────────────────────────────────┐</span></span>
+<span class="line"><span>│                    用户流量 (100%)                       │</span></span>
+<span class="line"><span>│                        ↓                                │</span></span>
+<span class="line"><span>│                  负载均衡器                              │</span></span>
+<span class="line"><span>│                        ↓                                │</span></span>
+<span class="line"><span>│         ┌──────────────┼──────────────┐                │</span></span>
+<span class="line"><span>│         ↓              ↓               ↓                │</span></span>
+<span class="line"><span>│  v1.0 服务器 A   v1.0 服务器 B   🐤 v2.0 Canary        │</span></span>
+<span class="line"><span>│  (45% 流量)      (45% 流量)       (10% 流量)           │</span></span>
+<span class="line"><span>└─────────────────────────────────────────────────────────┘</span></span></code></pre>
+<p><a id="reference-部署流程-1"></a></p>
+<h3 id="部署流程-1">部署流程</h3>
+<p>逐步增加新版本流量</p>
+<p><a id="reference-阶段-1-初始状态"></a></p>
+<h4 id="阶段-1-初始状态">阶段 1: 初始状态</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>v1.0 ████████████████████ 100% 流量</span></span>
+<span class="line"><span>v2.0 0%</span></span></code></pre>
+<p><a id="reference-阶段-2-canary-发布5-10-流量"></a></p>
+<h4 id="阶段-2-canary-发布5-10-流量">阶段 2: Canary 发布（5-10% 流量）</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>v1.0 █████████████████░░ 90% 流量 ← 大部分用户</span></span>
+<span class="line"><span>v2.0 █░░░░░░░░░░░░░░░░░░ 10% 流量 ← 小部分"试错"用户</span></span>
+<span class="line"><span>↑</span></span>
+<span class="line"><span>金丝雀！观察指标：错误率、延迟、CPU、内存</span></span></code></pre>
+<p>监控指标：</p>
+<ul>
+<li>✅ 错误率：&lt; 0.1%</li>
+<li>✅ P99 延迟：&lt; 200ms</li>
+<li>✅ CPU 使用率：&lt; 80%</li>
+</ul>
+<p>如果 Canary 正常 → 继续放量</p>
+<p><a id="reference-阶段-3-增加到-25"></a></p>
+<h4 id="阶段-3-增加到-25">阶段 3: 增加到 25%</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>v1.0 ███████████████░░░░ 75% 流量</span></span>
+<span class="line"><span>v2.0 █████░░░░░░░░░░░░░░ 25% 流量 ← 继续观察</span></span></code></pre>
+<p><a id="reference-阶段-4-增加到-50"></a></p>
+<h4 id="阶段-4-增加到-50">阶段 4: 增加到 50%</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>v1.0 ██████████░░░░░░░░░ 50% 流量</span></span>
+<span class="line"><span>v2.0 ██████████░░░░░░░░░ 50% 流量</span></span></code></pre>
+<p><a id="reference-阶段-5-全量发布"></a></p>
+<h4 id="阶段-5-全量发布">阶段 5: 全量发布</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>v1.0 0% ← 下线旧版本</span></span>
+<span class="line"><span>v2.0 ████████████████████ 100% 流量 ✅ 发布成功！</span></span></code></pre>
+<p>如果 Canary 发现问题？</p>
+<p><a id="reference-问题场景"></a></p>
+<h3 id="问题场景">问题场景</h3>
+<p><a id="reference-canary-阶段错误率飙升"></a></p>
+<h4 id="canary-阶段错误率飙升">Canary 阶段错误率飙升</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>v1.0 █████████████████░░ 90% 流量 ✅ 正常</span></span>
+<span class="line"><span>v2.0 █░░░░░░░░░░░░░░░░░░ 10% 流量 ❌ 错误率 5%！</span></span>
+<span class="line"><span>↑</span></span>
+<span class="line"><span>检测到问题！</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>立即回滚：</span></span>
+<span class="line"><span>v1.0 ████████████████████ 100% 流量 ↩️ 回滚完成</span></span>
+<span class="line"><span>v2.0 (已删除) 0% ❌ 有问题版本已下线</span></span></code></pre>
+<p>只影响了 10% 的用户，90% 用户完全不受影响！</p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>给一个数据库结构变更选择发布顺序，说明旧版本能否继续运行，以及用户侧如何验证没有中断。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>衔接机制或实践：<a href="/notes/computer-science/cloud/kubernetes/kubernetes-high-availability/">L10-High Availability</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#blue-green-deployment">Blue-Green Deployment</a></li><li style="--depth: 1"><a href="#部署流程">部署流程</a></li><li style="--depth: 2"><a href="#第-1-步初始状态">第 1 步：初始状态</a></li><li style="--depth: 2"><a href="#第-2-步在-green-环境部署新版本">第 2 步：在 Green 环境部署新版本</a></li><li style="--depth: 2"><a href="#第-3-步切换流量秒级完成">第 3 步：切换流量（秒级完成）</a></li><li style="--depth: 2"><a href="#第-4-步如果发现问题立即回滚">第 4 步：如果发现问题，立即回滚</a></li><li style="--depth: 2"><a href="#第-5-步稳定后blue-变成下一次的-green">第 5 步：稳定后，Blue 变成下一次的 Green</a></li><li style="--depth: 0"><a href="#canary-deployment">Canary Deployment</a></li><li style="--depth: 1"><a href="#部署流程-1">部署流程</a></li><li style="--depth: 2"><a href="#阶段-1-初始状态">阶段 1: 初始状态</a></li><li style="--depth: 2"><a href="#阶段-2-canary-发布5-10-流量">阶段 2: Canary 发布（5-10% 流量）</a></li><li style="--depth: 2"><a href="#阶段-3-增加到-25">阶段 3: 增加到 25%</a></li><li style="--depth: 2"><a href="#阶段-4-增加到-50">阶段 4: 增加到 50%</a></li><li style="--depth: 2"><a href="#阶段-5-全量发布">阶段 5: 全量发布</a></li><li style="--depth: 1"><a href="#问题场景">问题场景</a></li><li style="--depth: 2"><a href="#canary-阶段错误率飙升">Canary 阶段错误率飙升</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

@@ -1,0 +1,899 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>缓存商品、购物车 · Musuyin&#39; Home</title><meta name="description" content="商品缓存减轻查询压力，购物车则保存用户准备购买的条目。缓存需要明确键和失效时机；购物车新增、查询、清空都必须限定当前用户，不能仅按商品 ID 操作。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/java/sky-take-out/product-cache-and-cart/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="缓存商品、购物车 · Musuyin' Home"><meta property="og:description" content="商品缓存减轻查询压力，购物车则保存用户准备购买的条目。缓存需要明确键和失效时机；购物车新增、查询、清空都必须限定当前用户，不能仅按商品 ID 操作。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/java/sky-take-out/product-cache-and-cart/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">缓存商品、购物车</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-06">2026-08-06</time></dd></div><div><dt>字数</dt><dd>3288</dd></div><div><dt>预计阅读</dt><dd>11 分钟</dd></div></dl></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>缓存商品、购物车</h1><time datetime="2026-08-06">2026-08-06</time></header><div class="prose"><p>商品缓存减轻查询压力，购物车则保存用户准备购买的条目。缓存需要明确键和失效时机；购物车新增、查询、清空都必须限定当前用户，不能仅按商品 ID 操作。</p>
+<p><a id="reference-课程内容"></a></p>
+<h2 id="课程内容">课程内容</h2>
+<ul>
+<li>缓存菜品</li>
+<li>缓存套餐</li>
+<li>添加购物车</li>
+<li>查看购物车</li>
+<li>清空购物车</li>
+</ul>
+<p>功能实现：<strong>缓存商品</strong>、<strong>购物车</strong></p>
+<p><strong>效果图：</strong></p>
+<p><img alt="image-20221208175444066" loading="lazy" decoding="async" width="431" height="763" src="/_astro/IMG-20260722152511924.B6AwiA0l_1xCbFy.webp"></p>
+<p><a id="reference-缓存菜品"></a></p>
+<h2 id="缓存菜品">缓存菜品</h2>
+<p><a id="reference-问题说明"></a></p>
+<h3 id="问题说明">问题说明</h3>
+<p>用户端小程序展示的菜品数据都是通过查询数据库获得，如果用户端访问量比较大，数据库访问压力随之增大。</p>
+<p><img alt="image-20221208180228667" loading="lazy" decoding="async" width="1608" height="532" src="/_astro/IMG-20260722152523046.BMw2yJbj_Z15a5Uc.webp"></p>
+<p><strong>结果：</strong> 系统响应慢、用户体验差</p>
+<p><a id="reference-实现思路"></a></p>
+<h3 id="实现思路">实现思路</h3>
+<p>通过 Redis 来缓存菜品数据，减少数据库查询操作。</p>
+<p><img alt="image-20221208180818572" loading="lazy" decoding="async" width="1773" height="502" src="/_astro/IMG-20260722152523084.Y6RLS1wA_2ffcTA.webp"></p>
+<p><strong>缓存逻辑分析：</strong></p>
+<ul>
+<li>每个分类下的菜品保存一份缓存数据</li>
+<li>数据库中菜品数据有变更时清理缓存数据</li>
+</ul>
+<p><img alt="image-20221208181007639" loading="lazy" decoding="async" width="606" height="364" src="/_astro/IMG-20260722152523107.DmtMBvTF_ZmRJW8.webp"></p>
+<p><a id="reference-代码开发"></a></p>
+<h3 id="代码开发">代码开发</h3>
+<p><strong>修改用户端接口 DishController 的 list 方法，加入缓存处理逻辑：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Override</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Transactional</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> List</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">DishVO</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> listWithFlavor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Dish dish) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 1. 先查询 Redis 中是否有对应缓存，根据 categoryId 来存储</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String key </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> DISH_CACHE_KEY </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dish.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getCategoryId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; strDishVO </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> stringRedisTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">opsForList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">range</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(key, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">DishVO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; list </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ArrayList&lt;&gt;();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (strDishVO </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;&amp;</span><span style="color:#D73A49;--shiki-dark:#F97583"> !</span><span style="color:#24292E;--shiki-dark:#E1E4E8">strDishVO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">isEmpty</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            strDishVO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">forEach</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(each </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(JSONUtil.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">toBean</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(each, DishVO.class)));</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 2. 不存在，再查询数据库</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Dish</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; dishes </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dishMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">query</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dish);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (Dish d </span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dishes) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">DishFlavor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; flavors </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> flavorMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getByDishId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(d.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            DishVO dishVO </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> DishVO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            BeanUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">copyProperties</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(d, dishVO);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            dishVO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setFlavors</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(flavors);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            list.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dishVO);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 3. 将数据库查询到的数据放入 Redis</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        list.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">forEach</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(each </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> stringRedisTemplate</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">opsForList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">rightPush</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(key, JSONUtil.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">toJsonStr</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(each)));</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p>为了保证<strong>数据库</strong>和 <strong>Redis</strong> 中的数据保持一致，修改<strong>管理端接口 DishController</strong> 的相关方法，加入清理缓存逻辑。</p>
+<p>需要改造的方法：</p>
+<ul>
+<li>新增菜品</li>
+<li>修改菜品</li>
+<li>批量删除菜品</li>
+<li>起售、停售菜品</li>
+</ul>
+<p><strong>抽取清理缓存的方法：</strong></p>
+<p>在管理端 DishServiceImpl 中添加</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	@</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> RedisTemplate redisTemplate;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 清理缓存数据</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> pattern</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> cleanCache</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String pattern){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Set keys </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> redisTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">keys</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(pattern);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        redisTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">delete</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(keys);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><strong>调用清理缓存的方法，保证数据一致性：</strong></p>
+<p><strong>1). 新增菜品优化</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Override</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 出现对于多张数据表的操作，要开启事务操作来保证原子性</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Transactional</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> saveWithFlavor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(DishDTO dishDTO) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 0. 将DTO转为实体类</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Dish dish </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Dish</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        BeanUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">copyProperties</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dishDTO, dish);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 1. 向菜品表中插入数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        dishMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">insert</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dish);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Long dishId </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dish.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 2. 向口味表中插入数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">DishFlavor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; flavors </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dishDTO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getFlavors</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 判断口味集合是否存在</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (flavors </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;&amp;</span><span style="color:#D73A49;--shiki-dark:#F97583"> !</span><span style="color:#24292E;--shiki-dark:#E1E4E8">flavors.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">isEmpty</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            flavors.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">forEach</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(flavor </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> flavor.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setDishId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dishId));</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            // 批量插入</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            flavorMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">insertBatch</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(flavors);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 删除缓存数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String key </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> DISH_CACHE_KEY </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dish.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getCategoryId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">        cleanCache</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(key);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><strong>2). 菜品批量删除优化</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 菜品批量删除</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> ids</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">DeleteMapping</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"菜品批量删除"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result </span><span style="color:#6F42C1;--shiki-dark:#B392F0">delete</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestParam</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> List</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">Long</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ids) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">info</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"菜品批量删除：{}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, ids);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        dishService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">deleteBatch</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ids);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //将所有的菜品缓存数据清理掉，所有以dish_开头的key</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">        cleanCache</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dish_*"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><strong>3). 修改菜品优化</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 修改菜品</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> dishDTO</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">PutMapping</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"修改菜品"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result </span><span style="color:#6F42C1;--shiki-dark:#B392F0">update</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestBody</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> DishDTO dishDTO) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">info</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"修改菜品：{}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, dishDTO);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        dishService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">updateWithFlavor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dishDTO);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //将所有的菜品缓存数据清理掉，所有以dish_开头的key</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">        cleanCache</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dish_*"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><strong>4). 菜品起售停售优化</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 菜品起售停售</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> status</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> id</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">PostMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/status/{status}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"菜品起售停售"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">String</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> startOrStop</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">PathVariable</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Integer status, Long id) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        dishService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">startOrStop</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(status, id);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //将所有的菜品缓存数据清理掉，所有以dish_开头的key</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">        cleanCache</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dish_*"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><a id="reference-功能测试"></a></p>
+<h3 id="功能测试">功能测试</h3>
+<p>可以通过如下方式进行测试：</p>
+<ul>
+<li>查看控制台 sql</li>
+<li>前后端联调</li>
+<li>查看 Redis 中的缓存数据</li>
+</ul>
+<p>以<strong>加入缓存</strong>、<strong>菜品修改</strong>两个功能测试为例，通过前后端联调方式，查看控制台 sql 的打印和 Redis 中的缓存数据变化。</p>
+<p><strong>1). 加入缓存</strong></p>
+<p>当第一次查询某个分类的菜品时，会从数据为中进行查询，同时将查询的结果存储到 Redis 中，在后绪的访问，若查询相同分类的菜品时，直接从 Redis 缓存中查询，不再查询数据库。</p>
+<p><strong>登录小程序：</strong> 选择蜀味牛蛙(id=17)</p>
+<p><img alt="image-20221210174656770" loading="lazy" decoding="async" width="481" height="750" src="/_astro/IMG-20260722152523139.CZNA7kio_8vSyO.webp"></p>
+<p><strong>查看控制台 sql：</strong> 有查询语句，说明是从数据库中进行查询</p>
+<p><img alt="image-20221210174839028" loading="lazy" decoding="async" width="1388" height="429" src="/_astro/IMG-20260722152523170.Db2bIhCE_Zqc09M.webp"></p>
+<p><strong>查看 Redis 中的缓存数据：</strong> 说明缓存成功</p>
+<p><img alt="image-20221210175055282" loading="lazy" decoding="async" width="1877" height="904" src="/_astro/IMG-20260722152523210.CP9SpA1c_189Gqf.webp"></p>
+<p><strong>再次访问：</strong> 选择蜀味牛蛙(id=17)</p>
+<p><img alt="image-20221210175438411" loading="lazy" decoding="async" width="1394" height="514" src="/_astro/IMG-20260722152523242.B3jAZtjP_2ryStG.webp"></p>
+<p>说明是从 Redis 中查询的数据。</p>
+<p><strong>2). 菜品修改</strong></p>
+<p>当在后台修改菜品数据时，为了保证 Redis 缓存中的数据和数据库中的数据时刻保持一致，当修改后，需要清空对应的缓存数据。用户再次访问时，还是先从数据库中查询，同时再把查询的结果存储到 Redis 中，这样，就能保证缓存和数据库的数据保持一致。</p>
+<p><strong>进入后台：</strong> 修改蜀味牛蛙分类下的任意一个菜品，当前分类的菜品数据已在 Redis 中缓存</p>
+<p><img alt="image-20221210180624453" loading="lazy" decoding="async" width="1887" height="862" src="/_astro/IMG-20260722152523271._8YBvEaE_ZrpCHA.webp"></p>
+<p><strong>修改：</strong></p>
+<p><img alt="image-20221210180900924" loading="lazy" decoding="async" width="1758" height="768" src="/_astro/IMG-20260722152523300.CNKEHnfN_XmPHX.webp"></p>
+<p><strong>查看 Redis 中的缓存数据：</strong> 说明修改时，已清空缓存</p>
+<p><img alt="image-20221210181142408" loading="lazy" decoding="async" width="1892" height="980" src="/_astro/IMG-20260722152523332.CNGYzu6y_1HSyFU.webp"></p>
+<p>用户再次访问同一个菜品分类时，需要先查询数据库，再把结果同步到 Redis 中，保证了两者数据一致性。</p>
+<p>其它功能测试步骤基本一致，自已测试即可。</p>
+<p><a id="reference-代码提交"></a></p>
+<h3 id="代码提交">代码提交</h3>
+<p><img alt="image-20221210202804407" loading="lazy" decoding="async" width="1080" height="999" src="/_astro/IMG-20260722152523358.CXs3cxAV_2qtdRW.webp"></p>
+<p>后续步骤和其它功能代码提交一致，不再赘述。</p>
+<p><a id="reference-缓存套餐"></a></p>
+<h2 id="缓存套餐">缓存套餐</h2>
+<p><a id="reference-spring-cache"></a></p>
+<h3 id="spring-cache">Spring Cache</h3>
+<p><a id="reference-介绍"></a></p>
+<h4 id="介绍">介绍</h4>
+<p>Spring Cache 是一个框架，实现了基于注解的缓存功能，只需要简单地加一个注解，就能实现缓存功能。其实就相当于在原本代码不变的基础上增入的缓存功能，不需要手动编写对 redis 的操作代码</p>
+<p>Spring Cache 提供了一层抽象，底层可以切换不同的缓存实现，例如：</p>
+<ul>
+<li>EHCache</li>
+<li>Caffeine</li>
+<li>Redis(常用)</li>
+</ul>
+<p><strong>依赖：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-cache&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;2.7.3&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><a id="reference-常用注解"></a></p>
+<h4 id="常用注解">常用注解</h4>
+<p>在 SpringCache 中提供了很多缓存操作的注解，常见的是以下的几个：</p>
+<table>
+<thead>
+<tr>
+<th><strong>注解</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>@EnableCaching</td>
+<td>开启缓存注解功能，通常加在启动类上</td>
+</tr>
+<tr>
+<td>@Cacheable</td>
+<td>在方法执行前先查询缓存中是否有数据，如果有数据，则直接返回缓存数据；如果没有缓存数据，调用方法并将方法返回值放到缓存中</td>
+</tr>
+<tr>
+<td>@CachePut</td>
+<td>将方法的返回值放到缓存中</td>
+</tr>
+<tr>
+<td>@CacheEvict</td>
+<td>将一条或多条数据从缓存中删除</td>
+</tr>
+</tbody>
+</table>
+<p>在 spring boot 项目中，使用缓存技术只需在项目中导入相关缓存技术的依赖包，并在启动类上使用 @EnableCaching 开启缓存支持即可。</p>
+<p>例如，使用 Redis 作为缓存技术，只需要导入 Spring data Redis 的 maven 坐标即可。</p>
+<p><a id="reference-enablecaching"></a></p>
+<h4 id="enablecaching"><strong>@EnableCaching</strong></h4>
+<p><strong>引导类上加 @EnableCaching</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.itheima;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.extern.slf4j.Slf4j;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.SpringApplication;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.autoconfigure.SpringBootApplication;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.cache.annotation.EnableCaching;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Slf4j</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">SpringBootApplication</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">EnableCaching</span><span style="color:#6A737D;--shiki-dark:#6A737D">//开启缓存注解功能</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> CacheDemoApplication</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[] </span><span style="color:#E36209;--shiki-dark:#FFAB70">args</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        SpringApplication.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">run</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(CacheDemoApplication.class,args);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">info</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"项目启动成功..."</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-cacheput"></a></p>
+<h4 id="cacheput"><strong>@CachePut</strong></h4>
+<ul>
+<li>作用: 将方法返回值，放入缓存</li>
+<li>value: 缓存的名称, 每个缓存名称下面可以有很多 key</li>
+<li>key: 缓存的 key，支持 Spring 的表达式语言 SPEL 语法</li>
+</ul>
+<p><strong>在 save 方法上加注解 @CachePut</strong></p>
+<p>当前 UserController 的 save 方法是用来保存用户信息的，我们希望在该用户信息保存到数据库的同时，也往缓存中缓存一份数据，我们可以在 save 方法上加上注解 @CachePut，用法如下：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	* CachePut：将方法返回值放入缓存</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	* value：缓存的名称，每个缓存名称下面可以有多个key</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	* key：缓存的key</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	*/</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	@</span><span style="color:#D73A49;--shiki-dark:#F97583">PostMapping</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">CachePut</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">value</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "userCache"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">key</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "#user.id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span><span style="color:#6A737D;--shiki-dark:#6A737D">//key的生成：userCache::1</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> User </span><span style="color:#6F42C1;--shiki-dark:#B392F0">save</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestBody</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> User user){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        userMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">insert</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(user);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> user;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p>key 的写法如下</p>
+<ul>
+<li>​<code>#user.id</code>​ : user 指的是方法形参的名称, id 指的是 user 的 id 属性 , 也就是使用 user 的 id 属性作为 key ;</li>
+<li>​<code>#result.id</code>​ : result 代表方法返回值，该表达式代表以返回对象的 id 属性作为 key ；</li>
+<li>​<code>#p0.id</code>​：p0 指的是方法中的第一个参数，id 指的是第一个参数的 id 属性,也就是使用第一个参数的 id 属性作为 key;</li>
+<li>​<code>#a0.id</code>​：a0 指的是方法中的第一个参数，id 指的是第一个参数的 id 属性,也就是使用第一个参数的 id 属性作为 key;</li>
+<li>​<code>#root.args[0].id</code>​：root.args[0] 指的是方法中的第一个参数，id 指的是第一个参数的 id 属性,也就是使用第一个参数的 id 属性作为 key ;</li>
+</ul>
+<p><a id="reference-cacheable"></a></p>
+<h4 id="cacheable"><strong>@Cacheable</strong></h4>
+<ul>
+<li>作用: 在方法执行前，spring 先查看缓存中是否有数据，如果有数据，则直接返回缓存数据；若没有数据，调用方法并将方法返回值放到缓存中</li>
+<li>cacheNames: 缓存的名称，每个缓存名称下面可以有多个 key</li>
+<li>key: 缓存的 key，支持 Spring 的表达式语言 SPEL 语法</li>
+</ul>
+<p><strong>在 getById 上加注解 @Cacheable</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	* Cacheable：在方法执行前spring先查看缓存中是否有数据，如果有数据，则直接返回缓存数据</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	* 若没有数据，则调用方法并将方法返回值放到缓存中</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	* value：缓存的名称，每个缓存名称下面可以有多个key</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	* key：缓存的key</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	*/</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	@</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Cacheable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">cacheNames</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "userCache"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">key</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"#id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> User </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long id){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        User user </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> userMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(id);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> user;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p>再次查询相同 id 的数据时，直接从 redis 中直接获取，不再查询数据库。</p>
+<p><a id="reference-cacheevict"></a></p>
+<h4 id="cacheevict"><strong>@CacheEvict</strong></h4>
+<ul>
+<li>作用: 清理指定缓存</li>
+<li>value: 缓存的名称，每个缓存名称下面可以有多个 key</li>
+<li>key: 缓存的 key，支持 Spring 的表达式语言 SPEL 语法</li>
+</ul>
+<p><strong>在 delete 方法上加注解 @CacheEvict</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	@</span><span style="color:#D73A49;--shiki-dark:#F97583">DeleteMapping</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">CacheEvict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">cacheNames</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "userCache"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">key</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "#id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span><span style="color:#6A737D;--shiki-dark:#6A737D">//删除某个key对应的缓存数据</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> deleteById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long id){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        userMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">deleteById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(id);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	@</span><span style="color:#D73A49;--shiki-dark:#F97583">DeleteMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/delAll"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">CacheEvict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">cacheNames</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "userCache"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">allEntries</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span><span style="color:#6A737D;--shiki-dark:#6A737D">//删除userCache下所有的缓存数据</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> deleteAll</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        userMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">deleteAll</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><a id="reference-实现思路-1"></a></p>
+<h3 id="实现思路-1">实现思路</h3>
+<p><strong>实现步骤：</strong></p>
+<ol>
+<li>导入 Spring Cache 和 Redis 相关 maven 坐标</li>
+<li>在启动类上加入 <code>@EnableCaching</code>​ 注解，开启缓存注解功能</li>
+<li>在用户端接口 SetmealController 的 list 方法上加入 <code>@Cacheable</code>​ 注解</li>
+<li>在管理端接口 SetmealController 的 save、delete、update、startOrStop 等方法上加入 <code>@CacheEvict</code>​ 注解</li>
+</ol>
+<p><a id="reference-代码开发-1"></a></p>
+<h3 id="代码开发-1">代码开发</h3>
+<p>按照上述实现步骤：</p>
+<p><strong>1). 导入 Spring Cache 和 Redis 相关 maven 坐标</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-data-redis&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-cache&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><strong>2). 在启动类上加入 @EnableCaching 注解，开启缓存注解功能</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.extern.slf4j.Slf4j;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.SpringApplication;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.autoconfigure.SpringBootApplication;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.cache.annotation.EnableCaching;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.transaction.annotation.EnableTransactionManagement;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">SpringBootApplication</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">EnableTransactionManagement</span><span style="color:#6A737D;--shiki-dark:#6A737D"> //开启注解方式的事务管理</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Slf4j</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">EnableCaching</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> SkyApplication</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[] </span><span style="color:#E36209;--shiki-dark:#FFAB70">args</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        SpringApplication.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">run</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(SkyApplication.class, args);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">info</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"server started"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>3). 在用户端接口 SetmealController 的 list 方法上加入 @Cacheable 注解</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 条件查询</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> categoryId</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/list"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"根据分类id查询套餐"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Cacheable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">cacheNames</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "setmealCache"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">key</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "#categoryId"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6A737D;--shiki-dark:#6A737D">//key: setmealCache::100</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">List</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">Setmeal</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long categoryId) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Setmeal setmeal </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Setmeal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        setmeal.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setCategoryId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(categoryId);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        setmeal.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setStatus</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(StatusConstant.ENABLE);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Setmeal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; list </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> setmealService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(setmeal);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(list);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><strong>4). 在管理端接口 SetmealController 的 save、delete、update、startOrStop 等方法上加入 CacheEvict 注解</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 新增套餐</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> setmealDTO</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">PostMapping</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"新增套餐"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">CacheEvict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">cacheNames</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "setmealCache"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">key</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "#setmealDTO.categoryId"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span><span style="color:#6A737D;--shiki-dark:#6A737D">//key: setmealCache::100</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result </span><span style="color:#6F42C1;--shiki-dark:#B392F0">save</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestBody</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SetmealDTO setmealDTO) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        setmealService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">saveWithDish</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(setmealDTO);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 批量删除套餐</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> ids</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">DeleteMapping</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"批量删除套餐"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">CacheEvict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">cacheNames</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "setmealCache"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">allEntries</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result </span><span style="color:#6F42C1;--shiki-dark:#B392F0">delete</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestParam</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> List</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">Long</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ids) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        setmealService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">deleteBatch</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ids);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 修改套餐</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> setmealDTO</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">PutMapping</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"修改套餐"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">CacheEvict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">cacheNames</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "setmealCache"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">allEntries</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result </span><span style="color:#6F42C1;--shiki-dark:#B392F0">update</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestBody</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SetmealDTO setmealDTO) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        setmealService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">update</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(setmealDTO);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 套餐起售停售</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> status</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> id</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">PostMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/status/{status}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"套餐起售停售"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">CacheEvict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">cacheNames</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "setmealCache"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">allEntries</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result </span><span style="color:#6F42C1;--shiki-dark:#B392F0">startOrStop</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">PathVariable</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Integer status, Long id) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        setmealService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">startOrStop</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(status, id);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><a id="reference-功能测试-1"></a></p>
+<h3 id="功能测试-1">功能测试</h3>
+<p>通过前后端联调方式来进行测试，同时观察 redis 中缓存的套餐数据。和<strong>缓存菜品</strong>功能测试基本一致，不再赘述。</p>
+<p><a id="reference-添加购物车"></a></p>
+<h2 id="添加购物车">添加购物车</h2>
+<p><a id="reference-需求分析和设计"></a></p>
+<h3 id="需求分析和设计">需求分析和设计</h3>
+<p><a id="reference-产品原型"></a></p>
+<h4 id="产品原型">产品原型</h4>
+<p><img alt="image-20210813181916235" loading="lazy" decoding="async" width="23" height="28" src="/_astro/IMG-20260722152523384.D6kULv5d_2pvaUw.webp"></p>
+<p>用户可以将菜品或者套餐添加到购物车。对于菜品来说，如果设置了口味信息，则需要选择规格后才能加入购物车;对于套餐来说，可以直接点击将当前套餐加入购物车。在购物车中可以修改菜品和套餐的数量，也可以清空购物车。</p>
+<p><strong>效果图：</strong></p>
+<p><img alt="image-20221210203822817" loading="lazy" decoding="async" width="1372" height="695" src="/_astro/IMG-20260722152523423.C4myeaIj_1lj52L.webp"></p>
+<p><a id="reference-接口设计"></a></p>
+<h4 id="接口设计">接口设计</h4>
+<p>通过上述原型图，设计出对应的添加购物车接口。</p>
+<p><img alt="image-20221208184342490" loading="lazy" decoding="async" width="597" height="721" src="/_astro/IMG-20260722152523451.COdhJS8j_7cU1z.webp"></p>
+<p><strong>说明：</strong> 添加购物车时，有可能添加菜品，也有可能添加套餐。故传入参数要么是菜品 id，要么是套餐 id。</p>
+<p><a id="reference-表设计"></a></p>
+<h4 id="表设计">表设计</h4>
+<p>用户的购物车数据，也是需要保存在数据库中的，购物车对应的数据表为 shopping_cart 表，具体表结构如下：</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>说明</strong></th>
+<th><strong>备注</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>bigint</td>
+<td>主键</td>
+<td>自增</td>
+</tr>
+<tr>
+<td>name</td>
+<td>varchar(32)</td>
+<td>商品名称</td>
+<td>冗余字段</td>
+</tr>
+<tr>
+<td>image</td>
+<td>varchar(255)</td>
+<td>商品图片路径</td>
+<td>冗余字段</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>bigint</td>
+<td>用户 id</td>
+<td>逻辑外键</td>
+</tr>
+<tr>
+<td>dish_id</td>
+<td>bigint</td>
+<td>菜品 id</td>
+<td>逻辑外键</td>
+</tr>
+<tr>
+<td>setmeal_id</td>
+<td>bigint</td>
+<td>套餐 id</td>
+<td>逻辑外键</td>
+</tr>
+<tr>
+<td>dish_flavor</td>
+<td>varchar(50)</td>
+<td>菜品口味</td>
+<td></td>
+</tr>
+<tr>
+<td>number</td>
+<td>int</td>
+<td>商品数量</td>
+<td></td>
+</tr>
+<tr>
+<td>amount</td>
+<td>decimal(10,2)</td>
+<td>商品单价</td>
+<td>冗余字段</td>
+</tr>
+<tr>
+<td>create_time</td>
+<td>datetime</td>
+<td>创建时间</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>说明：</strong></p>
+<ul>
+<li>购物车数据是关联用户的，在表结构中，我们需要记录，每一个用户的购物车数据是哪些</li>
+<li>菜品列表展示出来的既有套餐，又有菜品，如果用户选择的是套餐，就保存套餐 ID(setmeal_id)，如果用户选择的是菜品，就保存菜品 ID(dish_id)</li>
+<li>对同一个菜品/套餐，如果选择多份不需要添加多条记录，增加数量 number 即可</li>
+</ul>
+<p><a id="reference-代码开发-2"></a></p>
+<h3 id="代码开发-2">代码开发</h3>
+<p><a id="reference-dto-设计"></a></p>
+<h4 id="dto-设计">DTO 设计</h4>
+<p><strong>根据添加购物车接口的参数设计 DTO：</strong></p>
+<p><img alt="image-20221208184938195" loading="lazy" decoding="async" width="754" height="318" src="/_astro/IMG-20260722152523480.CSqPlvHi_Ldm0g.webp"></p>
+<p>在 sky-pojo 模块，ShoppingCartDTO.java 已定义</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.dto;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Data;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.io.Serializable;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Data</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ShoppingCartDTO</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Serializable</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Long dishId;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Long setmealId;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String dishFlavor;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-controller-层"></a></p>
+<h4 id="controller-层">Controller 层</h4>
+<p><strong>根据添加购物车接口创建 ShoppingCartController：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.controller.user;</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.dto.ShoppingCartDTO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.result.Result;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.swagger.annotations.Api;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.swagger.annotations.ApiOperation;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.extern.slf4j.Slf4j;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.PostMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RequestBody;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RequestMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RestController;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * 购物车</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RestController</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/user/shoppingCart"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Slf4j</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Api</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">tags</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "C端-购物车接口"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ShoppingCartController</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ShoppingCartService shoppingCartService;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 添加购物车</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> shoppingCartDTO</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">PostMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/add"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"添加购物车"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestBody</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ShoppingCartDTO </span><span style="color:#E36209;--shiki-dark:#FFAB70">shoppingCartDTO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">info</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"添加购物车：{}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, shoppingCartDTO);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        shoppingCartService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">addShoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(shoppingCartDTO);</span><span style="color:#6A737D;--shiki-dark:#6A737D">//后绪步骤实现</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-service-层接口"></a></p>
+<h4 id="service-层接口">Service 层接口</h4>
+<p><strong>创建 ShoppingCartService 接口：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.dto.ShoppingCartDTO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.ShoppingCart;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.List;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> interface</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ShoppingCartService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 添加购物车</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> shoppingCartDTO</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> addShoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ShoppingCartDTO </span><span style="color:#E36209;--shiki-dark:#FFAB70">shoppingCartDTO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-service-层实现类"></a></p>
+<h4 id="service-层实现类">Service 层实现类</h4>
+<p><strong>创建 ShoppingCartServiceImpl 实现类，并实现 add 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.impl;</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.context.BaseContext;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.dto.ShoppingCartDTO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.Dish;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.Setmeal;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.ShoppingCart;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.mapper.DishMapper;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.mapper.SetmealMapper;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.ShoppingCartService;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.BeanUtils;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.stereotype.Service;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.time.LocalDateTime;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.List;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Service</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ShoppingCartServiceImpl</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ShoppingCartService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ShoppingCartMapper shoppingCartMapper;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> DishMapper dishMapper;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SetmealMapper setmealMapper;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 添加购物车</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> shoppingCartDTO</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> addShoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ShoppingCartDTO </span><span style="color:#E36209;--shiki-dark:#FFAB70">shoppingCartDTO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        ShoppingCart shoppingCart </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ShoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        BeanUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">copyProperties</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(shoppingCartDTO, shoppingCart);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //只能查询自己的购物车数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        shoppingCart.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setUserId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(BaseContext.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getCurrentId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //判断当前商品是否在购物车中</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">ShoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; shoppingCartList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> shoppingCartMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(shoppingCart);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (shoppingCartList </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> shoppingCartList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">size</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            //如果已经存在，就更新数量，数量加1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            shoppingCart </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> shoppingCartList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            shoppingCart.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setNumber</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(shoppingCart.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getNumber</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            shoppingCartMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">updateNumberById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(shoppingCart);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        } </span><span style="color:#D73A49;--shiki-dark:#F97583">else</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            //如果不存在，插入数据，数量就是1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            //判断当前添加到购物车的是菜品还是套餐</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            Long dishId </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> shoppingCartDTO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getDishId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (dishId </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">                //添加到购物车的是菜品</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                Dish dish </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dishMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dishId);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                shoppingCart.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dish.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                shoppingCart.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setImage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dish.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getImage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                shoppingCart.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setAmount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dish.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getPrice</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            } </span><span style="color:#D73A49;--shiki-dark:#F97583">else</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">                //添加到购物车的是套餐</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                Setmeal setmeal </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> setmealMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(shoppingCartDTO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getSetmealId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                shoppingCart.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(setmeal.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                shoppingCart.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setImage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(setmeal.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getImage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                shoppingCart.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setAmount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(setmeal.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getPrice</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            shoppingCart.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setNumber</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            shoppingCart.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setCreateTime</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDateTime.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">now</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            shoppingCartMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">insert</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(shoppingCart);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-mapper-层"></a></p>
+<h4 id="mapper-层">Mapper 层</h4>
+<p><strong>创建 ShoppingCartMapper 接口:</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.mapper;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.ShoppingCart;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.ibatis.annotations.Delete;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.ibatis.annotations.Insert;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.ibatis.annotations.Mapper;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.ibatis.annotations.Update;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.List;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Mapper</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> interface</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ShoppingCartMapper</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 条件查询</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> shoppingCart</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">ShoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ShoppingCart </span><span style="color:#E36209;--shiki-dark:#FFAB70">shoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 更新商品数量</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> shoppingCart</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Update</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"update shopping_cart set number = #{number} where id = #{id}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> updateNumberById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ShoppingCart </span><span style="color:#E36209;--shiki-dark:#FFAB70">shoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 插入购物车数据</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> shoppingCart</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Insert</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"insert into shopping_cart (name, user_id, dish_id, setmeal_id, dish_flavor, number, amount, image, create_time) "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            " values (#{name},#{userId},#{dishId},#{setmealId},#{dishFlavor},#{number},#{amount},#{image},#{createTime})"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> insert</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ShoppingCart </span><span style="color:#E36209;--shiki-dark:#FFAB70">shoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>创建 ShoppingCartMapper.xml：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;?</span><span style="color:#22863A;--shiki-dark:#85E89D">xml</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1.0"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> encoding</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"UTF-8"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ?&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;!</span><span style="color:#D73A49;--shiki-dark:#F97583">DOCTYPE</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> mapper</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" &gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">mapper</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"com.sky.mapper.ShoppingCartMapper"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">select</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"list"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> parameterType</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"ShoppingCart"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> resultType</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"ShoppingCart"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        select * from shopping_cart</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">where</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> test</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"userId != null"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and user_id = #{userId}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> test</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dishId != null"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and dish_id = #{dishId}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> test</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"setmealId != null"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and setmeal_id = #{setmealId}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> test</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dishFlavor != null"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and dish_flavor = #{dishFlavor}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">where</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        order by create_time desc</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">mapper</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><a id="reference-功能测试-2"></a></p>
+<h3 id="功能测试-2">功能测试</h3>
+<p>进入小程序，添加菜品</p>
+<p><img alt="image-20221210210338094" loading="lazy" decoding="async" width="473" height="791" src="/_astro/IMG-20260722152523509.DrZW9Ncs_Z2fIcfg.webp"></p>
+<p>加入购物车，查询数据库</p>
+<p><img alt="image-20221210210643308" loading="lazy" decoding="async" width="1595" height="83" src="/_astro/IMG-20260722152523542.DcGjcvXo_Z2v94dg.webp"></p>
+<p>因为现在没有实现查看购物车功能，所以只能在表中进行查看。</p>
+<p>在前后联调时，后台可通断点方式启动，查看运行的每一步。</p>
+<p><a id="reference-查看购物车"></a></p>
+<h2 id="查看购物车">查看购物车</h2>
+<p><a id="reference-需求分析和设计-1"></a></p>
+<h3 id="需求分析和设计-1">需求分析和设计</h3>
+<p><a id="reference-产品原型-1"></a></p>
+<h4 id="产品原型-1">产品原型</h4>
+<p>当用户添加完菜品和套餐后，可进入到购物车中，查看购物中的菜品和套餐。</p>
+<p><img alt="image-20221208190038058" loading="lazy" decoding="async" width="415" height="737" src="/_astro/IMG-20260722152523575.CiSKQLo2_10es3T.webp"></p>
+<p><a id="reference-接口设计-1"></a></p>
+<h4 id="接口设计-1">接口设计</h4>
+<p><img alt="image-20221208190052467" loading="lazy" decoding="async" width="558" height="298" src="/_astro/IMG-20260722152523615.CVIoe0oJ_ZlPtUG.webp"></p>
+<p><a id="reference-代码开发-3"></a></p>
+<h3 id="代码开发-3">代码开发</h3>
+<p><a id="reference-controller-层-1"></a></p>
+<h4 id="controller-层-1">Controller 层</h4>
+<p><strong>在 ShoppingCartController 中创建查看购物车的方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 查看购物车</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/list"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"查看购物车"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">List</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">ShoppingCart</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(){</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(shoppingCartService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">showShoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><a id="reference-service-层接口-1"></a></p>
+<h4 id="service-层接口-1">Service 层接口</h4>
+<p><strong>在 ShoppingCartService 接口中声明查看购物车的方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 查看购物车</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    List</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">ShoppingCart</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> showShoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span></code></pre>
+<p><a id="reference-service-层实现类-1"></a></p>
+<h4 id="service-层实现类-1">Service 层实现类</h4>
+<p><strong>在 ShoppingCartServiceImpl 中实现查看购物车的方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 查看购物车</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> List</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">ShoppingCart</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> showShoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> shoppingCartMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ShoppingCart.</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">                                       builder</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">                                       userId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(BaseContext.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getCurrentId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()).</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">                                       build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><a id="reference-功能测试-3"></a></p>
+<h3 id="功能测试-3">功能测试</h3>
+<p>当进入小程序时，就会发起查看购物车的请求</p>
+<p><img alt="image-20221210213347557" loading="lazy" decoding="async" width="481" height="794" src="/_astro/IMG-20260722152523634.OGdeqdSt_1wVfU3.webp"></p>
+<p>点击购物车图标</p>
+<p><img alt="image-20221210213438878" loading="lazy" decoding="async" width="472" height="503" src="/_astro/IMG-20260722152523667.iBFePBaa_1NaAP.webp"></p>
+<p>测试成功。</p>
+<p><a id="reference-清空购物车"></a></p>
+<h2 id="清空购物车">清空购物车</h2>
+<p><a id="reference-需求分析和设计-2"></a></p>
+<h3 id="需求分析和设计-2">需求分析和设计</h3>
+<p><a id="reference-产品原型-2"></a></p>
+<h4 id="产品原型-2">产品原型</h4>
+<p>当点击清空按钮时，会把购物车中的数据全部清空。</p>
+<p><img alt="image-20221210213703715" loading="lazy" decoding="async" width="1039" height="748" src="/_astro/IMG-20260722152523698.DiUweSBI_Z13zHYL.webp"></p>
+<p><a id="reference-接口设计-2"></a></p>
+<h4 id="接口设计-2">接口设计</h4>
+<p><img alt="image-20221208191606894" loading="lazy" decoding="async" width="692" height="682" src="/_astro/IMG-20260722152523725.CXLiwNY3_ajhAb.webp"></p>
+<p><a id="reference-代码开发-4"></a></p>
+<h3 id="代码开发-4">代码开发</h3>
+<p><a id="reference-controller-层-2"></a></p>
+<h4 id="controller-层-2">Controller 层</h4>
+<p><strong>在 ShoppingCartController 中创建清空购物车的方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 清空购物车商品</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">DeleteMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/clean"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"清空购物车商品"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">String</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> clean</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        shoppingCartService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">cleanShoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><a id="reference-service-层接口-2"></a></p>
+<h4 id="service-层接口-2">Service 层接口</h4>
+<p><strong>在 ShoppingCartService 接口中声明清空购物车的方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 清空购物车商品</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> cleanShoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span></code></pre>
+<p><a id="reference-service-层实现类-2"></a></p>
+<h4 id="service-层实现类-2">Service 层实现类</h4>
+<p><strong>在 ShoppingCartServiceImpl 中实现清空购物车的方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 清空购物车商品</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> cleanShoppingCart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        shoppingCartMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">deleteByUserId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(BaseContext.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getCurrentId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><a id="reference-mapper-层-1"></a></p>
+<h4 id="mapper-层-1">Mapper 层</h4>
+<p><strong>在 ShoppingCartMapper 接口中创建删除购物车数据的方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据用户id删除购物车数据</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> userId</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Delete</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"delete from shopping_cart where user_id = #{userId}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> deleteByUserId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long userId);</span></span></code></pre>
+<p><a id="reference-功能测试-4"></a></p>
+<h3 id="功能测试-4">功能测试</h3>
+<p>进入到购物车页面</p>
+<p><img alt="image-20221210214710863" loading="lazy" decoding="async" width="482" height="795" src="/_astro/IMG-20260722152523750.YpAXhYS7_ix0hd.webp"></p>
+<p>点击清空</p>
+<p><img alt="image-20221210214914092" loading="lazy" decoding="async" width="474" height="796" src="/_astro/IMG-20260722152523777.BiAHjOK7_Z27QfR5.webp"></p>
+<p>查看数据库中的数据</p>
+<p><img alt="image-20221210214950261" loading="lazy" decoding="async" width="1109" height="60" src="/_astro/IMG-20260722152523800.lUw514ij_1BLd7m.webp"></p>
+<p>说明当前用户的购物车数据已全部删除。</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>菜品修改后，哪些分类缓存需要失效？</li>
+<li>Cacheable、CachePut、CacheEvict 分别改变什么？</li>
+<li>相同商品不同口味如何判断是否合并购物车行？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#课程内容">课程内容</a></li><li style="--depth: 0"><a href="#缓存菜品">缓存菜品</a></li><li style="--depth: 1"><a href="#问题说明">问题说明</a></li><li style="--depth: 1"><a href="#实现思路">实现思路</a></li><li style="--depth: 1"><a href="#代码开发">代码开发</a></li><li style="--depth: 1"><a href="#功能测试">功能测试</a></li><li style="--depth: 1"><a href="#代码提交">代码提交</a></li><li style="--depth: 0"><a href="#缓存套餐">缓存套餐</a></li><li style="--depth: 1"><a href="#spring-cache">Spring Cache</a></li><li style="--depth: 2"><a href="#介绍">介绍</a></li><li style="--depth: 2"><a href="#常用注解">常用注解</a></li><li style="--depth: 2"><a href="#enablecaching">@EnableCaching</a></li><li style="--depth: 2"><a href="#cacheput">@CachePut</a></li><li style="--depth: 2"><a href="#cacheable">@Cacheable</a></li><li style="--depth: 2"><a href="#cacheevict">@CacheEvict</a></li><li style="--depth: 1"><a href="#实现思路-1">实现思路</a></li><li style="--depth: 1"><a href="#代码开发-1">代码开发</a></li><li style="--depth: 1"><a href="#功能测试-1">功能测试</a></li><li style="--depth: 0"><a href="#添加购物车">添加购物车</a></li><li style="--depth: 1"><a href="#需求分析和设计">需求分析和设计</a></li><li style="--depth: 2"><a href="#产品原型">产品原型</a></li><li style="--depth: 2"><a href="#接口设计">接口设计</a></li><li style="--depth: 2"><a href="#表设计">表设计</a></li><li style="--depth: 1"><a href="#代码开发-2">代码开发</a></li><li style="--depth: 2"><a href="#dto-设计">DTO 设计</a></li><li style="--depth: 2"><a href="#controller-层">Controller 层</a></li><li style="--depth: 2"><a href="#service-层接口">Service 层接口</a></li><li style="--depth: 2"><a href="#service-层实现类">Service 层实现类</a></li><li style="--depth: 2"><a href="#mapper-层">Mapper 层</a></li><li style="--depth: 1"><a href="#功能测试-2">功能测试</a></li><li style="--depth: 0"><a href="#查看购物车">查看购物车</a></li><li style="--depth: 1"><a href="#需求分析和设计-1">需求分析和设计</a></li><li style="--depth: 2"><a href="#产品原型-1">产品原型</a></li><li style="--depth: 2"><a href="#接口设计-1">接口设计</a></li><li style="--depth: 1"><a href="#代码开发-3">代码开发</a></li><li style="--depth: 2"><a href="#controller-层-1">Controller 层</a></li><li style="--depth: 2"><a href="#service-层接口-1">Service 层接口</a></li><li style="--depth: 2"><a href="#service-层实现类-1">Service 层实现类</a></li><li style="--depth: 1"><a href="#功能测试-3">功能测试</a></li><li style="--depth: 0"><a href="#清空购物车">清空购物车</a></li><li style="--depth: 1"><a href="#需求分析和设计-2">需求分析和设计</a></li><li style="--depth: 2"><a href="#产品原型-2">产品原型</a></li><li style="--depth: 2"><a href="#接口设计-2">接口设计</a></li><li style="--depth: 1"><a href="#代码开发-4">代码开发</a></li><li style="--depth: 2"><a href="#controller-层-2">Controller 层</a></li><li style="--depth: 2"><a href="#service-层接口-2">Service 层接口</a></li><li style="--depth: 2"><a href="#service-层实现类-2">Service 层实现类</a></li><li style="--depth: 2"><a href="#mapper-层-1">Mapper 层</a></li><li style="--depth: 1"><a href="#功能测试-4">功能测试</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

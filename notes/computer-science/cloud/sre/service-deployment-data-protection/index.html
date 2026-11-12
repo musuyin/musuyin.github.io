@@ -1,0 +1,197 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>服务部署与数据保护 · Musuyin&#39; Home</title><meta name="description" content="交付和恢复需要把程序、配置、密钥、可变数据与日志分别管理。一次发布有回退路径，一次备份有恢复验证，才形成可依赖的操作流程。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/sre/service-deployment-data-protection/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="服务部署与数据保护 · Musuyin' Home"><meta property="og:description" content="交付和恢复需要把程序、配置、密钥、可变数据与日志分别管理。一次发布有回退路径，一次备份有恢复验证，才形成可依赖的操作流程。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/sre/service-deployment-data-protection/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">服务部署与数据保护</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-09-30">2026-09-30</time></dd></div><div><dt>字数</dt><dd>1768</dd></div><div><dt>预计阅读</dt><dd>6 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/SRE/">#SRE</a><a href="/tags/Deployment/">#Deployment</a><a href="/tags/Backup/">#Backup</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>服务部署与数据保护</h1><time datetime="2026-09-30">2026-09-30</time><p class="tags"><a href="/tags/SRE/">#SRE</a><a href="/tags/Deployment/">#Deployment</a><a href="/tags/Backup/">#Backup</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>交付和恢复需要把程序、配置、密钥、可变数据与日志分别管理。一次发布有回退路径，一次备份有恢复验证，才形成可依赖的操作流程。</p>
+<p><a id="reference-学习目标"></a></p>
+<h2 id="学习目标">学习目标</h2>
+<p>学完本章后，应当能够：</p>
+<ul>
+<li>将程序、配置、密钥、可变数据和日志分离管理。</li>
+<li>设计可验证、可回滚、影响范围明确的服务变更流程。</li>
+<li>配置 HTTPS、日志轮转、最小权限和数据库备份。</li>
+<li>用恢复演练验证备份，并量化 RPO 与 RTO。</li>
+</ul>
+<blockquote>
+<p>SRE 视角：部署成功不是“进程已启动”，备份成功也不是“文件已生成”。两者都必须从用户请求和恢复结果验证。</p>
+</blockquote>
+<p><a id="reference-服务资产分类"></a></p>
+<h2 id="服务资产分类">服务资产分类</h2>
+<table>
+<thead>
+<tr>
+<th>资产</th>
+<th>示例</th>
+<th>管理原则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>程序</td>
+<td>二进制、包、静态资源</td>
+<td>不可变版本，可重建、可回滚</td>
+</tr>
+<tr>
+<td>配置</td>
+<td>端口、特性开关、依赖地址</td>
+<td>版本化、校验、环境差异明确</td>
+</tr>
+<tr>
+<td>密钥</td>
+<td>密码、Token、TLS 私钥</td>
+<td>不进 Git，最小权限，可轮换</td>
+</tr>
+<tr>
+<td>数据</td>
+<td>数据库、上传文件</td>
+<td>持久化、备份、恢复和一致性验证</td>
+</tr>
+<tr>
+<td>日志</td>
+<td>应用、访问、审计日志</td>
+<td>轮转、保留、脱敏、集中检索</td>
+</tr>
+</tbody>
+</table>
+<p>推荐路径示例：程序位于 <code>/opt/myapp/releases/&lt;version&gt;</code>，稳定软链接指向当前版本；配置位于 <code>/etc/myapp</code>；数据位于 <code>/var/lib/myapp</code>；日志交给 journald 或 <code>/var/log/myapp</code>。</p>
+<p><a id="reference-变更与发布流程"></a></p>
+<h2 id="变更与发布流程">变更与发布流程</h2>
+<ol>
+<li>明确变更目的、影响范围、负责人和维护窗口。</li>
+<li>备份必要状态，确认回退版本与回退命令。</li>
+<li>在测试环境验证配置语法、迁移兼容性和健康检查。</li>
+<li>小范围执行，观察错误率、延迟、资源和业务成功率。</li>
+<li>达到停止条件则回滚；稳定窗口通过后再扩大范围。</li>
+<li>记录版本、时间、操作、验证结果和异常。</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">sha256sum</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> artifact.tar.gz</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">nginx</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -t</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">systemd-analyze</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> verify</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> myapp.service</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -fsS</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> http://127.0.0.1:8000/healthz</span></span></code></pre>
+<p>健康检查至少区分：</p>
+<ul>
+<li>Liveness：进程是否陷入不可恢复状态。</li>
+<li>Readiness：实例当前能否接收流量。</li>
+<li>深度检查：依赖是否可用，通常供诊断而非高频重启判断。</li>
+</ul>
+<p><a id="reference-配置与环境变量"></a></p>
+<h2 id="配置与环境变量">配置与环境变量</h2>
+<p>环境变量适合少量启动配置，但可能出现在进程环境、崩溃信息或调试输出中。复杂配置使用权限受控的文件；密钥优先从密钥系统在运行时获取。</p>
+<p>变更配置后分别验证：</p>
+<ul>
+<li>文件内容是否正确落地。</li>
+<li>服务是否读取了新版本。</li>
+<li>reload 或 restart 是否成功。</li>
+<li>用户侧行为和核心指标是否符合预期。</li>
+</ul>
+<p>配置发布要么原子替换，要么写新文件后切换软链接，避免进程读取到半写入内容。</p>
+<p><a id="reference-日志轮转"></a></p>
+<h2 id="日志轮转">日志轮转</h2>
+<p>若应用直接写文件，可使用 logrotate：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/var/log/myapp/*.log {</span></span>
+<span class="line"><span>    daily</span></span>
+<span class="line"><span>    rotate 14</span></span>
+<span class="line"><span>    compress</span></span>
+<span class="line"><span>    delaycompress</span></span>
+<span class="line"><span>    missingok</span></span>
+<span class="line"><span>    notifempty</span></span>
+<span class="line"><span>    create 0640 myapp adm</span></span>
+<span class="line"><span>    sharedscripts</span></span>
+<span class="line"><span>    postrotate</span></span>
+<span class="line"><span>        systemctl kill -s HUP myapp.service || true</span></span>
+<span class="line"><span>    endscript</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p>确认应用是否会在 HUP 后重新打开日志。使用 <code>copytruncate</code> 可能丢失少量日志，并非首选。轮转后检查磁盘、文件所有者、应用写入和日志采集 Agent。</p>
+<p><a id="reference-数据库备份策略"></a></p>
+<h2 id="数据库备份策略">数据库备份策略</h2>
+<p>先明确：</p>
+<ul>
+<li>需要保护哪些数据库和外部文件。</li>
+<li>可接受丢失多久的数据，即 RPO。</li>
+<li>可接受多久恢复服务，即 RTO。</li>
+<li>备份是逻辑备份、物理备份、快照还是持续日志归档。</li>
+<li>备份时如何保证事务一致性。</li>
+<li>密钥、备份介质和生产故障是否隔离。</li>
+</ul>
+<p>遵循 3-2-1 思路：至少三份副本、两种介质、一份异地或独立故障域。实际方案还要考虑加密、访问控制、不可变保留和删除保护。</p>
+<p><a id="reference-备份不等于恢复"></a></p>
+<h3 id="备份不等于恢复">备份不等于恢复</h3>
+<p>恢复演练应在隔离环境执行：</p>
+<ol>
+<li>选择明确时间点和备份版本。</li>
+<li>校验备份文件和解密能力。</li>
+<li>恢复数据库及外部文件。</li>
+<li>启动同版本或兼容版本应用。</li>
+<li>执行业务级校验，例如记录数、关键查询和抽样校验和。</li>
+<li>记录实际数据缺口和恢复耗时，比较 RPO/RTO。</li>
+</ol>
+<p><a id="reference-tls-与密钥"></a></p>
+<h2 id="tls-与密钥">TLS 与密钥</h2>
+<ul>
+<li>私钥只允许服务用户或代理读取，通常为 <code>600</code> 或受控组权限。</li>
+<li>证书自动续期，至少提前数周告警。</li>
+<li>reload 前验证新证书链、域名和有效期。</li>
+<li>轮换数据库密码时允许新旧凭据短暂共存，应用切换验证后再吊销旧值。</li>
+<li>禁止把真实 <code>.env</code>、数据库导出和私钥提交到 Git。</li>
+</ul>
+<p><a id="reference-故障排查-runbook"></a></p>
+<h2 id="故障排查-runbook">故障排查 Runbook</h2>
+<p><a id="reference-发布后服务不可用"></a></p>
+<h3 id="发布后服务不可用">发布后服务不可用</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">systemctl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> status</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> myapp</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nginx</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">journalctl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -u</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> myapp</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -u</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nginx</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --since</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '20 min ago'</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">ss</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -lntp</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -sv</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> http://127.0.0.1:8000/healthz</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -sv</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> https://</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">hos</span><span style="color:#24292E;--shiki-dark:#E1E4E8">t</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">/healthz</span></span></code></pre>
+<p>比较本机应用、代理入口和外部请求，查看变更 diff。若越过停止条件，先回滚程序和配置，再调查。</p>
+<p><a id="reference-磁盘即将写满"></a></p>
+<h3 id="磁盘即将写满">磁盘即将写满</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">df</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -hT</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">df</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -i</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">du</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -xhd1</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /var</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> sort</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -h</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">lsof</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> +L1</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">journalctl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --disk-usage</span></span></code></pre>
+<p>先限制增长源并保护数据库。不要未经确认删除 <code>/var/lib</code> 数据或仍在使用的日志。</p>
+<p><a id="reference-恢复后数据不一致"></a></p>
+<h3 id="恢复后数据不一致">恢复后数据不一致</h3>
+<p>停止向错误实例继续写入；保存恢复步骤、备份元数据和应用版本。检查恢复时间点、事务日志、时区、外部文件以及数据库 schema 兼容性。</p>
+<p><a id="reference-实践与验收"></a></p>
+<h2 id="实践与验收">实践与验收</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> 按程序、配置、密钥、数据、日志分类部署练习服务。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 配置 Nginx 访问/错误日志、HTTPS 与自动续期测试。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 配置日志轮转并验证轮转后服务仍持续写日志。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 实现每日数据库备份、校验、保留和失败告警。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 删除一份测试数据，在隔离目录或实例恢复并记录实际 RPO/RTO。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 发布一份错误配置，按停止条件回滚并验证用户请求恢复。</li>
+</ul>
+<p><a id="reference-生产基线"></a></p>
+<h2 id="生产基线">生产基线</h2>
+<ul>
+<li>发布物不可变且可追溯，配置变更经过审查，密钥独立管理。</li>
+<li>数据备份加密、异地、受访问控制，并定期进行业务级恢复验证。</li>
+<li>日志有容量上限和保留策略，磁盘空间与 inode 均有告警。</li>
+<li>发布与恢复 Runbook 明确负责人、停止条件、回退步骤和验证指标。</li>
+</ul>
+<p><a id="reference-官方参考"></a></p>
+<h2 id="官方参考">官方参考</h2>
+<ul>
+<li><a href="https://docs.nginx.com/nginx/admin-guide/">Nginx 管理指南</a></li>
+<li><a href="https://man7.org/linux/man-pages/man8/logrotate.8.html">logrotate 手册</a></li>
+<li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html">OWASP Secrets Management Cheat Sheet</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>恢复演练分别度量数据损失范围与恢复时间；解释发布回滚为何不必然回滚数据库内容。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/sre/reliable-personal-service/">实践项目：可靠的个人服务</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#学习目标">学习目标</a></li><li style="--depth: 0"><a href="#服务资产分类">服务资产分类</a></li><li style="--depth: 0"><a href="#变更与发布流程">变更与发布流程</a></li><li style="--depth: 0"><a href="#配置与环境变量">配置与环境变量</a></li><li style="--depth: 0"><a href="#日志轮转">日志轮转</a></li><li style="--depth: 0"><a href="#数据库备份策略">数据库备份策略</a></li><li style="--depth: 1"><a href="#备份不等于恢复">备份不等于恢复</a></li><li style="--depth: 0"><a href="#tls-与密钥">TLS 与密钥</a></li><li style="--depth: 0"><a href="#故障排查-runbook">故障排查 Runbook</a></li><li style="--depth: 1"><a href="#发布后服务不可用">发布后服务不可用</a></li><li style="--depth: 1"><a href="#磁盘即将写满">磁盘即将写满</a></li><li style="--depth: 1"><a href="#恢复后数据不一致">恢复后数据不一致</a></li><li style="--depth: 0"><a href="#实践与验收">实践与验收</a></li><li style="--depth: 0"><a href="#生产基线">生产基线</a></li><li style="--depth: 0"><a href="#官方参考">官方参考</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

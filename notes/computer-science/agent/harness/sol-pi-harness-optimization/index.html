@@ -1,0 +1,251 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SoL-Pi · Musuyin&#39; Home</title><meta name="description" content="原笔记围绕 Harness 的执行成本优化：减少无效模型回合、重复上下文和长日志阅读，同时保留完成工作需要的证据。理解每项优化时，应比较节省了什么，以及可能损失哪类信息。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/harness/sol-pi-harness-optimization/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="SoL-Pi · Musuyin' Home"><meta property="og:description" content="原笔记围绕 Harness 的执行成本优化：减少无效模型回合、重复上下文和长日志阅读，同时保留完成工作需要的证据。理解每项优化时，应比较节省了什么，以及可能损失哪类信息。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/harness/sol-pi-harness-optimization/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">SoL-Pi</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-09-16">2026-09-16</time></dd></div><div><dt>字数</dt><dd>2765</dd></div><div><dt>预计阅读</dt><dd>10 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Pi/">#Pi</a><a href="/tags/Agent/">#Agent</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>SoL-Pi</h1><time datetime="2026-09-16">2026-09-16</time><p class="tags"><a href="/tags/Pi/">#Pi</a><a href="/tags/Agent/">#Agent</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>原笔记围绕 Harness 的执行成本优化：减少无效模型回合、重复上下文和长日志阅读，同时保留完成工作需要的证据。理解每项优化时，应比较节省了什么，以及可能损失哪类信息。</p>
+<p><em>SoL-Pi</em> 是 NVIDIA 发布并维护的开源 Agent Harness 效率扩展，构建在 <a href="https://github.com/earendil-works/pi">Pi</a> 的公开扩展 API 之上。它不是另一套模型或独立的 Coding Agent，而是在不改动 Pi 核心的前提下，为长时间运行的 Coding Agent 减少无效模型回合、上下文重放与长日志阅读开销。</p>
+<p>其核心目标是：<strong>在不减少有效工作、不跳过验证、不隐藏关键证据的前提下，降低 token 与推理成本。</strong></p>
+<blockquote>
+<p>SoL-Pi 的定位更接近“Agent 运行时优化中间件”，而非“更聪明的模型 CLI”。</p>
+</blockquote>
+<p><a id="reference-定位与设计边界"></a></p>
+<h2 id="定位与设计边界">定位与设计边界</h2>
+<p>SoL-Pi 以 Pi 的扩展形式安装：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">pi</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> install</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> git:github.com/NVlabs/SoL-Pi</span></span></code></pre>
+<p>它遵循以下边界：</p>
+<ul>
+<li><strong>不 patch Pi</strong>：仅使用 Pi 的公共 API，不 fork 或 vendor Pi 源码。</li>
+<li><strong>不接管运行时选择</strong>：认证、模型供应商、主模型、Provider URL、Shell 行为仍由 Pi 控制。</li>
+<li><strong>不绑定 NVIDIA 模型</strong>：可随 Pi 使用 Claude、OpenAI、Gemini、其他 API Provider 或本地模型。</li>
+<li><strong>显式启用</strong>：所有效率机制默认关闭，必须通过配置逐项开启。</li>
+<li><strong>保留原始证据</strong>：被打包或缩减的原始观察结果仍保存于本地，必要时可精确召回。</li>
+</ul>
+<p>这种设计使 SoL-Pi 能随 Pi 升级，并避免将用户锁定到某个特定模型、供应商或 NVIDIA 自有运行时。</p>
+<p><a id="reference-优化的四类浪费"></a></p>
+<h2 id="优化的四类浪费">优化的四类浪费</h2>
+<p>长任务中的 Agent 往往重复经历如下低效路径：编辑之后再花一个模型回合决定运行验证命令；大文件和长日志在后续每轮请求里反复传入；已经完成的子任务一直占据活跃上下文；模型为找到少数关键报错而完整阅读超长日志。</p>
+<p>SoL-Pi 将这些问题拆分为四个独立机制：</p>
+<table>
+<thead>
+<tr>
+<th>层面</th>
+<th>机制</th>
+<th>消除的主要浪费</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工具调用</td>
+<td><em>Action Fusion</em></td>
+<td>编辑后再单独发起固定验证的模型回合</td>
+</tr>
+<tr>
+<td>工具观察结果</td>
+<td><em>ObservationPack</em></td>
+<td>大型文本结果在后续请求中被重复重放</td>
+</tr>
+<tr>
+<td>长日志诊断</td>
+<td><em>Evidence-Preserving Reducer</em></td>
+<td>模型完整阅读长日志，只为获得少量关键信息</td>
+</tr>
+<tr>
+<td>上下文</td>
+<td><em>Online Context Compact</em></td>
+<td>已完成子任务长期保留在活跃上下文</td>
+</tr>
+</tbody>
+</table>
+<p>四个机制可以独立开启和组合使用。</p>
+<p><a id="reference-action-fusion"></a></p>
+<h2 id="action-fusion">Action Fusion</h2>
+<p><em>Action Fusion</em> 将“修改文件”和“执行后续验证”合并为同一个工具调用。</p>
+<p>典型 Coding Agent 轨迹如下：</p>
+<ol>
+<li>调用 <code>edit</code> 或 <code>write</code> 修改代码；</li>
+<li>模型读取修改成功的结果；</li>
+<li>模型进行一次额外推理；</li>
+<li>决定运行 <code>test</code>、<code>lint</code> 或 <code>typecheck</code>；</li>
+<li>调用 Shell 执行验证。</li>
+</ol>
+<p>其中第 2～4 步对大量可预测修改而言，常常没有足够的增量价值。Action Fusion 允许在编辑、写入后自动运行一条预配置的验证命令，并将验证输出与编辑结果一并返回模型。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>普通流程：Edit → 模型推理 → Shell 验证</span></span>
+<span class="line"><span>融合流程：Edit + Shell 验证 → 一次返回</span></span></code></pre>
+<p><a id="reference-工程意义"></a></p>
+<h3 id="工程意义">工程意义</h3>
+<ul>
+<li><strong>不是省略验证，而是保留验证并删除中间决策回合</strong>。</li>
+<li>验证命令来自显式配置，而不是机制在未知项目中自行猜测。</li>
+<li>特别适用于格式化、类型检查、单测等稳定、重复的反馈循环。</li>
+<li>可视为对 Agent 工具工作流的 <em>macro / transaction fusion</em>。</li>
+</ul>
+<p><a id="reference-observationpack"></a></p>
+<h2 id="observationpack">ObservationPack</h2>
+<p><em>ObservationPack</em> 解决大型工具结果被重复塞入上下文的问题。</p>
+<p>例如，Agent 读取一个 100 KB 文件或得到一段很长的构建日志时，首次调用可能确实需要全文；但在之后的每个模型请求中持续重放原文，会带来：</p>
+<ul>
+<li>输入 token 与缓存成本增加；</li>
+<li>可用 Context Window 被历史材料挤占；</li>
+<li>模型更难从噪声中定位当前需要的信息；</li>
+<li>更高的上下文传输和推理负担。</li>
+</ul>
+<p><a id="reference-工作方式"></a></p>
+<h3 id="工作方式">工作方式</h3>
+<ol>
+<li>首次出现时，正常向模型提供原始结果；</li>
+<li>SoL-Pi 将符合条件的原文按会话归档到本地；</li>
+<li>后续请求中，将重复的大结果替换为稳定句柄；</li>
+<li>模型需要细节时，通过分页、精确的 recall 工具重新读取原文片段。</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>大段原文 → 稳定句柄（obs_...） → 按需、分页、精确召回</span></span></code></pre>
+<p>这不是普通的有损摘要，而是将上下文改造成类似“冷热分层”的存储结构：活跃上下文只留下可寻址索引，完整原文留在本地归档，只有需要时才重新载入。</p>
+<p><a id="reference-可靠性特征"></a></p>
+<h3 id="可靠性特征">可靠性特征</h3>
+<ul>
+<li>原始内容仍然存在，可被精确召回；</li>
+<li>句柄稳定，适合作为后续推理中的引用；</li>
+<li>分页读取避免一次性重新引入全部内容；</li>
+<li>将上下文视为昂贵缓存，而不是无限的聊天历史。</li>
+</ul>
+<p><a id="reference-evidence-preserving-reducer"></a></p>
+<h2 id="evidence-preserving-reducer">Evidence-Preserving Reducer</h2>
+<p><em>Evidence-Preserving Reducer</em> 面向诊断类长日志。它的目标不是生成一般性的摘要，而是产出可验证的紧凑“回执（receipt）”。</p>
+<p>普通 LLM 摘要可能遗漏关键报错、加入不存在的推断，或者使读者无法追溯摘要依据。SoL-Pi 采用“模型生成 + 确定性验证”的设计：</p>
+<ol>
+<li>识别适合缩减的诊断类长日志；</li>
+<li>归档原始日志；</li>
+<li>交由配置的 reducer 模型提取紧凑回执；</li>
+<li>对回执中保留的逐字引用，在原始内容中进行机械校验；</li>
+<li>若任何引用无法在原文中找到，直接保留原始结果。</li>
+</ol>
+<blockquote>
+<p>它无法机械证明摘要的所有语义结论都正确，但能保证保留下来的关键引用确实来自原始日志。</p>
+</blockquote>
+<p><a id="reference-fail-open-原则"></a></p>
+<h3 id="fail-open-原则">Fail-open 原则</h3>
+<p>Reducer 验证失败时不会继续使用可疑摘要，而是回退到原始文本。这种 <strong>fail-open</strong> 策略优先保障 Agent 的证据链完整性，而非追求压缩率。</p>
+<blockquote>
+<p>注意：Reducer 可能将符合条件的日志发送给配置的远程模型。含有密钥、用户数据、内部路径或其他敏感内容的日志，应谨慎启用此功能。</p>
+</blockquote>
+<p><a id="reference-online-context-compact"></a></p>
+<h2 id="online-context-compact">Online Context Compact</h2>
+<p>Pi 本身提供上下文压缩能力。<em>Online Context Compact</em> 不重新实现压缩，而是试图选择更合理的触发时机。</p>
+<p>其关键洞察是：<strong>计划中的一个步骤完成时，往往是压缩上下文的语义安全点。</strong> 已完成子任务的具体操作细节通常不再需要持续占据上下文，但下一阶段仍可保留必要结论。</p>
+<p>SoL-Pi 会结合以下因素决定是否触发 Pi 原生 compact：</p>
+<ul>
+<li>当前计划步骤是否完成；</li>
+<li>Context Window 的压力；</li>
+<li>压缩本身的额外成本；</li>
+<li>预期能减少的后续上下文重放成本。</li>
+</ul>
+<p>压缩成功后，Pi 会在新的 turn 中自动继续当前任务；如果用户取消运行或退出 Pi，则不会强制继续。</p>
+<p>从运行时角度看，它类似 Agent 上下文的“垃圾回收（GC）”：不是仅凭 token 阈值机械回收，而是在任务语义边界上清理已完成阶段的详细轨迹。</p>
+<p><a id="reference-配置与启用策略"></a></p>
+<h2 id="配置与启用策略">配置与启用策略</h2>
+<p>SoL-Pi 使用单一有效配置，配置优先级如下：</p>
+<ol>
+<li>当前受信任项目中的 <code>.pi/sol-pi.json</code>；</li>
+<li>用户级 <code>~/.pi/agent/sol-pi.json</code>；</li>
+<li>内置默认值。</li>
+</ol>
+<p>项目级配置优先于用户级配置，二者<strong>不会合并</strong>。这避免了多层配置叠加后难以解释的行为。</p>
+<p>一个保守配置示例：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "version"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "actionFusion"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "observationPack"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "evidencePreservingReducer"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "onlineContextCompact"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "cacheWriteReadRatio"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">12.5</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>建议的启用顺序：</p>
+<ol>
+<li>先开启 <em>Action Fusion</em> 与 <em>ObservationPack</em>；它们不需要额外模型调用，也不会主动终止当前运行。</li>
+<li>在确认日志不含敏感内容、并接受额外模型调用后，再评估 <em>Evidence-Preserving Reducer</em>。</li>
+<li>对长任务和复杂计划执行进行实测后，再开启 <em>Online Context Compact</em>。</li>
+</ol>
+<p><a id="reference-本地存储与安全"></a></p>
+<h2 id="本地存储与安全">本地存储与安全</h2>
+<p>ObservationPack 与 Reducer 的原始资料会按照会话保存在 Pi session 目录下：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>&lt;session-directory&gt;/sol-pi/&lt;session-id&gt;/</span></span>
+<span class="line"><span>├── observation-pack/</span></span>
+<span class="line"><span>└── evidence-preserving-reducer/</span></span></code></pre>
+<p>这些归档在会话结束后不会自动删除。因此需要注意：</p>
+<ul>
+<li>工具结果可能含有源码、日志、路径与敏感信息；</li>
+<li>本地磁盘权限、备份策略与清理周期应符合项目安全要求；</li>
+<li>禁止对必须留在本地的敏感日志启用远程 Reducer；</li>
+<li>归档的价值在于可追溯性，但也带来数据留存责任。</li>
+</ul>
+<p><a id="reference-与-claude-codecodex-cli-的差异"></a></p>
+<h2 id="与-claude-codecodex-cli-的差异">与 Claude Code、Codex CLI 的差异</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>SoL-Pi</th>
+<th>Claude Code / Codex CLI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>形态</td>
+<td>Pi 的开源效率扩展</td>
+<td>各自厂商维护的完整 CLI Agent 产品</td>
+</tr>
+<tr>
+<td>优化重点</td>
+<td>可组合的 Harness 效率机制</td>
+<td>官方内置的端到端 Agent 体验</td>
+</tr>
+<tr>
+<td>模型绑定</td>
+<td>不绑定，继承 Pi 的多 Provider 能力</td>
+<td>主要围绕 Claude 或 OpenAI/Codex 生态</td>
+</tr>
+<tr>
+<td>可定制性</td>
+<td>通过 Pi 公共扩展 API 与配置组合</td>
+<td>受官方产品接口与工作流限制</td>
+</tr>
+<tr>
+<td>证据策略</td>
+<td>本地归档、按需召回、可验证缩减</td>
+<td>具体行为由各工具内部实现决定</td>
+</tr>
+</tbody>
+</table>
+<p>SoL-Pi 不直接与 Claude Code 或 Codex CLI 在“谁的模型更强”上竞争；它优化的是 Agent 在模型调用之间的执行轨迹和上下文生命周期。</p>
+<p><a id="reference-总结"></a></p>
+<h2 id="总结">总结</h2>
+<p>SoL-Pi 的工程特色可概括为：</p>
+<ol>
+<li><strong>在 Harness 层而非模型层优化</strong>：减少重复回合、重复上下文与无效长日志阅读。</li>
+<li><strong>四个机制分层解耦</strong>：工具、观察结果、日志缩减、上下文压缩分别治理。</li>
+<li><strong>以证据保留为先</strong>：原文可召回，Reducer 引用可验证，失败时回退原文。</li>
+<li><strong>以显式配置为先</strong>：默认不改变 Pi 行为，用户可以分阶段启用并测量收益。</li>
+<li><strong>不侵入上游</strong>：不修改 Pi 核心，不绑定模型、认证或 NVIDIA 运行时。</li>
+<li><strong>面向长任务的经济性</strong>：把 Context Window、缓存重放、模型回合都视为有成本的运行时资源。</li>
+</ol>
+<p><a id="reference-参考资料"></a></p>
+<h2 id="参考资料">参考资料</h2>
+<ul>
+<li><a href="https://github.com/NVlabs/SoL-Pi">NVlabs/SoL-Pi</a></li>
+<li><a href="https://nvlabs.github.io/SoL-Pi/">SoL-Pi Blog</a></li>
+<li><a href="https://github.com/earendil-works/pi">Pi</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>给一次长任务分别记录有效工作量、调用次数、上下文体积和验证结果。不能只凭 token 降低就认定优化成功。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>衔接相关实践：<a href="/notes/computer-science/agent/framework/learn-claude-code/context-compaction/">S08-Context Compact</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#定位与设计边界">定位与设计边界</a></li><li style="--depth: 0"><a href="#优化的四类浪费">优化的四类浪费</a></li><li style="--depth: 0"><a href="#action-fusion">Action Fusion</a></li><li style="--depth: 1"><a href="#工程意义">工程意义</a></li><li style="--depth: 0"><a href="#observationpack">ObservationPack</a></li><li style="--depth: 1"><a href="#工作方式">工作方式</a></li><li style="--depth: 1"><a href="#可靠性特征">可靠性特征</a></li><li style="--depth: 0"><a href="#evidence-preserving-reducer">Evidence-Preserving Reducer</a></li><li style="--depth: 1"><a href="#fail-open-原则">Fail-open 原则</a></li><li style="--depth: 0"><a href="#online-context-compact">Online Context Compact</a></li><li style="--depth: 0"><a href="#配置与启用策略">配置与启用策略</a></li><li style="--depth: 0"><a href="#本地存储与安全">本地存储与安全</a></li><li style="--depth: 0"><a href="#与-claude-codecodex-cli-的差异">与 Claude Code、Codex CLI 的差异</a></li><li style="--depth: 0"><a href="#总结">总结</a></li><li style="--depth: 0"><a href="#参考资料">参考资料</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

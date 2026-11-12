@@ -1,0 +1,339 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kubernetes ConfigMap 与 Secret · Musuyin&#39; Home</title><meta name="description" content="配置更新有三个独立状态：API 对象改变、内容进入容器、应用重新读取。环境变量和卷投射的更新语义不同，Secret 的 Base64 编码也不等于加密或授权。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-configmaps-secrets/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Kubernetes ConfigMap 与 Secret · Musuyin' Home"><meta property="og:description" content="配置更新有三个独立状态：API 对象改变、内容进入容器、应用重新读取。环境变量和卷投射的更新语义不同，Secret 的 Base64 编码也不等于加密或授权。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-configmaps-secrets/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Kubernetes ConfigMap 与 Secret</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-03-25">2026-03-25</time></dd></div><div><dt>字数</dt><dd>1823</dd></div><div><dt>预计阅读</dt><dd>7 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Kubernetes/">#Kubernetes</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Kubernetes ConfigMap 与 Secret</h1><time datetime="2026-03-25">2026-03-25</time><p class="tags"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Kubernetes/">#Kubernetes</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>配置更新有三个独立状态：API 对象改变、内容进入容器、应用重新读取。环境变量和卷投射的更新语义不同，Secret 的 Base64 编码也不等于加密或授权。</p>
+<p><a id="reference-学习目标"></a></p>
+<h2 id="学习目标">学习目标</h2>
+<p>学完本章后，应当能够：</p>
+<ul>
+<li>区分 ConfigMap 与 Secret 的适用范围，并理解 Base64 不等于加密。</li>
+<li>选择环境变量或 Volume 投射方式，说明变更何时能被容器和应用感知。</li>
+<li>设计可审计、可灰度、可回滚的配置发布和密钥轮换流程。</li>
+<li>从对象引用、键名、挂载、应用 reload 与 RBAC 多层定位配置故障。</li>
+</ul>
+<blockquote>
+<p>ConfigMap/Secret 只是 API 中的配置来源。配置“对象已更新”、文件“已投射”和应用“已重新加载”是三个不同状态，必须分别验证。</p>
+</blockquote>
+<p><a id="reference-configmap-概念"></a></p>
+<h2 id="configmap-概念">ConfigMap 概念</h2>
+<p><img alt="IMG-20260817143947985" loading="lazy" decoding="async" width="1162" height="496" src="/_astro/IMG-20260817143947985.ZDOttCtX_ZyiBJD.webp"></p>
+<p><em>ConfigMap</em> 用于存储配置数据，并将其提供给容器。</p>
+<p><img alt="IMG-20260817143948046" loading="lazy" decoding="async" width="1207" height="1312" src="/_astro/IMG-20260817143948046.wfQsbhB7_ZFyhDF.webp"></p>
+<blockquote>
+<p>图：ConfigMap、Kubernetes Secret 和外部密钥系统向应用交付配置/密钥，以及环境变量与 Volume 两种生效路径。</p>
+</blockquote>
+<ul>
+<li>提供向容器注入配置数据的方式。</li>
+<li>可存储完整文件或键值对。
+<ul>
+<li>以文件形式存储时，键是文件名，值是文件内容。</li>
+<li>内容可以是 JSON、XML、键值对等。</li>
+</ul>
+</li>
+</ul>
+<p>Pod 可通过以下方式使用 ConfigMap：</p>
+<ul>
+<li>环境变量（键值对）。</li>
+<li>ConfigMap Volume（以文件方式访问）。</li>
+</ul>
+<p><img alt="IMG-20260817143948124" loading="lazy" decoding="async" width="665" height="290" src="/_astro/IMG-20260817143948124.CbEphvyt_Z11DPAE.webp"></p>
+<p><a id="reference-创建-configmap"></a></p>
+<h2 id="创建-configmap">创建 ConfigMap</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 从 ConfigMap 清单创建</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [yaml_name.yaml]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用配置文件中的数据创建 ConfigMap</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> configmap</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [cm_name] --from-file</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">[file_path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 从环境变量文件创建 ConfigMap</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> configmap</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [cm_name] --from-env-file</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">[file_path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 从单个数据值创建 ConfigMap</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> configmap</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [cm_name] --from-literal</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">[key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]=[value]</span></span></code></pre>
+<p><a id="reference-配置变更与密钥轮换"></a></p>
+<h3 id="配置变更与密钥轮换">配置变更与密钥轮换</h3>
+<p><a id="reference-配置的生效语义"></a></p>
+<h4 id="配置的生效语义">配置的生效语义</h4>
+<ul>
+<li>通过 <strong>环境变量</strong> 注入的 ConfigMap/Secret，不会自动更新到已运行的容器，通常需要滚动重启工作负载。</li>
+<li>通过 <strong>volume</strong> 投射的 ConfigMap/Secret 会在 kubelet 同步后更新文件，但应用是否自动 reload 取决于应用本身；使用 <code>subPath</code> 挂载时不会自动更新。</li>
+<li>生产配置变更要有版本记录、灰度范围、验证指标和回滚版本；不要直接修改后假设所有 Pod 已生效。</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 变更后安全触发滚动重启，并观察发布状态</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rollout</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> restart</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> deployment/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rollout</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> status</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> deployment/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --timeout=10m</span></span></code></pre>
+<p><a id="reference-密钥安全检查"></a></p>
+<h4 id="密钥安全检查">密钥安全检查</h4>
+<ul>
+<li>为业务 ServiceAccount 授予最小化的 <code>get</code>/<code>list</code> Secret 权限；避免使用默认 ServiceAccount。</li>
+<li>密钥轮换应支持新旧凭据短暂并存，并在应用切换和验证后吊销旧凭据。</li>
+<li>禁止用 <code>kubectl get secret -o yaml</code> 的输出直接粘贴到工单、日志或代码仓库；调试输出应脱敏。</li>
+</ul>
+<p><a id="reference-configmap-清单"></a></p>
+<h3 id="configmap-清单">ConfigMap 清单</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ConfigMap</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">app-settings</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">app-settings</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">data</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  enemies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">aliens</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  lives</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"3"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  enemies.cheat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"true"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  enemies.cheat.level</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">noGoodRotten</span></span></code></pre>
+<p><img alt="IMG-20260817143948208" loading="lazy" decoding="async" width="1085" height="433" src="/_astro/IMG-20260817143948208.UwuY8CjR_2jla3C.webp"></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [yaml_name.yaml]</span></span></code></pre>
+<p><a id="reference-文件中的键值对"></a></p>
+<h3 id="文件中的键值对">文件中的键值对</h3>
+<p><img alt="IMG-20260817143948244" loading="lazy" decoding="async" width="1144" height="180" src="/_astro/IMG-20260817143948244.BkMdHZV3_oVqX7.webp"></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用文件中的数据创建 ConfigMap</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> configmap</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [cm_name] --from-file</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">[file_path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span></code></pre>
+<p><img alt="IMG-20260817143948277" loading="lazy" decoding="async" width="1196" height="314" src="/_astro/IMG-20260817143948277.V60JmIqf_ZWuwiD.webp"></p>
+<p><a id="reference-环境变量文件"></a></p>
+<h3 id="环境变量文件">环境变量文件</h3>
+<p><img alt="IMG-20260817143948301" loading="lazy" decoding="async" width="1162" height="189" src="/_astro/IMG-20260817143948301.RS9QWpiv_1UF9HP.webp"></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用文件中的数据创建环境变量 ConfigMap</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> configmap</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [cm_name] --from-env-file</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">[file_path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span></code></pre>
+<p><a id="reference-使用-configmap"></a></p>
+<h2 id="使用-configmap">使用 ConfigMap</h2>
+<p><a id="reference-kubectl"></a></p>
+<h3 id="kubectl">kubectl</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 获取 ConfigMap</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> cm</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [cm_name] -o yaml</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> cm</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [cm_name]</span></span></code></pre>
+<p><a id="reference-选择键作为环境变量"></a></p>
+<h3 id="选择键作为环境变量">选择键作为环境变量</h3>
+<p>仅加载 Pod 所需的键。</p>
+<p><img alt="IMG-20260817143948332" loading="lazy" decoding="async" width="1178" height="350" src="/_astro/IMG-20260817143948332.BvrBc5jB_Z2oiTxY.webp"></p>
+<p><a id="reference-将所有键作为环境变量"></a></p>
+<h3 id="将所有键作为环境变量">将所有键作为环境变量</h3>
+<p>可使用 <code>envFrom</code> 将 ConfigMap 的所有键值加载为环境变量。</p>
+<p><img alt="IMG-20260817143948357" loading="lazy" decoding="async" width="1091" height="402" src="/_astro/IMG-20260817143948357.Ba-FcUql_Z22PgPC.webp"></p>
+<p><a id="reference-挂载到容器volume"></a></p>
+<h3 id="挂载到容器volume">挂载到容器（Volume）</h3>
+<p>每个键会转换为一个文件，值写入该文件中。</p>
+<p><img alt="IMG-20260817143948388" loading="lazy" decoding="async" width="1079" height="420" src="/_astro/IMG-20260817143948388.UaD2h84L_2nbw58.webp"></p>
+<p><a id="reference-secret-概念"></a></p>
+<h2 id="secret-概念">Secret 概念</h2>
+<p><em>Secret</em> 是包含少量敏感数据（如密码、令牌或密钥）的对象。</p>
+<ul>
+<li>Kubernetes 可以存储密码、令牌、密钥和证书等敏感信息。</li>
+<li>Secret 可以避免把敏感数据直接固化进容器镜像或普通应用配置，但 Secret 对象本身仍需严格保护。</li>
+<li>Pod 可以将 Secret 作为文件或环境变量使用。</li>
+<li>Kubelet 只会获取调度到本 Node 的 Pod 所需的 Secret。</li>
+<li>Secret Volume 使用内存文件系统向容器投射数据，避免将该 Volume 内容持久化到节点磁盘；但 Secret API 对象仍存储在 etcd 中。</li>
+</ul>
+<p>Secret 最佳实践：</p>
+<ul>
+<li>启用 API Server 的 encryption at rest，确保 Secret 写入 etcd 前经过静态加密；Kubernetes 默认并不保证 Secret 在 etcd 中已加密。</li>
+<li>严格限制 etcd、Secret API、Pod 创建权限，并遵循最小权限 RBAC。</li>
+<li>为 API Server 到 etcd、以及 etcd 节点之间的通信启用 TLS。</li>
+<li>YAML/JSON 中 <code>data</code> 字段的 Base64 只是可逆编码，不是加密；不要将明文或 Base64 Secret 提交到 Git。</li>
+<li>优先使用外部密钥管理系统及其 CSI Driver/Operator，并建立密钥轮换、审计和吊销机制。</li>
+<li>通过环境变量注入的 Secret 可能出现在进程环境、调试输出或崩溃信息中；文件挂载通常更便于权限控制和轮换。</li>
+</ul>
+<p><a id="reference-创建-secret"></a></p>
+<h2 id="创建-secret">创建 Secret</h2>
+<p><a id="reference-kubectl-1"></a></p>
+<h3 id="kubectl-1">kubectl</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 创建 Secret 并安全存储在 Kubernetes 中</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> secret</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> generic</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [secret_name] --from-literal</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">[key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]=[value]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 从文件创建 Secret</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> secret</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> generic</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [secret_name] --from-file</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">[key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]=[value]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 从密钥对创建 TLS Secret</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> secret</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> tls</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [secret_name] --cert</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">path/to/tls.cert</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> --key</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">path/to/tls.key</span></span></code></pre>
+<p><a id="reference-yaml"></a></p>
+<h3 id="yaml">YAML</h3>
+<p>Secret manifest 的 <code>data</code> 字段使用 Base64 编码只是为了安全传输二进制内容，并不提供保密性。任何获得 manifest 或 Secret API 读取权限的人都可以轻易解码，因此不要在仓库中保存真实密钥。也可使用 <code>stringData</code> 输入明文，由 API Server 转换为 <code>data</code>，但这同样不改变其安全边界。</p>
+<p><img alt="IMG-20260817143948427" loading="lazy" decoding="async" width="1116" height="405" src="/_astro/IMG-20260817143948427.Di983U3V_ZskAW8.webp"></p>
+<p><a id="reference-使用-secret"></a></p>
+<h2 id="使用-secret">使用 Secret</h2>
+<p><a id="reference-查看-secret-键"></a></p>
+<h3 id="查看-secret-键">查看 Secret 键</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 获取 Secret</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> secrets</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 获取指定 Secret 的 YAML</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> secrets</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> db-passwords</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> yaml</span></span></code></pre>
+<p><a id="reference-环境变量"></a></p>
+<h3 id="环境变量">环境变量</h3>
+<p><img alt="IMG-20260817143948461" loading="lazy" decoding="async" width="1105" height="391" src="/_astro/IMG-20260817143948461.DVRJaBFK_Z6GGTC.webp"></p>
+<p><a id="reference-volume"></a></p>
+<h3 id="volume">Volume</h3>
+<p>每个键会转换为一个文件，值写入该文件中。</p>
+<p><img alt="IMG-20260817143948524" loading="lazy" decoding="async" width="1146" height="424" src="/_astro/IMG-20260817143948524.ChQlQxvs_24xX0R.webp"></p>
+<p><a id="reference-示例"></a></p>
+<h2 id="示例">示例</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ConfigMap</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-secrets-env</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-secrets-env</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">data</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  MONGODB_DBNAME</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">codeWithDan</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  MONGO_INITDB_ROOT_USERNAME</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">admin</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">---</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">StorageClass</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">storage.k8s.io/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">local-storage</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">provisioner</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">kubernetes.io/no-provisioner</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 回收策略作用于 PV，而非 StorageClass 本身。</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用此 StorageClass 创建的 PV/PVC 会继承这里设置的回收策略。</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">reclaimPolicy</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Retain</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">volumeBindingMode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">WaitForFirstConsumer</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">---</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 注意：本地存储 PV 虽可使用，但更推荐 NFS、云存储等更可靠的方案。</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 此示例用于 Docker Desktop Kubernetes；其环境仅支持单个 Node。</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># https://kubernetes.io/blog/2018/04/13/local-persistent-volumes-beta/</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">PersistentVolume</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-pv</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  capacity</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    storage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">1Gi</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  volumeMode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Filesystem</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  accessModes</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ReadWriteOnce</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  # StorageClass has a reclaim policy default so it'll be "inherited" by the PV</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  # persistentVolumeReclaimPolicy: Retain</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  storageClassName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">local-storage</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  hostPath</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/private/tmp/data/db</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">DirectoryOrCreate</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  nodeAffinity</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    required</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      nodeSelectorTerms</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">matchExpressions</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        - </span><span style="color:#22863A;--shiki-dark:#85E89D">key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">kubernetes.io/hostname</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          operator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">In</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          values</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">docker-desktop</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">---</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">PersistentVolumeClaim</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-pvc</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  accessModes</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ReadWriteOnce</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  storageClassName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">local-storage</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    requests</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      storage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">1Gi</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">---</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">apps/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">StatefulSet</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  serviceName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  replicas</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  selector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    matchLabels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  template</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      volumes</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-volume</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        persistentVolumeClaim</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          claimName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-pvc</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 仅作示例；此处实际使用环境变量</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">secrets</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        secret</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          secretName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">db-passwords</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">env</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_DBNAME</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          valueFrom</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            configMapKeyRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_DBNAME</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-secrets-env</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGO_INITDB_ROOT_USERNAME</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          valueFrom</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            configMapKeyRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-secrets-env</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGO_INITDB_ROOT_USERNAME</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 从 Secret 读取密码</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGO_INITDB_ROOT_PASSWORD</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          valueFrom</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            secretKeyRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">db-passwords</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">db-password</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        ports</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        - </span><span style="color:#22863A;--shiki-dark:#85E89D">containerPort</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">27017</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {}</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        volumeMounts</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-volume</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          mountPath</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/data/db</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 仅作示例；此处实际使用环境变量</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">secrets</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          mountPath</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/etc/db-passwords</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          readOnly</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span></code></pre>
+<p><a id="reference-配置故障-runbook"></a></p>
+<h2 id="配置故障-runbook">配置故障 Runbook</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> configmap/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> yaml</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> deployment/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> yaml</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rollout</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> status</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> deployment/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p>涉及 Secret 时避免把值输出到终端、日志或工单。依次确认：</p>
+<ol>
+<li>Pod 模板引用的对象名称和键是否存在。</li>
+<li>环境变量或挂载路径是否与应用读取位置一致。</li>
+<li>各 Pod 的 template revision 是否一致，旧 Pod 是否仍在运行。</li>
+<li>Volume 文件是否已更新，应用是否支持 reload；<code>subPath</code> 是否阻止自动更新。</li>
+<li>密钥新旧版本是否处于兼容窗口，依赖端是否已接受新凭据。</li>
+</ol>
+<p><a id="reference-实践与验收"></a></p>
+<h2 id="实践与验收">实践与验收</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> 分别用环境变量和 Volume 注入同一 ConfigMap，更新后比较生效行为。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 使用不存在的键制造 Pod 创建错误，通过事件定位并修复。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 设计双凭据轮换：发布新凭据、验证应用切换、吊销旧凭据并确认无失败请求。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 使用 <code>kubectl auth can-i</code> 验证业务 ServiceAccount 不能读取无关 Secret。</li>
+</ul>
+<p><a id="reference-生产基线"></a></p>
+<h2 id="生产基线">生产基线</h2>
+<ul>
+<li>配置和密钥有责任人、版本、校验和、变更记录与回滚方式。</li>
+<li>Secret 在 etcd 中启用静态加密，读取权限最小化，禁止明文进入 Git 和日志。</li>
+<li>优先采用外部密钥系统和短期工作负载身份；轮换失败有告警与恢复方案。</li>
+<li>对需要重启才能生效的配置，通过受控 rollout 更新并观察核心 SLI。</li>
+</ul>
+<p><a id="reference-官方参考"></a></p>
+<h2 id="官方参考">官方参考</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/configuration/configmap/">Kubernetes：ConfigMap</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/configuration/secret/">Kubernetes：Secret</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/security/secrets-good-practices/">Kubernetes：Secret 最佳实践</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>设计一次可回退的配置变更，指出验证对象、容器文件与应用行为的三个观察点。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/kubernetes/kubernetes-security/">L11-Security</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#学习目标">学习目标</a></li><li style="--depth: 0"><a href="#configmap-概念">ConfigMap 概念</a></li><li style="--depth: 0"><a href="#创建-configmap">创建 ConfigMap</a></li><li style="--depth: 1"><a href="#配置变更与密钥轮换">配置变更与密钥轮换</a></li><li style="--depth: 2"><a href="#配置的生效语义">配置的生效语义</a></li><li style="--depth: 2"><a href="#密钥安全检查">密钥安全检查</a></li><li style="--depth: 1"><a href="#configmap-清单">ConfigMap 清单</a></li><li style="--depth: 1"><a href="#文件中的键值对">文件中的键值对</a></li><li style="--depth: 1"><a href="#环境变量文件">环境变量文件</a></li><li style="--depth: 0"><a href="#使用-configmap">使用 ConfigMap</a></li><li style="--depth: 1"><a href="#kubectl">kubectl</a></li><li style="--depth: 1"><a href="#选择键作为环境变量">选择键作为环境变量</a></li><li style="--depth: 1"><a href="#将所有键作为环境变量">将所有键作为环境变量</a></li><li style="--depth: 1"><a href="#挂载到容器volume">挂载到容器（Volume）</a></li><li style="--depth: 0"><a href="#secret-概念">Secret 概念</a></li><li style="--depth: 0"><a href="#创建-secret">创建 Secret</a></li><li style="--depth: 1"><a href="#kubectl-1">kubectl</a></li><li style="--depth: 1"><a href="#yaml">YAML</a></li><li style="--depth: 0"><a href="#使用-secret">使用 Secret</a></li><li style="--depth: 1"><a href="#查看-secret-键">查看 Secret 键</a></li><li style="--depth: 1"><a href="#环境变量">环境变量</a></li><li style="--depth: 1"><a href="#volume">Volume</a></li><li style="--depth: 0"><a href="#示例">示例</a></li><li style="--depth: 0"><a href="#配置故障-runbook">配置故障 Runbook</a></li><li style="--depth: 0"><a href="#实践与验收">实践与验收</a></li><li style="--depth: 0"><a href="#生产基线">生产基线</a></li><li style="--depth: 0"><a href="#官方参考">官方参考</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

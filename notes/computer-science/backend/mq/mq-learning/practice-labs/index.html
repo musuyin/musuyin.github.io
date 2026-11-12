@@ -1,0 +1,160 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>06-practice-labs · Musuyin&#39; Home</title><meta name="description" content="实践按基线、最小收发、重复投递、幂等、确认故障、Outbox、毒消息与容量逐步推进。每个实验都应有可重复触发的故障、预期状态和观测记录，不能把清单中的验收目标视为已完成结果。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/mq/mq-learning/practice-labs/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="06-practice-labs · Musuyin' Home"><meta property="og:description" content="实践按基线、最小收发、重复投递、幂等、确认故障、Outbox、毒消息与容量逐步推进。每个实验都应有可重复触发的故障、预期状态和观测记录，不能把清单中的验收目标视为已完成结果。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/mq/mq-learning/practice-labs/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">06-practice-labs</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-10-11">2026-10-11</time></dd></div><div><dt>字数</dt><dd>1474</dd></div><div><dt>预计阅读</dt><dd>5 分钟</dd></div></dl></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>06-practice-labs</h1><time datetime="2026-10-11">2026-10-11</time></header><div class="prose"><p>实践按基线、最小收发、重复投递、幂等、确认故障、Outbox、毒消息与容量逐步推进。每个实验都应有可重复触发的故障、预期状态和观测记录，不能把清单中的验收目标视为已完成结果。</p>
+<p><a id="reference-实践实验从接入到故障演练"></a></p>
+<h2 id="实践实验从接入到故障演练">实践实验：从接入到故障演练</h2>
+<p>实验以独立分支进行，避免污染当前业务。每项都要记录现象、指标、日志与结论，而不只是“跑通”。示例配置不可用于生产。</p>
+<p><a id="reference-建立基线"></a></p>
+<h3 id="建立基线">建立基线</h3>
+<p>定位并画出调用链：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>psych-core-api/biz/domain/engine/engine.go</span></span>
+<span class="line"><span> -&gt; psych-core-api/biz/infra/mq/producer.go</span></span>
+<span class="line"><span> -&gt; RabbitMQ</span></span>
+<span class="line"><span> -&gt; psych-post/pkg/mq/consumer.go</span></span>
+<span class="line"><span> -&gt; psych-post/biz/domain/report/report.go</span></span></code></pre>
+<p>回答：发布时机、消息字段、Exchange/routing key/queue 来自哪里、ACK/NACK 条件、worker 并发上限。</p>
+<p><a id="reference-启动-rabbitmq-并声明拓扑"></a></p>
+<h3 id="启动-rabbitmq-并声明拓扑">启动 RabbitMQ 并声明拓扑</h3>
+<p>可用 Docker：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">docker</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> run</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --name</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> mq-learning</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -p</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 5672:5672</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 15672:15672</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -e</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> RABBITMQ_DEFAULT_USER=learn</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -e</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> RABBITMQ_DEFAULT_PASS=learn-pass</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  rabbitmq:4-management</span></span></code></pre>
+<p>访问 <code>http://localhost:15672</code>。创建独立 vhost 和最小权限用户更接近生产。声明：</p>
+<ul>
+<li>durable direct/topic exchange；</li>
+<li>durable queue（生产可评估 quorum queue）；</li>
+<li>binding key；</li>
+<li>DLX、DLQ；</li>
+<li>5s/30s 重试队列，通过 TTL + DLX 返回主 exchange。</li>
+</ul>
+<p>验收：能在 Management UI 看到 binding；发布正确 key 可入队，错误 key 配合 mandatory 能 Return。</p>
+<p><a id="reference-最小-go-生产与消费"></a></p>
+<h3 id="最小-go-生产与消费">最小 Go 生产与消费</h3>
+<p>使用项目已有 <code>amqp091-go</code>。生产者至少实现：</p>
+<ol>
+<li>建立 Connection/Channel；</li>
+<li>幂等声明拓扑；</li>
+<li>开启 Confirm；</li>
+<li><code>mandatory=true</code>；</li>
+<li>发布 persistent 消息，包含 message ID、content type、timestamp；</li>
+<li>等待 ack/nack/return 并记录 eventId。</li>
+</ol>
+<p>消费者实现：</p>
+<ol>
+<li>每个 worker 独立 Channel；</li>
+<li><code>Qos(1, 0, false)</code>；</li>
+<li><code>autoAck=false</code>；</li>
+<li>成功后 ACK；</li>
+<li>错误分类后进入 retry/DLQ，而非永久立即 requeue；</li>
+<li>SIGTERM 时停止新任务并等待在途任务。</li>
+</ol>
+<p>验收：连续发送 100 条，不丢；消费者并发不超过设定值；错误路由能被生产者发现。</p>
+<p><a id="reference-验证-at-least-once"></a></p>
+<h3 id="验证-at-least-once">验证 at-least-once</h3>
+<p>处理函数按步骤记录：<code>RECEIVED -&gt; DB_WRITTEN -&gt; ACKED</code>。在 DB 写入后、ACK 前人为 <code>kill -9</code>。</p>
+<p>预期：消息重投，<code>Redelivered</code> 可能为 true；若没有幂等，会出现重复记录。注意 <code>Redelivered=false</code> 不能证明从未重复，不能把它当幂等键。</p>
+<p>验收输出：故障时间线、重复数据证据、恢复后队列状态。</p>
+<p><a id="reference-实现消费幂等"></a></p>
+<h3 id="实现消费幂等">实现消费幂等</h3>
+<p>为测试报告使用稳定业务键 <code>conversationId + reportVersion</code>，数据库建立唯一索引。实现原子 upsert/条件状态转换：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>不存在 -&gt; PENDING -&gt; PROCESSING(lease) -&gt; SUCCEEDED</span></span>
+<span class="line"><span>已 SUCCEEDED -&gt; 直接 ACK</span></span>
+<span class="line"><span>PROCESSING 且租约未过期 -&gt; 延迟重试</span></span>
+<span class="line"><span>PROCESSING 且租约已过期 -&gt; CAS 抢占并恢复</span></span></code></pre>
+<p>重复投递同一 eventId 10 次。验收：只有一份最终报告；可接受多次 delivery，但昂贵调用次数符合设计目标；并发消费者不会突破唯一约束。</p>
+<p><a id="reference-publisher-confirm-故障实验"></a></p>
+<h3 id="publisher-confirm-故障实验">Publisher Confirm 故障实验</h3>
+<p>批量异步发布，并保存 <code>deliveryTag -&gt; eventId</code> 映射。发布过程中停止 RabbitMQ 容器或断网，观察三类消息：已 confirm、明确 nack/return、结果未知。</p>
+<p>恢复后重发未确认消息。验收：消息不缺失；可能重复，由 Lab 4 幂等吸收；指标可显示 confirm latency 和 nack/timeout。</p>
+<p><a id="reference-transactional-outbox"></a></p>
+<h3 id="transactional-outbox">Transactional Outbox</h3>
+<p>设计集合：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"eventId"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "aggregateId"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"conversationId"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"conversation.closed"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "schemaVersion"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "payload"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {},</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "status"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"NEW"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "attempts"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "nextAttemptAt"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"..."</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "createdAt"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"..."</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "publishedAt"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">null</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>把会话更新与 outbox insert 放在 Mongo 事务内。Relay 以租约/CAS 抢占 NEW 记录，发布后等 Confirm，再标记 PUBLISHED。Relay 在 Confirm 后、更新状态前 kill -9。</p>
+<p>预期：恢复后重复发布，但不丢；消费幂等保证最终只产生一份业务结果。</p>
+<p><a id="reference-毒消息退避和-dlq"></a></p>
+<h3 id="毒消息退避和-dlq">毒消息、退避和 DLQ</h3>
+<p>发送三类消息：非法 JSON、非法 ObjectID、模拟 LLM 503。</p>
+<p>期望策略：</p>
+<ul>
+<li>非法 JSON/ID：立即 DLQ；</li>
+<li>503：5s、30s、5m 等有限退避；</li>
+<li>超过最大次数：DLQ；</li>
+<li>DLQ 消息保留 eventId、原 routing key、失败分类和诊断信息，避免泄露敏感 payload。</li>
+</ul>
+<p>验收：没有高频 requeue；正常消息不被毒消息饿死；DLQ 有告警，修复后能按 eventId 安全重放。</p>
+<p><a id="reference-连接恢复和优雅停机"></a></p>
+<h3 id="连接恢复和优雅停机">连接恢复和优雅停机</h3>
+<p>测试：</p>
+<ol>
+<li>RabbitMQ 重启；</li>
+<li>TCP 断开；</li>
+<li>消费者 SIGTERM；</li>
+<li>处理超过 termination grace period；</li>
+<li>网络恢复后生产者/消费者重新建立 Channel、Confirm、QoS 和订阅。</li>
+</ol>
+<p>特别审查当前生产端重连代码：共享 <code>producer</code> 初始化时序、旧 Connection/Channel、NotifyClose 重新注册是否存在竞态。使用 Go race detector 做针对性测试：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> psych-core-api</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> &amp;&amp; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> test</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -race</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./biz/infra/mq/...</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ../psych-post</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> &amp;&amp; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> test</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -race</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./pkg/mq/...</span></span></code></pre>
+<p>若包无测试，先补 fake/integration test；不要以“没有 test files”作为通过。</p>
+<p><a id="reference-积压与容量"></a></p>
+<h3 id="积压与容量">积压与容量</h3>
+<p>暂停消费者并发送任务形成积压，再恢复不同 worker 数。记录：</p>
+<ul>
+<li>publish/ack rate；</li>
+<li>ready/unacked 数；</li>
+<li>最老消息年龄；</li>
+<li>p50/p95/p99 处理耗时；</li>
+<li>LLM QPS/限流率与 Mongo 压力；</li>
+<li>DLQ 和重试量。</li>
+</ul>
+<p>估算：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>单 worker 吞吐 ≈ 1 / 平均处理秒数</span></span>
+<span class="line"><span>总稳定吞吐 ≈ worker 数 × 单 worker 吞吐 × 有效率</span></span>
+<span class="line"><span>追平时间 ≈ backlog / (消费速率 - 新增速率)</span></span></code></pre>
+<p>若消费速率不大于新增速率，永远无法追平。扩 worker 不能突破下游配额。</p>
+<p><a id="reference-选型对比小实验"></a></p>
+<h3 id="选型对比小实验">选型对比小实验</h3>
+<p>用相同消息和业务处理分别实现 RabbitMQ 与 Redis Streams：</p>
+<ul>
+<li>RabbitMQ：prefetch、manual ack、DLQ；</li>
+<li>Streams：consumer group、PEL、XACK、XAUTOCLAIM、XTRIM。</li>
+</ul>
+<p>再用 Redis Pub/Sub 模拟消费者断线，证明消息不可恢复。比较代码量、恢复机制、积压内存、可观测性，不要只比较无持久化峰值 QPS。</p>
+<p><a id="reference-最终交付物"></a></p>
+<h3 id="最终交付物">最终交付物</h3>
+<ul>
+<li>架构图和故障窗口表；</li>
+<li>可重复的 Docker/脚本；</li>
+<li>幂等索引和状态机说明；</li>
+<li>5 类故障实验报告；</li>
+<li>监控面板截图或指标样例；</li>
+<li>一页 ADR：为什么本项目继续使用 RabbitMQ，何时应重新评估 Kafka/RocketMQ/Streams。</li>
+</ul>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>业务提交后主动终止消费者，怎样验证重投没有重复副作用？</li>
+<li>permanent error 与 transient error 应进入什么不同路径？</li>
+<li>消费能力高于生产速率多少时，积压才能在目标时间追平？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#实践实验从接入到故障演练">实践实验：从接入到故障演练</a></li><li style="--depth: 1"><a href="#建立基线">建立基线</a></li><li style="--depth: 1"><a href="#启动-rabbitmq-并声明拓扑">启动 RabbitMQ 并声明拓扑</a></li><li style="--depth: 1"><a href="#最小-go-生产与消费">最小 Go 生产与消费</a></li><li style="--depth: 1"><a href="#验证-at-least-once">验证 at-least-once</a></li><li style="--depth: 1"><a href="#实现消费幂等">实现消费幂等</a></li><li style="--depth: 1"><a href="#publisher-confirm-故障实验">Publisher Confirm 故障实验</a></li><li style="--depth: 1"><a href="#transactional-outbox">Transactional Outbox</a></li><li style="--depth: 1"><a href="#毒消息退避和-dlq">毒消息、退避和 DLQ</a></li><li style="--depth: 1"><a href="#连接恢复和优雅停机">连接恢复和优雅停机</a></li><li style="--depth: 1"><a href="#积压与容量">积压与容量</a></li><li style="--depth: 1"><a href="#选型对比小实验">选型对比小实验</a></li><li style="--depth: 1"><a href="#最终交付物">最终交付物</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Agent 工具调用 · Musuyin&#39; Home</title><meta name="description" content="工具调用有模型契约与执行实现两部分：模型看到名称、描述和参数形状，运行时负责校验、授权、执行并回填结果。MCP 统一接入协议，不自动替 Host 完成权限控制。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/theory/tool-use/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Agent 工具调用 · Musuyin' Home"><meta property="og:description" content="工具调用有模型契约与执行实现两部分：模型看到名称、描述和参数形状，运行时负责校验、授权、执行并回填结果。MCP 统一接入协议，不自动替 Host 完成权限控制。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/theory/tool-use/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Agent 工具调用</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-10-28">2026-10-28</time></dd></div><div><dt>字数</dt><dd>2714</dd></div><div><dt>预计阅读</dt><dd>10 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a><a href="/tags/Tool/">#Tool</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Agent 工具调用</h1><time datetime="2026-10-28">2026-10-28</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a><a href="/tags/Tool/">#Tool</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>工具调用有模型契约与执行实现两部分：模型看到名称、描述和参数形状，运行时负责校验、授权、执行并回填结果。MCP 统一接入协议，不自动替 Host 完成权限控制。</p>
+<p><a id="reference-从工具定义到真实执行"></a></p>
+<h2 id="从工具定义到真实执行">从工具定义到真实执行</h2>
+<p>工具调用包含两份不同的东西：给模型看的能力契约，以及运行时真正执行的函数或远程服务。模型通常看到名称、description 和参数 schema，不会因为注册了工具就看到函数实现。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>本地函数 / MCP tools/list</span></span>
+<span class="line"><span>        ↓</span></span>
+<span class="line"><span>运行时工具注册表：名称 → schema、实现、权限与行为属性</span></span>
+<span class="line"><span>        ↓</span></span>
+<span class="line"><span>按身份和当前任务筛选，适配为模型支持的工具定义</span></span>
+<span class="line"><span>        ↓</span></span>
+<span class="line"><span>模型请求：messages + tools</span></span>
+<span class="line"><span>        ↓</span></span>
+<span class="line"><span>模型响应：调用标识 + 工具名 + 参数</span></span>
+<span class="line"><span>        ↓</span></span>
+<span class="line"><span>运行时校验 → 调用实现 → 记录结果</span></span>
+<span class="line"><span>        ↓</span></span>
+<span class="line"><span>带对应调用标识的工具结果加入下一次模型请求</span></span></code></pre>
+<p>MCP 解决的是工具发现和远程调用协议。将 MCP schema 转换成模型输入、控制工具可见性和执行权限，仍由 Host / Agent 运行时负责。协议细节见 <a href="/notes/computer-science/agent/theory/agent-fundamentals/#reference-mcp%E6%A8%A1%E5%9E%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%8D%8F%E8%AE%AE">S00-基础概念</a>。</p>
+<p><a id="reference-工具列表如何交给模型"></a></p>
+<h3 id="工具列表如何交给模型">工具列表如何交给模型</h3>
+<p>支持原生工具调用的模型 API 通常有与消息并列的 <code>tools</code> 一类字段，运行时把工具名称、description 和输入 schema 放进去。不同服务有不同包装结构，不能假设 MCP 的 <code>inputSchema</code> 响应可以原样直接发送。</p>
+<p>底层服务会把这些定义转换为模型能够处理的输入表示。工具说明和 schema 消耗上下文，并非窗口之外的一本免费手册。</p>
+<p>不支持原生工具调用的模型，可以通过文本列出工具并约定输出格式，但名称与参数解析更容易出错。支持原生接口时，应使用该接口及其校验机制。</p>
+<p>下一次调用仍需要让模型访问当前可用的工具定义：可能由应用重新发送，也可能由服务的会话或引用机制保留。是否可以省略传输，要依据服务契约；不能假定“第一轮给过，之后就永远记住”。</p>
+<p><a id="reference-工具调用与结果必须关联"></a></p>
+<h3 id="工具调用与结果必须关联">工具调用与结果必须关联</h3>
+<p>一次模型响应可能含多个工具调用，运行时需要记录每个调用的 ID，并用它关联对应结果。不能只追加一段“查询成功”的普通文本，让模型猜它属于哪个调用。</p>
+<p>压缩消息时也必须保留合法的调用与结果关系，不能留下孤立结果、遗漏需要返回的调用结果，或改变执行状态。</p>
+<p>如果响应通过流式返回，参数可能分成多个 JSON 片段；应在调用参数完整且验证通过后才执行。多个调用能否并行，取决于是否存在数据依赖、共享状态和副作用，不是模型一次输出多个调用就一定能并行。</p>
+<p><a id="reference-description-与参数契约"></a></p>
+<h2 id="description-与参数契约">Description 与参数契约</h2>
+<p><a id="reference-描述帮助模型区分能力"></a></p>
+<h3 id="描述帮助模型区分能力">描述帮助模型区分能力</h3>
+<p>Description 需要回答：工具做什么、适用于什么输入、与相似工具有何边界、返回什么，以及调用有什么副作用。写“查询数据”无法让模型区分查订单、查日志和查知识库。</p>
+<p>例如，日志工具可以描述为：</p>
+<blockquote>
+<p>查询指定服务在给定时间范围内的运行日志，用于定位异常和检查请求行为。仅检索日志，不查询业务订单；返回日志条目、是否截断及下一页游标，不直接给出故障根因。时间使用带时区的 ISO 8601 格式。</p>
+</blockquote>
+<p>这一描述同时给出了适用范围、相邻能力边界、输入约定和输出含义。关键限制需要写清楚，但不应在每个工具里重复整份平台操作手册。</p>
+<p>模型选择工具会综合名称、description、参数 schema、当前任务和历史结果，不能说它“完全只靠 description”。明确而有区分度的名称同样重要。</p>
+<p><a id="reference-参数-schema-减少含糊表达"></a></p>
+<h3 id="参数-schema-减少含糊表达">参数 Schema 减少含糊表达</h3>
+<p>下面是应用内部的工具目录示意，适配器会转换为所选模型服务的工具格式。其中 <code>input_schema</code> 不代表所有 API 使用同一个字段名。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"search_service_logs"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "description"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"检索指定服务与时间范围的运行日志，返回条目、截断状态和下一页游标；不查询业务订单，不修改服务。"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "input_schema"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"object"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "properties"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "service"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        "type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"string"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        "description"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"准确的服务标识，不能用自然语言推测服务名"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      },</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "start_time"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        "type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"string"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        "description"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"包含时区的 ISO 8601 开始时间，例如 2026-10-28T09:00:00+08:00"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      },</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "end_time"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        "type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"string"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        "description"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"包含时区的 ISO 8601 结束时间，必须晚于开始时间"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      },</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "level"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        "type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"string"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        "enum"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"all"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"error"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"warn"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"info"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      },</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "limit"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        "type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"integer"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        "minimum"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        "maximum"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">100</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    },</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "required"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"service"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"start_time"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"end_time"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"level"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"limit"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "additionalProperties"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>字段应说明标识符来源、单位、格式、范围及必填性。枚举比“填写适当的状态”更清楚，明确时区比“传一个时间”更清楚。</p>
+<p>这个 schema 仍不能独自保证服务存在、时间真实合法或当前身份有访问权，运行时必须检查。不同服务支持的 JSON Schema 子集也不同，应在工具注册时验证兼容性。</p>
+<p>能由运行时确定的租户、当前用户和认证信息，不应让模型填入；由可信身份上下文绑定。工具也应避免要求模型复制大段可以通过稳定 ID 引用的数据。</p>
+<p><a id="reference-输出也是工具契约的一部分"></a></p>
+<h3 id="输出也是工具契约的一部分">输出也是工具契约的一部分</h3>
+<p>工具结果最好明确返回数据、执行状态、数据来源及完整性，例如：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "status"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"ok"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "entries"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [],</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "truncated"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "next_cursor"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "query_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"日志系统实际返回的查询标识"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>这里的空数组表示检索范围内没有匹配项。它与查询失败不同；<code>truncated: true</code> 则表示结果不完整，不能据此判断“没有其他异常”。示例字段应按实际工具能力实现，不得编造查询标识或截断状态。</p>
+<p>输出过大时，优先在工具设计中支持筛选、分页和按范围读取。完整结果需要留存时，可以返回持久化引用与有限预览，同时明确省略了多少内容；不能悄悄截断后伪装成完整结果。</p>
+<p><a id="reference-工具过多时如何组织"></a></p>
+<h2 id="工具过多时如何组织">工具过多时如何组织</h2>
+<p>工具多带来的问题有两类：schema 占用输入预算，以及相似能力增加选择混淆。没有一个适用于所有模型的固定安全数量，需要同时考察总 token、工具相似度和任务成功率。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>实现方式</th>
+<th>代价与验证点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>按身份过滤</td>
+<td>先剔除当前身份不可使用的工具</td>
+<td>可见性控制不能替代执行时鉴权</td>
+</tr>
+<tr>
+<td>按任务范围分组</td>
+<td>当前查日志只加载日志、指标等相关工具</td>
+<td>范围判断错误会使需要的工具缺席</td>
+</tr>
+<tr>
+<td>候选检索</td>
+<td>根据工具名称、简述和 schema 建索引，为任务选候选集</td>
+<td>必须评估需要的工具是否被召回</td>
+</tr>
+<tr>
+<td>按需发现</td>
+<td>常驻少量基础工具与发现工具，发现后加载完整 schema</td>
+<td>多一次调用，还要明确加载到哪一轮生效</td>
+</tr>
+<tr>
+<td>调整工具边界</td>
+<td>合并重复能力，让一个工具用明确参数处理同类操作</td>
+<td>不应合并成可任意执行的万能接口</td>
+</tr>
+</tbody>
+</table>
+<p>按需发现可以这样工作：模型先调用“查找日志相关工具”，运行时返回候选名称和简述，选择后将完整 schema 注册到后续请求；或者运行时直接检索并加载候选。这是应用明确实现的流程，不是模型凭工具名字自动获得远程能力。</p>
+<p>未进入完整可用集合的工具不能直接执行。模型提出未注册或当前不可用的名称时，应报告明确错误，而不能模糊匹配到名字相似的另一个工具。</p>
+<p>筛选工具时不能只使用最初的用户问题。任务执行会产生新信息，应结合当前子目标、已确认事实和计划依赖决定可用工具；“查完日志后需要读代码”的能力变化要在下一次请求前反映出来。</p>
+<p><a id="reference-评估工具选择与描述"></a></p>
+<h3 id="评估工具选择与描述">评估工具选择与描述</h3>
+<p>用有明确正确动作的任务集比较 description 和筛选策略，任务既要包含需要调用的场景，也要包含应直接回答或信息不足的场景。</p>
+<ul>
+<li>候选召回率：完成当前任务需要的工具是否进入可用集合；多步骤任务应检查关键工具是否全部覆盖。</li>
+<li>工具选择正确率：模型是否选了适合当前动作的工具，而不是名称相似的工具。</li>
+<li>参数正确率：schema 校验通过之后，ID、时间、单位等业务含义是否正确。</li>
+<li>不必要调用比例、完成步数、时延、每个成功任务的费用。</li>
+<li>最终任务成功率：工具调用有效不代表故障诊断、订单查询等目标已经完成。</li>
+</ul>
+<p>可以专门构造“查订单”和“查订单日志”等相邻工具的区分样例。改善描述的目标是减少真实混淆，不是单纯让 description 更长。</p>
+<p><a id="reference-运行时校验与失败语义"></a></p>
+<h2 id="运行时校验与失败语义">运行时校验与失败语义</h2>
+<p>模型提出的是调用意图，运行时负责验证名称、参数结构、业务规则、身份与权限，然后才执行工具。工具 schema 即使受到生成约束，也不能代替这些验证。</p>
+<p>错误需要明确分类，例如无效参数、认证失败、没有权限、资源不存在、服务超时，以及执行结果未知。不得把异常转换成空结果或“成功但无数据”。</p>
+<p>参数错误可以作为带原调用 ID 的明确错误反馈给模型，让它在允许的预算内修正；认证、权限和业务失败则按应用定义的终止或恢复协议处理。任何重试都需要明确触发条件、次数限制和可观察的结果，不应自动掩盖失败。</p>
+<p>特别是写入类操作：超时只说明没有收到结果，不证明服务没有完成写入。重试前需要幂等键、操作记录或状态查询；不能因为模型“再试一次”就重复创建、扣款或发送。</p>
+<p>工具返回里的指令式文本只是外部数据，不能自动变成平台规则。工具 description 也不是权限授予，真正的访问范围由运行时和服务端控制。</p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>追踪一项工具从服务端 Schema 到模型 tools 字段，再到 handler 和结果消息；每个转换都应保留调用标识与错误语义。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>衔接相关实践：<a href="/notes/computer-science/agent/framework/learn-claude-code/tool-dispatch/">S02-Tool Use</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#从工具定义到真实执行">从工具定义到真实执行</a></li><li style="--depth: 1"><a href="#工具列表如何交给模型">工具列表如何交给模型</a></li><li style="--depth: 1"><a href="#工具调用与结果必须关联">工具调用与结果必须关联</a></li><li style="--depth: 0"><a href="#description-与参数契约">Description 与参数契约</a></li><li style="--depth: 1"><a href="#描述帮助模型区分能力">描述帮助模型区分能力</a></li><li style="--depth: 1"><a href="#参数-schema-减少含糊表达">参数 Schema 减少含糊表达</a></li><li style="--depth: 1"><a href="#输出也是工具契约的一部分">输出也是工具契约的一部分</a></li><li style="--depth: 0"><a href="#工具过多时如何组织">工具过多时如何组织</a></li><li style="--depth: 1"><a href="#评估工具选择与描述">评估工具选择与描述</a></li><li style="--depth: 0"><a href="#运行时校验与失败语义">运行时校验与失败语义</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

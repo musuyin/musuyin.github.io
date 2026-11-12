@@ -1,0 +1,451 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>传输层 · Musuyin&#39; Home</title><meta name="description" content="传输层把主机通信分解到进程，并在需要时提供可靠传输。停止等待、流水线、重传与窗口机制逐步连接到 TCP，流量控制和拥塞控制则约束不同资源。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/network/transport-layer/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="传输层 · Musuyin' Home"><meta property="og:description" content="传输层把主机通信分解到进程，并在需要时提供可靠传输。停止等待、流水线、重传与窗口机制逐步连接到 TCP，流量控制和拥塞控制则约束不同资源。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/network/transport-layer/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">传输层</p><dl><div><dt>发布日期</dt><dd><time datetime="2024-10-14">2024-10-14</time></dd></div><div><dt>字数</dt><dd>7780</dd></div><div><dt>预计阅读</dt><dd>26 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">#计算机网络</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>传输层</h1><time datetime="2024-10-14">2024-10-14</time><p class="tags"><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">#计算机网络</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>传输层把主机通信分解到进程，并在需要时提供可靠传输。停止等待、流水线、重传与窗口机制逐步连接到 TCP，流量控制和拥塞控制则约束不同资源。</p>
+<p><a id="reference-传输层概述"></a></p>
+<h2 id="传输层概述">传输层概述</h2>
+<p>传输层位于应用层和网络层之间，是 OSI 体系结构中端到端的<strong>最底</strong>层次。</p>
+<ul>
+<li><strong>向上</strong>：为运行在不同主机上的应用进程提供<strong>逻辑通信</strong>（好像两个进程直接相连）</li>
+<li><strong>向下</strong>：依赖网络层提供主机间的逻辑通信</li>
+</ul>
+<p>传输层协议只运行在<strong>端系统</strong>，不在路由器中：</p>
+<ul>
+<li><strong>发送方</strong>：将应用报文分段封装后传给网络层</li>
+<li><strong>接收方</strong>：将网络层上传的报文段重组后交给应用层</li>
+</ul>
+<p>路由器只处理网络层字段，不识别传输层信息。</p>
+<p><a id="reference-传输层-vs-网络层"></a></p>
+<h3 id="传输层-vs-网络层">传输层 vs 网络层</h3>
+<table>
+<thead>
+<tr>
+<th>对比</th>
+<th>网络层</th>
+<th>传输层</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>通信范围</td>
+<td>主机之间</td>
+<td>进程之间（应用程序到应用程序）</td>
+</tr>
+<tr>
+<td>协议位置</td>
+<td>主机 + 路由器</td>
+<td>只在端系统</td>
+</tr>
+</tbody>
+</table>
+<p>传输层可以在不可靠的网络层之上提供可靠传输（如 TCP over IP）。</p>
+<p><a id="reference-因特网传输层协议"></a></p>
+<h3 id="因特网传输层协议">因特网传输层协议</h3>
+<table>
+<thead>
+<tr>
+<th>协议</th>
+<th>全称</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UDP</strong></td>
+<td>用户数据报协议</td>
+<td>不可靠、无连接</td>
+</tr>
+<tr>
+<td><strong>TCP</strong></td>
+<td>传输控制协议</td>
+<td>可靠、面向连接、拥塞控制</td>
+</tr>
+</tbody>
+</table>
+<p><strong>分组术语</strong>：</p>
+<ul>
+<li>传输层分组 → <strong>报文段（segment）</strong></li>
+<li>网络层分组 → <strong>数据报（datagram）</strong></li>
+</ul>
+<p><a id="reference-多路复用与分解"></a></p>
+<h2 id="多路复用与分解">多路复用与分解</h2>
+<p><a id="reference-基本概念"></a></p>
+<h3 id="基本概念">基本概念</h3>
+<p>将网络层提供的“主机到主机”交付，扩展为“进程到进程”的交付。</p>
+<ul>
+<li><strong>多路复用（发送方）</strong>：从多个套接字收集数据，封装首部，生成报文段传给网络层（多对一）</li>
+<li><strong>多路分解（接收方）</strong>：根据报文段中的字段，将数据送到正确的套接字（一对多）</li>
+</ul>
+<p><a id="reference-端口号"></a></p>
+<h3 id="端口号">端口号</h3>
+<p>端口号是 16 位字段（0～65535）：</p>
+<ul>
+<li><strong>0～1023</strong>：周知端口号，保留给固定应用（HTTP:80，SMTP:25，FTP:21）</li>
+<li><strong>1024～65535</strong>：应用程序自由使用</li>
+</ul>
+<p><a id="reference-udp-的多路复用与分解无连接"></a></p>
+<h3 id="udp-的多路复用与分解无连接">UDP 的多路复用与分解（无连接）</h3>
+<ul>
+<li>UDP 套接字由**二元组（目的 IP, 目的端口）**标识</li>
+<li>不同源但相同目的端口的 UDP 报文段 → 送到<strong>同一个</strong>套接字（多对一）</li>
+<li>源端口号作为回复时的返回地址</li>
+</ul>
+<p><a id="reference-tcp-的多路复用与分解面向连接"></a></p>
+<h3 id="tcp-的多路复用与分解面向连接">TCP 的多路复用与分解（面向连接）</h3>
+<ul>
+<li>TCP 套接字由**四元组（源 IP, 源端口, 目的 IP, 目的端口）**标识</li>
+<li>不同源的 TCP 报文段 → 送到<strong>不同</strong>套接字（一对一）</li>
+<li>Web 服务器可为每个连接创建新进程或线程（轻量级子进程）</li>
+<li><strong>持久 HTTP</strong>：同一套接字复用；<strong>非持久 HTTP</strong>：每次请求创建新连接</li>
+</ul>
+<p><a id="reference-可靠数据传输原理"></a></p>
+<h2 id="可靠数据传输原理">可靠数据传输原理</h2>
+<p>可靠传输要求：数据<strong>不出错、不丢失、按发送顺序</strong>到达。</p>
+<p><a id="reference-rdt10完全可靠信道"></a></p>
+<h3 id="rdt10完全可靠信道">rdt1.0：完全可靠信道</h3>
+<p>假设信道完全可靠，发送方直接发，接收方直接收，无需任何反馈。</p>
+<p><a id="reference-rdt20有比特差错无丢包"></a></p>
+<h3 id="rdt20有比特差错无丢包">rdt2.0：有比特差错，无丢包</h3>
+<p>引入**自动重传请求（ARQ）**协议：</p>
+<ul>
+<li><strong>差错检测</strong>：添加校验和（checksum）字段</li>
+<li><strong>接收方反馈</strong>：ACK（确认）或 NAK（否认）</li>
+<li><strong>重传</strong>：收到 NAK 则重传</li>
+</ul>
+<blockquote>
+<p>停等（stop-and-wait）协议：发完一个分组后等待确认，再发下一个。</p>
+</blockquote>
+<p><strong>问题</strong>：若 ACK/NAK 本身受损，发送方不知道是否成功。</p>
+<p><strong>解决</strong>：给分组添加<strong>序号</strong>字段（停等协议只需 1 bit，0 和 1 交替）。</p>
+<p><a id="reference-rdt21--rdt22"></a></p>
+<h3 id="rdt21--rdt22">rdt2.1 / rdt2.2</h3>
+<ul>
+<li><strong>rdt2.1</strong>：处理受损的 ACK/NAK；接收方丢弃乱序或受损分组并回发 ACK</li>
+<li><strong>rdt2.2</strong>：去掉 NAK，改为对最后正确接收的分组发<strong>冗余 ACK</strong>（代替 NAK）</li>
+</ul>
+<p><a id="reference-rdt30有比特差错--丢包"></a></p>
+<h3 id="rdt30有比特差错--丢包">rdt3.0：有比特差错 + 丢包</h3>
+<p>增加<strong>超时重传</strong>机制：</p>
+<ul>
+<li>发送方启动<strong>倒计时定时器</strong></li>
+<li>超时未收到 ACK → 重传分组</li>
+<li>用序号区分新分组和重传分组</li>
+</ul>
+<blockquote>
+<p>rdt3.0 解决了所有基本问题，但效率低（停等模式）。</p>
+</blockquote>
+<p><a id="reference-停等协议的性能"></a></p>
+<h3 id="停等协议的性能">停等协议的性能</h3>
+<p><strong>发送方利用率</strong>：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>U</mi><mrow><mi>s</mi><mi>e</mi><mi>n</mi><mi>d</mi><mi>e</mi><mi>r</mi></mrow></msub><mo>=</mo><mfrac><mrow><mi>L</mi><mi mathvariant="normal">/</mi><mi>R</mi></mrow><mrow><mi>L</mi><mi mathvariant="normal">/</mi><mi>R</mi><mo>+</mo><mi>R</mi><mi>T</mi><mi>T</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">U_{sender} = \frac{L/R}{L/R + RTT}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;">U</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">se</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight" style="margin-right:0.0278em;">er</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:2.363em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></div>
+<blockquote>
+<p>例：1Gbps 链路，RTT=30ms，L=1000B → 利用率仅约 <strong>0.027%</strong>，极度浪费。</p>
+</blockquote>
+<p><a id="reference-流水线协议"></a></p>
+<h3 id="流水线协议">流水线协议</h3>
+<p>允许发送方连续发送多个分组而无需等待，利用率提升为：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>U</mi><mrow><mi>s</mi><mi>e</mi><mi>n</mi><mi>d</mi><mi>e</mi><mi>r</mi></mrow></msub><mo>=</mo><mi>N</mi><mo>⋅</mo><mfrac><mrow><mi>L</mi><mi mathvariant="normal">/</mi><mi>R</mi></mrow><mrow><mi>L</mi><mi mathvariant="normal">/</mi><mi>R</mi><mo>+</mo><mi>R</mi><mi>T</mi><mi>T</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">U_{sender} = N \cdot \frac{L/R}{L/R + RTT}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;">U</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">se</span><span class="mord mathnormal mtight">n</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight" style="margin-right:0.0278em;">er</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:2.363em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></div>
+<p>两种流水线协议：</p>
+<p><a id="reference-gbn回退-n-步go-back-n"></a></p>
+<h3 id="gbn回退-n-步go-back-n">GBN（回退 N 步，Go-Back-N）</h3>
+<p><strong>基本思想</strong>：</p>
+<ul>
+<li>发送方可连续发送窗口内的多个分组</li>
+<li>接收方<strong>按序接收</strong>，出错时从出错分组开始<strong>全部丢弃</strong>，不发 ACK</li>
+<li>发送方超时后<strong>从出错分组重传后续所有分组</strong></li>
+</ul>
+<p><strong>发送窗口</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>范围</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[0, base-1]</code></td>
+<td>已发送并已确认</td>
+</tr>
+<tr>
+<td><code>[base, nextseqnum-1]</code></td>
+<td>已发送但未确认</td>
+</tr>
+<tr>
+<td><code>[nextseqnum, base+N-1]</code></td>
+<td>即将发送</td>
+</tr>
+<tr>
+<td><code>[base+N, ∞]</code></td>
+<td>暂不可用</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>接收窗口大小 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mi>R</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">W_R = 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0077em;">R</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>（只按序接收）</li>
+<li>序号位数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> 位，最大发送窗口 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mi>T</mi></msub><mo>=</mo><msup><mn>2</mn><mi>k</mi></msup><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">W_T = 2^k - 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1389em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.9324em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></li>
+<li>使用<strong>累积确认</strong>：ACK(n) 表示 n 及 n 之前所有分组均已收到</li>
+<li>只用<strong>一个定时器</strong>，超时重传所有未确认分组</li>
+</ul>
+<p><a id="reference-sr选择性重传selective-repeat"></a></p>
+<h3 id="sr选择性重传selective-repeat">SR（选择性重传，Selective Repeat）</h3>
+<p><strong>基本思想</strong>：</p>
+<ul>
+<li>只重传<strong>出错的那个分组</strong>（不重传后续分组）</li>
+<li>接收方<strong>不按序</strong>接收，将失序分组<strong>缓存</strong>，待出错分组补齐后统一交付</li>
+</ul>
+<p><strong>发送/接收窗口</strong>：</p>
+<ul>
+<li>序号位数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> 位，发送窗口和接收窗口最大均为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">2^{k-1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8491em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span>（序号空间的一半）</li>
+</ul>
+<p><strong>接收方动作</strong>：</p>
+<ul>
+<li>序号在接收窗口内的分组：缓存，回发 ACK；若序号等于接收基序号，则将连续已缓存的分组一起交付，滑动窗口</li>
+<li>序号在接收基序号<strong>之前</strong>的分组：重发 ACK（防止发送方窗口无法前移）</li>
+</ul>
+<p><a id="reference-三种协议比较"></a></p>
+<h3 id="三种协议比较">三种协议比较</h3>
+<table>
+<thead>
+<tr>
+<th>协议</th>
+<th>发送方</th>
+<th>接收方</th>
+<th>发送窗口 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mi>T</mi></msub></mrow><annotation encoding="application/x-tex">W_T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.1389em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></th>
+<th>接收窗口 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">W_R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0077em;">R</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>停等</td>
+<td>发 1 个，重发出错分组</td>
+<td>按序接收，丢弃出错/重复</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>GBN</td>
+<td>连发 N 个，从出错处全重发</td>
+<td>按序接收，从出错处全丢</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><msup><mn>2</mn><mi>k</mi></msup><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\leq 2^k - 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.9324em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></td>
+<td>1</td>
+</tr>
+<tr>
+<td>SR</td>
+<td>连发 N 个，只重发出错分组</td>
+<td>不按序，只丢出错分组</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><msup><mn>2</mn><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\leq 2^{k-1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8491em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><msup><mn>2</mn><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\leq 2^{k-1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8491em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span></td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-可靠传输机制总结"></a></p>
+<h3 id="可靠传输机制总结">可靠传输机制总结</h3>
+<table>
+<thead>
+<tr>
+<th>机制</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>校验和</td>
+<td>检测比特差错</td>
+</tr>
+<tr>
+<td>定时器/超时重传</td>
+<td>检测丢包和 ACK 丢失</td>
+</tr>
+<tr>
+<td>序号</td>
+<td>区分新分组与重传分组，检测丢失/重复</td>
+</tr>
+<tr>
+<td>确认（ACK）</td>
+<td>告知发送方哪些分组已正确接收</td>
+</tr>
+<tr>
+<td>否认（NAK）</td>
+<td>告知发送方哪些分组出错（可用冗余 ACK 代替）</td>
+</tr>
+<tr>
+<td>窗口/流水线</td>
+<td>提高信道利用率</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-拥塞控制原理"></a></p>
+<h2 id="拥塞控制原理">拥塞控制原理</h2>
+<p><strong>拥塞</strong>：发送方发送速率过快，超过网络处理能力 → 路由器缓冲区溢出（丢包）和长排队时延。</p>
+<blockquote>
+<p>拥塞控制 ≠ 流量控制：前者针对网络全局，后者针对发送方与接收方之间的速率匹配。</p>
+</blockquote>
+<p><a id="reference-拥塞的代价"></a></p>
+<h3 id="拥塞的代价">拥塞的代价</h3>
+<ul>
+<li><strong>Case 1（无限缓存路由器）</strong>：吞吐量最大只有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mi mathvariant="normal">/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">R/2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mord">/2</span></span></span></span>，但排队时延随发送速率增大而剧增</li>
+<li><strong>Case 2（有限缓存，重传）</strong>：最大吞吐量降至 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mi mathvariant="normal">/</mi><mn>3</mn></mrow><annotation encoding="application/x-tex">R/3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mord">/3</span></span></span></span>（重传消耗带宽）</li>
+<li><strong>Case 3（超时重传 + 重复分组）</strong>：最大吞吐量降至 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mi mathvariant="normal">/</mi><mn>4</mn></mrow><annotation encoding="application/x-tex">R/4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mord">/4</span></span></span></span></li>
+</ul>
+<p><a id="reference-拥塞控制方法"></a></p>
+<h3 id="拥塞控制方法">拥塞控制方法</h3>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>原理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>端到端拥塞控制</strong></td>
+<td>端系统通过丢包、时延观察推断拥塞（TCP 采用此方式）</td>
+</tr>
+<tr>
+<td><strong>网络辅助拥塞控制</strong></td>
+<td>路由器直接向发送方反馈拥塞信息（如 ATM ABR）</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-atm-abr-拥塞控制"></a></p>
+<h3 id="atm-abr-拥塞控制">ATM ABR 拥塞控制</h3>
+<p><strong>ATM（异步传输模式）</strong>：基于虚电路（VC）的快速分组交换，每台交换机维护 VC 状态。</p>
+<p><strong>ABR（可用比特率）</strong>：弹性服务，轻载时充分利用空闲带宽，拥塞时降至最低速率。</p>
+<p><strong>RM（资源管理）信元</strong>：散布在数据信元中，用于传递拥塞信息。</p>
+<p>拥塞通知字段：</p>
+<ul>
+<li><strong>EFCI 比特</strong>：交换机设为 1 告知目的端拥塞；目的端将 RM 信元中的 CI 位置 1 回送发送方</li>
+<li><strong>CI（拥塞指示）</strong>：严重拥塞时置 1</li>
+<li><strong>NI（无增长）</strong>：轻度拥塞时置 1</li>
+<li><strong>ER（显式速率）</strong>：路径上最小支持速率，拥塞交换机降低 ER 值，发送方据此调整速率</li>
+</ul>
+<p><a id="reference-面向连接的传输tcp"></a></p>
+<h2 id="面向连接的传输tcp">面向连接的传输：TCP</h2>
+<p>TCP 采用：差错检测、重传、累积确认、定时器、序号和确认号。</p>
+<p><a id="reference-tcp-连接管理"></a></p>
+<h3 id="tcp-连接管理">TCP 连接管理</h3>
+<p><a id="reference-三次握手建立连接"></a></p>
+<h4 id="三次握手建立连接">三次握手（建立连接）</h4>
+<ol>
+<li><strong>客户端 → SYN 报文段</strong>：SYN=1，序号=<code>client_isn</code>（随机选择）</li>
+<li><strong>服务器 → SYNACK 报文段</strong>：SYN=1，确认号=<code>client_isn+1</code>，序号=<code>server_isn</code>；分配缓存和变量</li>
+<li><strong>客户端 → 第三个报文段</strong>：SYN=0，确认号=<code>server_isn+1</code>；可携带应用层数据；分配缓存和变量</li>
+</ol>
+<p><a id="reference-四次挥手释放连接"></a></p>
+<h4 id="四次挥手释放连接">四次挥手（释放连接）</h4>
+<ol>
+<li>客户端发送 FIN=1 报文段</li>
+<li>服务器回复 ACK</li>
+<li>服务器发送 FIN=1 报文段</li>
+<li>客户端回复 ACK</li>
+</ol>
+<p><a id="reference-tcp-报文段结构"></a></p>
+<h3 id="tcp-报文段结构">TCP 报文段结构</h3>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>大小</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>源端口 / 目的端口</td>
+<td>各 16 bits</td>
+<td>多路复用/分解</td>
+</tr>
+<tr>
+<td>序号</td>
+<td>32 bits</td>
+<td>该报文段首字节的字节流编号</td>
+</tr>
+<tr>
+<td>确认号</td>
+<td>32 bits</td>
+<td>期望收到的下一个字节的编号</td>
+</tr>
+<tr>
+<td>接收窗口</td>
+<td>16 bits</td>
+<td>流量控制：接收方愿意接受的字节数</td>
+</tr>
+<tr>
+<td>首部长度</td>
+<td>4 bits</td>
+<td>TCP 首部长度（×4 字节，典型值 20B）</td>
+</tr>
+<tr>
+<td>标志字段</td>
+<td>6 bits</td>
+<td>ACK/SYN/FIN/RST/CWR/ECE/PSH/URG</td>
+</tr>
+<tr>
+<td>检验和</td>
+<td>16 bits</td>
+<td>差错检测</td>
+</tr>
+</tbody>
+</table>
+<p><strong>序号</strong>：基于字节流，而非报文段。例如 500,000 字节文件（MSS=1000B）：第 1 个报文段序号 0，第 2 个 1000，以此类推。</p>
+<p><strong>确认号</strong>：期望收到的下一字节序号，使用<strong>累积确认</strong>（只确认第一个丢失字节之前的数据）。</p>
+<p><a id="reference-往返时间估计与超时"></a></p>
+<h3 id="往返时间估计与超时">往返时间估计与超时</h3>
+<p><strong>EstimatedRTT</strong>（指数加权移动平均）：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>EstimatedRTT</mtext><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo stretchy="false">)</mo><mo>⋅</mo><mtext>EstimatedRTT</mtext><mo>+</mo><mi>α</mi><mo>⋅</mo><mtext>SampleRTT</mtext><mspace width="1em"/><mo stretchy="false">(</mo><mi>α</mi><mo>=</mo><mn>1</mn><mi mathvariant="normal">/</mi><mn>8</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{EstimatedRTT} = (1-\alpha) \cdot \text{EstimatedRTT} + \alpha \cdot \text{SampleRTT} \quad (\alpha = 1/8)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord text"><span class="mord">EstimatedRTT</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord text"><span class="mord">EstimatedRTT</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4445em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">SampleRTT</span></span><span class="mspace" style="margin-right:1em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1/8</span><span class="mclose">)</span></span></span></span></span></div>
+<p><strong>DevRTT</strong>（RTT 偏差，反映波动程度）：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>DevRTT</mtext><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>β</mi><mo stretchy="false">)</mo><mo>⋅</mo><mtext>DevRTT</mtext><mo>+</mo><mi>β</mi><mo>⋅</mo><mi mathvariant="normal">∣</mi><mtext>SampleRTT</mtext><mo>−</mo><mtext>EstimatedRTT</mtext><mi mathvariant="normal">∣</mi><mspace width="1em"/><mo stretchy="false">(</mo><mi>β</mi><mo>=</mo><mn>1</mn><mi mathvariant="normal">/</mi><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{DevRTT} = (1-\beta) \cdot \text{DevRTT} + \beta \cdot |\text{SampleRTT} - \text{EstimatedRTT}| \quad (\beta = 1/4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord">DevRTT</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord text"><span class="mord">DevRTT</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord text"><span class="mord">SampleRTT</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">EstimatedRTT</span></span><span class="mord">∣</span><span class="mspace" style="margin-right:1em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0528em;">β</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1/4</span><span class="mclose">)</span></span></span></span></span></div>
+<p><strong>超时间隔</strong>：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>TimeoutInterval</mtext><mo>=</mo><mtext>EstimatedRTT</mtext><mo>+</mo><mn>4</mn><mo>⋅</mo><mtext>DevRTT</mtext></mrow><annotation encoding="application/x-tex">\text{TimeoutInterval} = \text{EstimatedRTT} + 4 \cdot \text{DevRTT}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord text"><span class="mord">TimeoutInterval</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord text"><span class="mord">EstimatedRTT</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord">DevRTT</span></span></span></span></span></span></div>
+<p><a id="reference-tcp-可靠数据传输"></a></p>
+<h3 id="tcp-可靠数据传输">TCP 可靠数据传输</h3>
+<p>TCP 在不可靠的 IP 层上实现可靠传输，保证数据<strong>无损坏、无间隙、非冗余、按序</strong>。</p>
+<p>使用<strong>单一重传定时器</strong>（绑定最早未确认报文段）：</p>
+<ul>
+<li>收到上层数据 → 封装报文段，若定时器未运行则启动</li>
+<li>定时器超时 → 重传引起超时的报文段，重启定时器</li>
+<li>收到 ACK(y) → 若 y &gt; SendBase，更新 SendBase；若仍有未确认报文段，重启定时器</li>
+</ul>
+<p><a id="reference-超时间隔加倍"></a></p>
+<h4 id="超时间隔加倍">超时间隔加倍</h4>
+<p>超时后，下次超时间隔<strong>加倍</strong>（指数增长），避免网络已拥塞时持续重传加剧拥塞。</p>
+<p><a id="reference-快速重传"></a></p>
+<h4 id="快速重传">快速重传</h4>
+<p>收到**3 个冗余 ACK（duplicate ACK）**时，在定时器过期前立即重传丢失报文段。</p>
+<blockquote>
+<p>收到冗余 ACK 说明：该 ACK 编号之后的报文段已到达接收方，但中间有报文段丢失。</p>
+</blockquote>
+<p><a id="reference-差错恢复机制"></a></p>
+<h4 id="差错恢复机制">差错恢复机制</h4>
+<p>TCP 是 GBN 和 SR 的混合体：</p>
+<ul>
+<li>使用<strong>选择确认（selective acknowledgment）</strong>，接收方有选择地确认失序报文段</li>
+<li>跳过已被接收方选择性确认的报文段，只重传真正丢失的</li>
+</ul>
+<p><a id="reference-流量控制"></a></p>
+<h3 id="流量控制">流量控制</h3>
+<p>TCP 接收方在首部**接收窗口（rwnd）**字段通告剩余缓存空间，发送方不超过 rwnd 发送，防止接收方缓存溢出。</p>
+<p><a id="reference-面试追问端口与请求回包"></a></p>
+<h3 id="面试追问端口与请求回包">面试追问：端口与请求回包</h3>
+<p><a id="reference-端口由哪层提供"></a></p>
+<h4 id="端口由哪层提供">端口由哪层提供</h4>
+<p>端口是<strong>传输层</strong>（TCP/UDP）用来把 IP 主机上的报文交付给正确进程的逻辑编号；IP 负责定位主机，端口定位主机内的套接字/应用。严格说，端口号位于 TCP/UDP 首部，由操作系统网络栈维护。</p>
+<p><a id="reference-同一路由器的多台电脑如何收到各自回包"></a></p>
+<h4 id="同一路由器的多台电脑如何收到各自回包">同一路由器的多台电脑如何收到各自回包</h4>
+<p>路由器做 NAT 时为每条出站连接维护映射，例如 <code>192.168.1.10:52341 → 公网IP:40001</code>。服务器回包目标是公网 IP 和临时端口；NAT 依表项改写为内网源 IP、源端口，随后二层用 MAC/ARP 交付给正确主机。即使访问同一服务器，也由四元组（源 IP、源端口、目的 IP、目的端口）区分连接。</p>
+<p><a id="reference-tcp-拥塞控制"></a></p>
+<h3 id="tcp-拥塞控制">TCP 拥塞控制</h3>
+<p>TCP 使用端到端拥塞控制，通过丢包/冗余 ACK 推断拥塞，动态调整发送速率（拥塞窗口 cwnd）。</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>确认号与序号怎样支持重传？接收窗口与拥塞窗口分别反映哪一侧的限制？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#传输层概述">传输层概述</a></li><li style="--depth: 1"><a href="#传输层-vs-网络层">传输层 vs 网络层</a></li><li style="--depth: 1"><a href="#因特网传输层协议">因特网传输层协议</a></li><li style="--depth: 0"><a href="#多路复用与分解">多路复用与分解</a></li><li style="--depth: 1"><a href="#基本概念">基本概念</a></li><li style="--depth: 1"><a href="#端口号">端口号</a></li><li style="--depth: 1"><a href="#udp-的多路复用与分解无连接">UDP 的多路复用与分解（无连接）</a></li><li style="--depth: 1"><a href="#tcp-的多路复用与分解面向连接">TCP 的多路复用与分解（面向连接）</a></li><li style="--depth: 0"><a href="#可靠数据传输原理">可靠数据传输原理</a></li><li style="--depth: 1"><a href="#rdt10完全可靠信道">rdt1.0：完全可靠信道</a></li><li style="--depth: 1"><a href="#rdt20有比特差错无丢包">rdt2.0：有比特差错，无丢包</a></li><li style="--depth: 1"><a href="#rdt21--rdt22">rdt2.1 / rdt2.2</a></li><li style="--depth: 1"><a href="#rdt30有比特差错--丢包">rdt3.0：有比特差错 + 丢包</a></li><li style="--depth: 1"><a href="#停等协议的性能">停等协议的性能</a></li><li style="--depth: 1"><a href="#流水线协议">流水线协议</a></li><li style="--depth: 1"><a href="#gbn回退-n-步go-back-n">GBN（回退 N 步，Go-Back-N）</a></li><li style="--depth: 1"><a href="#sr选择性重传selective-repeat">SR（选择性重传，Selective Repeat）</a></li><li style="--depth: 1"><a href="#三种协议比较">三种协议比较</a></li><li style="--depth: 1"><a href="#可靠传输机制总结">可靠传输机制总结</a></li><li style="--depth: 0"><a href="#拥塞控制原理">拥塞控制原理</a></li><li style="--depth: 1"><a href="#拥塞的代价">拥塞的代价</a></li><li style="--depth: 1"><a href="#拥塞控制方法">拥塞控制方法</a></li><li style="--depth: 1"><a href="#atm-abr-拥塞控制">ATM ABR 拥塞控制</a></li><li style="--depth: 0"><a href="#面向连接的传输tcp">面向连接的传输：TCP</a></li><li style="--depth: 1"><a href="#tcp-连接管理">TCP 连接管理</a></li><li style="--depth: 2"><a href="#三次握手建立连接">三次握手（建立连接）</a></li><li style="--depth: 2"><a href="#四次挥手释放连接">四次挥手（释放连接）</a></li><li style="--depth: 1"><a href="#tcp-报文段结构">TCP 报文段结构</a></li><li style="--depth: 1"><a href="#往返时间估计与超时">往返时间估计与超时</a></li><li style="--depth: 1"><a href="#tcp-可靠数据传输">TCP 可靠数据传输</a></li><li style="--depth: 2"><a href="#超时间隔加倍">超时间隔加倍</a></li><li style="--depth: 2"><a href="#快速重传">快速重传</a></li><li style="--depth: 2"><a href="#差错恢复机制">差错恢复机制</a></li><li style="--depth: 1"><a href="#流量控制">流量控制</a></li><li style="--depth: 1"><a href="#面试追问端口与请求回包">面试追问：端口与请求回包</a></li><li style="--depth: 2"><a href="#端口由哪层提供">端口由哪层提供</a></li><li style="--depth: 2"><a href="#同一路由器的多台电脑如何收到各自回包">同一路由器的多台电脑如何收到各自回包</a></li><li style="--depth: 1"><a href="#tcp-拥塞控制">TCP 拥塞控制</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

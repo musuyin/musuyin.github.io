@@ -1,0 +1,438 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>网络层：控制平面 · Musuyin&#39; Home</title><meta name="description" content="控制平面计算路由并维护网络状态。链路状态和距离向量使用不同信息，OSPF 面向自治系统内部，BGP 则把跨域可达性与策略连接起来。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/network/network-control-plane/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="网络层：控制平面 · Musuyin' Home"><meta property="og:description" content="控制平面计算路由并维护网络状态。链路状态和距离向量使用不同信息，OSPF 面向自治系统内部，BGP 则把跨域可达性与策略连接起来。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/network/network-control-plane/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">网络层：控制平面</p><dl><div><dt>发布日期</dt><dd><time datetime="2024-11-21">2024-11-21</time></dd></div><div><dt>字数</dt><dd>7003</dd></div><div><dt>预计阅读</dt><dd>24 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">#计算机网络</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>网络层：控制平面</h1><time datetime="2024-11-21">2024-11-21</time><p class="tags"><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">#计算机网络</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>控制平面计算路由并维护网络状态。链路状态和距离向量使用不同信息，OSPF 面向自治系统内部，BGP 则把跨域可达性与策略连接起来。</p>
+<p><a id="reference-概述"></a></p>
+<h2 id="概述">概述</h2>
+<p>控制平面负责计算、维护和安装转发表/流表，使数据报能从源主机正确路由到目的主机。</p>
+<p>两种控制方案：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>每路由器控制</strong></td>
+<td>每台路由器自己运行路由选择算法，与邻居路由器交互，自行计算转发表（传统 OSPF、BGP）</td>
+</tr>
+<tr>
+<td><strong>逻辑集中式控制（SDN）</strong></td>
+<td>远程控制器统一计算并向每台路由器下发转发表，路由器中的控制代理（CA）只负责执行命令</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-路由选择算法"></a></p>
+<h2 id="路由选择算法">路由选择算法</h2>
+<p><strong>路由选择算法</strong>：在路由器网络中，确定从发送方到接收方的最低开销路径。</p>
+<p>用图 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi><mo>=</mo><mo stretchy="false">(</mo><mi>N</mi><mo separator="true">,</mo><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">G=(N,E)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mclose">)</span></span></span></span> 建模：节点为路由器，边为物理链路，边的权值为开销（距离/速率/费用等）。</p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">c(x,y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">c</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mclose">)</span></span></span></span>：节点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 到邻居节点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 的边的开销。</p>
+<p><a id="reference-算法分类"></a></p>
+<h3 id="算法分类">算法分类</h3>
+<table>
+<thead>
+<tr>
+<th>分类维度</th>
+<th>类型</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>信息来源</td>
+<td><strong>集中式（LS）</strong></td>
+<td>需要全局完整网络信息（全图）</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>分散式（DV）</strong></td>
+<td>只需直连邻居信息，逐步迭代</td>
+</tr>
+<tr>
+<td>时变性</td>
+<td><strong>静态</strong></td>
+<td>人工调整，变化慢</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>动态</strong></td>
+<td>自动响应拓扑/负载变化，可能引起振荡</td>
+</tr>
+<tr>
+<td>负载感知</td>
+<td><strong>负载敏感</strong></td>
+<td>开销反映链路当前拥塞</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>负载迟钝</strong></td>
+<td>开销不反映当前拥塞（因特网的 RIP/OSPF/BGP 均如此）</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-链路状态路由选择算法ls--dijkstra"></a></p>
+<h3 id="链路状态路由选择算法ls--dijkstra">链路状态路由选择算法（LS / Dijkstra）</h3>
+<p>每个节点<strong>广播链路状态</strong>（与哪些节点相连、各链路开销），使全网所有节点都有完整的网络拓扑图，然后各自运行 <strong>Dijkstra 算法</strong>计算最短路径树。</p>
+<p><strong>Dijkstra 算法步骤</strong>（从源节点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">u</span></span></span></span> 出发）：</p>
+<ol>
+<li>初始化：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mi>u</mi><mo stretchy="false">)</mo><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">D(u)=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>，其他节点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mi>v</mi><mo stretchy="false">)</mo><mo>=</mo><mi mathvariant="normal">∞</mi></mrow><annotation encoding="application/x-tex">D(v)=\infty</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">v</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord">∞</span></span></span></span></li>
+<li>找当前未确定最短路径中距离最小的节点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span></span></span></span>，加入已确定集合</li>
+<li>更新 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span></span></span></span> 的邻居节点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">v</span></span></span></span> 的最短距离：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mi>v</mi><mo stretchy="false">)</mo><mo>=</mo><mi>min</mi><mo>⁡</mo><mo stretchy="false">{</mo><mi>D</mi><mo stretchy="false">(</mo><mi>v</mi><mo stretchy="false">)</mo><mo separator="true">,</mo><mtext> </mtext><mi>D</mi><mo stretchy="false">(</mo><mi>w</mi><mo stretchy="false">)</mo><mo>+</mo><mi>c</mi><mo stretchy="false">(</mo><mi>w</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">D(v) = \min{D(v),\ D(w)+c(w,v)}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">v</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">min</span><span class="mopen">{</span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">v</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">c</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">v</span><span class="mclose">)}</span></span></span></span></li>
+<li>重复直到所有节点确定</li>
+</ol>
+<p>算法复杂度：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><msup><mi mathvariant="normal">∣</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(|V|^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right:0.2222em;">V</span><span class="mord"><span class="mord">∣</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>，优化后 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mi>log</mi><mo>⁡</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(|E|\log|V|)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mord">∣</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right:0.2222em;">V</span><span class="mord">∣</span><span class="mclose">)</span></span></span></span></p>
+<p><a id="reference-距离向量路由选择算法dv--bellman-ford"></a></p>
+<h3 id="距离向量路由选择算法dv--bellman-ford">距离向量路由选择算法（DV / Bellman-Ford）</h3>
+<p><strong>分散式、迭代式、异步</strong>：每个节点只知道直连链路开销，通过与邻居交换距离向量迭代收敛。</p>
+<p><strong>Bellman-Ford 方程</strong>（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>x</mi></msub><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d_x(y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mclose">)</span></span></span></span>：节点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 的最短路径开销）：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>d</mi><mi>x</mi></msub><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo><mo>=</mo><munder><mrow><mi>min</mi><mo>⁡</mo></mrow><mi>v</mi></munder><mo stretchy="false">{</mo><mtext> </mtext><mi>c</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo><mo>+</mo><msub><mi>d</mi><mi>v</mi></msub><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">d_x(y) = \min_v\{\ c(x,v) + d_v(y) \}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.45em;vertical-align:-0.7em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6679em;"><span style="top:-2.4em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0359em;">v</span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">min</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7em;"><span></span></span></span></span></span><span class="mopen">{</span><span class="mspace"> </span><span class="mord mathnormal">c</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">v</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0359em;">v</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mclose">)}</span></span></span></span></span></div>
+<p><strong>工作流程</strong>：</p>
+<ol>
+<li>初始化：每个节点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 构造距离向量（到所有已知目标的距离估计）</li>
+<li>向所有邻居发送自己的距离向量</li>
+<li>收到邻居 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">v</span></span></span></span> 的距离向量后，更新自己的距离估计</li>
+<li>若距离发生变化，再次向邻居广播；否则停止（自我终止）</li>
+</ol>
+<p><a id="reference-链路开销变化与路由选择环路"></a></p>
+<h4 id="链路开销变化与路由选择环路">链路开销变化与路由选择环路</h4>
+<p>链路开销降低时，DV 快速收敛（好消息传播快）。</p>
+<p>链路开销升高时，可能引发<strong>无穷计数</strong>问题（路由选择环路）：</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 认为可以通过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi></mrow><annotation encoding="application/x-tex">z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.044em;">z</span></span></span></span> 到达 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi></mrow><annotation encoding="application/x-tex">z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.044em;">z</span></span></span></span> 认为可以通过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 到达 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> → 无限循环</li>
+</ul>
+<p><strong>解决：毒性逆转（Poisoned Reverse）</strong></p>
+<ul>
+<li>如果 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi></mrow><annotation encoding="application/x-tex">z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.044em;">z</span></span></span></span> 通过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 路由到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>，则 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi></mrow><annotation encoding="application/x-tex">z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.044em;">z</span></span></span></span> 向 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 通告“我到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 的距离是无穷大”</li>
+<li>这样 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> 就不会以为可以经过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi></mrow><annotation encoding="application/x-tex">z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.044em;">z</span></span></span></span> 到达 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span></li>
+</ul>
+<blockquote>
+<p>注意：毒性逆转只能解决两节点间的环路，无法完全解决多节点场景。</p>
+</blockquote>
+<p><a id="reference-ls-与-dv-算法比较"></a></p>
+<h3 id="ls-与-dv-算法比较">LS 与 DV 算法比较</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>LS</th>
+<th>DV</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>信息交换</td>
+<td>每个节点向全网广播（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo>⋅</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(</td>
+<td>V</td>
+</tr>
+<tr>
+<td>计算复杂度</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><msup><mi mathvariant="normal">∣</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(</td>
+<td>V</td>
+</tr>
+<tr>
+<td>收敛速度</td>
+<td>较快</td>
+<td>较慢，可能有路由环路、无穷计数</td>
+</tr>
+<tr>
+<td>健壮性</td>
+<td>单节点只能广播错误的本地链路信息，影响有限</td>
+<td>错误信息会通过邻居传播到全网，影响更广</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-as-内部路由选择ospf"></a></p>
+<h2 id="as-内部路由选择ospf">AS 内部路由选择：OSPF</h2>
+<p><a id="reference-自治系统as"></a></p>
+<h3 id="自治系统as">自治系统（AS）</h3>
+<p>将因特网分组织为<strong>自治系统（Autonomous System，AS）</strong>：</p>
+<ul>
+<li>每个 AS 是一组统一管理的路由器集合</li>
+<li>AS 内部所有路由器运行<strong>相同的路由选择协议</strong>（AS 内部协议）</li>
+</ul>
+<p><a id="reference-ospf开放最短路优先"></a></p>
+<h3 id="ospf开放最短路优先">OSPF（开放最短路优先）</h3>
+<p><strong>OSPF</strong> 是链路状态协议，基于 Dijkstra 算法：</p>
+<ul>
+<li>每台路由器向<strong>AS 内所有路由器</strong>广播链路状态信息（不只是邻居）</li>
+<li>链路状态变化时立即广播；即使未变化，每 30 分钟也周期性广播</li>
+<li>OSPF 报文直接由 <strong>IP</strong> 承载（协议号 89）</li>
+</ul>
+<p><a id="reference-ospf-的优点"></a></p>
+<h4 id="ospf-的优点">OSPF 的优点</h4>
+<ol>
+<li><strong>安全</strong>：路由器间可配置 MD5 鉴别，防止恶意注入</li>
+<li><strong>等价多路径</strong>：多条相同开销的路径可同时使用，分担流量</li>
+<li><strong>支持多播路由（MOSPF）</strong></li>
+<li><strong>层次化结构</strong>：AS 内可划分多个区域，区域间通过<strong>主干区域</strong>互联，减小每个路由器的拓扑规模</li>
+</ol>
+<p><a id="reference-isp-间路由选择bgp"></a></p>
+<h2 id="isp-间路由选择bgp">ISP 间路由选择：BGP</h2>
+<p>当分组需要跨越多个 AS 时，使用<strong>BGP（Border Gateway Protocol，边界网关协议）</strong>——因特网唯一的 AS 间路由选择协议。</p>
+<p><a id="reference-bgp-的作用"></a></p>
+<h3 id="bgp-的作用">BGP 的作用</h3>
+<ol>
+<li><strong>从邻居 AS 获得前缀的可达性信息</strong>：让整个因特网知道某子网的存在</li>
+<li><strong>确定到该前缀的“最好路由”</strong>：综合策略和可达性信息做决策</li>
+</ol>
+<p><a id="reference-bgp-路由器类型"></a></p>
+<h3 id="bgp-路由器类型">BGP 路由器类型</h3>
+<ul>
+<li><strong>网关路由器（gateway router）</strong>：位于 AS 边缘，直连其他 AS 的路由器</li>
+<li><strong>内部路由器（internal router）</strong>：只连接本 AS 内部节点</li>
+</ul>
+<p><a id="reference-bgp-连接类型"></a></p>
+<h3 id="bgp-连接类型">BGP 连接类型</h3>
+<ul>
+<li><strong>eBGP（外部 BGP）</strong>：跨越两个 AS 的 BGP 连接（网关路由器间）</li>
+<li><strong>iBGP（内部 BGP）</strong>：同一 AS 内路由器间的 BGP 会话（不必须是物理直连）</li>
+</ul>
+<p>BGP 使用 <strong>TCP 179 端口</strong>的半永久连接。</p>
+<p><a id="reference-bgp-路由通告"></a></p>
+<h3 id="bgp-路由通告">BGP 路由通告</h3>
+<p>以前缀 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 的可达性通告为例：</p>
+<ol>
+<li>AS3 的网关路由器 3a 向 AS2 的网关路由器 2c 发 eBGP 报文：<code>AS3 x</code></li>
+<li>AS2 的 2c 通过 iBGP 通告 AS2 内所有路由器（含网关 2a）：<code>AS3 x</code></li>
+<li>AS2 的 2a 向 AS1 的 1c 发 eBGP 报文：<code>AS2 AS3 x</code></li>
+<li>AS1 的 1c 通过 iBGP 通告 AS1 内所有路由器：<code>AS2 AS3 x</code></li>
+</ol>
+<p><a id="reference-bgp-属性"></a></p>
+<h3 id="bgp-属性">BGP 属性</h3>
+<p>路由通告时包含<strong>BGP 属性（BGP attributes）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AS-PATH</strong></td>
+<td>通告已经经过的 AS 列表（如 <code>AS2 AS3</code>），用于防环检测（若看到自己的 ASN 则拒绝）</td>
+</tr>
+<tr>
+<td><strong>NEXT-HOP</strong></td>
+<td>AS-PATH 起始路由器接口的 IP 地址，用于 AS 内路由选择协议与 BGP 协同工作</td>
+</tr>
+</tbody>
+</table>
+<p>完整 BGP 路由表项格式：<code>NEXT-HOP AS-PATH; 目的前缀</code></p>
+<p><a id="reference-热土豆路由选择"></a></p>
+<h3 id="热土豆路由选择">热土豆路由选择</h3>
+<p>当有多条路径可达某前缀时，路由器选择<strong>NEXT-HOP 中 AS 内路由开销最小</strong>的路径（尽快将数据“扔出”本 AS），忽略 AS 间开销。</p>
+<blockquote>
+<p>比喻：像接力赛跑，每个选手尽快把“土豆”（分组）传递给下一个选手，不管下一段有多难跑。</p>
+</blockquote>
+<p><a id="reference-sdn-控制平面"></a></p>
+<h2 id="sdn-控制平面">SDN 控制平面</h2>
+<p><a id="reference-sdn-四大特征"></a></p>
+<h3 id="sdn-四大特征">SDN 四大特征</h3>
+<ol>
+<li><strong>基于流的转发</strong>：基于多个首部字段值（L2/L3/L4）做转发决策，而不只是目的 IP</li>
+<li><strong>数据平面与控制平面分离</strong>：网络交换机只执行转发，控制逻辑在远程服务器上</li>
+<li><strong>网络控制功能位于数据平面交换机外部</strong>：SDN 控制器（网络操作系统）+ 网络控制应用程序</li>
+<li><strong>可编程的网络</strong>：通过控制器的 API 定义转发规则，实现路由、防火墙、负载均衡等</li>
+</ol>
+<p><a id="reference-sdn-控制器三层结构"></a></p>
+<h3 id="sdn-控制器三层结构">SDN 控制器三层结构</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>网络控制应用程序（路由、负载均衡、防火墙...）</span></span>
+<span class="line"><span>         ↑↓ 北向 API</span></span>
+<span class="line"><span>    SDN 控制器（网络操作系统）</span></span>
+<span class="line"><span>    ┌──────────────────────┐</span></span>
+<span class="line"><span>    │ 网络范围状态管理层     │  维护链路/主机/交换机/流表的最新状态</span></span>
+<span class="line"><span>    │ 通信层（南向接口）     │  与受控网络设备通信（如 OpenFlow 协议）</span></span>
+<span class="line"><span>    └──────────────────────┘</span></span>
+<span class="line"><span>         ↕ 南向接口（OpenFlow 等）</span></span>
+<span class="line"><span>    SDN 使能的网络交换机（只做转发）</span></span></code></pre>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>通信层（南向）</strong></td>
+<td>控制器与交换机之间传递流表、状态和事件</td>
+</tr>
+<tr>
+<td><strong>网络范围状态管理层</strong></td>
+<td>维护全网拓扑、链路状态、流表、统计数据</td>
+</tr>
+<tr>
+<td><strong>北向 API</strong></td>
+<td>供网络控制应用程序读取网络状态、安装流表规则</td>
+</tr>
+</tbody>
+</table>
+<p>SDN 控制器逻辑上集中，实际通常<strong>分布式部署</strong>在多台服务器上，保证高可用性。</p>
+<p><a id="reference-icmp因特网控制报文协议"></a></p>
+<h2 id="icmp因特网控制报文协议">ICMP：因特网控制报文协议</h2>
+<p>ICMP 用于主机和路由器之间沟通网络层信息，典型用途是<strong>差错报告</strong>。</p>
+<ul>
+<li>ICMP 报文封装在 <strong>IP 分组</strong>中（上层协议编码为 <strong>1</strong>）</li>
+<li>位于 IP 之上，但又承载在 IP 数据报中（跨越网络层边界的协议）</li>
+</ul>
+<p><strong>常用 ICMP 报文</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>编码</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>回显回答（ping 响应）</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0</td>
+<td>目的网络不可达</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>目的主机不可达</td>
+</tr>
+<tr>
+<td>3</td>
+<td>3</td>
+<td>目的端口不可达</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0</td>
+<td>源抑制（拥塞控制，实践中少用）</td>
+</tr>
+<tr>
+<td>8</td>
+<td>0</td>
+<td>回显请求（ping 请求）</td>
+</tr>
+<tr>
+<td>11</td>
+<td>0</td>
+<td>TTL 过期</td>
+</tr>
+<tr>
+<td>12</td>
+<td>0</td>
+<td>IP 首部损坏</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ping</strong> 工作原理：发送 ICMP 类型 8 编码 0 → 目的主机回复类型 0 编码 0。</p>
+<p><a id="reference-网络管理与-snmp"></a></p>
+<h2 id="网络管理与-snmp">网络管理与 SNMP</h2>
+<p><a id="reference-网络管理框架五要素"></a></p>
+<h3 id="网络管理框架五要素">网络管理框架五要素</h3>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>管理服务器</strong></td>
+<td>运行于网络运营中心（NOC），负责收集、处理、控制网络信息</td>
+</tr>
+<tr>
+<td><strong>被管设备</strong></td>
+<td>网络中受管理的设备（路由器、交换机等）</td>
+</tr>
+<tr>
+<td><strong>被管对象</strong></td>
+<td>设备中的具体硬件/配置，如网卡、路由协议参数</td>
+</tr>
+<tr>
+<td><strong>MIB（管理信息库）</strong></td>
+<td>存储被管对象的信息，由 SMI 语言定义，具有正式语法</td>
+</tr>
+<tr>
+<td><strong>网络管理代理</strong></td>
+<td>运行在被管设备中，响应管理服务器命令</td>
+</tr>
+<tr>
+<td><strong>网络管理协议</strong></td>
+<td>管理服务器与代理之间的通信协议（如 SNMP）</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-snmp简单网络管理协议"></a></p>
+<h3 id="snmp简单网络管理协议">SNMP（简单网络管理协议）</h3>
+<p>应用层协议，用于传递网络管理控制报文。</p>
+<p>两种工作模式：</p>
+<ol>
+<li><strong>请求-响应</strong>：管理服务器发请求，代理执行并回复（查询/设置 MIB 对象值）</li>
+<li><strong>陷阱报文（Trap）</strong>：代理主动向管理服务器报告异常事件</li>
+</ol>
+<p><strong>SNMPv2 PDU 类型</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>PDU 类型</th>
+<th>方向</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GetRequest</td>
+<td>管理者 → 代理</td>
+<td>获取一个或多个 MIB 对象值</td>
+</tr>
+<tr>
+<td>GetNextRequest</td>
+<td>管理者 → 代理</td>
+<td>获取列表中下一个 MIB 对象值</td>
+</tr>
+<tr>
+<td>GetBulkRequest</td>
+<td>管理者 → 代理</td>
+<td>批量获取（如大表中的值）</td>
+</tr>
+<tr>
+<td>InformRequest</td>
+<td>管理者 → 管理者</td>
+<td>向远程管理者通知 MIB 值</td>
+</tr>
+<tr>
+<td>SetRequest</td>
+<td>管理者 → 代理</td>
+<td>设置 MIB 对象值</td>
+</tr>
+<tr>
+<td>Response</td>
+<td>代理 → 管理者</td>
+<td>对请求的响应</td>
+</tr>
+<tr>
+<td>SNMPv2-Trap</td>
+<td>代理 → 管理者</td>
+<td>主动通报异常事件</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>LS 与 DV 各依赖哪些信息？BGP 为什么不能只按最短距离理解？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#概述">概述</a></li><li style="--depth: 0"><a href="#路由选择算法">路由选择算法</a></li><li style="--depth: 1"><a href="#算法分类">算法分类</a></li><li style="--depth: 1"><a href="#链路状态路由选择算法ls--dijkstra">链路状态路由选择算法（LS / Dijkstra）</a></li><li style="--depth: 1"><a href="#距离向量路由选择算法dv--bellman-ford">距离向量路由选择算法（DV / Bellman-Ford）</a></li><li style="--depth: 2"><a href="#链路开销变化与路由选择环路">链路开销变化与路由选择环路</a></li><li style="--depth: 1"><a href="#ls-与-dv-算法比较">LS 与 DV 算法比较</a></li><li style="--depth: 0"><a href="#as-内部路由选择ospf">AS 内部路由选择：OSPF</a></li><li style="--depth: 1"><a href="#自治系统as">自治系统（AS）</a></li><li style="--depth: 1"><a href="#ospf开放最短路优先">OSPF（开放最短路优先）</a></li><li style="--depth: 2"><a href="#ospf-的优点">OSPF 的优点</a></li><li style="--depth: 0"><a href="#isp-间路由选择bgp">ISP 间路由选择：BGP</a></li><li style="--depth: 1"><a href="#bgp-的作用">BGP 的作用</a></li><li style="--depth: 1"><a href="#bgp-路由器类型">BGP 路由器类型</a></li><li style="--depth: 1"><a href="#bgp-连接类型">BGP 连接类型</a></li><li style="--depth: 1"><a href="#bgp-路由通告">BGP 路由通告</a></li><li style="--depth: 1"><a href="#bgp-属性">BGP 属性</a></li><li style="--depth: 1"><a href="#热土豆路由选择">热土豆路由选择</a></li><li style="--depth: 0"><a href="#sdn-控制平面">SDN 控制平面</a></li><li style="--depth: 1"><a href="#sdn-四大特征">SDN 四大特征</a></li><li style="--depth: 1"><a href="#sdn-控制器三层结构">SDN 控制器三层结构</a></li><li style="--depth: 0"><a href="#icmp因特网控制报文协议">ICMP：因特网控制报文协议</a></li><li style="--depth: 0"><a href="#网络管理与-snmp">网络管理与 SNMP</a></li><li style="--depth: 1"><a href="#网络管理框架五要素">网络管理框架五要素</a></li><li style="--depth: 1"><a href="#snmp简单网络管理协议">SNMP（简单网络管理协议）</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

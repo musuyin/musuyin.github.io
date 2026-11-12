@@ -1,0 +1,652 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>文件管理 · Musuyin&#39; Home</title><meta name="description" content="文件系统把逻辑文件映射到物理存储，并用目录与元数据管理名字、位置和权限。顺序、链接及索引分配在随机访问和扩展成本上有不同取舍。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/operating-system/file-management/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="文件管理 · Musuyin' Home"><meta property="og:description" content="文件系统把逻辑文件映射到物理存储，并用目录与元数据管理名字、位置和权限。顺序、链接及索引分配在随机访问和扩展成本上有不同取舍。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/operating-system/file-management/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">文件管理</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-05-14">2025-05-14</time></dd></div><div><dt>字数</dt><dd>8909</dd></div><div><dt>预计阅读</dt><dd>30 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">#操作系统</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>文件管理</h1><time datetime="2025-05-14">2025-05-14</time><p class="tags"><a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">#操作系统</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>文件系统把逻辑文件映射到物理存储，并用目录与元数据管理名字、位置和权限。顺序、链接及索引分配在随机访问和扩展成本上有不同取舍。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="852" height="361" src="/_astro/IMG-20260722152423445.Cl_tEk_l_Z2wWODU.webp"></p>
+<p><a id="reference-文件的属性"></a></p>
+<h3 id="文件的属性">文件的属性</h3>
+<ul>
+<li>文件名：由创建文件的用户决定文件名，主要是为了方便用户找到文件，同一目录下不允许有重名文件。</li>
+<li>标识符：一个系统内的各文件标识符唯一，对用户来说毫无可读性，因此标识符只是操作系统用于区分各个文件的一种内部名称。</li>
+<li>类型：指明文件的类型</li>
+<li>位置：文件存放的路径（让用户使用）、在外存中的地址（操作系统使用，对用户不可见）</li>
+<li>大小：：指明文件大小</li>
+<li>创建时间、修改时间：</li>
+<li>文件所有者信息：</li>
+<li>保护信息：对文件进行保护的访问控制信息</li>
+</ul>
+<p><a id="reference-文件内部的数据组织"></a></p>
+<h3 id="文件内部的数据组织">文件内部的数据组织</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="876" height="300" src="/_astro/IMG-20260722152423473.DBmdJn8V_Z1LwOee.webp"></p>
+<ul>
+<li>
+<p>无结构文件（流式文件）：由二进制或字符流组成</p>
+</li>
+<li>
+<p>有结构文件（记录式文件）：由一组相似的记录组成</p>
+<ul>
+<li>记录：一组相关数据项的集合</li>
+<li>数据线：文件系统中最基本的数据单位</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-文件之间的组织"></a></p>
+<h3 id="文件之间的组织">文件之间的组织</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="905" height="220" src="/_astro/IMG-20260722152423500.nfpnqvDd_l8ry9.webp"></p>
+<ul>
+<li>目录：一种特殊的有结构文件（由记录组成）</li>
+</ul>
+<p><a id="reference-操作系统向上提供的功能"></a></p>
+<h3 id="操作系统向上提供的功能">操作系统向上提供的功能</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="783" height="373" src="/_astro/IMG-20260722152423530.D39g9Pqf_Z1NUebx.webp"></p>
+<ul>
+<li>创建文件：<code>create</code>  系统调用</li>
+<li>读文件，将文件数据读入内存：<code>read</code>  系统调用，将文件数据从外村读入内存</li>
+<li>写文件，将更改过的文件数据写回外存：<code>write</code>  系统调用</li>
+<li>删除文件：<code>delete</code>  系统调用</li>
+<li>打开文件：<code>open</code>  系统调用</li>
+<li>关闭文件：<code>close</code>  系统调用</li>
+</ul>
+<p>更复杂的功能可以由多个功能组合实现</p>
+<p><a id="reference-文件的存储"></a></p>
+<h3 id="文件的存储">文件的存储</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="324" height="636" src="/_astro/IMG-20260722152423560.DdORwCwW_m8Hx7.webp"></p>
+<ul>
+<li>
+<p>操作系统以<strong>块</strong>为单位，为文件分配存储空间，因此即使一个文件大小不足 1KB，也会占用 1KB 的磁盘块。外存中的数据读入内存时间以块为单位</p>
+</li>
+<li>
+<p>类似于内存分为一个个“内存块”，外存会分为一个个“块/磁盘块/物理块”</p>
+<ul>
+<li>每个磁盘块的大小是相等的，每块一般包含 2 的整数幂个地址（如本例中，一块包含 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>10</mn></msup></mrow><annotation encoding="application/x-tex">2^{10}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">10</span></span></span></span></span></span></span></span></span></span></span></span> 个地址，即 1KB）</li>
+<li>文件的逻辑地址也可以分为 <code>(逻辑块号, 块内地址)</code>，操作系统同样需要将逻辑地址转换为外存的物理地址 <code>(物理块号, 块内地址)</code>  的形式</li>
+<li>块内地址的位数取决于磁盘块的大小</li>
+</ul>
+</li>
+<li>
+<p>与内存一样，外存也是由一个个存储单元组成的，每个存储单元可以存储一定量的数据（如 1B）</p>
+<ul>
+<li>每个存储单元对应一个物理地址</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-文件的结构"></a></p>
+<h2 id="文件的结构">文件的结构</h2>
+<ul>
+<li>逻辑结构：在用户看来，文件内部的数据应该是如何组织起来的</li>
+<li>物理结构：在操作系统看来，文件的数据是如何存放在外存中的</li>
+</ul>
+<p><a id="reference-文件的逻辑结构"></a></p>
+<h3 id="文件的逻辑结构">文件的逻辑结构</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="960" height="303" src="/_astro/IMG-20260722152423590.Bb49uD7b_24hQdQ.webp"></p>
+<p>按文件是否有结构分类，可以分为无结构文件、有结构文件两种</p>
+<p><a id="reference-无结构文件"></a></p>
+<h4 id="无结构文件">无结构文件</h4>
+<p>无结构文件：文件内部的数据就是一系列<strong>二进制流或字符流</strong>组成。又称“<strong>流式文件</strong>”。如：txt 文件</p>
+<p><a id="reference-有结构文件"></a></p>
+<h4 id="有结构文件">有结构文件</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1108" height="485" src="/_astro/IMG-20260722152423630.B6nGf3Sb_Z1qJ5t9.webp"></p>
+<p>有结构文件：由一组相似的<strong>记录</strong>组成，又称“<strong>记录式文件</strong>”。每条记录又若干个<strong>数据项</strong>组成。如：数据库表文件。一般来说，每条记录有一个数据项可作为关键字（作为识别不同记录的 ID）</p>
+<p>根据各条记录的长度（占用的存储空间）是否相等，又可分为<strong>定长记录</strong>和<strong>可变长记录</strong>两种</p>
+<p><a id="reference-顺序文件"></a></p>
+<h5 id="顺序文件">顺序文件</h5>
+<p>文件中的记录一个接一个地顺序排列（逻辑上），记录可以是定长的或可变长的。各个记录在物理上可以<strong>顺序存储或链式存储</strong></p>
+<p><img alt="image" loading="lazy" decoding="async" width="748" height="121" src="/_astro/IMG-20260722152423652.DWEBX0Nv_23oVnB.webp"></p>
+<p><a id="reference-随机存取"></a></p>
+<h6 id="随机存取">随机存取</h6>
+<p><img alt="image" loading="lazy" decoding="async" width="915" height="199" src="/_astro/IMG-20260722152423680.W_Y58szY_R2cvn.webp"></p>
+<p>定长记录的顺序文件，若物理上采用顺序存储，则可实现随机存取；若能再保证记录的顺序结构，则可实现快速检索（即根据关键字快速找到对应记录）</p>
+<p><a id="reference-索引文件"></a></p>
+<h5 id="索引文件">索引文件</h5>
+<p><img alt="image" loading="lazy" decoding="async" width="565" height="375" src="/_astro/IMG-20260722152423705.DX8EC9JG_Z2vPp8Q.webp"></p>
+<ul>
+<li>索引表本身是定长记录的顺序文件。因此可以快速找到第 i 个记录对应的索引项</li>
+<li>可将<strong>关键字作为索引号内容</strong>，若按关键字顺序排列，则还可以支持按照关键字折半查找</li>
+<li>每当要增加/删除一个记录时，需要对索引表进行修改。由于索引文件有很快的检索速度，因此主要用于对信息处理的及时性要求比较高的场合</li>
+</ul>
+<p><a id="reference-索引顺序文件"></a></p>
+<h5 id="索引顺序文件">索引顺序文件</h5>
+<ul>
+<li>索引顺序文件是索引文件和顺序文件思想的结合</li>
+<li>索引顺序文件中，同样会为文件建立一张索引表，但不同的是：并不是每个记录对应一个索引表项，而是<strong>一组记录对应一个索引表项</strong></li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="569" height="412" src="/_astro/IMG-20260722152423737._-2Zm8n2_1Gf7Dt.webp"></p>
+<p>虽然优化了空间（对于索引文件）和时间（顺序文件），但是查找效率仍然较低</p>
+<p><a id="reference-多级索引顺序文件"></a></p>
+<h6 id="多级索引顺序文件">多级索引顺序文件</h6>
+<p>了进一步提高检索效率，可以为顺序文件建立<strong>多级索引表</strong></p>
+<p><img alt="image" loading="lazy" decoding="async" width="798" height="431" src="/_astro/IMG-20260722152423759.BccnP2fI_xFhJL.webp"></p>
+<p><a id="reference-文件的物理结构"></a></p>
+<h3 id="文件的物理结构">文件的物理结构</h3>
+<p>对非空闲磁盘块的管理</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1072" height="394" src="/_astro/IMG-20260722152423790.DF6JeDU8_ZUkDW8.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="1095" height="446" src="/_astro/IMG-20260722152423815.urEK9OG6_ZdGC3H.webp"></p>
+<p><a id="reference-连续分配"></a></p>
+<h4 id="连续分配">连续分配</h4>
+<ul>
+<li>
+<p>连续分配方式要求每个文件在磁盘上占有一组<strong>连续的块</strong></p>
+</li>
+<li>
+<p>用户给出要访问的逻辑块号，操作系统找到该文件对应的目录项（FCB）</p>
+</li>
+<li>
+<p>可以直接算出逻辑块号对应的物理块号，因此连续分配支持顺序访问和直接访问（即随机访问）</p>
+</li>
+<li>
+<p>读取某个磁盘块时，需要移动磁头。访问的两个磁盘块相隔越远，移动磁头所需时间就越长</p>
+<ul>
+<li>连续分配的文件在顺序读/写时速度最快</li>
+</ul>
+</li>
+<li>
+<p>物理上采用连续分配的文件不方便拓展</p>
+</li>
+<li>
+<p>物理上采用连续分配，存储空间利用率低，会产生难以利用的磁盘碎片</p>
+<ul>
+<li>可以用紧凑来处理碎片，但是需要耗费很大的时间代价</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-链接分配"></a></p>
+<h4 id="链接分配">链接分配</h4>
+<p>链接分配采取离散分配的方式，可以为文件分配离散的磁盘块。分为隐式链接和显式链接两种</p>
+<p>默认是指隐式链接</p>
+<p><a id="reference-隐式链接"></a></p>
+<h5 id="隐式链接">隐式链接</h5>
+<ul>
+<li>文件目录包括文件<strong>第一块</strong>的指针和<strong>最后一块</strong>的指针。除了文件的最后一个磁盘块之外，每个磁盘块中都会保存指向下一个盘块的指针，这些指针对用户是透明的</li>
+<li>采用链式分配（隐式链接）方式的文件，<strong>只支持顺序访问，不支持随机访问</strong>，查找效率低。另外，指向下一个盘块的指针也需要耗费少量的存储空间</li>
+<li>采用隐式链接的链接分配方式，很方便文件拓展。所有的空闲磁盘块都可以被利用，不会有碎片问题，外存利用率高</li>
+</ul>
+<p><a id="reference-显式链接"></a></p>
+<h5 id="显式链接">显式链接</h5>
+<p><img alt="image" loading="lazy" decoding="async" width="335" height="558" src="/_astro/IMG-20260722152423862.COAykiTg_1b2DV0.webp"></p>
+<ul>
+<li>把用于链接文件各物理块的指针<strong>显式地存放在一张表</strong>中。即<strong>文件分配表（FAT</strong>，File Allocation Table）。目录中只需记录文件的<strong>起始块号</strong></li>
+<li>一个磁盘仅设置一张 FAT。开机时，将 FAT 读入内存，并<strong>常驻内存</strong></li>
+<li>FAT 的各个表项在物理上连续存储，且每一个表项长度相同，因此“物理块号”字段可以是隐含的</li>
+<li>逻辑块号转换成物理块号的过程不需要读磁盘操作</li>
+<li>采用链式分配（显式链接）方式的文件，<strong>支持顺序访问，也支持随机访问</strong>（想访问 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 号逻辑块时，并不需要依次访问之前的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mi>i</mi><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,i-1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span> 号逻辑块），由于<strong>块号转换的过程不需要访问磁盘</strong>，因此相比于隐式链接来说，访问速度快很多</li>
+<li>显式链接也不会产生外部碎片，也可以很方便地对文件进行拓展</li>
+<li>文件分配表的需要占用一定的存储空间</li>
+</ul>
+<p><a id="reference-索引分配"></a></p>
+<h4 id="索引分配">索引分配</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="650" height="484" src="/_astro/IMG-20260722152423893.g6LrS2Ip_Z2iPKJU.webp"></p>
+<ul>
+<li>
+<p>索引分配允许文件离散地分配在各个磁盘块中，系统会为<strong>每个文件建立一张索引表</strong>，索引表中记录了文件的各个逻辑块对应的物理块</p>
+<ul>
+<li>索引表存放的磁盘块称为<strong>索引块</strong></li>
+<li>文件数据存放的磁盘块称为<strong>数据块</strong></li>
+</ul>
+</li>
+<li>
+<p>索引分配方式可以支持随机访问</p>
+</li>
+<li>
+<p>文件拓展也很容易实现（只需要给文件分配一个空闲块，并增加一个索引表项即可）</p>
+</li>
+<li>
+<p>但是索引表需要占用一定的存储空间</p>
+</li>
+</ul>
+<p>文件过大，索引表太大，一个索引块装不下：</p>
+<p><a id="reference-链接方案"></a></p>
+<h5 id="链接方案">链接方案</h5>
+<p>链接方案：将多个索引块链接起来存放，每个索引表的最后一个表项指向下一个索引块</p>
+<p><img alt="image" loading="lazy" decoding="async" width="295" height="429" src="/_astro/IMG-20260722152423932.DzmS8fyM_zHVNl.webp"></p>
+<p>若想要访问文件的最后一个逻辑块，就必须找到最后一个索引块，访问效率低</p>
+<p><a id="reference-多层索引方式"></a></p>
+<h5 id="多层索引方式">多层索引方式</h5>
+<p>多层索引：建立多层索引（原理类似于多级页表）。使第一层索引块指向第二层的索引块。还可根据文件大小的要求再建立第三层、第四层索引块</p>
+<ul>
+<li>若采用多层索引，则各层索引表大小不能超过一个磁盘块</li>
+<li>采用 K 层索引结构，且顶级索引表未调入内存，则访问一个数据块只需要 K + 1 次读磁盘操作</li>
+</ul>
+<p><a id="reference-混合索引方式unix-方案"></a></p>
+<h5 id="混合索引方式unix-方案">混合索引方式（Unix 方案）</h5>
+<p>混合索引（Unix）：多种索引分配方式的结合。例如，一个文件的顶级索引表中，既包含直接地址索引（直接指向数据块，默认是 10 个，看具体实现），又包含一级间接索引（指向单层索引表）、还包含两级间接索引（指向两层索引表）</p>
+<p><img alt="image" loading="lazy" decoding="async" width="830" height="444" src="/_astro/IMG-20260722152423956.B4M0PKQy_2bVAL8.webp"></p>
+<p><a id="reference-文件目录"></a></p>
+<h2 id="文件目录">文件目录</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1161" height="539" src="/_astro/IMG-20260722152423980.DEQgGEtk_1ALatx.webp"></p>
+<p><a id="reference-文件控制块"></a></p>
+<h3 id="文件控制块">文件控制块</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="728" height="361" src="/_astro/IMG-20260722152424006.C-hgNg2C_1W98X2.webp"></p>
+<ul>
+<li>
+<p>目录本身就是一种<strong>有结构文件</strong>，由一条条记录组成。每条记录对应一个在该放在该目录下的文件</p>
+</li>
+<li>
+<p>目录文件中的一条记录就是一个<strong>文件控制块</strong>（FCB）</p>
+<ul>
+<li>
+<p>FCB 的有序集合称为“文件目录”，一个 FCB 就是一个文件目录项</p>
+</li>
+<li>
+<p>FCB 中包含了文件的基本信息（文件名、物理地址、逻辑结构、物理结构等），存取控制信息（是否可读/可写、禁止访问的用户名单等），使用信息（如文件的建立时间、修改时间等）</p>
+<ul>
+<li>最重要，最基本的还是文件名、文件存放的物理地址</li>
+<li>FCB 实现了<strong>文件名和文件之间的映射</strong>。使用户（用户程序）可以实现“按名存取”</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-目录操作"></a></p>
+<h4 id="目录操作">目录操作</h4>
+<ul>
+<li>搜索：当用户要使用一个文件时，系统要根据文件名搜索目录，找到该文件对应的目录项</li>
+<li>创建文件：创建一个新文件时，需要在其所属的目录中增加一个目录项</li>
+<li>删除文件：当删除一个文件时，需要在目录中删除相应的目录项</li>
+<li>显示目录：用户可以请求显示目录的内容，如显示该目录中的所有文件及相应属性</li>
+<li>修改目录：某些文件属性保存在目录中，因此这些属性变化时需要修改相应的目录项（如：文件重命名）</li>
+</ul>
+<p><a id="reference-目录结构"></a></p>
+<h3 id="目录结构">目录结构</h3>
+<p><a id="reference-单级目录结构"></a></p>
+<h4 id="单级目录结构">单级目录结构</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="478" height="385" src="/_astro/IMG-20260722152424032.DmxnzAJU_2dkTpl.webp"></p>
+<ul>
+<li>早期操作系统并不支持多级目录，整个系统中只建立一张目录表，每个文件占一个目录项</li>
+<li>单级目录实现了“按名存取”，但是<strong>不允许文件重名</strong></li>
+</ul>
+<p><a id="reference-两级目录结构"></a></p>
+<h4 id="两级目录结构">两级目录结构</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1138" height="467" src="/_astro/IMG-20260722152424057.BT9ao4Cp_ZDK6PW.webp"></p>
+<ul>
+<li>早期的多用户操作系统，采用两级目录结构。分为<strong>主文件目录</strong>（MFD，Master File Directory）和<strong>用户文件目录</strong>（UFD，User Flie Directory）</li>
+<li>允许不同用户的文件重名。文件名虽然相同，但是对应的其实是不同的文件</li>
+<li>主文件目录记录<strong>用户名及相应用户文件目录</strong>的存放位置</li>
+<li>用户文件目录由该用户的文件 FCB 组成</li>
+<li>两级目录结构允许不同用户的文件重名，也可以在目录上实现实现访问限制（检查此时登录的用户名是否匹配）。但是两级目录结构依然缺乏灵活性，用户不能对自己的文件进行分类</li>
+</ul>
+<p><a id="reference-多级目录结构树形"></a></p>
+<h4 id="多级目录结构树形">多级目录结构（树形）</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1004" height="317" src="/_astro/IMG-20260722152424082.DwitnZUI_6Rcj.webp"></p>
+<ul>
+<li>
+<p>用户（或用户进程）要访问某个文件时要用<strong>文件路径名</strong>标识文件，文件路径名是个字符串。各级目录之间用“/”隔开。从根目录出发的路径称为<strong>绝对路径</strong>。</p>
+</li>
+<li>
+<p>系统根据绝对路径一层一层地找到下一级目录。刚开始从外存读入根目录的目录表；找到目标目录的存放位置后，从外存读入对应的目录表；再寻找下一级的目标目录</p>
+</li>
+<li>
+<p>每次都从根目录开始查找，是很低效的。因此可以设置一个“当前目录”</p>
+<ul>
+<li>当用户想要访问某个文件时，可以使用从当前目录出发的“相对路径”</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-无环图目录结构"></a></p>
+<h4 id="无环图目录结构">无环图目录结构</h4>
+<p>树形目录结构可以很方便地对文件进行分类，层次结构清晰，也能够更有效地进行文件的管理和保护。但是，树形结构<strong>不便于实现文件的共享</strong>。为此，提出了<strong>无环图目录结构</strong></p>
+<p><img alt="image" loading="lazy" decoding="async" width="774" height="361" src="/_astro/IMG-20260722152424112.R3lx6y3q_Z1b9o7c.webp"></p>
+<ul>
+<li>
+<p>在树形目录结构的基础上，增加一些指向同一节点的有向边，使整个目录成为一个有向无环图。可以更方便地实现多个用户间的文件共享</p>
+</li>
+<li>
+<p>可以用<strong>不同的文件名指向同一个文件</strong>，甚至可以指向同一个目录（共享同一目录下的所有内容）</p>
+</li>
+<li>
+<p>需要为每个共享结点设置一个<strong>共享计数器</strong>，用于记录此时有多少个地方在共享该结点</p>
+<ul>
+<li>用户提出删除结点的请求时，只是删除该用户的 FCB、并使共享计数器减 1，并不会直接删除共享结点</li>
+<li>只有共享计数器减为 0 时，才删除结点</li>
+</ul>
+</li>
+<li>
+<p>注意：共享文件不同于复制文件</p>
+<ul>
+<li>在共享文件中，由于各用户指向的是同一个文件，因此只要其中一个用户修改了文件数据，那么所有用户都可以看到文件数据的变化</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-索引结点"></a></p>
+<h3 id="索引结点">索引结点</h3>
+<p>在查找各级目录的过程中只需要用到<strong>文件名</strong>这个信息，只有文件名匹配时，才需要读出文件的其他信息。因此可以考虑让目录表“瘦身”来提升效率</p>
+<ul>
+<li>
+<p>当找到文件名对应的目录项时，才需要将<strong>索引结点调入内存</strong></p>
+<ul>
+<li>索引结点中记录了文件的各种信息，包括文件在外存中的存放位置，根据<strong>存放位置</strong>即可找到文件</li>
+</ul>
+</li>
+<li>
+<p>存放在外存中的索引结点称为<strong>磁盘索引结点</strong>，当索引结点放入内存后称为<strong>内存索引结点</strong></p>
+<ul>
+<li>相比之下内存索引结点中需要增加一些信息，比如：文件是否被修改、此时有几个进程正在访问该文件等</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-文件的基本操作"></a></p>
+<h2 id="文件的基本操作">文件的基本操作</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1349" height="584" src="/_astro/IMG-20260722152424163.8vgBwDLs_1v73Tq.webp"></p>
+<p><a id="reference-创建文件"></a></p>
+<h3 id="创建文件">创建文件</h3>
+<p>进行 Create 系统调用时，需要提供的几个主要参数：</p>
+<ol>
+<li>所需的外存空间大小</li>
+<li>文件存放路径</li>
+<li>文件名</li>
+</ol>
+<p>操作系统在处理 Create 系统调用时，主要做了两件事：</p>
+<ol>
+<li>
+<p>在外存中找到文件所需的空间（空闲链表法、位示图、成组链接法等管理策略，找到空闲空间）</p>
+</li>
+<li>
+<p>根据文件存放路径的信息找到该目录对应的目录文件，在目录中创建该文件对应的目录项。目录项中包含了文件名、文件在外存中的存放位置等信息</p>
+</li>
+</ol>
+<p><a id="reference-删除文件"></a></p>
+<h3 id="删除文件">删除文件</h3>
+<p>进行 Delete 系统调用时，需要提供的几个主要参数：</p>
+<ol>
+<li>文件存放路径</li>
+<li>文件名</li>
+</ol>
+<p>操作系统在处理 Delete 系统调用时，主要做了几件事：</p>
+<ol>
+<li>
+<p>根据文件存放路径找到相应的目录文件，从目录中找到文件名对应的目录项。</p>
+</li>
+<li>
+<p>根据该目录项记录的文件在外存的存放位置、文件大小等信息，回收文件占用的磁盘块。（回收磁盘块时，根据空闲表法、空闲链表法、位图法等管理策略的不同，需要做不同的处理）</p>
+</li>
+<li>
+<p>从目录表中删除文件对应的目录项</p>
+</li>
+</ol>
+<p><a id="reference-打开文件"></a></p>
+<h3 id="打开文件">打开文件</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="736" height="568" src="/_astro/IMG-20260722152424197.CTybH6y7_Z1nusOl.webp"></p>
+<p>在很多操作系统中，在对文件进行操作之前，要求用户先使用 open 系统调用“打开文件”，需要提供的几个主要参数：</p>
+<ol>
+<li>文件存放路径</li>
+<li>文件名</li>
+<li>要对文件的操作类型（如：r 只读；rw 读写等）</li>
+</ol>
+<p>操作系统在处理 open 系统调用时，主要做了几件事：</p>
+<ol>
+<li>
+<p>根据文件存放路径找到相应的目录文件，从目录中找到文件名对应的的目录项，并检查该用户是否有指定的操作权限。</p>
+</li>
+<li>
+<p>将目录项复制到内存中的“打开文件表”中。并将对应表目的编号（文件描述符）返回给用户。之后用户使用打开文件表的编号来指明要操作的文件。</p>
+</li>
+</ol>
+<p><img alt="image" loading="lazy" decoding="async" width="1096" height="390" src="/_astro/IMG-20260722152424230.D6C-7FL2_Z20b5Vj.webp"></p>
+<p><a id="reference-关闭文件"></a></p>
+<h3 id="关闭文件">关闭文件</h3>
+<p>进程使用完文件后，要“关闭文件”</p>
+<p>操作系统在处理 Close 系统调用时，主要做了几件事：</p>
+<ol>
+<li>将进程的打开<strong>文件表相应表项</strong>删除</li>
+<li>回收分配给该文件的<strong>内存空间</strong>等资源</li>
+<li><strong>系统打开文件表</strong>的<strong>打开计数器</strong> count 减 1，若 count =0，则删除对应表项</li>
+</ol>
+<p><a id="reference-读文件"></a></p>
+<h3 id="读文件">读文件</h3>
+<p>进程使用 read 系统调用完成读操作。</p>
+<ol>
+<li>指明是哪个文件（在支持“打开文件”操作的系统中，只需要提供文件在<strong>打开文件表中的索引号</strong>即可）</li>
+<li>指明要读入多少数据（如：读入 1KB）</li>
+<li>指明读入的数据要放在内存中的什么位置</li>
+</ol>
+<p>操作系统在处理 read 系统调用时，会从<strong>读指针指向的外存</strong>中，将用户指定大小的数据读入用户指定的内存区域中</p>
+<p><a id="reference-写文件"></a></p>
+<h3 id="写文件">写文件</h3>
+<p>进程使用 write 系统调用完成写操作</p>
+<ol>
+<li>指明是哪个文件（在支持“打开文件”操作的系统中，只需要提供文件在<strong>打开文件表中的索引号</strong>即可）</li>
+<li>指明要写出多少数据（如：写出 1KB）</li>
+<li>指明写回外存的数据放在内存中的什么位置</li>
+</ol>
+<p>操作系统在处理 write 系统调用时，会从用户指定的内存区域中，将指定大小的数据写回写指针指向的外存</p>
+<p><a id="reference-文件保护"></a></p>
+<h2 id="文件保护">文件保护</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1231" height="378" src="/_astro/IMG-20260722152424260.C5EMnrSf_1eoXXK.webp"></p>
+<p><a id="reference-口令保护"></a></p>
+<h3 id="口令保护">口令保护</h3>
+<p>令一般存放在文件对应的 FCB 或索引结点中。用户访问文件前需要先输入“口令”，操作系统会将用户提供的口令与 FCB 中存储的口令进行对比，如果正确，则允许该用户访问文件</p>
+<ul>
+<li>优点：保存口令的空间开销不多，验证口令的时间开销也很小</li>
+<li>缺点：正确的“口令”存放在系统内部，不够安全</li>
+</ul>
+<p><a id="reference-加密保护"></a></p>
+<h3 id="加密保护">加密保护</h3>
+<p>使用某个“密码”对文件进行加密，在访问文件时需要提供正确的“密码”才能对文件进行正确的解密</p>
+<ul>
+<li>优点：保密性强，不需要在系统中存储“密码”</li>
+<li>缺点：编码/译码，或者说加密/解密要花费一定时间</li>
+</ul>
+<p><a id="reference-访问控制"></a></p>
+<h3 id="访问控制">访问控制</h3>
+<p>在每个文件的 FCB（或索引结点）中增加一个<strong>访问控制列表</strong>（Access-Control List, ACL），该表中记录了各个用户可以对该文件执行哪些操作</p>
+<p>精简的访问列表：以“组”为单位，标记各“组”用户可以对文件执行哪些操作</p>
+<ul>
+<li>如：分为系统管理员、文件主、文件主的伙伴、其他用户几个分组。</li>
+<li>当某用户想要访问文件时，系统会检查该用户所属的分组是否有相应的访问权限</li>
+</ul>
+<p>如果对某个目录进行了访问权限的控制，那也要对目录下的所有文件进行相同的访问权限控制</p>
+<p><a id="reference-文件共享"></a></p>
+<h2 id="文件共享">文件共享</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1247" height="531" src="/_astro/IMG-20260722152424307.DdFMqMVp_Z1eDEUX.webp"></p>
+<p>多个用户共享同一个文件，意味着系统中只有“一份”文件数据。并且只要某个用户修改了该文件的数据，其他用户也可以看到文件数据的变化</p>
+<p><a id="reference-基于索引节点的共享方式硬链接"></a></p>
+<h3 id="基于索引节点的共享方式硬链接">基于索引节点的共享方式：硬链接</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1018" height="289" src="/_astro/IMG-20260722152424361.DPNnGlVM_Z1YVi6q.webp"></p>
+<p>索引结点中设置一个链接计数变量 count，用于表示链接到本索引结点上的用户目录项数</p>
+<ul>
+<li>若某个用户决定“删除”该文件，则只是要把用户目录中与该文件对应的目录项删除，且索引结点的 count 值减 1。</li>
+<li>若 count&gt;0，说明还有别的用户要使用该文件，暂时不能把文件数据删除，否则会导致指针悬空。</li>
+<li>当 count = 0 时系统负责删除文件</li>
+</ul>
+<p><a id="reference-基于符号链的共享方式软链接"></a></p>
+<h3 id="基于符号链的共享方式软链接">基于符号链的共享方式：软链接</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1070" height="451" src="/_astro/IMG-20260722152424389.BVeqQRyp_QIq8G.webp"></p>
+<p>操作系统判断文件“ccc”属于 Link 类型文件，于是会根据其中记录的路径层层查找目录。即使删除了指向的文件，也不影响软链接文件的存在，只是不能再打开（相当于指针仍在，但数据不在）</p>
+<p><a id="reference-文件系统"></a></p>
+<h2 id="文件系统">文件系统</h2>
+<p><a id="reference-层次结构"></a></p>
+<h3 id="层次结构">层次结构</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1180" height="542" src="/_astro/IMG-20260722152424422.DJU1qQIu_ZIe1Fg.webp"></p>
+<ol>
+<li>
+<p>用户需要<strong>通过操作系统提供的接口</strong>发出上述请求——用户接口</p>
+</li>
+<li>
+<p>由于用户提供的是文件的存放路径，因此需要操作系统一层一层地<strong>查找目录</strong>，找到对应的目录项——文件目录系统</p>
+</li>
+<li>
+<p>不同的用户对文件有不同的<strong>操作权限</strong>，因此为了保证安全，需要检查用户是否有访问权限——存取控制模块（存取控制验证层）</p>
+</li>
+<li>
+<p>验证了用户的访问权限之后，需要把用户提供的“记录号”转变为对应的<strong>逻辑地址</strong>——逻辑文件系统与文件信息缓冲区</p>
+</li>
+<li>
+<p>知道了目标记录对应的逻辑地址后，还需要转换成实际的<strong>物理地址</strong>——物理文件系统</p>
+</li>
+<li>
+<p>要删除这条记录，必定要对<strong>磁盘设备发出请求</strong>——设备管理程序模块</p>
+</li>
+<li>
+<p>删除这些记录后，会有一些盘块空闲，因此要将这些<strong>空闲盘块回收</strong>——辅助分配模块</p>
+</li>
+</ol>
+<p><a id="reference-文件系统布局"></a></p>
+<h3 id="文件系统布局">文件系统布局</h3>
+<p><a id="reference-在外存中的结构"></a></p>
+<h4 id="在外存中的结构">在外存中的结构</h4>
+<p>物理格式化，即低级格式化——划分扇区，检测坏扇区，并用备用扇区替换坏扇区</p>
+<p><img alt="image" loading="lazy" decoding="async" width="4232" height="281" src="/_astro/IMG-20260722152424545.Db9kXLTT_Z24cDL8.webp"></p>
+<p>磁盘分区（分卷 Volume）后，对各分区进行逻辑格式化，完成文件系统初始化注：逻辑格式化后，灰色部分就有实际数据了，白色部分还没有数据</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1368" height="338" src="/_astro/IMG-20260722152424577.Bxw-I7Xq_ZbMYiJ.webp"></p>
+<ul>
+<li>i-node 区：存储索引结点</li>
+</ul>
+<p><a id="reference-在内存中的结构"></a></p>
+<h4 id="在内存中的结构">在内存中的结构</h4>
+<p>近期访问过的目录文件会缓存在内存中，不用每次都从磁盘读入，这样可以加快目录检索速度</p>
+<p><img alt="image" loading="lazy" decoding="async" width="988" height="480" src="/_astro/IMG-20260722152424608.82FgzEvm_Z1xe6Xg.webp"></p>
+<p><a id="reference-文件存储空间管理"></a></p>
+<h3 id="文件存储空间管理">文件存储空间管理</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="830" height="135" src="/_astro/IMG-20260722152424756.CxDk_Yq__1HKIlF.webp"></p>
+<ul>
+<li>对非空闲磁盘块管理——文件的物理结构</li>
+<li>对空闲磁盘块的管理——文件存储空间管理</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1112" height="529" src="/_astro/IMG-20260722152424779.D-ROSWpN_1m0kKs.webp"></p>
+<p><a id="reference-存储空间的划分与初始化"></a></p>
+<h4 id="存储空间的划分与初始化">存储空间的划分与初始化</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1165" height="496" src="/_astro/IMG-20260722152424805.Di94EkE6_SsnEX.webp"></p>
+<p><a id="reference-管理方法"></a></p>
+<h4 id="管理方法">管理方法</h4>
+<p><a id="reference-空闲表法"></a></p>
+<h5 id="空闲表法">空闲表法</h5>
+<p><img alt="image" loading="lazy" decoding="async" width="461" height="275" src="/_astro/IMG-20260722152424852.ZCxUT7br_2aTqDq.webp"></p>
+<ul>
+<li>
+<p>适用于<strong>连续分配方式</strong></p>
+</li>
+<li>
+<p>分配：与内存管理中的动态分区分配很类似，为一个文件分配连续的存储空间。同样可采用<strong>首次适应、最佳适应、最坏适应</strong>等算法来决定要为文件分配哪个区间</p>
+</li>
+<li>
+<p>回收</p>
+<ol>
+<li>回收区的前后都没有相邻空闲区</li>
+<li>回收区的前后都是空闲区</li>
+<li>回收区前面是空闲区</li>
+<li>回收区后面是空闲区</li>
+</ol>
+<p>总之，回收时需要注意表项的合并问题</p>
+</li>
+</ul>
+<p><a id="reference-空闲链表法"></a></p>
+<h5 id="空闲链表法">空闲链表法</h5>
+<p><img alt="image" loading="lazy" decoding="async" width="943" height="149" src="/_astro/IMG-20260722152424966.DBJ_Fwmg_2iO18Q.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="1064" height="439" src="/_astro/IMG-20260722152425010.CzO_PY_7_RfhiL.webp"></p>
+<p>空闲盘块链：</p>
+<ul>
+<li>操作系统保存着链头、链尾指针</li>
+<li>分配：若某文件申请 K 个盘块，则从链头开始依次摘下 K 个盘块分配，并<strong>修改空闲链的链头指针</strong></li>
+<li>回收：回收的盘块<strong>依次挂到链尾</strong>，并<strong>修改空闲链的链尾指针</strong></li>
+<li>适用于离散分配的物理结构。为文件分配多个盘块时可能要重复多次操作</li>
+</ul>
+<p>空闲盘区链：</p>
+<ul>
+<li>作系统保存着链头、链尾指针</li>
+<li>分配：若某文件申请 K 个盘块，则可以采用首次适应、最佳适应等算法，从链头开始检索，按照算法规则找到<strong>一个大小符合要求的空闲盘区</strong>，分配给文件。若没有合适的连续空闲块，也可以<strong>将不同盘区的盘块同时分配给一个文件</strong>，注意分配后可能要修改相应的链指针、盘区大小等数据</li>
+<li>回收：若回收区和某个空闲盘区相邻，则需要将回收区<strong>合并</strong>到空闲盘区中。若回收区没有和任何空闲区相邻，将回收区作为单独的一个空闲盘区挂到链尾</li>
+<li>离散分配、连续分配都适用。为一个文件分配多个盘块时效率更高</li>
+</ul>
+<p><a id="reference-位示图法"></a></p>
+<h5 id="位示图法">位示图法</h5>
+<p>位示图：每个二进制位对应一个盘块</p>
+<p><img alt="image" loading="lazy" decoding="async" width="788" height="240" src="/_astro/IMG-20260722152425048.rgM1kI0R_ZwMsvp.webp"></p>
+<ul>
+<li>
+<p>字中的每一位对应一个盘块。因此可以用 <code>(字号, 位号)</code>  对应一个盘块号</p>
+</li>
+<li>
+<p><code>(字号, 位号)</code>=<code>(i, j)</code> 的二进制位对应的盘块号 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>=</mo><mi>n</mi><mo>∗</mo><mi>i</mi><mo>+</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">b = n*i + j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4653em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7429em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span></span></span></span></p>
+</li>
+<li>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi></mrow><annotation encoding="application/x-tex">b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span></span></span></span> 号盘块对应的字号 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>=</mo><mi>b</mi><mi mathvariant="normal">/</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">i = b/n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">b</span><span class="mord">/</span><span class="mord mathnormal">n</span></span></span></span>，位号 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>=</mo><mi>b</mi><mi mathvariant="normal">%</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">j = b%n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord mathnormal">b</span><span class="mord">%</span><span class="mord mathnormal">n</span></span></span></span></p>
+</li>
+<li>
+<p>分配：若文件需要 K 个块</p>
+<ol>
+<li>顺序扫描位示图，找到 K 个相邻或不相邻的“0”</li>
+<li>根据字号、位号算出对应的盘块号，将相应盘块分配给文件</li>
+<li>将相应位设置为“1”</li>
+</ol>
+</li>
+<li>
+<p>回收</p>
+<ol>
+<li>根据回收的盘块号计算出对应的字号、位号</li>
+<li>将相应二进制位设为“0”</li>
+</ol>
+</li>
+</ul>
+<p><a id="reference-成组链接法"></a></p>
+<h5 id="成组链接法">成组链接法</h5>
+<p>空闲表法、空闲链表法不适用于大型文件系统，因为空闲表或空闲链表可能过大。UNIX 系统中采用了<strong>成组链接法</strong>对磁盘空闲块进行管理</p>
+<p>文件卷的目录区中专门用一个磁盘块作为“<strong>超级块</strong>”，当系统启动时需要将超级块读入内存。并且要保证内存与外存中的“超级块”数据一致</p>
+<p><img alt="image" loading="lazy" decoding="async" width="520" height="356" src="/_astro/IMG-20260722152425083.TLTHfm_u_1PM6bm.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="1160" height="551" src="/_astro/IMG-20260722152425108.CWBg7AuQ_Ze9Xfo.webp"></p>
+<ul>
+<li>
+<p>分配</p>
+<ol>
+<li>
+<p>检查第一个分组的块数是否足够</p>
+</li>
+<li>
+<p>若足够，且小于下一组空闲盘块数，则直接分配</p>
+</li>
+<li>
+<p>若足够，但等于下一组空闲盘块数，则需要先将下一组的空闲盘块信息复制到超级块中，再进行分配</p>
+<ol>
+<li>相当于原本就将空闲的块用于记录下一组空闲盘块数，现在要将它分配出去，就要先复制一份</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>
+<p>回收</p>
+<ul>
+<li>分组未满：直接插入新的空闲块，超级块下一组空闲盘块数 +1</li>
+<li>分组已满：需要将超级块中的数据复制到新回收的块中，并修改超级块的内容，让新回收的块成为第一个分组。</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-虚拟文件系统"></a></p>
+<h3 id="虚拟文件系统">虚拟文件系统</h3>
+<p><a id="reference-特点"></a></p>
+<h4 id="特点">特点</h4>
+<p>普通文件系统</p>
+<p><img alt="image" loading="lazy" decoding="async" width="750" height="533" src="/_astro/IMG-20260722152425139.BBv2MOYx_Z1X8anc.webp"></p>
+<p>缺点：对于不同文件系统，对文件的操作指令不同</p>
+<p>虚拟文件系统（就是一个 interface）</p>
+<p><img alt="image" loading="lazy" decoding="async" width="735" height="537" src="/_astro/IMG-20260722152425203.ChOOsw6y_31Vn0.webp"></p>
+<ul>
+<li>向上层用户进程提供<strong>统一标准</strong>的系统调用接口，屏蔽底层具体文件系统的实现差异</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="761" height="538" src="/_astro/IMG-20260722152425225.k8pQAhX-_2i8oz3.webp"></p>
+<ul>
+<li>VFS 要求下层的文件系统<strong>必须实现某些规定的函数功能</strong>，如：open/read/write。一个新的文件系统想要在某操作系统上被使用，就必须满足该操作系统 VFS 的要求</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1000" height="497" src="/_astro/IMG-20260722152425267.DXuTL0xf_KSdkA.webp"></p>
+<p>不同的文件系统，表示文件数据结构各不相同。打开文件后，其在内存中的表示就不同</p>
+<ul>
+<li>每打开一个文件，VFS 就在主存中新建一个 vnode，用统一的数据结构表示文件，无论该文件存储在哪个文件系统。</li>
+<li>vnode 只存在于主存中，而 inode 既会被调入主存，也会在外存中存储</li>
+</ul>
+<p><a id="reference-文件系统挂载"></a></p>
+<h4 id="文件系统挂载">文件系统挂载</h4>
+<p>文件系统挂载（mounting），即文件系统安装/装载——如何将一个文件系统挂载到操作系统中</p>
+<ol>
+<li>在 VFS 中注册新挂载的文件系统。内存中的挂载表（mount table）包含每个文件系统的相关信息，包括文件系统类型、容量大小等</li>
+<li>新挂载的文件系统，要向 VFS 提供一个函数地址列表</li>
+<li>将新文件系统加到挂载点（mount point），也就是将新文件系统挂载在某个父目录下</li>
+</ol>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>文件逻辑结构与物理分配方式有何区别？目录项与 inode 分别保留什么信息？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 1"><a href="#文件的属性">文件的属性</a></li><li style="--depth: 1"><a href="#文件内部的数据组织">文件内部的数据组织</a></li><li style="--depth: 1"><a href="#文件之间的组织">文件之间的组织</a></li><li style="--depth: 1"><a href="#操作系统向上提供的功能">操作系统向上提供的功能</a></li><li style="--depth: 1"><a href="#文件的存储">文件的存储</a></li><li style="--depth: 0"><a href="#文件的结构">文件的结构</a></li><li style="--depth: 1"><a href="#文件的逻辑结构">文件的逻辑结构</a></li><li style="--depth: 2"><a href="#无结构文件">无结构文件</a></li><li style="--depth: 2"><a href="#有结构文件">有结构文件</a></li><li style="--depth: 3"><a href="#顺序文件">顺序文件</a></li><li style="--depth: 4"><a href="#随机存取">随机存取</a></li><li style="--depth: 3"><a href="#索引文件">索引文件</a></li><li style="--depth: 3"><a href="#索引顺序文件">索引顺序文件</a></li><li style="--depth: 4"><a href="#多级索引顺序文件">多级索引顺序文件</a></li><li style="--depth: 1"><a href="#文件的物理结构">文件的物理结构</a></li><li style="--depth: 2"><a href="#连续分配">连续分配</a></li><li style="--depth: 2"><a href="#链接分配">链接分配</a></li><li style="--depth: 3"><a href="#隐式链接">隐式链接</a></li><li style="--depth: 3"><a href="#显式链接">显式链接</a></li><li style="--depth: 2"><a href="#索引分配">索引分配</a></li><li style="--depth: 3"><a href="#链接方案">链接方案</a></li><li style="--depth: 3"><a href="#多层索引方式">多层索引方式</a></li><li style="--depth: 3"><a href="#混合索引方式unix-方案">混合索引方式（Unix 方案）</a></li><li style="--depth: 0"><a href="#文件目录">文件目录</a></li><li style="--depth: 1"><a href="#文件控制块">文件控制块</a></li><li style="--depth: 2"><a href="#目录操作">目录操作</a></li><li style="--depth: 1"><a href="#目录结构">目录结构</a></li><li style="--depth: 2"><a href="#单级目录结构">单级目录结构</a></li><li style="--depth: 2"><a href="#两级目录结构">两级目录结构</a></li><li style="--depth: 2"><a href="#多级目录结构树形">多级目录结构（树形）</a></li><li style="--depth: 2"><a href="#无环图目录结构">无环图目录结构</a></li><li style="--depth: 1"><a href="#索引结点">索引结点</a></li><li style="--depth: 0"><a href="#文件的基本操作">文件的基本操作</a></li><li style="--depth: 1"><a href="#创建文件">创建文件</a></li><li style="--depth: 1"><a href="#删除文件">删除文件</a></li><li style="--depth: 1"><a href="#打开文件">打开文件</a></li><li style="--depth: 1"><a href="#关闭文件">关闭文件</a></li><li style="--depth: 1"><a href="#读文件">读文件</a></li><li style="--depth: 1"><a href="#写文件">写文件</a></li><li style="--depth: 0"><a href="#文件保护">文件保护</a></li><li style="--depth: 1"><a href="#口令保护">口令保护</a></li><li style="--depth: 1"><a href="#加密保护">加密保护</a></li><li style="--depth: 1"><a href="#访问控制">访问控制</a></li><li style="--depth: 0"><a href="#文件共享">文件共享</a></li><li style="--depth: 1"><a href="#基于索引节点的共享方式硬链接">基于索引节点的共享方式：硬链接</a></li><li style="--depth: 1"><a href="#基于符号链的共享方式软链接">基于符号链的共享方式：软链接</a></li><li style="--depth: 0"><a href="#文件系统">文件系统</a></li><li style="--depth: 1"><a href="#层次结构">层次结构</a></li><li style="--depth: 1"><a href="#文件系统布局">文件系统布局</a></li><li style="--depth: 2"><a href="#在外存中的结构">在外存中的结构</a></li><li style="--depth: 2"><a href="#在内存中的结构">在内存中的结构</a></li><li style="--depth: 1"><a href="#文件存储空间管理">文件存储空间管理</a></li><li style="--depth: 2"><a href="#存储空间的划分与初始化">存储空间的划分与初始化</a></li><li style="--depth: 2"><a href="#管理方法">管理方法</a></li><li style="--depth: 3"><a href="#空闲表法">空闲表法</a></li><li style="--depth: 3"><a href="#空闲链表法">空闲链表法</a></li><li style="--depth: 3"><a href="#位示图法">位示图法</a></li><li style="--depth: 3"><a href="#成组链接法">成组链接法</a></li><li style="--depth: 1"><a href="#虚拟文件系统">虚拟文件系统</a></li><li style="--depth: 2"><a href="#特点">特点</a></li><li style="--depth: 2"><a href="#文件系统挂载">文件系统挂载</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

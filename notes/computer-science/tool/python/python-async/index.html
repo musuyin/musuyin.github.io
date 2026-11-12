@@ -1,0 +1,130 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Python 异步编程：async/await/yield · Musuyin&#39; Home</title><meta name="description" content="async def 创建协程函数，调用先得到协程对象；await 交出当前协程的执行机会，异步生成器再用 yield 按次产生结果。把创建、调度和消费分开，才能读懂流式链路。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/tool/python/python-async/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Python 异步编程：async/await/yield · Musuyin' Home"><meta property="og:description" content="async def 创建协程函数，调用先得到协程对象；await 交出当前协程的执行机会，异步生成器再用 yield 按次产生结果。把创建、调度和消费分开，才能读懂流式链路。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/tool/python/python-async/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Python 异步编程：async/await/yield</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-05-26">2026-05-26</time></dd></div><div><dt>字数</dt><dd>783</dd></div><div><dt>预计阅读</dt><dd>3 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Python/">#Python</a><a href="/tags/%E5%BC%82%E6%AD%A5/">#异步</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Python 异步编程：async/await/yield</h1><time datetime="2026-05-26">2026-05-26</time><p class="tags"><a href="/tags/Python/">#Python</a><a href="/tags/%E5%BC%82%E6%AD%A5/">#异步</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>async def 创建协程函数，调用先得到协程对象；await 交出当前协程的执行机会，异步生成器再用 yield 按次产生结果。把创建、调度和消费分开，才能读懂流式链路。</p>
+<p><a id="reference-背景为什么需要异步"></a></p>
+<h2 id="背景为什么需要异步">背景：为什么需要异步</h2>
+<p>程序运行时有两类操作：<strong>CPU 密集型</strong>（计算）和 <strong>IO 密集型</strong>（网络请求、读写磁盘、查数据库）。IO 操作的特点是：发出请求之后，CPU 只是在<strong>等待</strong>，什么也不做。</p>
+<p>同步方式下，等待是阻塞的——后面的任务必须排队：</p>
+<blockquote>
+<p>调 Claude API（等 3 秒）→ 查数据库（等 1 秒）→ <strong>总共 4 秒</strong></p>
+</blockquote>
+<p>异步方式下，等待期间 CPU 可以去处理其他任务：</p>
+<blockquote>
+<p>调 Claude API（发出请求，不等）<br>
+查数据库（发出请求，不等）<br>
+等两个都回来 → <strong>总共 3 秒</strong></p>
+</blockquote>
+<p><strong>核心思想：等待 IO 的时候，把 CPU 让出去干别的事。</strong></p>
+<p><a id="reference-async-def"></a></p>
+<h2 id="async-def">async def</h2>
+<p><em>协程函数</em>（coroutine function）的声明方式。<code>async def</code> 告诉 Python：<strong>这个函数内部可能会暂停</strong>，让出 CPU 给别人用。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>普通函数</th>
+<th>async def 函数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>调用后</td>
+<td>立刻执行，必须等完</td>
+<td>返回一个协程对象，不执行</td>
+</tr>
+<tr>
+<td>能否暂停</td>
+<td>否</td>
+<td>能，通过 <code>await</code> 暂停</td>
+</tr>
+<tr>
+<td>使用场景</td>
+<td>CPU 计算</td>
+<td>IO 操作、网络请求</td>
+</tr>
+</tbody>
+</table>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 普通函数：调用即执行</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> fetch_sync</span><span style="color:#24292E;--shiki-dark:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "done"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 协程函数：调用返回协程对象，需要被 await 或放入事件循环才执行</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">async</span><span style="color:#D73A49;--shiki-dark:#F97583"> def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> fetch_async</span><span style="color:#24292E;--shiki-dark:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "done"</span></span></code></pre>
+<p><a id="reference-await"></a></p>
+<h2 id="await">await</h2>
+<p>在 <code>async def</code> 函数内部使用，表示**“我在等，别人可以先跑”**。</p>
+<p>执行到 <code>await</code> 时，当前协程<strong>主动暂停</strong>，将控制权交还给 asyncio 事件循环；事件循环可以去运行其他协程，等待的结果回来后再恢复执行。</p>
+<blockquote>
+<p>类比：餐厅点菜后，服务员（CPU）不会站在你桌旁干等，而是去服务其他桌。你的菜好了再回来通知你。</p>
+</blockquote>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">async</span><span style="color:#D73A49;--shiki-dark:#F97583"> def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> stream</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, inp):</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 暂停，等 Anthropic 服务器响应</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 暂停期间，事件循环可以处理其他请求</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    async</span><span style="color:#D73A49;--shiki-dark:#F97583"> with</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">._client.messages.stream(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">as</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> sdk_stream:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        ...</span></span></code></pre>
+<p><strong>常见错误：忘写 <code>await</code></strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">result </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> some_async_func()        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 错：只拿到协程对象，函数根本没执行</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">result </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> await</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> some_async_func()  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 对：真正执行并等待结果</span></span></code></pre>
+<p><a id="reference-yield"></a></p>
+<h2 id="yield">yield</h2>
+<p>把函数变成<em>生成器</em>（generator），<strong>每次产出一个值</strong>，调用方拿到一个、处理一个，不需要等全部完成。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 普通函数：全部算完才返回</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get_all</span><span style="color:#24292E;--shiki-dark:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 生成器函数：每次 yield 一个，调用方按需消费</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> gen</span><span style="color:#24292E;--shiki-dark:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    yield</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#6A737D;--shiki-dark:#6A737D">   # 产出 1，暂停</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    yield</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span><span style="color:#6A737D;--shiki-dark:#6A737D">   # 产出 2，暂停</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    yield</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span><span style="color:#6A737D;--shiki-dark:#6A737D">   # 产出 3，结束</span></span></code></pre>
+<p>结合 <code>async</code> 就是 <em>async generator</em>，是流式输出场景的核心：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">async</span><span style="color:#D73A49;--shiki-dark:#F97583"> def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> stream</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, inp):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    yield</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> AgentStartEvent(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 立刻推给前端："开始了"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    async</span><span style="color:#D73A49;--shiki-dark:#F97583"> for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> event </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> sdk_stream:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        yield</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> BlockDeltaEvent(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)    </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 每收到一个 token，立刻推出去</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    yield</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> AgentDoneEvent(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)         </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 最后推："完了"</span></span></code></pre>
+<p>对比<strong>不用 yield 的错误方式</strong>——用户体验是“转圈等待，一次性刷出所有内容”：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">async</span><span style="color:#D73A49;--shiki-dark:#F97583"> def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> stream_bad</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, inp):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    events </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    async</span><span style="color:#D73A49;--shiki-dark:#F97583"> for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> event </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> sdk_stream:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        events.append(event)    </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 全部收集</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> events               </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 全部完成才返回，前端一卡一卡</span></span></code></pre>
+<p><strong><code>yield</code> 的关键价值：边生产边消费，实现真正的实时流式输出。</strong></p>
+<p><a id="reference-三者组合完整链路示例"></a></p>
+<h2 id="三者组合完整链路示例">三者组合：完整链路示例</h2>
+<p>以 AgentHub 项目的流式输出为例，三个关键字协同工作：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Claude API</span></span>
+<span class="line"><span>  —[yield]→  ClaudeAdapter.stream()</span></span>
+<span class="line"><span>  —[async for + await]→  ThreadService._run_thread()</span></span>
+<span class="line"><span>  —[await]→  StreamService.push_event()</span></span>
+<span class="line"><span>  —→  SSE 队列  —→  前端</span></span></code></pre>
+<p><strong>ThreadService 消费 Adapter 产出的事件：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># async for 隐含了 await，每个事件到来就处理一次</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">async</span><span style="color:#D73A49;--shiki-dark:#F97583"> for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> event </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> adapter.stream(stream_input):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    await</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> stream_service.push_event(conversation_id, event)</span></span></code></pre>
+<p><strong>ClaudeAdapter 产出事件：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">async</span><span style="color:#D73A49;--shiki-dark:#F97583"> def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> stream</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, inp):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    yield</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> AgentStartEvent(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    async</span><span style="color:#D73A49;--shiki-dark:#F97583"> with</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">._client.messages.stream(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">as</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s:  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># await 等 API 建立连接</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        async</span><span style="color:#D73A49;--shiki-dark:#F97583"> for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> event </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s:                            </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 边收 SDK 事件边处理</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            yield</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> BlockDeltaEvent(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)                   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 立刻向上层传递</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    yield</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> AgentDoneEvent(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p>每产出一个 token，整条链路就推送一次，用户看到的是<strong>字符逐渐出现</strong>的实时效果，而不是等待后一次性刷出。</p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>沿完整示例追踪普通返回、await 与 async for；并发等待为什么不同于让 CPU 密集代码自动并行？</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/agent/framework/learn-claude-code/background-task-execution/">S13-Background Tasks</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/tool/">开发工具学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#背景为什么需要异步">背景：为什么需要异步</a></li><li style="--depth: 0"><a href="#async-def">async def</a></li><li style="--depth: 0"><a href="#await">await</a></li><li style="--depth: 0"><a href="#yield">yield</a></li><li style="--depth: 0"><a href="#三者组合完整链路示例">三者组合：完整链路示例</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

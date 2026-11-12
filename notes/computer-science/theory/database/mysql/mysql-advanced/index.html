@@ -1,0 +1,1831 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MySQL 进阶篇 · Musuyin&#39; Home</title><meta name="description" content="MySQL 进阶把存储引擎、索引、执行计划和事务联系起来。索引是否有效要结合查询条件与访问路径判断，锁与日志则解释并发及持久化行为。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/database/mysql/mysql-advanced/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="MySQL 进阶篇 · Musuyin' Home"><meta property="og:description" content="MySQL 进阶把存储引擎、索引、执行计划和事务联系起来。索引是否有效要结合查询条件与访问路径判断，锁与日志则解释并发及持久化行为。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/database/mysql/mysql-advanced/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">MySQL 进阶篇</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-10-02">2025-10-02</time></dd></div><div><dt>字数</dt><dd>15214</dd></div><div><dt>预计阅读</dt><dd>51 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a><a href="/tags/MySQL/">#MySQL</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>MySQL 进阶篇</h1><time datetime="2025-10-02">2025-10-02</time><p class="tags"><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a><a href="/tags/MySQL/">#MySQL</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>MySQL 进阶把存储引擎、索引、执行计划和事务联系起来。索引是否有效要结合查询条件与访问路径判断，锁与日志则解释并发及持久化行为。</p>
+<p><a id="reference-体系结构"></a></p>
+<h2 id="体系结构">体系结构</h2>
+<ul>
+<li>
+<p>连接层</p>
+<ul>
+<li>最上层，负责客户端和连接服务，完成连接处理、授权认证以及相关的安全方案</li>
+<li>为安全接入的客户端验证其所具有的操作权限</li>
+</ul>
+</li>
+<li>
+<p>服务层</p>
+<ul>
+<li>完成大多数核心服务功能，如 SQL 接口</li>
+<li>历史版本可使用查询缓存；MySQL 8.0 已移除 Query Cache，不能把这一功能与 InnoDB Buffer Pool 混为一谈。<a href="https://dev.mysql.com/blog-archive/mysql-8-0-retiring-support-for-the-query-cache/">MySQL 官方说明</a></li>
+<li>SQL 的分析和优化</li>
+<li>部分内置函数的执行</li>
+<li>所有夸存储引擎的功能（过程、函数）</li>
+</ul>
+</li>
+<li>
+<p>引擎层</p>
+<ul>
+<li>存储引擎真正负责了 MySQL 中数据的存储和提取</li>
+<li>服务器通过 API 和存储引擎进行通信</li>
+<li>不同的存储引擎具有不同的功能（且索引也不同）</li>
+</ul>
+</li>
+<li>
+<p>存储层</p>
+<ul>
+<li>将数据存储在文件系统之上</li>
+<li>完成与存储引擎的交互</li>
+</ul>
+</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="875" height="528" src="/_astro/IMG-20260908174131898.DPFoyVop_Z5UjCT.webp"></p>
+<p><a id="reference-存储引擎"></a></p>
+<h2 id="存储引擎">存储引擎</h2>
+<p><a id="reference-概述"></a></p>
+<h3 id="概述">概述</h3>
+<p>存储数据、简历索引、更新/查询数据等技术的实现方式，</p>
+<p><a id="reference-查询使用的存储引擎"></a></p>
+<h4 id="查询使用的存储引擎">查询使用的存储引擎</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">show engines;</span></span></code></pre>
+<p><a id="reference-innodb"></a></p>
+<h4 id="innodb">InnoDB</h4>
+<p>兼顾高可靠性和高性能的通用存储引擎，在 MySQL 5.5 之后，为默认存储引擎</p>
+<ul>
+<li>支持事务（DML 操作遵循 ACID 模型：原子性、一致性、持久性、隔离性）</li>
+<li>行级锁，提高并发访问性能</li>
+<li>支持外键约束</li>
+</ul>
+<p>使用 <code>.idb</code>  文件存储数据，每一张表都对应一个表空间文件，存储该表的表结构（frm，sdi）、数据、索引</p>
+<p><a id="reference-逻辑存储结构"></a></p>
+<h5 id="逻辑存储结构">逻辑存储结构</h5>
+<ul>
+<li>Tablespace 表空间-&gt; segment 段-&gt; extent 区 1M -&gt; page 页 16K -&gt; row 行</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1261" height="524" src="/_astro/IMG-20260908174131953.BhjzCK6u_Z2jVNX5.webp"></p>
+<ul>
+<li>表空间：InnoDB 存储引擎逻辑结构的最高层，ibd 文件就是表空间文件，在表空间中可以包含多个 Segment 段。</li>
+<li>段：表空间是由各个段组成的， 常见的段有数据段、索引段、回滚段等。InnoDB 中对于段的管理，都是引擎自身完成，不需要人为对其控制，一个段中包含多个区。</li>
+<li>区：区是表空间的单元结构，每个区的大小为 1M。 默认情况下， InnoDB 存储引擎页大小为 16K， 即一个区中一共有 64 个连续的页。</li>
+<li>页：页是组成区的最小单元，页也是 InnoDB 存储引擎磁盘管理的最小单元，每个页的大小默认为 16KB。为了保证页的连续性，InnoDB 存储引擎每次从磁盘申请 4-5 个区。</li>
+<li>行：InnoDB 存储引擎是面向行的，也就是说数据是按行进行存放的，在每一行中除了定义表时所指定的字段以外，还包含两个隐藏字段</li>
+</ul>
+<p><a id="reference-myisam"></a></p>
+<h4 id="myisam">MyISAM</h4>
+<p>早期的默认引擎</p>
+<ul>
+<li>不支持事务，不支持外键</li>
+<li>支持表锁，不支持行锁</li>
+<li>访问速度快</li>
+</ul>
+<p>使用三个文件存储</p>
+<ul>
+<li><code>.MYI</code> 存储索引</li>
+<li><code>.MYD</code> 存储数据</li>
+<li><code>.sdi</code>  存储表结构</li>
+</ul>
+<p><a id="reference-memory"></a></p>
+<h4 id="memory">Memory</h4>
+<p>数据存放在内存，用于临时表或缓存使用，不支持持久化</p>
+<ul>
+<li>内存存放</li>
+<li>hash 索引（默认）</li>
+</ul>
+<p><code>.sdi</code>  存储表结构</p>
+<p><a id="reference-存储引擎选择"></a></p>
+<h3 id="存储引擎选择">存储引擎选择</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="913" height="701" src="/_astro/IMG-20260908174132272.BXS0vX0C_ZTlNhn.webp"></p>
+<ul>
+<li>InnoDB：对事务的完整性、并发条件下要求数据的一致性要求高；数据包含很多更新、删除操作</li>
+<li>MyISAM：对事务的完整性和数据的一致性要求低；以读操作和插入操作为主，只有很少的更新或删除操作 -&gt; 存储非核心事务 -&gt; NoSQL（MongoDB）</li>
+<li>Memory：访问速度快，用于临时表和缓存，对表的大小有限制，且无法保障数据的安全性 -&gt; Redis</li>
+</ul>
+<p>基本上都是使用 InnoDB</p>
+<p><a id="reference-索引"></a></p>
+<h2 id="索引">索引</h2>
+<p><a id="reference-索引概述"></a></p>
+<h3 id="索引概述">索引概述</h3>
+<p>索引（index）是帮助 MySQL 高效获取数据的数据结构（有序）</p>
+<p>数据库系统维护着满足特定查找算法的数据结构，这些数据结构以某种方式引用数据，这样就可以在这些数据结构上实现高级查找算法，这种数据结构即索引</p>
+<ul>
+<li>无索引情况：全表扫描</li>
+<li>有索引情况：根据实现的索引结构高效查询</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势（基本可以忽略）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>提高数据检索的效率，降低数据库的 IO 成本</td>
+<td>索引列也是要占用空间的</td>
+</tr>
+<tr>
+<td>通过索引列对数据进行排序，降低数据排序的成本，降低 CPU 的消耗</td>
+<td>索引大大提高了查询效率，同时却也降低更新表的速度，如对表进行 INSERT、UPDATE、DELETE 时，效率降低</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-索引结构"></a></p>
+<h3 id="索引结构">索引结构</h3>
+<p>MySQL 的索引再存储引擎层实现，不同的存储引擎有不同的索引结构</p>
+<table>
+<thead>
+<tr>
+<th>索引结构</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>B+Tree</strong></td>
+<td>最常见的索引类型，大部分引擎都支持 B+ 树索引</td>
+</tr>
+<tr>
+<td>Hash</td>
+<td>底层数据结构是用哈希表实现的, 只有精确匹配索引列的查询才有效, 不支持范围查询</td>
+</tr>
+<tr>
+<td>R-tree（空间索引）</td>
+<td>空间索引是 MyISAM 引擎的一个特殊索引类型，主要用于地理空间数据类型，通常使用较少</td>
+</tr>
+<tr>
+<td>Full-text（全文索引）</td>
+<td>是一种通过建立倒排索引,快速匹配文档的方式。类似于 Lucene,Solr,ES</td>
+</tr>
+</tbody>
+</table>
+<p>一般索引认为就是 B+ 树</p>
+<p><a id="reference-b-树"></a></p>
+<h4 id="b-树">B 树</h4>
+<p>B 树是一种多叉路衡查找树，相对于二叉树，B 树每个节点可以有多个分支，即多叉。</p>
+<p>以一颗最大度数（max-degree）为 5(5 阶)的 b-tree 为例，那这个 B 树每个节点最多存储 4 个 key，5 个指针</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1274" height="390" src="/_astro/IMG-20260908174132494.CxPxIj1y_29prYi.webp"></p>
+<ul>
+<li>5 阶的 B 树，每一个节点最多存储 4 个 key，对应 5 个指针。</li>
+<li>一旦节点存储的 key 数量到达 5，就会裂变，<strong>中间元素向上分裂。</strong></li>
+<li>在 B 树中，<strong>非叶子节点和叶子节点都会存放数据。</strong></li>
+</ul>
+<p><a id="reference-b-树-1"></a></p>
+<h4 id="b-树-1">B+ 树</h4>
+<p>B+Tree 是 B-Tree 的变种，以一颗最大度数（max-degree）为 4（4 阶）的 b+tree 为例</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1274" height="395" src="/_astro/IMG-20260908174132724.DXiz7Ujq_Z2a7QKi.webp"></p>
+<ul>
+<li>绿色框框起来的部分，是索引部分，仅仅起到索引数据的作用，不存储数据。</li>
+<li>红色框框起来的部分，是数据存储部分，在其叶子节点中要存储具体的数据。</li>
+</ul>
+<p>B+Tree 与 B-Tree 相比，主要有以下三点区别：</p>
+<ul>
+<li>所有的数据都会出现在叶子节点。</li>
+<li>叶子节点形成一个单向链表。</li>
+<li>非叶子节点仅仅起到索引数据作用，具体的数据都是<strong>在叶子节点存放的</strong></li>
+</ul>
+<p><a id="reference-mysql-对于-b-树的优化"></a></p>
+<h5 id="mysql-对于-b-树的优化">MySQL 对于 B+ 树的优化</h5>
+<p>在原 B+Tree 的基础上，增加一个指向相邻叶子节点的链表指针，就形成了带有顺序指针的 B+Tree，提高区间访问的性能，利于排序</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1248" height="414" src="/_astro/IMG-20260908174132950.D6EcZnPQ_SyHv7.webp"></p>
+<p><a id="reference-hash"></a></p>
+<h4 id="hash">Hash</h4>
+<p>哈希索引就是采用一定的 hash 算法，将键值换算成新的 hash 值，映射到对应的槽位上，然后存储在 hash 表中。</p>
+<p>如果两个(或多个)键值，映射到一个相同的槽位上，他们就产生了 hash 冲突（也称为 hash 碰撞），可以通过链表来解决。（拉链法）</p>
+<ul>
+<li>Hash 索引只能用于对等比较(<code>=</code>，<code>in</code>)，不支持范围查询（<code>between</code>，<code>&gt;</code>，<code>&lt;</code> ，<code>...</code>）</li>
+<li>无法利用索引完成排序操作</li>
+<li>查询效率高，通常(不存在 hash 冲突的情况)只需要一次检索就可以了，效率通常要高于 B+tree 索引</li>
+</ul>
+<p>Memory 存储引擎支持 hash 索引。而 InnoDB 中具有<strong>自适应 hash 功能</strong>，hash 索引是 InnoDB 存储引擎根据 B+Tree 索引在指定条件下自动构建的。</p>
+<p><a id="reference-为什么使用-b-树"></a></p>
+<h4 id="为什么使用-b-树">为什么使用 B+ 树</h4>
+<ol>
+<li>
+<p>相对于二叉树，层级更少，搜索效率高</p>
+</li>
+<li>
+<p>对于 B-tree，无论是叶子节点还是非叶子节点，都会保存数据，这样导致一页中存储的键值减少，指针跟着减少，要同样保存大量数据，只能增加树的高度，导致性能降低</p>
+</li>
+<li>
+<p>相对 Hash 索引，B+tree 支持<strong>范围匹配及排序操作</strong></p>
+</li>
+</ol>
+<p>‍</p>
+<p><a id="reference-索引分类"></a></p>
+<h3 id="索引分类">索引分类</h3>
+<table>
+<thead>
+<tr>
+<th>分类</th>
+<th>含义</th>
+<th>特点</th>
+<th>关键字</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主键索引</td>
+<td>针对于表中主键创建的索引</td>
+<td>默认自动创建, 只能有一个</td>
+<td>PRIMARY</td>
+</tr>
+<tr>
+<td>唯一索引</td>
+<td>避免同一个表中某数据列中的值重复</td>
+<td>可以有多个</td>
+<td>UNIQUE</td>
+</tr>
+<tr>
+<td>常规索引</td>
+<td>快速定位特定数据</td>
+<td>可以有多个</td>
+<td></td>
+</tr>
+<tr>
+<td>全文索引</td>
+<td>全文索引查找的是文本中的关键词，而不是比较索引中的值</td>
+<td>可以有多个</td>
+<td>FULLTEXT</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-聚集索引和二级索引"></a></p>
+<h4 id="聚集索引和二级索引">聚集索引和二级索引</h4>
+<p>在 InnoDB 存储引擎中，根据索引的存储形式，可分为</p>
+<table>
+<thead>
+<tr>
+<th>分类</th>
+<th>含义</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>聚集索引(ClusteredIndex)</td>
+<td>将数据存储与索引放到了一块，索引结构的叶子节点保存了行数据</td>
+<td>必须有,而且只有一个</td>
+</tr>
+<tr>
+<td>二级索引（辅助索引）(SecondaryIndex)</td>
+<td>将数据与索引分开存储，索引结构的叶子节点关联的是对应的主键</td>
+<td>可以存在多个</td>
+</tr>
+</tbody>
+</table>
+<p>聚集索引选取规则：</p>
+<ul>
+<li>如果存在主键，<strong>主键索引就是聚集索引</strong></li>
+<li>如果不存在主键，将使用第一个唯一（UNIQUE）索引作为聚集索引</li>
+<li>如果表没有主键，或没有合适的唯一索引，则 InnoDB 会自动生成一个 <code>rowid</code>  作为隐藏的聚集索引</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1541" height="743" src="/_astro/IMG-20260908174133175.BOs584Y5_ZH9yT.webp"></p>
+<ul>
+<li>聚集索引的叶子节点下挂的是这一行的<strong>数据</strong></li>
+<li>二级索引的叶子节点下挂的是该字段值对应的<strong>主键值</strong></li>
+</ul>
+<p><a id="reference-回表查询"></a></p>
+<h4 id="回表查询">回表查询</h4>
+<p>如果根据二级索引查询，那么会先查询二级索引的 B+ 树得到对应主键值，再从聚集索引的 B+ 树中查找得到数据，即<strong>查找两次</strong></p>
+<p>查询主键的语句效率 &gt; 查询二级索引语句的效率</p>
+<p><a id="reference-主键索引的存储效率"></a></p>
+<h4 id="主键索引的存储效率">主键索引的存储效率</h4>
+<p>假设：一行数据大小为 1k，一页中可以存储 16 行这样的数据。InnoDB 的指针占用 6 个字节的空间，主键假设为 bigint，占用字节数为 8。</p>
+<ul>
+<li>高度为 2：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>∗</mo><mn>8</mn><mo>+</mo><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mo>∗</mo><mn>6</mn><mo>=</mo><mn>16</mn><mo>∗</mo><mn>1024</mn></mrow><annotation encoding="application/x-tex">n * 8 + (n + 1) * 6 = 16*1024</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4653em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">8</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">6</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">16</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1024</span></span></span></span>, 算出 n 约为 1170</li>
+</ul>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1171</mn><mo>∗</mo><mn>16</mn><mo>=</mo><mn>18736</mn></mrow><annotation encoding="application/x-tex">1171* 16 = 18736</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1171</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">16</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">18736</span></span></span></span></p>
+<p>也就是说，如果树的高度为 2，则可以存储 18000 多条记录。</p>
+<ul>
+<li>高度为 3：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1171</mn><mo>∗</mo><mn>1171</mn><mo>∗</mo><mn>16</mn><mo>=</mo><mn>21939856</mn></mrow><annotation encoding="application/x-tex">1171 * 1171 * 16 = 21939856</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1171</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1171</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">16</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">21939856</span></span></span></span></li>
+</ul>
+<p>也就是说，如果树的高度为 3，则可以存储 2200w 左右的记录</p>
+<p><a id="reference-索引语法"></a></p>
+<h3 id="索引语法">索引语法</h3>
+<p><a id="reference-创建索引"></a></p>
+<h4 id="创建索引">创建索引</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CREATE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [UNIQUE|FULLTEXT] </span><span style="color:#D73A49;--shiki-dark:#F97583">INDEX</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> index_name </span><span style="color:#D73A49;--shiki-dark:#F97583">ON</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table_name (index_col_name, ...)</span></span></code></pre>
+<ul>
+<li>单列索引：只关联一个字段</li>
+<li>联合/组合索引：关联多个字段</li>
+</ul>
+<p><a id="reference-查看索引"></a></p>
+<h4 id="查看索引">查看索引</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SHOW </span><span style="color:#D73A49;--shiki-dark:#F97583">INDEX</span><span style="color:#D73A49;--shiki-dark:#F97583"> FROM</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table_name</span></span></code></pre>
+<p><a id="reference-删除索引"></a></p>
+<h4 id="删除索引">删除索引</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">DROP</span><span style="color:#D73A49;--shiki-dark:#F97583"> INDEX</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> index_name </span><span style="color:#D73A49;--shiki-dark:#F97583">ON</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table_name</span></span></code></pre>
+<p><a id="reference-sql-性能分析"></a></p>
+<h3 id="sql-性能分析">SQL 性能分析</h3>
+<p><a id="reference-sql-执行频率"></a></p>
+<h4 id="sql-执行频率">SQL 执行频率</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">show [session|global] </span><span style="color:#D73A49;--shiki-dark:#F97583">status</span></span></code></pre>
+<p>查看服务器状态信息</p>
+<ul>
+<li>如果是以增删改为主，可以考虑不对其进行索引的优化。</li>
+<li>如果是以查询为主，那么就要考虑对数据库的索引进行优化了。</li>
+</ul>
+<p><a id="reference-慢查询日志"></a></p>
+<h4 id="慢查询日志">慢查询日志</h4>
+<p>慢查询日志记录了所有执行时间超过指定参数（long_query_time，单位：秒，默认 10 秒）的所有 SQL 语句的日志。</p>
+<p>MySQL 的慢查询日志默认没有开启，我们可以查看一下系统变量 <code>slow_query_log</code></p>
+<p>开启慢查询日志，需要在 MySQL 的配置文件（<code>/etc/my.cnf</code>）中配置如下信息</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span># 开启MySQL慢日志查询开关</span></span>
+<span class="line"><span>slow_query_log=1</span></span>
+<span class="line"><span># 设置慢日志的时间为2秒，SQL语句执行时间超过2秒，就会视为慢查询，记录慢查询日志</span></span>
+<span class="line"><span>long_query_time=2</span></span></code></pre>
+<p>配置完毕之后，通过以下指令重新启动 MySQL 服务器进行测试，查看慢日志文件中记录的信息 <code>/var/lib/mysql/localhost-slow.log</code></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">systemctl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> restart</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> mysqld</span></span></code></pre>
+<p>通过慢查询日志，就可以定位出执行效率比较低的 SQL，从而有针对性的进行优化</p>
+<p><a id="reference-profile-详情"></a></p>
+<h4 id="profile-详情">profile 详情</h4>
+<p><code>show profiles</code> 能够查询时间耗费</p>
+<p>查询是否支持</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @@have_profiling;</span></span></code></pre>
+<p>开启</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">set</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> profiling </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p>查询消耗</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">show profiles;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- SQL语句各个阶段的耗时</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">show </span><span style="color:#D73A49;--shiki-dark:#F97583">profile</span><span style="color:#D73A49;--shiki-dark:#F97583"> for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> query query_id;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- CPU 使用情况</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">show </span><span style="color:#D73A49;--shiki-dark:#F97583">profile</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> cpu </span><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> query query_id;</span></span></code></pre>
+<p><a id="reference-explain-执行计划"></a></p>
+<h4 id="explain-执行计划"><code>explain</code> 执行计划</h4>
+<p>可以获取 MySQL 如何执行 select 语句，比如表如何连接和连接顺序</p>
+<p>在 select 语句之前加上 <code>explain</code>  或 <code>desc</code></p>
+<p><img alt="image" loading="lazy" decoding="async" width="1114" height="161" src="/_astro/IMG-20260908174133366.E5njApFR_SYgpo.webp"></p>
+<ul>
+<li>
+<p>id：select 查询的序列号，表示执行 select 子句或操作表的顺序</p>
+<ul>
+<li>id 相同，从上到下执行</li>
+<li>id 不同，值越大，越先执行</li>
+</ul>
+</li>
+<li>
+<p>select_type：表示 select 类型</p>
+<ul>
+<li><code>SIMPLE</code>：简单表，不使用表连接或子查询</li>
+<li><code>PRIMARY</code>：主查询（外层查询）</li>
+<li><code>UNION</code>：<code>UNION</code>  中的第二个或后面的查询语句</li>
+<li><code>SUBQUERY</code>：<code>select</code>/<code>where</code> 之后包含了子查询</li>
+</ul>
+</li>
+<li>
+<p>type：连接类型。以下按性能由好到差排列</p>
+<ul>
+<li><code>NULL</code>：不访问任何表</li>
+<li><code>system</code> <code>const</code> <code>eq_ref</code> <code>ref</code> <code>range</code> <code>index</code> <code>all</code></li>
+</ul>
+</li>
+<li>
+<p>possible_key：可能应用在这张表上的索引</p>
+</li>
+<li>
+<p>key：实际使用的索引</p>
+</li>
+<li>
+<p>key_len：索引中使用的字节数，</p>
+</li>
+<li>
+<p>rows：MySQL 认为必须要执行查询的行数，在 InnoDB 引擎表中为估计值</p>
+</li>
+<li>
+<p>filtered：表示返回结果的行数占需读取行数的比例，值越大越好（因为查询的都是需要的，相当于优化极佳）</p>
+</li>
+</ul>
+<p><a id="reference-索引使用原则"></a></p>
+<h3 id="索引使用原则">索引使用原则</h3>
+<p><a id="reference-最左前缀法则"></a></p>
+<h4 id="最左前缀法则">最左前缀法则</h4>
+<p>建立了联合索引，才需要遵循最左前缀法则</p>
+<ul>
+<li>查询从索引的最左列开始，且<strong>不跳过索引中的列</strong>；如果跳跃某一列，其后的索引将会失效（即只有左边的索引生效）</li>
+<li>如果最左列不存在，则索引会全部失效</li>
+<li>注意：上述的最左是指建立联合索引时在 <code>()</code>  内指定的顺序，在编写语句时 <code>where=</code>  之后的顺序没有影响</li>
+</ul>
+<p><a id="reference-范围查询"></a></p>
+<h4 id="范围查询">范围查询</h4>
+<p>联合索引中出现范围查询（<code>&gt;</code>，<code>&lt;</code>），会导致范围查询<strong>右侧</strong>的索引失效</p>
+<p>避免方法：使用小于等于 <code>&lt;=</code>  或大于等于 <code>&gt;=</code></p>
+<p><a id="reference-索引失效"></a></p>
+<h4 id="索引失效">索引失效</h4>
+<ul>
+<li>索引列运算：在索引上进行运算操作（如函数操作，比如 <code>substring()</code>）</li>
+<li>字符串不加引号</li>
+<li>头部模糊查询（<code>%</code> <code>_</code>）会导致索引失效（尾部模糊 <code>like 'x%'</code>  不会），即应当<strong>规避头部模糊查询</strong></li>
+<li>用 <code>or</code>  分割的条件，只有两侧字段<strong>都有索引才会生效</strong></li>
+<li>数据分布影响：如果 MySQL 评估使用索引比全表更慢，则不使用索引，直接全表扫描（会受具体数据影响）</li>
+</ul>
+<p><a id="reference-sql-提示"></a></p>
+<h4 id="sql-提示">SQL 提示</h4>
+<p>在 SQL 语句中加入一些人为的提示来达到优化操作的目的</p>
+<p>建议 MySQL 使用索引（仅是建议）</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">use</span><span style="color:#D73A49;--shiki-dark:#F97583"> index</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span></code></pre>
+<p>忽略指定的索引</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">ignore</span><span style="color:#D73A49;--shiki-dark:#F97583"> index</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span></code></pre>
+<p>强制使用索引</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">force</span><span style="color:#D73A49;--shiki-dark:#F97583"> index</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span></code></pre>
+<p><a id="reference-覆盖索引"></a></p>
+<h4 id="覆盖索引">覆盖索引</h4>
+<p>查询使用了索引，并且<strong>需要返回的列</strong>，在<strong>该索引中已经全部都能找到</strong></p>
+<p>比如已经建立 <code>(profession, age)</code>  联合索引和 <code>id</code>  主键索引</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 其中根据(profession, age)联合索引进行查询，在二级索引（辅助索引）中能够查找到id</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 而最后需要的列只有id和profession，即已经被覆盖了，不需要再由id进行回表查询</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> id, profession </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> user </span><span style="color:#D73A49;--shiki-dark:#F97583">where</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> profession </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "x"</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> age </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 此时name未建立索引，那么通过联合索引查询后获得id，仍然需要使用id（聚集索引）进行回表查询，效率降低</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> id, profession, </span><span style="color:#D73A49;--shiki-dark:#F97583">name</span><span style="color:#D73A49;--shiki-dark:#F97583"> from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> user </span><span style="color:#D73A49;--shiki-dark:#F97583">where</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> profession </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "x"</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> age </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p>所以应该尽可能地使查询值覆盖索引</p>
+<p><a id="reference-前缀索引"></a></p>
+<h4 id="前缀索引">前缀索引</h4>
+<p>当字段类型为字符串（varchar, text, longtext）时，有时需要索引很长的字符串（大文本字段），会导致查询时浪费大量磁盘 IO 并影响查询效率。可以<strong>只将字符串的一部分前缀</strong>，从而节省索引空间和提高索引效率</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">create</span><span style="color:#D73A49;--shiki-dark:#F97583"> index</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> idx_xxx</span><span style="color:#D73A49;--shiki-dark:#F97583"> on</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table_name(column(n));</span></span></code></pre>
+<p><a id="reference-索引选择性"></a></p>
+<h5 id="索引选择性">索引选择性</h5>
+<ul>
+<li>
+<p>前缀长度：可以根据索引的选择性来决定</p>
+</li>
+<li>
+<p>选择性：不重复的索引值（基数）和数据表的记录总数的比值</p>
+<ul>
+<li><strong>索引选择性越高查询效率越高</strong></li>
+<li>唯一索引的选择性是 1，是最好的索引选择性，效率也最高</li>
+<li>但是注意此时的效率也会和字符串长度变长导致的效率降低冲突，需要均衡，所以需要用到前缀索引</li>
+</ul>
+</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 选择性计算</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> count</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">distinct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> field_name) </span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> count</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table_name;</span></span></code></pre>
+<p><a id="reference-前缀索引查询流程"></a></p>
+<h5 id="前缀索引查询流程">前缀索引查询流程</h5>
+<p><img alt="image" loading="lazy" decoding="async" width="1501" height="741" src="/_astro/IMG-20260908174133614.0F3vN5Xa_Z254Toz.webp"></p>
+<ul>
+<li>在建立辅助索引时，选取前缀</li>
+<li>在查找聚集索引后，还需要验证是否是对应数值</li>
+</ul>
+<p><a id="reference-单列索引和联合索引"></a></p>
+<h4 id="单列索引和联合索引">单列索引和联合索引</h4>
+<p>在业务场景中，如果存在多个查询条件，考虑针对于查询字段建立索引时，建议建立联合索引，而非单列索引。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1514" height="591" src="/_astro/IMG-20260908174133814.ClfACxTk_Z2pk66V.webp"></p>
+<p><a id="reference-索引设计原则"></a></p>
+<h3 id="索引设计原则">索引设计原则</h3>
+<ol>
+<li>
+<p>针对数据量较大（十万、百万级），且查询频繁的表建立索引</p>
+</li>
+<li>
+<p>对于常作为查询条件（where）、排序（order by）、分组（group by）操作的字段建立索引</p>
+</li>
+<li>
+<p>尽量选择区分度高的列作为索引，尽量建立唯一索引</p>
+</li>
+<li>
+<p>对于长字符串的字段，根据字段特点建立前缀索引</p>
+</li>
+<li>
+<p>尽量使用<strong>联合索引</strong>，减少单列索引，查询时尽量可以<strong>覆盖索引</strong>，节省存储空间、避免回表查询、提高查询效率</p>
+</li>
+<li>
+<p>控制索引数量，索引结构会影响增删改（DML）的效率</p>
+</li>
+<li>
+<p>注意考虑索引列能否存储 <code>NULL</code>，优化器会根据是否能存储 <code>NULL</code>  进行不同的优化</p>
+</li>
+</ol>
+<p>‍</p>
+<p><a id="reference-sql-优化"></a></p>
+<h2 id="sql-优化">SQL 优化</h2>
+<p><a id="reference-插入数据"></a></p>
+<h3 id="插入数据">插入数据</h3>
+<p><a id="reference-小批量插入数据-insert"></a></p>
+<h4 id="小批量插入数据-insert">小批量插入数据 <code>insert</code></h4>
+<ol>
+<li>
+<p>将多个单条语句合并为一个批量语句（千级别及以下）</p>
+</li>
+<li>
+<p>手动控制事务，提交多个批量语句</p>
+</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">start transaction</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">insert into</span><span style="color:#D73A49;--shiki-dark:#F97583"> table</span><span style="color:#D73A49;--shiki-dark:#F97583"> values</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">insert into</span><span style="color:#D73A49;--shiki-dark:#F97583"> table</span><span style="color:#D73A49;--shiki-dark:#F97583"> values</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">commit</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<ol start="3">
+<li><strong>主键顺序插入</strong>性能高于乱序插入，尽量实现主键顺序插入</li>
+</ol>
+<p><a id="reference-大批量插入数据-load"></a></p>
+<h4 id="大批量插入数据-load">大批量插入数据 <code>load</code></h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 客户端连接服务端时，加上参数 -–local-infile</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">mysql –</span><span style="color:#D73A49;--shiki-dark:#F97583">-local-</span><span style="color:#24292E;--shiki-dark:#E1E4E8">infile </span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#24292E;--shiki-dark:#E1E4E8">u </span><span style="color:#D73A49;--shiki-dark:#F97583">root</span><span style="color:#D73A49;--shiki-dark:#F97583"> -</span><span style="color:#24292E;--shiki-dark:#E1E4E8">p</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 设置全局参数local_infile为1，开启从本地加载文件导入数据的开关</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">set</span><span style="color:#D73A49;--shiki-dark:#F97583"> global</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> local_infile </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 执行load指令将准备好的数据，加载到表结构中</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">load</span><span style="color:#D73A49;--shiki-dark:#F97583"> data</span><span style="color:#D73A49;--shiki-dark:#F97583"> local</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> infile </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'/root/sql1.log'</span><span style="color:#D73A49;--shiki-dark:#F97583"> into</span><span style="color:#D73A49;--shiki-dark:#F97583"> table</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tb_user fields</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">terminated </span><span style="color:#D73A49;--shiki-dark:#F97583">by</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ','</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lines terminated </span><span style="color:#D73A49;--shiki-dark:#F97583">by</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '\n'</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ;</span></span></code></pre>
+<p>主键顺序插入性能高于乱序插入</p>
+<p><a id="reference-主键优化"></a></p>
+<h3 id="主键优化">主键优化</h3>
+<p><a id="reference-数据组织方式"></a></p>
+<h4 id="数据组织方式">数据组织方式</h4>
+<p>在 InnoDB 存储引擎中，表数据都是根据主键顺序组织存放的，这种存储方式的表称为<strong>索引组织表</strong>(index organized table, IOT)</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1347" height="503" src="/_astro/IMG-20260908174134013.DgKw9H56_ZqJ2G4.webp"></p>
+<ul>
+<li>行数据存储在聚集索引的<strong>叶子节点</strong>上</li>
+<li>数据行是记录在逻辑结构 page 页中的，而每一个页的大小是固定的，默认 16K。一个页中所存储的行也是有限的，如果插入的数据行 row 在该页存储不下，将会存储到下一个页中，页与页之间会通过指针连接。</li>
+</ul>
+<p><a id="reference-页分裂"></a></p>
+<h4 id="页分裂">页分裂</h4>
+<p>每个页可以为空，或至少包含 2 行数据，如果一行数据过大，会导致行溢出，根据主键排列</p>
+<p>主键顺序插入：</p>
+<ol>
+<li>
+<p>从磁盘中申请页，插入。</p>
+</li>
+<li>
+<p>当前页未满，继续插入</p>
+</li>
+<li>
+<p>当前页已满，再申请新页。页与页之间通过双向指针连接</p>
+</li>
+</ol>
+<p>‍</p>
+<p>主键乱序插入：</p>
+<ol>
+<li>
+<p>由于索引结构的叶子节点有序排列，若发生下图情况
+<img alt="image" loading="lazy" decoding="async" width="1012" height="383" src="/_astro/IMG-20260908174134032.Rp4hI946_Z29VmhA.webp"></p>
+</li>
+<li>
+<p>页 1 已满，但是元素 50 应当插入 47 之后，此时只能开辟新的页 3
+<img alt="image" loading="lazy" decoding="async" width="1523" height="147" src="/_astro/IMG-20260908174134419.Bk4dz4p0_Z180Rhm.webp"></p>
+</li>
+<li>
+<p>然后将页 1 中后一半的数据移到页 3，再在页 3 中插入新值，同时修改指针，使得页 1 之后为页 3，页 3 之后为页 2
+<img alt="image" loading="lazy" decoding="async" width="1527" height="182" src="/_astro/IMG-20260908174134568.zSG1ABIp_1jqK62.webp"></p>
+</li>
+</ol>
+<p>上述操作即<strong>页分裂</strong></p>
+<p><a id="reference-页合并"></a></p>
+<h4 id="页合并">页合并</h4>
+<p>对数据进行删除时：</p>
+<ul>
+<li>当删除一行记录时，实际上记录并没有被物理删除，只是记录被标记（flaged）为删除并且它的空间变得允许被其他记录声明使用</li>
+<li>当页中删除的记录达到 <code>MERGE_THRESHOLD</code>（默认为页的 50%），InnoDB 会开始寻找最靠近的页（前或后）看看是否可以将两个页合并以优化空间使用。</li>
+</ul>
+<p><a id="reference-主键设计原则"></a></p>
+<h4 id="主键设计原则">主键设计原则</h4>
+<ul>
+<li>满足业务需求的情况下，<strong>尽量降低主键的长度</strong></li>
+<li>插入数据时，尽量选择<strong>顺序插入</strong>，使用 <code>AUTO_INCREMENT</code>  自增主键</li>
+<li>尽量不要使用 UUID 和自然编号（身份证号）作为主键</li>
+<li>业务操作时，避免修改主键</li>
+</ul>
+<p><a id="reference-order-by--优化"></a></p>
+<h3 id="order-by--优化"><code>order by</code>  优化</h3>
+<p>两种排序方法</p>
+<ol>
+<li>
+<p><code>Using filesort</code>：通过表的索引或全表扫描，读取满足条件的数据行，然后在排序缓冲区 sortbuffer 中完成排序操作，所有不是通过索引直接返回排序结果的排序都叫 FileSort 排序</p>
+</li>
+<li>
+<p><code>Using index</code>：通过有序索引顺序扫描直接返回有序数据，这种情况即为 using index，<strong>不需要额外排序</strong>，操作效率高</p>
+</li>
+</ol>
+<p>using index 的性能更高，应该尽可能优化为 using index</p>
+<p>现有联合索引 <code>(A, B)</code></p>
+<ol>
+<li>
+<p><code>order by C</code>，没有索引，using filesort</p>
+</li>
+<li>
+<p><code>order by A</code>，符合最左原则，using index</p>
+</li>
+<li>
+<p><code>order by A, B</code>，符合最左原则，using index</p>
+</li>
+<li>
+<p><code>order by A, C</code>，符合最左原则，但是 C 未建立索引，同时有 using index, using filesort</p>
+</li>
+<li>
+<p><code>order by B, A</code>，B 不符合最左原则，A 符合最左原则（拆开来看），同时有 using index, using filesort</p>
+</li>
+<li>
+<p><code>order by A desc, B desc</code>，同时使用降序排序，则进行反向扫描，using index</p>
+</li>
+<li>
+<p><code>order by A, B desc</code> ，两个索引不同序排序，同时有 using index, using filesort（如果要实现这样的效果，可以在建立索引时指定顺序）</p>
+</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  create</span><span style="color:#D73A49;--shiki-dark:#F97583"> index</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> idx_table_A_B</span><span style="color:#D73A49;--shiki-dark:#F97583"> on</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table_name(A </span><span style="color:#D73A49;--shiki-dark:#F97583">asc</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, B </span><span style="color:#D73A49;--shiki-dark:#F97583">desc</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span></code></pre>
+<p>‍</p>
+<p><a id="reference-优化原则"></a></p>
+<h4 id="优化原则">优化原则</h4>
+<ol>
+<li>
+<p>根据排序字段建立合适的索引，多字段排序时，遵循<strong>最左前缀法则</strong></p>
+</li>
+<li>
+<p>尽量使用<strong>覆盖索引</strong></p>
+</li>
+<li>
+<p>多字段排序，存在<strong>部分升序部分降序</strong>时，需要注意联合索引的建立规则</p>
+</li>
+<li>
+<p>如果无法避免 using filesort，对于大数据量排序应当<strong>增大排序缓冲区大小</strong> <code>sort_buffer_size</code></p>
+</li>
+</ol>
+<p><a id="reference-group-by--优化"></a></p>
+<h3 id="group-by--优化"><code>group by</code>  优化</h3>
+<p>存在索引优化出现提示：<code>using temporary</code></p>
+<ul>
+<li>可以使用索引优化</li>
+<li>满足最左前缀法则</li>
+</ul>
+<p><a id="reference-limit--优化"></a></p>
+<h3 id="limit--优化"><code>limit</code>  优化</h3>
+<p>在数据量比较大时，如果进行 limit 分页查询，在查询时，越往后，分页查询效率越低</p>
+<p>优化思路：</p>
+<ul>
+<li>
+<p>一般分页查询时，通过创建覆盖索引能够比较好地提高性能</p>
+</li>
+<li>
+<p>通过<strong>覆盖索引加子查询形式</strong>进行优化</p>
+<ul>
+<li>先通过子查询查询 limit 划分的 id</li>
+<li>再通过 where 对应数据</li>
+</ul>
+</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s.</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#D73A49;--shiki-dark:#F97583"> from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table_name t, (</span><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> id </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table_name </span><span style="color:#D73A49;--shiki-dark:#F97583">order by</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> id </span><span style="color:#D73A49;--shiki-dark:#F97583">limit</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 100000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) a </span><span style="color:#D73A49;--shiki-dark:#F97583">where</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> t</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">id</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> a</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p><a id="reference-count-优化"></a></p>
+<h3 id="count-优化"><code>count</code> 优化</h3>
+<ul>
+<li>MyISAM 引擎把一个表的总行数存在了磁盘上，因此执行 <code>count(*)</code> 的时候会直接返回这个数，效率很高； 但是如果是带条件的 count 也慢</li>
+<li>InnoDB 引擎执行 <code>count(*)</code> 的时候，需要把数据一行一行地从引擎里面读出，然后累积计数</li>
+</ul>
+<p><a id="reference-count--原理"></a></p>
+<h4 id="count--原理"><code>count</code>  原理</h4>
+<p><code>count()</code> 是一个聚合函数，对于返回的结果集，一行行地判断，如果 count 函数的参数不是 NULL，累计值就加 1，否则不加，最后返回累计值。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>count(主键)</code></td>
+<td>InnoDB 引擎会遍历整张表，把每一行的<strong>主键 id 值</strong>都取出来，返回给服务层。服务层拿到主键后，直接按行进行累加(主键不可能为 null)</td>
+</tr>
+<tr>
+<td><code>count(字段)</code></td>
+<td>没有 not null 约束 : InnoDB 引擎会遍历整张表把每一行的字段值都取出来，返回给服务层，服务层判断是否为 null，<strong>不为 null，计数累加</strong>。有 not null 约束：InnoDB 引擎会遍历整张表把每一行的字段值都取出来，返回给服务层，直接按行进行累加。</td>
+</tr>
+<tr>
+<td><code>count(数字)</code></td>
+<td>InnoDB 引擎遍历整张表，但不取值。服务层对于返回的每一行，放一个数字“1”（不论数字是什么都会累加）进去，直接按行进行累加。</td>
+</tr>
+<tr>
+<td><code>count(*)</code></td>
+<td>InnoDB 引擎并不会把全部字段取出来，而是专门做了优化，不取值，服务层直接按行进行累加。</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>按照效率排序，<code>count(字段)</code> &lt; <code>count(主键 id)</code> &lt; <code>count(1)</code> ≈ <code>count(*)</code>，尽量使用 <code>count(*)</code></p>
+<p><a id="reference-update-优化"></a></p>
+<h3 id="update-优化"><code>update</code> 优化</h3>
+<p>使用事务进行 <code>update</code>  时，InnoDB 的行锁是<strong>针对索引</strong>加的锁，不是针对记录加的锁，并且该索引不能失效，否则会从行锁升级为表锁</p>
+<p><strong>应尽量根据主键和索引</strong>进行更新</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 根据索引定位，使用行锁</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">update</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> course </span><span style="color:#D73A49;--shiki-dark:#F97583">set</span><span style="color:#D73A49;--shiki-dark:#F97583"> name</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'a'</span><span style="color:#D73A49;--shiki-dark:#F97583"> where</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 不根据索引定位，使用表锁</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">update</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> course </span><span style="color:#D73A49;--shiki-dark:#F97583">set</span><span style="color:#D73A49;--shiki-dark:#F97583"> name</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'a'</span><span style="color:#D73A49;--shiki-dark:#F97583"> where</span><span style="color:#D73A49;--shiki-dark:#F97583"> name</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'b'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p><a id="reference-视图存储过程触发器"></a></p>
+<h2 id="视图存储过程触发器">视图、存储过程、触发器</h2>
+<ul>
+<li>
+<p>视图</p>
+<ul>
+<li>虚拟存在的表，不保存查询结果，只保存查询的 SQL 逻辑</li>
+<li>简单、安全、数据独立</li>
+</ul>
+</li>
+<li>
+<p>存储过程</p>
+<ul>
+<li>事先定义并存储在数据库中的一段 SQL 语句集合</li>
+<li>减少网络交互、提高性能、封装重用</li>
+</ul>
+</li>
+<li>
+<p>存储函数</p>
+<ul>
+<li>有返回值的存储过程</li>
+<li>可悲存储过程替换</li>
+</ul>
+</li>
+<li>
+<p>触发器</p>
+<ul>
+<li>可以在表数据进行 DML 语句之前或之后触发</li>
+<li>保证数据完整性、日志记录、数据校验</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-视图"></a></p>
+<h3 id="视图">视图</h3>
+<p><a id="reference-概述-1"></a></p>
+<h4 id="概述-1">概述</h4>
+<p>视图（View）是一种虚拟存在的表。视图中的数据并不在数据库中实际存在，行和列数据来自定义视图的查询中使用的表，并且是在使用视图时动态生成的</p>
+<p>视图只保存了查询的 SQL 逻辑，不保存查询结果。所以我们在创建视图的时候，主要的工作就落在创建这条 SQL 查询语句上</p>
+<p><a id="reference-作用"></a></p>
+<h4 id="作用">作用</h4>
+<ol>
+<li>
+<p>简化操作（相当于封装函数）：视图不仅可以简化用户对数据的理解，也可以简化他们的操作。那些被<strong>经常使用的查询</strong>可以被定义为视图，从而使得用户不必为以后的操作<strong>每次指定全部的条件</strong></p>
+</li>
+<li>
+<p>安全（相当于 VO 类）：数据库可以授权，但不能授权到数据库特定行和特定的列上。通过视图用户只能查询和修改他们所能见到的数据</p>
+</li>
+<li>
+<p>数据独立（相当于使用常量管理）：视图可帮助用户屏蔽真实表结构变化带来的影响（真实表中的字段改名，但是通过视图起别名可以屏蔽这种变化）</p>
+</li>
+</ol>
+<p><strong>视图不是物理表</strong>（类似于接口），查询视图时仍会访问原始表，因此性能和原始表一样，复杂嵌套视图可能性能差。</p>
+<p><a id="reference-使用"></a></p>
+<h4 id="使用">使用</h4>
+<p>创建视图</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CREATE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [OR REPLACE] VIEW view_name[(colomns_name)] </span><span style="color:#D73A49;--shiki-dark:#F97583">AS</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SELECT语句</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">[ WITH </span><span style="color:#005CC5;--shiki-dark:#79B8FF">[</span><span style="color:#24292E;--shiki-dark:#E1E4E8">CASCADED | LOCAL ] </span><span style="color:#D73A49;--shiki-dark:#F97583">CHECK</span><span style="color:#D73A49;--shiki-dark:#F97583"> OPTION</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ];</span></span></code></pre>
+<p>查询视图</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 查看创建视图语句</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SHOW </span><span style="color:#D73A49;--shiki-dark:#F97583">CREATE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> VIEW view_name;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 查看视图数据</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SELECT</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#D73A49;--shiki-dark:#F97583"> FROM</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> view_name;</span></span></code></pre>
+<p>修改视图</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 方式一</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CREATE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [OR REPLACE] VIEW 视图名称[(列名列表)] </span><span style="color:#D73A49;--shiki-dark:#F97583">AS</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SELECT语句</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">[ WITH </span><span style="color:#005CC5;--shiki-dark:#79B8FF">[</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> CASCADED | LOCAL ] </span><span style="color:#D73A49;--shiki-dark:#F97583">CHECK</span><span style="color:#D73A49;--shiki-dark:#F97583"> OPTION</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ];</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 方式二</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">ALTER</span><span style="color:#D73A49;--shiki-dark:#F97583"> VIEW</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> 视图名称[(列名列表)] </span><span style="color:#D73A49;--shiki-dark:#F97583">AS</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SELECT语句</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">[ WITH </span><span style="color:#005CC5;--shiki-dark:#79B8FF">[</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> CASCADED | LOCAL ] </span><span style="color:#D73A49;--shiki-dark:#F97583">CHECK</span><span style="color:#D73A49;--shiki-dark:#F97583"> OPTION</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ];</span></span></code></pre>
+<p>删除视图</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">DROP</span><span style="color:#D73A49;--shiki-dark:#F97583"> VIEW</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [IF EXISTS] 视图名称 [,视图名称]</span></span></code></pre>
+<p><a id="reference-检查选项"></a></p>
+<h4 id="检查选项">检查选项</h4>
+<p>当使用 <code>WITH [CASCADED | LOCAL] CHECK OPTION</code>   子句创建视图时，MySQL 会通过视图检查正在更改的每个行，例如插入，更新，删除，以使其符合视图的定义。即：当通过这个视图进行 <code>INSERT</code> 或 <code>UPDATE</code> 时，<strong>插入或修改后的行必须仍能被该视图选出来</strong>。</p>
+<p>MySQL 允许基于另一个视图创建视图，它还会<strong>检查依赖视图中的规则以保持一致性</strong>。</p>
+<p>为了确定检查的范围，MySQL 提供了两个选项： <code>CASCADED</code> 和 <code>LOCAL</code>，默认值为 <code>CASCADED</code>。</p>
+<p><a id="reference-cascaded-级联"></a></p>
+<h5 id="cascaded-级联"><code>CASCADED</code> 级联</h5>
+<p><img alt="image" loading="lazy" decoding="async" width="1284" height="282" src="/_astro/IMG-20260908174134751.fFrO7g20_ZktzbD.webp"></p>
+<p>比如，v2 视图是基于 v1 视图的</p>
+<ul>
+<li>如果在 v2 视图创建的时候指定了检查选项为 <code>cascaded</code>，但是 v1 视图创建时未指定检查选项。 则在执行检查时，不仅会检查 v2，还会级联检查 v2 的关联视图 v1</li>
+<li>如果 v2 视图不指定检查选项，而 v1 视图指定了为 <code>cascaded</code>，执行检查时不会检查 v2，但是会检查 v1</li>
+</ul>
+<p><a id="reference-local-本地"></a></p>
+<h5 id="local-本地"><code>LOCAL</code> 本地</h5>
+<p><img alt="image" loading="lazy" decoding="async" width="1255" height="275" src="/_astro/IMG-20260908174134932.CbRtmy6c_Z246umg.webp"></p>
+<ul>
+<li>如果在 v2 视图创建的时候指定了检查选项为 <code>local</code> ，但是 v1 视图创建时未指定检查选项。 则在执行检查时，只会检查 v2，不会检查 v2 的关联视图 v1。</li>
+<li><code>local</code>  会递归地寻找当前视图创建时依赖的其他视图，若有指定选项则会进行检查，否则找下一个</li>
+<li>就是不会强加检查给关联视图，使用 <code>cascaded</code> 相当于为没有指定 CHECK OPTION 的视图指定了 CHECK OPTION</li>
+</ul>
+<p><a id="reference-视图的更新"></a></p>
+<h4 id="视图的更新">视图的更新</h4>
+<ul>
+<li>
+<p>要使视图可更新，视图中的行与基础表中的行之间必须存在一对一的关系</p>
+</li>
+<li>
+<p>如果视图包含以下条件，则不可更新</p>
+<ul>
+<li>使用了聚合函数或窗口函数（<code>sum()</code> <code>min()</code> <code>max()</code> <code>count()</code>）</li>
+<li><code>DISTINCT</code></li>
+<li><code>GROUP BY</code>：不是一一对应</li>
+<li><code>HAVING</code></li>
+<li><code>UNION</code> 或 <code>UNION ALL</code></li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-存储过程"></a></p>
+<h3 id="存储过程">存储过程</h3>
+<p><a id="reference-概述-2"></a></p>
+<h4 id="概述-2">概述</h4>
+<p>存储过程是事先经过编译并存储在数据库中的一段 SQL 语句的集合，调用存储过程可以简化应用开发人员的很多工作，减少数据在数据库和应用服务器之间的传输，对于提高数据处理的效率是有好处的。</p>
+<p>存储过程思想上很简单，就是数据库 SQL 语言层面的代码封装与重用。</p>
+<ul>
+<li>封装，复用：将 SQL 语句封装在存储过程中，需要时直接调用</li>
+<li>可以接收参数，也可以返回数据</li>
+<li>减少网络交互，提升效率：如果涉及到执行多条 SQL，每一次执行都需要一次网络传输。封装在存储过程中，只需要一次网络交互（理想情况）</li>
+</ul>
+<p><a id="reference-使用-1"></a></p>
+<h4 id="使用-1">使用</h4>
+<p>创建</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CREATE</span><span style="color:#D73A49;--shiki-dark:#F97583"> PROCEDURE</span><span style="color:#D73A49;--shiki-dark:#F97583"> procedure_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [(参数列表)]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">BEGIN</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	-- SQL</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    select</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> count</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table_name;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">END</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p>调用</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CALL</span><span style="color:#D73A49;--shiki-dark:#F97583"> procedure_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span></code></pre>
+<p>查看创建语句</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 查询指定数据库的存储过程及状态信息</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SELECT</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">FROM</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> information_schema</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">ROUTINES</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">WHERE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ROUTINE_SCHEMA </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'classical_practice'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 查询某个存储过程的定义</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SHOW </span><span style="color:#D73A49;--shiki-dark:#F97583">CREATE</span><span style="color:#D73A49;--shiki-dark:#F97583"> PROCEDURE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> procedure_1;</span></span></code></pre>
+<p>删除</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">DROP</span><span style="color:#D73A49;--shiki-dark:#F97583"> PROCEDURE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> procedure_1;</span></span></code></pre>
+<p>在命令行中创建存储过程时，会将存储的 SQL 末尾 <code>;</code>  判断为命令结束符导致提前结束输入，需要使用 <code>delimiter</code>  来修改 SQL 的结束符</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 将结束符修改为 $$</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">delimiter $$</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CREATE</span><span style="color:#D73A49;--shiki-dark:#F97583"> PROCEDURE</span><span style="color:#D73A49;--shiki-dark:#F97583"> procedure_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [(参数列表)]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">BEGIN</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	-- SQL</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    select</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> count</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table_name;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 需要使用 $$来结尾</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">END</span><span style="color:#24292E;--shiki-dark:#E1E4E8">$$</span></span></code></pre>
+<p><a id="reference-变量"></a></p>
+<h4 id="变量">变量</h4>
+<p>MySQL 中存在三种变量类型：</p>
+<ul>
+<li>系统变量</li>
+<li>用户定义变量</li>
+<li>局部变量</li>
+</ul>
+<p><a id="reference-系统变量"></a></p>
+<h5 id="系统变量">系统变量</h5>
+<p>MySQL 服务器提供，不是用户定义的，属于服务器层面。分为</p>
+<ul>
+<li>全局变量（GLOBAL）</li>
+<li>会话变量（SESSION）：一个 console 是一个会话，仅在当前会话内生效</li>
+</ul>
+<p>查看系统变量</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 查看所有系统变量</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SHOW </span><span style="color:#D73A49;--shiki-dark:#F97583">SESSION</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> VARIABLES;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SHOW </span><span style="color:#D73A49;--shiki-dark:#F97583">GLOBAL</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> VARIABLES;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 模糊匹配查找</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SHOW </span><span style="color:#D73A49;--shiki-dark:#F97583">SESSION</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> VARIABLES </span><span style="color:#D73A49;--shiki-dark:#F97583">LIKE</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'auto%'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SHOW </span><span style="color:#D73A49;--shiki-dark:#F97583">GLOBAL</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> VARIABLES </span><span style="color:#D73A49;--shiki-dark:#F97583">LIKE</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'auto%'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 指定查找</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SELECT</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @@autocommit;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SELECT</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @@</span><span style="color:#005CC5;--shiki-dark:#79B8FF">local</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">autocommit</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p>设置系统变量</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SET</span><span style="color:#D73A49;--shiki-dark:#F97583"> SESSION</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> autocommit </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SET</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @@</span><span style="color:#005CC5;--shiki-dark:#79B8FF">SESSION</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">autocommit</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p>不指定 SESSION/GLOBAL，默认为 SESSION</p>
+<p>MySQL 服务重启后，设置的全局变量会失效。需要持久化则需在 <code>/etc/my.cnf</code>  配置</p>
+<p><a id="reference-用户定义变量"></a></p>
+<h5 id="用户定义变量">用户定义变量</h5>
+<p>用户根据需要自己定义的变量，用户变量不用提前声明，在用的时候直接用 “@ 变量名” 使用就可以。其作用域为当前连接（会话）</p>
+<p>赋值</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SET</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @var_age </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 18</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SET</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @var_name :</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Exusiai'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, @var_age :</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 19</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SELECT</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @var_name :</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Texas'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SELECT</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s_name </span><span style="color:#D73A49;--shiki-dark:#F97583">INTO</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @var_name </span><span style="color:#D73A49;--shiki-dark:#F97583">FROM</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> student </span><span style="color:#D73A49;--shiki-dark:#F97583">where</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s_id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p>使用</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SELECT</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @var_name;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 或者直接使用 @var_name 进行填充</span></span></code></pre>
+<p>用户定义的变量无需对其进行声明或初始化，只不过获取到的值为 NULL</p>
+<p><a id="reference-局部变量"></a></p>
+<h5 id="局部变量">局部变量</h5>
+<p>根据需要定义的在局部生效的变量，访问之前，需要 <code>DECLARE</code>  声明。可用作<strong>存储过程内</strong>的局部变量和输入参数，局部变量的范围是在其内声明的 <code>BEGIN ... END</code>  块</p>
+<p>使用</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">create</span><span style="color:#D73A49;--shiki-dark:#F97583"> procedure</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">begin</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    -- 声明</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    declare</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> stu_count </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> default</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    -- 赋值</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    set</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> stu_count </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    set</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> stu_count </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    select</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> count</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">into</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> stu_count </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> student;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> stu_count;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">end</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">call</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p();</span></span></code></pre>
+<p><a id="reference-if"></a></p>
+<h4 id="if"><code>if</code></h4>
+<p>用于条件判断</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">create</span><span style="color:#D73A49;--shiki-dark:#F97583"> procedure</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p_if()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">begin</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    declare</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> score </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> default</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    declare</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result </span><span style="color:#D73A49;--shiki-dark:#F97583">varchar</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s_score </span><span style="color:#D73A49;--shiki-dark:#F97583">into</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> score </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> score </span><span style="color:#D73A49;--shiki-dark:#F97583">where</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s_id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c_id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> score </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 90</span><span style="color:#D73A49;--shiki-dark:#F97583"> then</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        set</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result :</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Perfect'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    elseif score </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 60</span><span style="color:#D73A49;--shiki-dark:#F97583"> then</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        set</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result :</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Great'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    else</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        set</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result :</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Bad'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    end</span><span style="color:#D73A49;--shiki-dark:#F97583"> if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> score, result;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">end</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">call</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p_if();</span></span></code></pre>
+<p><a id="reference-参数"></a></p>
+<h4 id="参数">参数</h4>
+<ul>
+<li><code>IN</code>：输入</li>
+<li><code>OUT</code>：输出</li>
+<li><code>INOUT</code>：输入输出（类似指针）</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">create</span><span style="color:#D73A49;--shiki-dark:#F97583"> procedure</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p_arg(</span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> score </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">out</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result </span><span style="color:#D73A49;--shiki-dark:#F97583">varchar</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">begin</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> score </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 90</span><span style="color:#D73A49;--shiki-dark:#F97583"> then</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        set</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result :</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Perfect'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    elseif score </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 60</span><span style="color:#D73A49;--shiki-dark:#F97583"> then</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        set</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result :</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Great'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    else</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        set</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result :</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Bad'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    end</span><span style="color:#D73A49;--shiki-dark:#F97583"> if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> score, result;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">end</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s_score </span><span style="color:#D73A49;--shiki-dark:#F97583">into</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @score </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> score </span><span style="color:#D73A49;--shiki-dark:#F97583">where</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s_id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c_id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">call</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p_arg(@score, @result);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @result;</span></span></code></pre>
+<p>输入输出案例</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">create</span><span style="color:#D73A49;--shiki-dark:#F97583"> procedure</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p_inout(inout score double)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">begin</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    set</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> score :</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> score </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">end</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s_score </span><span style="color:#D73A49;--shiki-dark:#F97583">into</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @score </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> score </span><span style="color:#D73A49;--shiki-dark:#F97583">where</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s_id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c_id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">call</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p_inout(@score);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @score;</span></span></code></pre>
+<p><a id="reference-case"></a></p>
+<h4 id="case"><code>case</code></h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 含义： 当case_value的值为 when_value1时，执行statement_list1，当值为 when_value2时，执行statement_list2， 否则就执行 statement_list</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CASE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> case_value</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">WHEN</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> when_value1 </span><span style="color:#D73A49;--shiki-dark:#F97583">THEN</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> statement_list1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">[ WHEN when_value2 THEN statement_list2] ...</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">[ ELSE statement_list ]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">END</span><span style="color:#D73A49;--shiki-dark:#F97583"> CASE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 含义： 当条件search_condition1成立时，执行statement_list1，当条件search_condition2成</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">立时，执行statement_list2， 否则就执行 statement_list</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CASE</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">WHEN</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> search_condition1 </span><span style="color:#D73A49;--shiki-dark:#F97583">THEN</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> statement_list1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">[WHEN search_condition2 THEN statement_list2] ...</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">[ELSE statement_list]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">END</span><span style="color:#D73A49;--shiki-dark:#F97583"> CASE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p><a id="reference-while"></a></p>
+<h4 id="while"><code>while</code></h4>
+<p>是有条件的循环控制语句。满足条件后，再执行循环体中的 SQL 语句。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 先判定条件，如果条件为true，则执行逻辑，否则，不执行逻辑</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">WHILE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> 条件 DO</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SQL逻辑...</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">END</span><span style="color:#D73A49;--shiki-dark:#F97583"> WHILE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p><a id="reference-repeat"></a></p>
+<h4 id="repeat"><code>repeat</code></h4>
+<p>有条件的循环控制语句, 当满足 until 声明的条件的时候，则退出循环 -&gt; <code>do while</code></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 先执行一次逻辑，然后判定UNTIL条件是否满足，如果满足，则退出。如果不满足，则继续下一次循环</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">REPEAT</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SQL逻辑...</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">UNTIL 条件</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">END</span><span style="color:#D73A49;--shiki-dark:#F97583"> REPEAT</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p><a id="reference-loop"></a></p>
+<h4 id="loop"><code>loop</code></h4>
+<p>简单的循环，如果不在 SQL 逻辑中增加退出循环的条件，可以用其来实现简单的死循环</p>
+<ul>
+<li><code>LEAVE</code> ：配合循环使用，退出循环 -&gt; <code>break</code></li>
+<li><code>ITERATE</code>：必须用在循环中，作用是跳过当前循环剩下的语句，直接进入下一次循环 -&gt; <code>continue</code></li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">[begin_label:] </span><span style="color:#D73A49;--shiki-dark:#F97583">LOOP</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	-- SQL逻辑...</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">END</span><span style="color:#D73A49;--shiki-dark:#F97583"> LOOP</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [end_label];</span></span></code></pre>
+<p><a id="reference-cursor-游标"></a></p>
+<h4 id="cursor-游标"><code>cursor</code> 游标</h4>
+<p>存储查询结果集的数据类型 , 在存储过程和函数中可以使用游标对结果集进行循环的处理。游标的使用包括游标的声明、<code>OPEN</code>、<code>FETCH</code> 和 <code>CLOSE</code></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 声明游标</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">DECLARE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> 游标名称 </span><span style="color:#D73A49;--shiki-dark:#F97583">CURSOR</span><span style="color:#D73A49;--shiki-dark:#F97583"> FOR</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> 查询语句 ;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 打开游标</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">OPEN</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> 游标名称 ;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 获取游标记录</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">FETCH</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> 游标名称 </span><span style="color:#D73A49;--shiki-dark:#F97583">INTO</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> 变量 [, 变量 ] ;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 关闭游标</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CLOSE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> 游标名称 ;</span></span></code></pre>
+<p>使用例</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">create</span><span style="color:#D73A49;--shiki-dark:#F97583"> procedure</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p11(</span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> uage </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">begin</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    declare</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> uname </span><span style="color:#D73A49;--shiki-dark:#F97583">varchar</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">100</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    declare</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> upro </span><span style="color:#D73A49;--shiki-dark:#F97583">varchar</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">100</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    declare</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> u_cursor </span><span style="color:#D73A49;--shiki-dark:#F97583">cursor</span><span style="color:#D73A49;--shiki-dark:#F97583"> for</span><span style="color:#D73A49;--shiki-dark:#F97583"> select</span><span style="color:#D73A49;--shiki-dark:#F97583"> name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, profession</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                                from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tb_user</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                                where</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> age </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;=</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                                      uage;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    drop</span><span style="color:#D73A49;--shiki-dark:#F97583"> table</span><span style="color:#D73A49;--shiki-dark:#F97583"> if</span><span style="color:#D73A49;--shiki-dark:#F97583"> exists</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tb_user_pro;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    create</span><span style="color:#D73A49;--shiki-dark:#F97583"> table</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#D73A49;--shiki-dark:#F97583"> exists</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tb_user_pro</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    (</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        id         </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> primary key</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto_increment,</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        name</span><span style="color:#D73A49;--shiki-dark:#F97583">       varchar</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">100</span><span style="color:#24292E;--shiki-dark:#E1E4E8">),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        profession </span><span style="color:#D73A49;--shiki-dark:#F97583">varchar</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">100</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    );</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    open</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> u_cursor;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    while</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        do</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            fetch</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> u_cursor </span><span style="color:#D73A49;--shiki-dark:#F97583">into</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> uname,upro;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            insert into</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tb_user_pro </span><span style="color:#D73A49;--shiki-dark:#F97583">values</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#D73A49;--shiki-dark:#F97583">null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, uname, upro);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        end</span><span style="color:#D73A49;--shiki-dark:#F97583"> while</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    close</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> u_cursor;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">end</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">call</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p11(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">30</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span></code></pre>
+<p><a id="reference-handler"></a></p>
+<h4 id="handler"><code>handler</code></h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">DECLARE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> handler_action HANDLER </span><span style="color:#D73A49;--shiki-dark:#F97583">FOR</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> condition_value [, condition_value]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	... </span><span style="color:#D73A49;--shiki-dark:#F97583">statement</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">handler_action 的取值：</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	CONTINUE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: 继续执行当前程序</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	EXIT: 终止执行当前程序</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">condition_value 的取值：</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	SQLSTATE sqlstate_value: 状态码，如 </span><span style="color:#005CC5;--shiki-dark:#79B8FF">02000</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	SQLWARNING: 所有以01开头的SQLSTATE代码的简写</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	NOT</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> FOUND: 所有以02开头的SQLSTATE代码的简写</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	SQLEXCEPTION: 所有没有被SQLWARNING 或 </span><span style="color:#D73A49;--shiki-dark:#F97583">NOT</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> FOUND捕获的SQLSTATE代码的简写</span></span></code></pre>
+<p><a id="reference-存储函数"></a></p>
+<h3 id="存储函数">存储函数</h3>
+<p>存储函数是有返回值的存储过程，存储函数的参数只能是 IN 类型的</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CREATE</span><span style="color:#D73A49;--shiki-dark:#F97583"> FUNCTION</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> 存储函数名称</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ([ 参数列表 ])</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">RETURNS</span><span style="color:#D73A49;--shiki-dark:#F97583"> type</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [characteristic ...]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">BEGIN</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	-- SQL语句</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	RETURN</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ...;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">END</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ;</span></span></code></pre>
+<p>characteristic：</p>
+<ul>
+<li><code>DETERMINISTIC</code>：相同的输入参数总是产生相同的结果</li>
+<li><code>NO SQL</code> ：不包含 SQL 语句</li>
+<li><code>READS SQL DATA</code>：包含读取数据的语句，但不包含写入数据的语句</li>
+</ul>
+<blockquote>
+<p>在 university 数据库中，创建一个函数，用于根据学生 ID 返回该学生的总学分。</p>
+</blockquote>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">DELIMITER </span><span style="color:#D73A49;--shiki-dark:#F97583">//</span><span style="color:#24292E;--shiki-dark:#E1E4E8">  </span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CREATE</span><span style="color:#D73A49;--shiki-dark:#F97583"> FUNCTION</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> GetStudentTotalCredits</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(input_student_id </span><span style="color:#D73A49;--shiki-dark:#F97583">VARCHAR</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))  </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    RETURNS</span><span style="color:#D73A49;--shiki-dark:#F97583"> INT</span><span style="color:#24292E;--shiki-dark:#E1E4E8">  </span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	-- READS SQL DATA: 指定该函数会读取数据库中的数据，但不会修改数据。这是必需的特性声明，告诉 MySQL 服务器该函数的行为。</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    READS </span><span style="color:#D73A49;--shiki-dark:#F97583">SQL</span><span style="color:#D73A49;--shiki-dark:#F97583"> DATA</span><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    -- DETERMINISTIC: 表示对于相同的输入参数，函数总是返回相同的结果。这有助于 MySQL 优化查询执行计划。</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    DETERMINISTICBEGIN  </span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	-- 声明一个整型变量total_credits，初始值为0</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    DECLARE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> total_credits </span><span style="color:#D73A49;--shiki-dark:#F97583">INT</span><span style="color:#D73A49;--shiki-dark:#F97583"> DEFAULT</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;  </span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  	-- COALESCE函数用于处理NULL值，当SUM结果为NULL时（如没有符合条件的记录），返回0</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    SELECT</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> COALESCE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">SUM</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">c</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">credits</span><span style="color:#24292E;--shiki-dark:#E1E4E8">), </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    INTO</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> total_credits  </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    FROM</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> takes t  </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">             JOIN</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> course c </span><span style="color:#D73A49;--shiki-dark:#F97583">ON</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> t</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">course_id</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> c</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">course_id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">  </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    WHERE</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> t</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">id</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> input_student_id  </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">      AND</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> t</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">grade</span><span style="color:#D73A49;--shiki-dark:#F97583"> IS NOT NULL</span><span style="color:#24292E;--shiki-dark:#E1E4E8">  </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">      AND</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> t</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">grade</span><span style="color:#D73A49;--shiki-dark:#F97583"> !=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'F'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;  </span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    RETURN</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> total_credits;  </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">END</span><span style="color:#D73A49;--shiki-dark:#F97583"> //</span><span style="color:#24292E;--shiki-dark:#E1E4E8">  </span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  </span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">DELIMITER ;</span></span></code></pre>
+<p><a id="reference-触发器"></a></p>
+<h3 id="触发器">触发器</h3>
+<p>触发器是与表有关的数据库对象，指在 insert/update/delete 之前或之后，<strong>触发并执行触发器中定义的 SQL 语句集合</strong>。这种特性可以协助应用在数据库端确保数据的完整性、日志记录、数据校验等操作</p>
+<ul>
+<li>使用别名 <code>OLD</code> 和 <code>NEW</code> 来<strong>引用</strong>触发器中发生变化的记录内容</li>
+<li>只支持行级触发（影响了几行，触发几次），不支持语句级触发</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>触发器类型</th>
+<th><code>NEW</code>/<code>OLD</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>INSERT</td>
+<td><code>NEW</code> 将要或者已经新增的数据</td>
+</tr>
+<tr>
+<td>UPDATE</td>
+<td><code>OLD</code> 修改之前的数据，<code>NEW</code> 将要或已经修改后的数据</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>OLD</code> 将要或者已经删除的数据</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-使用-2"></a></p>
+<h4 id="使用-2">使用</h4>
+<p>创建</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">create</span><span style="color:#D73A49;--shiki-dark:#F97583"> trigger</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> trigger1</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    before</span><span style="color:#D73A49;--shiki-dark:#F97583"> insert</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    on</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> course</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> each </span><span style="color:#D73A49;--shiki-dark:#F97583">row</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">begin</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    insert into</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> course_log (course_id, course_name) </span><span style="color:#D73A49;--shiki-dark:#F97583">value</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#005CC5;--shiki-dark:#79B8FF">NEW</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">c_id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">NEW</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">c_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">end</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p>查看</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">show triggers;</span></span></code></pre>
+<p>删除</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">drop</span><span style="color:#D73A49;--shiki-dark:#F97583"> trigger</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> trigger1</span></span></code></pre>
+<p><a id="reference-锁"></a></p>
+<h2 id="锁">锁</h2>
+<p>锁是计算机协调<strong>多个进程或线程并发访问某一资源</strong>的机制</p>
+<p>在数据库中，除传统的计算资源（CPU、RAM、I/O）的争用以外，数据也是一种供许多用户共享的资源。如何保证数据并发访问的一致性、有效性是所有数据库必须解决的一个问题，锁冲突也是影响数据库并发访问性能的一个重要因素。</p>
+<p>按照锁的粒度分：</p>
+<ul>
+<li>全局锁：锁定数据库中所有表</li>
+<li>表级锁：锁定被操作的整张表</li>
+<li>行级锁：锁定被操作的行</li>
+</ul>
+<p>核心思路在于：读读共享，读写互斥</p>
+<p><a id="reference-全局锁"></a></p>
+<h3 id="全局锁">全局锁</h3>
+<p>对整个数据库实例加锁</p>
+<ul>
+<li>加锁后整个实例处于只读状态</li>
+<li>后续的 DML，DDL，已经更新操作的事务提交都会被阻塞；可以执行 DQL</li>
+</ul>
+<p>使用场景：全库的逻辑备份（数据备份就使用了查询操作）</p>
+<p><a id="reference-使用-3"></a></p>
+<h4 id="使用-3">使用</h4>
+<p>加全局锁</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">flush tables </span><span style="color:#D73A49;--shiki-dark:#F97583">with</span><span style="color:#D73A49;--shiki-dark:#F97583"> read</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lock;</span></span></code></pre>
+<p>数据备份，在操作系统命令行环境下执行</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">mysqldump</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -h</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 127.0.0.1</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -u</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> root</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 123456</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> database_name</span><span style="color:#D73A49;--shiki-dark:#F97583"> &gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> database_name.sql</span></span></code></pre>
+<p>释放锁</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">unlock</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tables;</span></span></code></pre>
+<p><a id="reference-特点"></a></p>
+<h4 id="特点">特点</h4>
+<p>数据库中加全局锁，是一个比较重的操作，存在以下问题：</p>
+<ul>
+<li>如果在主库上备份，那么在备份期间都不能执行更新，业务基本上就得停摆。</li>
+<li>如果在从库上备份，那么在备份期间从库不能执行主库同步过来的二进制日志（binlog），会导致主从延迟。</li>
+</ul>
+<p>在 InnoDB 引擎中，可以在备份时加上参数 –single-transaction 参数来完成不加锁的一致性数据备份。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">mysqldump</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --single-transaction</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -h</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 127.0.0.1</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -u</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> root</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 123456</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> database_name</span><span style="color:#D73A49;--shiki-dark:#F97583"> &gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> database_name.sql</span></span></code></pre>
+<p><a id="reference-表级锁"></a></p>
+<h3 id="表级锁">表级锁</h3>
+<p>表级锁，每次操作锁住整张表。锁定粒度大，发生锁冲突的概率最高，并发度最低。应用在 MyISAM、InnoDB、BDB 等存储引擎中</p>
+<p>分类：</p>
+<ul>
+<li>表锁</li>
+<li>元数据锁（meta data lock, MDL）</li>
+<li>意向锁</li>
+</ul>
+<p><a id="reference-表锁"></a></p>
+<h4 id="表锁">表锁</h4>
+<ul>
+<li>表共享读锁（read lock）</li>
+<li>表独占写锁（write lock）</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 加锁</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">lock tables table_name </span><span style="color:#D73A49;--shiki-dark:#F97583">read/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">write;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 解锁</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">unlock</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tables;</span></span></code></pre>
+<p>对当前客户端无影响，对于其他客户端：</p>
+<ul>
+<li>
+<p>读锁</p>
+<ul>
+<li>不会影响读，会阻塞写</li>
+</ul>
+</li>
+<li>
+<p>写锁</p>
+<ul>
+<li>会阻塞读和写</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-元数据锁"></a></p>
+<h4 id="元数据锁">元数据锁</h4>
+<p>MDL 加锁过程是系统自动控制，无需显式使用，在访问一张表的时候会自动加上。</p>
+<p>MDL 锁主要作用是维护表<strong>元数据的数据一致性</strong>，在表上有活动事务的时候，不可以对元数据进行写入操作。为了避免 DML 与 DDL 冲突，保证读写的正确性</p>
+<p>元数据：表结构</p>
+<ul>
+<li>当对一张表进行增删改查的时候，加 MDL 读锁(共享)</li>
+<li>当对表结构进行变更操作的时候，加 MDL 写锁(排他）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>对应 SQL</th>
+<th>锁类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lock tables xxx read /write</td>
+<td>SHARED_READ_ONLY / SHARED_NO_READ_WRITE</td>
+<td></td>
+</tr>
+<tr>
+<td>select、select … lock in share mode</td>
+<td>SHARED_READ</td>
+<td>与 SHARED_READ、SHARED_WRITE 兼容，与 EXCLUSIVE 互斥</td>
+</tr>
+<tr>
+<td>insert、update、delete、select … for update</td>
+<td>SHARED_WRITE</td>
+<td>与 SHARED_READ、SHARED_WRITE 兼容，与 EXCLUSIVE 互斥</td>
+</tr>
+<tr>
+<td>alter table …</td>
+<td>EXCLUSIVE</td>
+<td>与其他的 MDL 都互斥</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>当执行 SELECT、INSERT、UPDATE、DELETE 等语句时，添加的是元数据共享锁（SHARED_READ /SHARED_WRITE），之间是兼容的</li>
+<li>会阻塞元数据排他锁（EXCLUSIVE）</li>
+</ul>
+<p>查看元数据锁情况：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> object_type,object_schema,object_name,lock_type,lock_duration </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> performance_schema</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">metadata_locks</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p><a id="reference-意向锁"></a></p>
+<h4 id="意向锁">意向锁</h4>
+<p>为了避免 DML 在执行时，加的行锁与表锁的冲突，在 InnoDB 中引入了意向锁，使得表锁不用检查每行数据是否加锁，使用意向锁来减少表锁的检查。</p>
+<p>例：客户端 A 加上了行锁，此时客户端 B 想要加上表锁，则必须遍历所有行来判断是否有行锁。因此引入意向锁，标记表中是否存在行锁，则不需要再遍历整张表</p>
+<ul>
+<li><strong>意向共享锁(IS)</strong> : 由语句 select … lock in share mode 添加 。 与<strong>表锁共享锁(read)</strong> 兼容，与<strong>表锁排他锁(write)</strong> 互斥</li>
+<li><strong>意向排他锁(IX)</strong> : 由 insert、update、delete、select…for update 添加。与<strong>表锁共享锁(read)</strong> 及<strong>排他锁(write)</strong> 都互斥，<strong>意向锁之间不会互斥</strong></li>
+</ul>
+<p>一旦事务提交了，意向共享锁、意向排他锁，都会自动释放</p>
+<p>查看意向锁和行锁的加锁情况：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> object_schema,object_name,index_name,lock_type,lock_mode,lock_data </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> performance_schema</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">data_locks</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p><a id="reference-行级锁"></a></p>
+<h3 id="行级锁">行级锁</h3>
+<p>行级锁，每次操作锁住对应的行数据。锁定粒度最小，发生锁冲突的概率最低，并发度最高。应用在 InnoDB 存储引擎中</p>
+<p>InnoDB 的数据是基于<strong>索引组织</strong>的，行锁是通过对<strong>索引上的索引项</strong>加锁来实现的，而不是对记录加的锁。</p>
+<p>对于行级锁，主要分为以下三类：</p>
+<ol>
+<li>
+<p>行锁（Record Lock）：锁定<strong>单个行记录</strong>的锁，防止其他事务对此进行 update 和 delete。支持 RC（Read Commit）、RR（Repeatable Read）隔离级别</p>
+</li>
+<li>
+<p>间隙锁（Gap Lock）：锁定<strong>索引记录间隙</strong>（不包含该记录），确保索引记录间隙不变，防止其他事务在这个间隙进行 insert，产生幻读。支持 RR 隔离级别</p>
+</li>
+<li>
+<p>临键锁（Next-Key Lock）：行锁和间隙锁组合，同时锁住数据和间隙。支持 RR</p>
+</li>
+</ol>
+<p>‍</p>
+<p><a id="reference-行锁"></a></p>
+<h4 id="行锁">行锁</h4>
+<p>InnoDB 实现了以下两种类型的行锁：</p>
+<ul>
+<li>共享锁（S）：允许一个事务去读一行，阻止其他事务获得相同数据集的排它锁</li>
+<li>排他锁（X）：允许获取排他锁的事务更新数据，阻止其他事务获得相同数据集的共享锁和排他锁</li>
+</ul>
+<p>S 和 S 共享，X 和 X、X 和 S 互斥</p>
+<p><img alt="image" loading="lazy" decoding="async" width="890" height="206" src="/_astro/IMG-20260908174135127.Tp3ROFS__Z1MTKKN.webp"></p>
+<p>加锁规则：</p>
+<table>
+<thead>
+<tr>
+<th>SQL</th>
+<th>行锁类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>insert</td>
+<td>排他锁</td>
+<td>自动加锁</td>
+</tr>
+<tr>
+<td>update</td>
+<td>排他锁</td>
+<td>自动加锁</td>
+</tr>
+<tr>
+<td>delete</td>
+<td>排他锁</td>
+<td>自动加锁</td>
+</tr>
+<tr>
+<td>select</td>
+<td>不加锁</td>
+<td></td>
+</tr>
+<tr>
+<td>select … lock in share mode</td>
+<td>共享锁</td>
+<td>手动添加 lock in share mode</td>
+</tr>
+<tr>
+<td>select … for update</td>
+<td>排他锁</td>
+<td>手动添加 for update</td>
+</tr>
+</tbody>
+</table>
+<p>默认情况下，InnoDB 在 REPEATABLE READ 事务隔离级别运行，InnoDB 使用 next-key 锁进行搜索和索引扫描，以防止幻读</p>
+<ul>
+<li>针对唯一索引进行检索时，对<strong>已存在的记录</strong>进行等值匹配时，将会自动优化为行锁</li>
+<li>InnoDB 的行锁是针对于索引加的锁，不通过索引条件检索数据，那么 InnoDB 将对表中的所有记录加锁，此时就会升级为<strong>表锁</strong></li>
+</ul>
+<p><a id="reference-间隙锁临键锁"></a></p>
+<h4 id="间隙锁临键锁">间隙锁&amp;临键锁</h4>
+<ul>
+<li>
+<p>索引上的等值查询（唯一索引），给不存在的记录加锁时, 优化为间隙锁</p>
+</li>
+<li>
+<p>索引上的等值查询（非唯一普通索引），向右遍历时最后一个值不满足查询需求时，next-key lock 退化为间隙锁</p>
+<ul>
+<li>等值：临键锁</li>
+<li>对不满足值之前的间隙加间隙锁</li>
+</ul>
+</li>
+<li>
+<p>索引上的范围查询（唯一索引），会访问到不满足条件的第一个值为止</p>
+<p>如查询 &gt;= 目标值：</p>
+<ul>
+<li>[目标值]：行锁</li>
+<li>(目标值, 最大值]：临键锁</li>
+<li>(最大值, 正无穷)：正无穷的临键锁</li>
+</ul>
+</li>
+</ul>
+<p>间隙锁唯一目的是防止其他事务插入间隙。间隙锁可以共存，一个事务采用的间隙锁<strong>不会阻止</strong>另一个事务在<strong>同一间隙上</strong>采用间隙锁。</p>
+<p><a id="reference-innodb-引擎"></a></p>
+<h2 id="innodb-引擎">InnoDB 引擎</h2>
+<p><a id="reference-逻辑存储结构-1"></a></p>
+<h3 id="逻辑存储结构-1">逻辑存储结构</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1350" height="683" src="/_astro/IMG-20260908174135239.CjkHuxBQ_Z2npjqs.webp"></p>
+<p><a id="reference-表空间"></a></p>
+<h4 id="表空间">表空间</h4>
+<p>表空间是 InnoDB 存储引擎逻辑结构的最高层， 如果用户启用了参数 innodb_file_per_table(在 8.0 版本中默认开启) ，则每张表都会有一个表空间（xxx.ibd），一个 mysql 实例可以对应多个表空间，用于存储记录、索引等数据</p>
+<p><a id="reference-段"></a></p>
+<h4 id="段">段</h4>
+<p>段，分为：</p>
+<ul>
+<li>数据段（Leaf node segment）</li>
+<li>索引段（Non-leaf node segment）</li>
+<li>回滚段（Rollback segment）</li>
+</ul>
+<p>InnoDB 是索引组织表，数据段就是 B+ 树的叶子节点， 索引段即为 B+ 树的非叶子节点</p>
+<p>段用来管理多个 Extent（区）</p>
+<p><a id="reference-区"></a></p>
+<h4 id="区">区</h4>
+<p>区，表空间的单元结构，每个区的大小为 1M。 默认情况下， InnoDB 存储引擎页大小为 16K， 即一个区中一共有 64 个连续的页</p>
+<p><a id="reference-页"></a></p>
+<h4 id="页">页</h4>
+<p>页，是 InnoDB 存储引擎磁盘管理的最小单元，每个页的大小默认为 16KB。为了保证页的连续性，InnoDB 存储引擎每次从磁盘申请 4-5 个区</p>
+<p><a id="reference-行"></a></p>
+<h4 id="行">行</h4>
+<p>行，InnoDB 存储引擎数据是按行进行存放的。</p>
+<p>在行中，默认有两个隐藏字段：</p>
+<ul>
+<li>Trx_id：每次对某条记录进行改动时，都会把对应的<strong>事务 id</strong> 赋值给 trx_id 隐藏列</li>
+<li>Roll_pointer：每次对某条引记录进行改动时，都会把旧的版本写入到 <strong>undo 日志</strong>中，然后这个隐藏列就相当于一个指针，可以通过它来找到该记录修改前的信息</li>
+</ul>
+<p><a id="reference-架构"></a></p>
+<h3 id="架构">架构</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="676" height="481" src="/_astro/IMG-20260908174135470.DZoY_tuI_FiBif.webp"></p>
+<p><a id="reference-内存结构"></a></p>
+<h4 id="内存结构">内存结构</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="199" height="441" src="/_astro/IMG-20260908174135665.BkLjyeH2_ZpbrlL.webp"></p>
+<p>在专用服务器上，通常将多达 80％的物理内存分配给缓冲池</p>
+<p>参数设置：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">show variables </span><span style="color:#D73A49;--shiki-dark:#F97583">like</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'innodb_buffer_pool_size'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<p><a id="reference-buffer-pool-缓冲池"></a></p>
+<h5 id="buffer-pool-缓冲池">Buffer Pool 缓冲池</h5>
+<ul>
+<li>
+<p>缓冲池 Buffer Pool，是主内存中的一个区域，里面可以缓存磁盘上经常操作的真实数据，在执行增删改查操作时，先操作缓冲池中的数据（若缓冲池没有数据，则从磁盘加载并缓存），然后再以一定频率刷新到磁盘，从而减少磁盘 IO，加快处理速度</p>
+</li>
+<li>
+<p>缓冲池以 Page 页为单位，底层采用链表数据结构管理 Page。根据状态，将 Page 分为三种类型：</p>
+<ul>
+<li>free page：空闲 page，未被使用</li>
+<li>clean page：被使用 page，数据没有被修改过</li>
+<li>dirty page：脏页，被使用 page，数据被修改过，也中数据与磁盘的数据产生了不一致</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-change-buffer-更改缓冲区"></a></p>
+<h5 id="change-buffer-更改缓冲区">Change Buffer 更改缓冲区</h5>
+<ul>
+<li>Change Buffer，更改缓冲区（针对于<strong>非唯一二级索引页</strong>），在执行 DML 语句时，如果这些数据 Page 没有在 Buffer Pool 中，不会直接操作磁盘，而会将数据变更存在更改缓冲区 Change Buffer 中，在未来数据被读取时，<strong>再将数据合并恢复到 Buffer Pool 中</strong>，再将合并后的数据刷新到磁盘中</li>
+<li>二级索引通常是非唯一的，并且以相对随机的顺序插入二级索引。同样，删除和更新可能会<strong>影响索引树中不相邻的二级索引页</strong>，如果每一次都操作磁盘，会造成大量的磁盘 IO。有了 ChangeBuffer 之后，可以在缓冲池中进行合并处理，减少磁盘 IO</li>
+</ul>
+<p><a id="reference-adaptive-hash-index-自适应哈希索引"></a></p>
+<h5 id="adaptive-hash-index-自适应哈希索引">Adaptive Hash Index 自适应哈希索引</h5>
+<ul>
+<li>
+<p>用于优化对 Buffer Pool 数据的查询</p>
+</li>
+<li>
+<p>MySQL 的 innoDB 引擎中虽然没有直接支持 hash 索引，但是提供了自适应 hash 索引</p>
+<ul>
+<li>hash 索引在进行等值匹配时，一般性能是要高于 B+ 树的，hash 索引一般只需要一次 IO 即可，而 B+ 树可能需要几次匹配；但是 hash 索引不适合做范围查询、模糊匹配等</li>
+</ul>
+</li>
+<li>
+<p>InnoDB 存储引擎会监控对表上各索引页的查询，如果观察到在特定的条件下 hash 索引可以提升速度，则建立 hash 索引，称之为自适应 hash 索引（无需人工干预，系统自行完成）</p>
+</li>
+</ul>
+<p><a id="reference-log-buffer-日志缓冲区"></a></p>
+<h5 id="log-buffer-日志缓冲区">Log Buffer 日志缓冲区</h5>
+<ul>
+<li>
+<p>用来保存要写入到磁盘中的 log 日志数据（redo log 、undo log），默认大小为 16MB，日志缓冲区的日志会定期刷新到磁盘中。如果需要更新、插入或删除许多行的事务，增加日志缓冲区的大小可以节省磁盘 I/O</p>
+</li>
+<li>
+<p>innodb_log_buffer_size：缓冲区大小</p>
+</li>
+<li>
+<p>innodb_flush_log_at_trx_commit：日志刷新到磁盘时机，取值主要包含以下三个：</p>
+<ul>
+<li>0：<strong>每秒</strong>将日志写入并刷新到磁盘一次</li>
+<li>1：日志在<strong>每次事务提交时</strong>写入并刷新到磁盘，<strong>默认值</strong></li>
+<li>2：日志在<strong>每次事务提交</strong>后写入，并<strong>每秒</strong>刷新到磁盘一次</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-磁盘结构"></a></p>
+<h4 id="磁盘结构">磁盘结构</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="361" height="440" src="/_astro/IMG-20260908174135837.DLEKEKv8_192Bi0.webp"></p>
+<p><a id="reference-system-tablespace-系统表空间"></a></p>
+<h5 id="system-tablespace-系统表空间">System Tablespace 系统表空间</h5>
+<ul>
+<li>系统表空间是<strong>更改缓冲区的存储区域</strong></li>
+<li>如果表是在系统表空间而不是每个表文件或通用表空间中创建的，它也可能包含表和索引数据</li>
+<li>参数：innodb_data_file_path</li>
+</ul>
+<p><a id="reference-file-per-table-tablespaces-独立表空间"></a></p>
+<h5 id="file-per-table-tablespaces-独立表空间">File-Per-Table Tablespaces 独立表空间</h5>
+<ul>
+<li>如果开启了 innodb_file_per_table 开关 ，则每个表的文件表空间<strong>包含单个 InnoDB 表的数据和索引</strong> ，并存储在文件系统上的单个数据文件中</li>
+<li>开关参数：innodb_file_per_table ，该参数默认开启，即每创建一个表都会产生一个表空间文件</li>
+</ul>
+<p><a id="reference-general-tablespaces-通用表空间"></a></p>
+<h5 id="general-tablespaces-通用表空间">General Tablespaces 通用表空间</h5>
+<ul>
+<li>通用表空间，需要通过 CREATE TABLESPACE 语法创建通用表空间，在创建表时，可以指定该表空间</li>
+</ul>
+<p>创建表空间</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">create</span><span style="color:#D73A49;--shiki-dark:#F97583"> tablespace</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ts_name</span><span style="color:#D73A49;--shiki-dark:#F97583"> add</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> datafile </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'file_name'</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> engine </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> engine_name;</span></span></code></pre>
+<p>创建表时指定表空间</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">create</span><span style="color:#D73A49;--shiki-dark:#F97583"> table</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> xxx</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ... tablespace ts_name;</span></span></code></pre>
+<p><a id="reference-undo-tablespaces-撤销表空间"></a></p>
+<h5 id="undo-tablespaces-撤销表空间">Undo Tablespaces 撤销表空间</h5>
+<ul>
+<li>撤销表空间，MySQL 实例在初始化时会自动创建两个默认的 undo 表空间（初始大小为 16MB），用于存储 undo log 日志</li>
+</ul>
+<p><a id="reference-temporary-tablespaces-临时表空间"></a></p>
+<h5 id="temporary-tablespaces-临时表空间">Temporary Tablespaces 临时表空间</h5>
+<ul>
+<li>InnoDB 使用会话临时表空间和全局临时表空间，存储用户创建的临时表等数据</li>
+</ul>
+<p><a id="reference-doublewrite-buffer-files-双写缓冲区"></a></p>
+<h5 id="doublewrite-buffer-files-双写缓冲区">Doublewrite Buffer Files 双写缓冲区</h5>
+<ul>
+<li>InnoDB 将数据页从 Buffer Pool 刷新到磁盘前，先将数据页写入双写缓冲区文件中，便于系统异常时恢复数据</li>
+</ul>
+<p><a id="reference-redo-log-重做日志"></a></p>
+<h5 id="redo-log-重做日志">Redo Log 重做日志</h5>
+<ul>
+<li>
+<p>重做日志，是用来实现<strong>事务的持久性</strong></p>
+</li>
+<li>
+<p>该日志文件由两部分组成</p>
+<ul>
+<li>重做日志缓冲（redo logbuffer）：内存</li>
+<li>重做日志文件（redo log）：磁盘</li>
+</ul>
+</li>
+<li>
+<p>当事务提交之后会把所有修改信息都会存到该日志中，用于在刷新脏页到磁盘时，发生错误时，进行数据恢复使用</p>
+</li>
+</ul>
+<p><a id="reference-后台线程"></a></p>
+<h4 id="后台线程">后台线程</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1009" height="703" src="/_astro/IMG-20260908174136023.DwAG0GZY_Z1epnmB.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="461" height="414" src="/_astro/IMG-20260908174136039.SVewu5YQ_ZQyXRN.webp"></p>
+<p>核心作用：将内存区内的数据在合适的时间装载入磁盘区</p>
+<p><a id="reference-master-thread-核心后台线程"></a></p>
+<h5 id="master-thread-核心后台线程">Master Thread 核心后台线程</h5>
+<ul>
+<li>负责调度其他线程，还负责将缓冲池中的数据异步刷新到磁盘中, 保持数据的一致性，还包括脏页的刷新、合并插入缓存、undo 页的回收</li>
+</ul>
+<p><a id="reference-io-thread-io-线程"></a></p>
+<h5 id="io-thread-io-线程">IO Thread IO 线程</h5>
+<ul>
+<li>在 InnoDB 存储引擎中大量使用了 AIO（异步 IO）来处理 IO 请求, 这样可以极大地提高数据库的性能，而 IOThread 主要负责这些 IO 请求的回调</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>线程类型</th>
+<th>默认个数</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read Thread</td>
+<td>4</td>
+<td>读</td>
+</tr>
+<tr>
+<td>Write Thread</td>
+<td>4</td>
+<td>写</td>
+</tr>
+<tr>
+<td>Log Thread</td>
+<td>1</td>
+<td>日志缓冲区刷新到磁盘</td>
+</tr>
+<tr>
+<td>Insert Buffer Thread</td>
+<td>1</td>
+<td>写缓冲区刷新到磁盘</td>
+</tr>
+</tbody>
+</table>
+<p>查看状态信息：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">show engine innodb </span><span style="color:#D73A49;--shiki-dark:#F97583">status</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> \G;</span></span></code></pre>
+<p><a id="reference-purge-thread"></a></p>
+<h5 id="purge-thread">Purge Thread</h5>
+<ul>
+<li>用于回收事务已经提交的 undo log</li>
+</ul>
+<p><a id="reference-page-cleaner-thread"></a></p>
+<h5 id="page-cleaner-thread">Page Cleaner Thread</h5>
+<ul>
+<li>协助 Master Thread 刷新脏页到磁盘</li>
+</ul>
+<p><a id="reference-事务原理"></a></p>
+<h3 id="事务原理">事务原理</h3>
+<ul>
+<li>原子性：undo log</li>
+<li>一致性：redo log</li>
+<li>隔离性：undo log + redo log</li>
+<li>持久性：锁 + MVCC</li>
+</ul>
+<p><a id="reference-事务概念"></a></p>
+<h4 id="事务概念">事务概念</h4>
+<ul>
+<li>
+<p>事务是一组操作的集合，它是一个不可分割的工作单位，事务会把所有的操作作为一个整体一起向系统提交或撤销操作请求，即这些操作要么同时成功，要么同时失败</p>
+</li>
+<li>
+<p>特性</p>
+<ul>
+<li><strong>原子性（Atomicity）</strong> ：事务是不可分割的最小操作单元，要么全部成功，要么全部失败</li>
+<li><strong>一致性（Consistency）</strong> ：事务完成时，必须使所有的数据都保持一致状态（数据内容以及格式）</li>
+<li><strong>隔离性（Isolation）</strong> ：数据库系统提供的隔离机制，保证事务在不受外部并发操作影响的独立环境下运行</li>
+<li><strong>持久性（Durability）</strong> ：事务一旦提交或回滚，它对数据库中的数据的改变就是永久的</li>
+</ul>
+</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1331" height="476" src="/_astro/IMG-20260908174136118.BIQp1J9p_Z1ABSyi.webp"></p>
+<ul>
+<li>原子性、一致性、持久化：redo log、undo log</li>
+<li>持久性：锁、MVCC</li>
+</ul>
+<p><a id="reference-redo-log"></a></p>
+<h4 id="redo-log">Redo Log</h4>
+<ul>
+<li>重做日志，记录的是事务提交时数据页的物理修改，是用来实现事务的持久性</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1273" height="477" src="/_astro/IMG-20260908174136212.Bpo6mlp5_DbG5x.webp"></p>
+<p>问题描述：</p>
+<ul>
+<li>在一个事务中执行多个增删改的操作时，InnoDB 会先操作缓冲池中的数据，如果缓冲区没有对应的数据，会通过后台线程将磁盘中的数据加载出来，存放在缓冲区中，然后将缓冲池中的数据修改，修改后的数据页称为脏页</li>
+<li>脏页则会在一定的时机，通过后台线程刷新到磁盘中，从而保证缓冲区与磁盘的数据一致</li>
+<li>但缓冲区的脏页数据并不是实时刷新的，而是一段时间之后将缓冲区的数据刷新到磁盘中，假如刷新到磁盘的过程出错了，而提示给用户事务提交成功，数据却没有持久化下来，就出现问题了：没有保证事务的持久性</li>
+</ul>
+<p>redo log 解决问题：</p>
+<ul>
+<li>当对缓冲区的数据进行增删改之后，首先将操作的数据页的变化记录在 redo log buffer 中</li>
+<li>在事务提交时，将 redo log buffer 中的数据刷新到 redo log 磁盘文件中</li>
+<li>过一段时间之后，如果<strong>刷新缓冲区的脏页到磁盘时发生错误</strong>，就可以借助于 redo log 进行数据恢复，保证了事务的持久性</li>
+<li>如果脏页成功刷新到磁盘或者涉及到的数据已经落盘，此时 redolog 没有作用，可以删除，所以存在的两个 redolog 文件循环写</li>
+</ul>
+<p>（即一个兜底程序，没发生错误时不会用到）</p>
+<p><a id="reference-wal"></a></p>
+<h5 id="wal">WAL</h5>
+<ul>
+<li>操作数据一般都是随机读写磁盘的，而不是顺序读写磁盘</li>
+<li>redo log 是日志文件在，往磁盘文件中写入数据是顺序写的</li>
+<li>顺序写的效率，要远大于随机写。这种先写日志的方式，称之为 WAL（Write-Ahead Logging）</li>
+</ul>
+<p><a id="reference-undo-log"></a></p>
+<h4 id="undo-log">Undo Log</h4>
+<ul>
+<li>
+<p>回滚日志，用于记录数据被修改前的信息 , 作用包含两个 : 提供回滚（保证事务的原子性）和 MVCC（多版本并发控制）</p>
+</li>
+<li>
+<p>undo log 和 redo log 记录物理日志不一样，它是逻辑日志。</p>
+<ul>
+<li>可以认为当 delete 一条记录时，undo log 中会记录一条对应的 insert 记录，反之亦然，当 update 一条记录时，它记录一条对应相反的 update 记录</li>
+<li>当执行 rollback 时，就可以从 undo log 中的逻辑记录读取到相应的内容并进行回滚</li>
+</ul>
+</li>
+<li>
+<p>Undo log 销毁：undo log 在事务执行时产生，事务提交时，并不会立即删除 undo log，因为这些日志可能还用于 MVCC</p>
+</li>
+<li>
+<p>Undo log 存储：undo log 采用段的方式进行管理和记录，存放在前面介绍的 rollback segment 回滚段中，内部包含 1024 个 undo log segment</p>
+</li>
+</ul>
+<p>（优于快照，可以联想 Redis 的 AOF 和 RDB）</p>
+<p><a id="reference-mvcc-多版本并发控制"></a></p>
+<h3 id="mvcc-多版本并发控制">MVCC 多版本并发控制</h3>
+<p><a id="reference-mvcc-概念"></a></p>
+<h4 id="mvcc-概念">MVCC 概念</h4>
+<p><a id="reference-当前读"></a></p>
+<h5 id="当前读">当前读</h5>
+<ul>
+<li>读取的是记录的最新版本</li>
+<li>读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁</li>
+<li>日常的操作如：select … lock in share mode(共享锁)，select … for update、update、insert、delete(排他锁)都是当前读</li>
+</ul>
+<p>在默认的 RR 隔离级别下，事务 A 中依然可以读取到事务 B 最新提交的内容，因为在查询语句后面加上了 lock in share mode 共享锁，此时是当前读操作</p>
+<p><a id="reference-快照读"></a></p>
+<h5 id="快照读">快照读</h5>
+<p>简单的 select（不加锁）就是快照读，快照读，读取的是记录数据的可见版本，有可能是历史数据，不加锁，是非阻塞读</p>
+<ul>
+<li>
+<p>Read Committed：每次 select，都生成一个快照读（即后面读取都是读取快照，不会受其他事务影响）</p>
+</li>
+<li>
+<p>Repeatable Read：开启事务后第一个 select 语句才是快照读的地方（之后重复读取都是读取的快照内容，所以实现可重复读）</p>
+</li>
+<li>
+<p>Serializable：快照读会退化为当前读（因为不涉及并发了）</p>
+</li>
+</ul>
+<p><a id="reference-mvcc"></a></p>
+<h5 id="mvcc">MVCC</h5>
+<ul>
+<li>全称 Multi-Version Concurrency Control，多版本并发控制。指维护一个数据的多个版本，使得读写操作没有冲突</li>
+<li>快照读为 MySQL 实现 MVCC 提供了一个非阻塞读功能</li>
+<li>MVCC 的具体实现，还需要依赖于数据库记录中的三个隐式字段、undo log 日志、readView</li>
+</ul>
+<p><a id="reference-实现原理"></a></p>
+<h4 id="实现原理">实现原理</h4>
+<p><a id="reference-隐藏字段"></a></p>
+<h5 id="隐藏字段">隐藏字段</h5>
+<table>
+<thead>
+<tr>
+<th>隐藏字段</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DB_TRX_ID</td>
+<td>最近修改事务 ID，记录插入这条记录或者最后一次修改该记录的事务 ID，自增</td>
+</tr>
+<tr>
+<td>DB_ROLL_PTR</td>
+<td>回滚指针，指向这条记录的上一个版本，用于配合 undo log</td>
+</tr>
+<tr>
+<td>DB_ROW_ID</td>
+<td>隐藏主键，如果表结构没有指定主键，就会生成隐藏主键</td>
+</tr>
+</tbody>
+</table>
+<p>查看 idb 文件的表结构信息：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">ibd2sdi</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> idb_name.ibd</span></span></code></pre>
+<p><a id="reference-undo-log-1"></a></p>
+<h5 id="undo-log-1">undo log</h5>
+<p>回滚日志：在 insert、update、delete 的时候产生的便于数据回滚的日志</p>
+<ul>
+<li>insert：undo log 只在回滚时需要，在事务提交后可被立即删除</li>
+<li>update、delete：undo log 在回滚和快照读时需要，不会被立即删除</li>
+</ul>
+<p><a id="reference-版本链"></a></p>
+<h6 id="版本链">版本链</h6>
+<p><img alt="image" loading="lazy" decoding="async" width="1537" height="469" src="/_astro/IMG-20260908174136380.BArjqv-0_ZNcGKJ.webp"></p>
+<p>不同事务或相同事务对同一条记录进行修改，会导致该记录的 undo log 生成一条记录版本链表，链表的头部是最新的旧记录，链表尾部是最早的旧记录</p>
+<p>注意：此处的记录不是数据，而是 SQL 语句</p>
+<p><a id="reference-readview"></a></p>
+<h5 id="readview">readview</h5>
+<p>ReadView（读视图）是<strong>快照读</strong> SQL 执行时 MVCC 提取数据的依据，记录并维护系统当前活跃的事务（未提交的）id。</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>m_ids</td>
+<td>当前活跃的事务 ID 集合（未提交的）</td>
+</tr>
+<tr>
+<td>min_trx_id</td>
+<td>最小活跃事务 ID</td>
+</tr>
+<tr>
+<td>max_trx_id</td>
+<td>预分配事务 ID，当前最大事务 ID+1（自增）</td>
+</tr>
+<tr>
+<td>creator_trx_id</td>
+<td>ReaadView 创建者的事务 ID</td>
+</tr>
+</tbody>
+</table>
+<p>版本链数据的访问规则：根据当前事务 ID（trx_id）来判断</p>
+<p>核心在于：尽可访问本事务的或者已经提交的数据</p>
+<table>
+<thead>
+<tr>
+<th>条件</th>
+<th>是否可以访问</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>trx_id == creator_trx_id</td>
+<td>可以</td>
+<td>数据是当前这个事务更改的</td>
+</tr>
+<tr>
+<td>trx_id &lt; min_trx_id</td>
+<td>可以</td>
+<td>数据已经提交</td>
+</tr>
+<tr>
+<td>trx_id &gt; max_trx_id</td>
+<td>不可以</td>
+<td>事务是在 ReadView 生成后才开启</td>
+</tr>
+<tr>
+<td>min_trx_id &lt;= trx_id &lt;= max_trx_id</td>
+<td>若 trx_id 不在 m_ids，则可以</td>
+<td>数据已经提交</td>
+</tr>
+</tbody>
+</table>
+<p>在进行匹配时，会从 undo log 的版本链，从上到下进行挨个匹配，当满足可访问条件时终止</p>
+<p>不同的隔离级别，生成 ReadView 的时机不同：</p>
+<ul>
+<li>READ COMMITTED：在事务中<strong>每一次执行</strong>快照读时生成 ReadView。</li>
+<li>REPEATABLE READ：仅在事务中<strong>第一次执行</strong>快照读时生成 ReadView，后续复用该 ReadView</li>
+</ul>
+<p><a id="reference-mysql-管理"></a></p>
+<h2 id="mysql-管理">MySQL 管理</h2>
+<p><a id="reference-系统数据库"></a></p>
+<h3 id="系统数据库">系统数据库</h3>
+<p><a id="reference-mysql-工具"></a></p>
+<h3 id="mysql-工具">MySQL 工具</h3>
+<p>客户端工具</p>
+<p>mysqladmin</p>
+<p>mysqlbinlog</p>
+<p>mysqlshow</p>
+<p>mysqldump</p>
+<p>mysqlimport</p>
+<p>mysqlsource</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>二级索引何时需要回表？覆盖索引与索引下推分别减少什么工作？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#体系结构">体系结构</a></li><li style="--depth: 0"><a href="#存储引擎">存储引擎</a></li><li style="--depth: 1"><a href="#概述">概述</a></li><li style="--depth: 2"><a href="#查询使用的存储引擎">查询使用的存储引擎</a></li><li style="--depth: 2"><a href="#innodb">InnoDB</a></li><li style="--depth: 3"><a href="#逻辑存储结构">逻辑存储结构</a></li><li style="--depth: 2"><a href="#myisam">MyISAM</a></li><li style="--depth: 2"><a href="#memory">Memory</a></li><li style="--depth: 1"><a href="#存储引擎选择">存储引擎选择</a></li><li style="--depth: 0"><a href="#索引">索引</a></li><li style="--depth: 1"><a href="#索引概述">索引概述</a></li><li style="--depth: 1"><a href="#索引结构">索引结构</a></li><li style="--depth: 2"><a href="#b-树">B 树</a></li><li style="--depth: 2"><a href="#b-树-1">B+ 树</a></li><li style="--depth: 3"><a href="#mysql-对于-b-树的优化">MySQL 对于 B+ 树的优化</a></li><li style="--depth: 2"><a href="#hash">Hash</a></li><li style="--depth: 2"><a href="#为什么使用-b-树">为什么使用 B+ 树</a></li><li style="--depth: 1"><a href="#索引分类">索引分类</a></li><li style="--depth: 2"><a href="#聚集索引和二级索引">聚集索引和二级索引</a></li><li style="--depth: 2"><a href="#回表查询">回表查询</a></li><li style="--depth: 2"><a href="#主键索引的存储效率">主键索引的存储效率</a></li><li style="--depth: 1"><a href="#索引语法">索引语法</a></li><li style="--depth: 2"><a href="#创建索引">创建索引</a></li><li style="--depth: 2"><a href="#查看索引">查看索引</a></li><li style="--depth: 2"><a href="#删除索引">删除索引</a></li><li style="--depth: 1"><a href="#sql-性能分析">SQL 性能分析</a></li><li style="--depth: 2"><a href="#sql-执行频率">SQL 执行频率</a></li><li style="--depth: 2"><a href="#慢查询日志">慢查询日志</a></li><li style="--depth: 2"><a href="#profile-详情">profile 详情</a></li><li style="--depth: 2"><a href="#explain-执行计划">explain 执行计划</a></li><li style="--depth: 1"><a href="#索引使用原则">索引使用原则</a></li><li style="--depth: 2"><a href="#最左前缀法则">最左前缀法则</a></li><li style="--depth: 2"><a href="#范围查询">范围查询</a></li><li style="--depth: 2"><a href="#索引失效">索引失效</a></li><li style="--depth: 2"><a href="#sql-提示">SQL 提示</a></li><li style="--depth: 2"><a href="#覆盖索引">覆盖索引</a></li><li style="--depth: 2"><a href="#前缀索引">前缀索引</a></li><li style="--depth: 3"><a href="#索引选择性">索引选择性</a></li><li style="--depth: 3"><a href="#前缀索引查询流程">前缀索引查询流程</a></li><li style="--depth: 2"><a href="#单列索引和联合索引">单列索引和联合索引</a></li><li style="--depth: 1"><a href="#索引设计原则">索引设计原则</a></li><li style="--depth: 0"><a href="#sql-优化">SQL 优化</a></li><li style="--depth: 1"><a href="#插入数据">插入数据</a></li><li style="--depth: 2"><a href="#小批量插入数据-insert">小批量插入数据 insert</a></li><li style="--depth: 2"><a href="#大批量插入数据-load">大批量插入数据 load</a></li><li style="--depth: 1"><a href="#主键优化">主键优化</a></li><li style="--depth: 2"><a href="#数据组织方式">数据组织方式</a></li><li style="--depth: 2"><a href="#页分裂">页分裂</a></li><li style="--depth: 2"><a href="#页合并">页合并</a></li><li style="--depth: 2"><a href="#主键设计原则">主键设计原则</a></li><li style="--depth: 1"><a href="#order-by--优化">order by  优化</a></li><li style="--depth: 2"><a href="#优化原则">优化原则</a></li><li style="--depth: 1"><a href="#group-by--优化">group by  优化</a></li><li style="--depth: 1"><a href="#limit--优化">limit  优化</a></li><li style="--depth: 1"><a href="#count-优化">count 优化</a></li><li style="--depth: 2"><a href="#count--原理">count  原理</a></li><li style="--depth: 1"><a href="#update-优化">update 优化</a></li><li style="--depth: 0"><a href="#视图存储过程触发器">视图、存储过程、触发器</a></li><li style="--depth: 1"><a href="#视图">视图</a></li><li style="--depth: 2"><a href="#概述-1">概述</a></li><li style="--depth: 2"><a href="#作用">作用</a></li><li style="--depth: 2"><a href="#使用">使用</a></li><li style="--depth: 2"><a href="#检查选项">检查选项</a></li><li style="--depth: 3"><a href="#cascaded-级联">CASCADED 级联</a></li><li style="--depth: 3"><a href="#local-本地">LOCAL 本地</a></li><li style="--depth: 2"><a href="#视图的更新">视图的更新</a></li><li style="--depth: 1"><a href="#存储过程">存储过程</a></li><li style="--depth: 2"><a href="#概述-2">概述</a></li><li style="--depth: 2"><a href="#使用-1">使用</a></li><li style="--depth: 2"><a href="#变量">变量</a></li><li style="--depth: 3"><a href="#系统变量">系统变量</a></li><li style="--depth: 3"><a href="#用户定义变量">用户定义变量</a></li><li style="--depth: 3"><a href="#局部变量">局部变量</a></li><li style="--depth: 2"><a href="#if">if</a></li><li style="--depth: 2"><a href="#参数">参数</a></li><li style="--depth: 2"><a href="#case">case</a></li><li style="--depth: 2"><a href="#while">while</a></li><li style="--depth: 2"><a href="#repeat">repeat</a></li><li style="--depth: 2"><a href="#loop">loop</a></li><li style="--depth: 2"><a href="#cursor-游标">cursor 游标</a></li><li style="--depth: 2"><a href="#handler">handler</a></li><li style="--depth: 1"><a href="#存储函数">存储函数</a></li><li style="--depth: 1"><a href="#触发器">触发器</a></li><li style="--depth: 2"><a href="#使用-2">使用</a></li><li style="--depth: 0"><a href="#锁">锁</a></li><li style="--depth: 1"><a href="#全局锁">全局锁</a></li><li style="--depth: 2"><a href="#使用-3">使用</a></li><li style="--depth: 2"><a href="#特点">特点</a></li><li style="--depth: 1"><a href="#表级锁">表级锁</a></li><li style="--depth: 2"><a href="#表锁">表锁</a></li><li style="--depth: 2"><a href="#元数据锁">元数据锁</a></li><li style="--depth: 2"><a href="#意向锁">意向锁</a></li><li style="--depth: 1"><a href="#行级锁">行级锁</a></li><li style="--depth: 2"><a href="#行锁">行锁</a></li><li style="--depth: 2"><a href="#间隙锁临键锁">间隙锁&amp;临键锁</a></li><li style="--depth: 0"><a href="#innodb-引擎">InnoDB 引擎</a></li><li style="--depth: 1"><a href="#逻辑存储结构-1">逻辑存储结构</a></li><li style="--depth: 2"><a href="#表空间">表空间</a></li><li style="--depth: 2"><a href="#段">段</a></li><li style="--depth: 2"><a href="#区">区</a></li><li style="--depth: 2"><a href="#页">页</a></li><li style="--depth: 2"><a href="#行">行</a></li><li style="--depth: 1"><a href="#架构">架构</a></li><li style="--depth: 2"><a href="#内存结构">内存结构</a></li><li style="--depth: 3"><a href="#buffer-pool-缓冲池">Buffer Pool 缓冲池</a></li><li style="--depth: 3"><a href="#change-buffer-更改缓冲区">Change Buffer 更改缓冲区</a></li><li style="--depth: 3"><a href="#adaptive-hash-index-自适应哈希索引">Adaptive Hash Index 自适应哈希索引</a></li><li style="--depth: 3"><a href="#log-buffer-日志缓冲区">Log Buffer 日志缓冲区</a></li><li style="--depth: 2"><a href="#磁盘结构">磁盘结构</a></li><li style="--depth: 3"><a href="#system-tablespace-系统表空间">System Tablespace 系统表空间</a></li><li style="--depth: 3"><a href="#file-per-table-tablespaces-独立表空间">File-Per-Table Tablespaces 独立表空间</a></li><li style="--depth: 3"><a href="#general-tablespaces-通用表空间">General Tablespaces 通用表空间</a></li><li style="--depth: 3"><a href="#undo-tablespaces-撤销表空间">Undo Tablespaces 撤销表空间</a></li><li style="--depth: 3"><a href="#temporary-tablespaces-临时表空间">Temporary Tablespaces 临时表空间</a></li><li style="--depth: 3"><a href="#doublewrite-buffer-files-双写缓冲区">Doublewrite Buffer Files 双写缓冲区</a></li><li style="--depth: 3"><a href="#redo-log-重做日志">Redo Log 重做日志</a></li><li style="--depth: 2"><a href="#后台线程">后台线程</a></li><li style="--depth: 3"><a href="#master-thread-核心后台线程">Master Thread 核心后台线程</a></li><li style="--depth: 3"><a href="#io-thread-io-线程">IO Thread IO 线程</a></li><li style="--depth: 3"><a href="#purge-thread">Purge Thread</a></li><li style="--depth: 3"><a href="#page-cleaner-thread">Page Cleaner Thread</a></li><li style="--depth: 1"><a href="#事务原理">事务原理</a></li><li style="--depth: 2"><a href="#事务概念">事务概念</a></li><li style="--depth: 2"><a href="#redo-log">Redo Log</a></li><li style="--depth: 3"><a href="#wal">WAL</a></li><li style="--depth: 2"><a href="#undo-log">Undo Log</a></li><li style="--depth: 1"><a href="#mvcc-多版本并发控制">MVCC 多版本并发控制</a></li><li style="--depth: 2"><a href="#mvcc-概念">MVCC 概念</a></li><li style="--depth: 3"><a href="#当前读">当前读</a></li><li style="--depth: 3"><a href="#快照读">快照读</a></li><li style="--depth: 3"><a href="#mvcc">MVCC</a></li><li style="--depth: 2"><a href="#实现原理">实现原理</a></li><li style="--depth: 3"><a href="#隐藏字段">隐藏字段</a></li><li style="--depth: 3"><a href="#undo-log-1">undo log</a></li><li style="--depth: 4"><a href="#版本链">版本链</a></li><li style="--depth: 3"><a href="#readview">readview</a></li><li style="--depth: 0"><a href="#mysql-管理">MySQL 管理</a></li><li style="--depth: 1"><a href="#系统数据库">系统数据库</a></li><li style="--depth: 1"><a href="#mysql-工具">MySQL 工具</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>LangGraph 核心原理与使用 · Musuyin&#39; Home</title><meta name="description" content="把图理解为对 State 的逐步变换：Node 产生更新，Reducer 决定如何合并，Edge 决定下一步。Checkpoint 记录进度；Interrupt 恢复时节点会重新执行，因此恢复能力必须与副作用幂等一起设计。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/framework/langchain-langgraph/langgraph/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="LangGraph 核心原理与使用 · Musuyin' Home"><meta property="og:description" content="把图理解为对 State 的逐步变换：Node 产生更新，Reducer 决定如何合并，Edge 决定下一步。Checkpoint 记录进度；Interrupt 恢复时节点会重新执行，因此恢复能力必须与副作用幂等一起设计。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/framework/langchain-langgraph/langgraph/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">LangGraph 核心原理与使用</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-09-15">2026-09-15</time></dd></div><div><dt>字数</dt><dd>3488</dd></div><div><dt>预计阅读</dt><dd>12 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a><a href="/tags/LangGraph/">#LangGraph</a><a href="/tags/Workflow/">#Workflow</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>LangGraph 核心原理与使用</h1><time datetime="2026-09-15">2026-09-15</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a><a href="/tags/LangGraph/">#LangGraph</a><a href="/tags/Workflow/">#Workflow</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>把图理解为对 State 的逐步变换：Node 产生更新，Reducer 决定如何合并，Edge 决定下一步。Checkpoint 记录进度；Interrupt 恢复时节点会重新执行，因此恢复能力必须与副作用幂等一起设计。</p>
+<p><a id="reference-langgraph-解决什么问题"></a></p>
+<h2 id="langgraph-解决什么问题">LangGraph 解决什么问题</h2>
+<p>LangGraph 是构建长时间运行、有状态 Agent 和工作流的低层编排框架与运行时。它让应用显式定义：</p>
+<ul>
+<li>执行过程中保存哪些状态。</li>
+<li>每个节点读取什么、返回什么更新。</li>
+<li>节点之间怎样流转、分支、循环或并行。</li>
+<li>在哪里保存 Checkpoint。</li>
+<li>在哪里暂停等待人工输入。</li>
+<li>失败或进程重启后从哪里恢复。</li>
+</ul>
+<p>它专注编排，不负责替开发者设计 Prompt 或业务架构。LangGraph 可以使用任意模型 SDK，也可以构建完全不含 LLM 的普通状态工作流。</p>
+<p><a id="reference-为什么-agent-需要-graph"></a></p>
+<h2 id="为什么-agent-需要-graph">为什么 Agent 需要 Graph</h2>
+<p>简单 Agent 只有一个模型—工具循环。真实业务往往还要求：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>接收请求</span></span>
+<span class="line"><span>  → 确定性校验权限</span></span>
+<span class="line"><span>  → 模型分类</span></span>
+<span class="line"><span>  → 按类别选择数据源</span></span>
+<span class="line"><span>  → 并行检索</span></span>
+<span class="line"><span>  → 生成方案</span></span>
+<span class="line"><span>  → 高风险操作等待审批</span></span>
+<span class="line"><span>  → 执行工具</span></span>
+<span class="line"><span>  → 写审计记录</span></span></code></pre>
+<p>其中有些步骤必须由程序决定，有些适合交给模型。LangGraph 的关键价值是把两者放在同一张显式执行图中，并让状态转移可检查、可测试、可恢复。</p>
+<p><a id="reference-核心概念"></a></p>
+<h2 id="核心概念">核心概念</h2>
+<p><a id="reference-state"></a></p>
+<h3 id="state">State</h3>
+<p>State 是节点之间共享的工作数据。节点不应原地修改 State，而是返回一个<strong>部分更新</strong>，由 Runtime 根据每个字段的 Reducer 合并。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> operator</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> typing </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Annotated, TypedDict</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> WorkflowState</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TypedDict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    request: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    category: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    evidence: Annotated[list[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">], operator.add]</span></span></code></pre>
+<p>这里 <code>request</code> 和 <code>category</code> 默认使用覆盖语义；<code>evidence</code> 使用 <code>operator.add</code>，多个更新会追加到列表。</p>
+<p>State 只保存执行所需数据。数据库连接、模型 Client、Logger 等依赖不应塞进 State；大文件也应存到对象存储，只在 State 中保留 URI、哈希和元数据。</p>
+<p><a id="reference-node"></a></p>
+<h3 id="node">Node</h3>
+<p>Node 是接收 State 并返回 State 更新的函数。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> normalize_request</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(state: WorkflowState) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    normalized </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"request"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">].strip()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> normalized:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        raise</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> ValueError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"request 不能为空"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"request"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: normalized}</span></span></code></pre>
+<p>好的 Node 应职责单一、输入输出清晰。外部副作用应显式隔离，便于重试、测试和审计。</p>
+<p><a id="reference-edge"></a></p>
+<h3 id="edge">Edge</h3>
+<p>Edge 决定控制流：</p>
+<ul>
+<li>普通边：节点完成后固定进入下一个节点。</li>
+<li>条件边：调用路由函数，根据当前 State 选择后继。</li>
+<li><code>START</code>：图的虚拟入口。</li>
+<li><code>END</code>：图的虚拟终点。</li>
+</ul>
+<p>路由函数应该是纯函数：同样的 State 应得到同样的路由结果，不应在路由函数里访问外部服务或执行副作用。</p>
+<p><a id="reference-reducer"></a></p>
+<h3 id="reducer">Reducer</h3>
+<p>Reducer 决定某个 State 字段如何合并更新。没有 Reducer 时通常是覆盖；有 Reducer 时按指定规则合并。</p>
+<p>Reducer 尤其影响并行节点。如果两个并行节点同时更新同一字段，而字段没有定义可合并语义，Runtime 无法安全判断最终值。</p>
+<p>消息列表通常使用 <code>add_messages</code>，它不只是简单拼接，还会按消息 ID 正确更新已有消息：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> typing </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Annotated, TypedDict</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> langgraph.graph.message </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> add_messages</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ChatState</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TypedDict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    messages: Annotated[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, add_messages]</span></span></code></pre>
+<p>官方还提供 <code>MessagesState</code> 作为常用消息 State。</p>
+<p><a id="reference-graph-编译"></a></p>
+<h3 id="graph-编译">Graph 编译</h3>
+<p>先用 <code>StateGraph</code> 声明拓扑，再调用 <code>compile()</code> 生成可运行对象。编译阶段会检查部分结构问题，并注入 Checkpointer、Store 或中断配置。</p>
+<p><a id="reference-最小状态图"></a></p>
+<h2 id="最小状态图">最小状态图</h2>
+<p>先写一个完全不调用模型的示例：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> typing </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Literal, TypedDict</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> langgraph.graph </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> END</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">START</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, StateGraph</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ReviewState</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TypedDict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    amount: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">int</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    risk: Literal[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"normal"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"high"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    result: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> assess_risk</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(state: ReviewState) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    risk </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "high"</span><span style="color:#D73A49;--shiki-dark:#F97583"> if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"amount"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 10_000</span><span style="color:#D73A49;--shiki-dark:#F97583"> else</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "normal"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"risk"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: risk}</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> route_by_risk</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(state: ReviewState) -&gt; Literal[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"manual_review"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"auto_approve"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "manual_review"</span><span style="color:#D73A49;--shiki-dark:#F97583"> if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"risk"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "high"</span><span style="color:#D73A49;--shiki-dark:#F97583"> else</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "auto_approve"</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> manual_review</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(state: ReviewState) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"result"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"等待人工审核"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> auto_approve</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(state: ReviewState) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"result"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"自动通过"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> StateGraph(ReviewState)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_node(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"assess_risk"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, assess_risk)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_node(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"manual_review"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, manual_review)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_node(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"auto_approve"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, auto_approve)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_edge(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">START</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"assess_risk"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_conditional_edges(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"assess_risk"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, route_by_risk)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_edge(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"manual_review"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">END</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_edge(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"auto_approve"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">END</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">graph </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> builder.compile()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">result </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> graph.invoke({</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"amount"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">12_000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"risk"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"normal"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"result"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(result)</span></span></code></pre>
+<p>这个例子刻意先不用 LLM，因为 Graph 的本质是状态机和数据流，不是提示词包装器。</p>
+<p><a id="reference-手写模型工具循环"></a></p>
+<h2 id="手写模型工具循环">手写模型—工具循环</h2>
+<p>LangChain <code>create_agent</code> 已经封装了常见循环。为了理解两层关系，可以用 LangGraph 显式写出来：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> langchain.chat_models </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> init_chat_model</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> langchain.tools </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tool</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> langgraph.graph </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> END</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">START</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, MessagesState, StateGraph</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> langgraph.prebuilt </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ToolNode, tools_condition</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@tool</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get_weather</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(city: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    """查询指定城市的天气。"""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">city</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">：晴，24°C"</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">tools </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [get_weather]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">model </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> init_chat_model(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"openai:gpt-5.5"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">).bind_tools(tools)</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> call_model</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(state: MessagesState) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    response </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> model.invoke(state[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"messages"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">])</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"messages"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [response]}</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> StateGraph(MessagesState)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_node(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"agent"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, call_model)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_node(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"tools"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, ToolNode(tools))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_edge(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">START</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"agent"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_conditional_edges(</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "agent"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    tools_condition,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"tools"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"tools"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">END</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">END</span><span style="color:#24292E;--shiki-dark:#E1E4E8">},</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_edge(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"tools"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"agent"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">graph </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> builder.compile()</span></span></code></pre>
+<p><code>tools_condition</code> 检查最后一条 AI 消息：存在 Tool Call 就路由到 <code>tools</code>，否则结束。<code>ToolNode</code> 执行工具并产生 ToolMessage，然后回到模型。</p>
+<p>如果业务只需要这张标准图，使用 <code>create_agent</code> 更简洁；只有需要插入自定义审批、复杂路由、批处理或特殊状态时，手写图才有明显价值。</p>
+<p><a id="reference-pregel-与-super-step-心智模型"></a></p>
+<h2 id="pregel-与-super-step-心智模型">Pregel 与 Super-step 心智模型</h2>
+<p>LangGraph 的执行受到 Pregel/BSP 思想启发。可以把一次运行理解为多个 Super-step：</p>
+<ul>
+<li>当前可执行的一组节点在同一轮运行。</li>
+<li>节点返回 State 更新。</li>
+<li>Runtime 使用 Reducer 合并更新。</li>
+<li>更新完成后，下一组节点被激活。</li>
+</ul>
+<p>这个模型解释了为什么并行更新必须有明确合并规则，也解释了 Checkpoint 为什么通常围绕执行步骤保存，而不是随意保存半个函数的局部变量。</p>
+<p><a id="reference-persistence-与-checkpoint"></a></p>
+<h2 id="persistence-与-checkpoint">Persistence 与 Checkpoint</h2>
+<p>给图配置 Checkpointer 后，Runtime 会把每个线程的 State 按执行步骤保存。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> langgraph.checkpoint.memory </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> InMemorySaver</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">checkpointer </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> InMemorySaver()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">graph </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> builder.compile(</span><span style="color:#E36209;--shiki-dark:#FFAB70">checkpointer</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">checkpointer)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">config </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"configurable"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"thread_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"ticket-2026-001"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">first </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> graph.invoke(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"messages"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"查询上海天气"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}]},</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    config</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">config,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p><code>thread_id</code> 是 Checkpoint 的逻辑分区键：</p>
+<ul>
+<li>相同 <code>thread_id</code> 会继续同一线程的历史。</li>
+<li>不同 <code>thread_id</code> 应彼此隔离。</li>
+<li>它不是用户身份，也不能替代认证授权。</li>
+</ul>
+<p>生产环境不能使用 <code>InMemorySaver</code> 承诺持久恢复。应选择数据库支持的 Checkpointer，并考虑租户隔离、加密、保留期、迁移、清理、备份和恢复。</p>
+<p>Checkpoint 可支持：</p>
+<ul>
+<li>进程失败后的恢复。</li>
+<li>查看当前和历史 State。</li>
+<li>Human-in-the-loop 暂停。</li>
+<li>从旧 Checkpoint 派生新执行。</li>
+<li>调试时的时间旅行与状态回放。</li>
+</ul>
+<blockquote>
+<p><strong>Checkpoint 不是业务数据库事务</strong>
+Checkpoint 保存编排状态，不能让“写业务数据库 + 写 Checkpoint”天然成为一个原子事务。跨系统副作用仍需幂等键、Outbox、状态核对或补偿机制。</p>
+</blockquote>
+<p><a id="reference-interrupt-与-human-in-the-loop"></a></p>
+<h2 id="interrupt-与-human-in-the-loop">Interrupt 与 Human-in-the-loop</h2>
+<p><code>interrupt()</code> 可以在节点内部暂停执行，把可序列化的数据交给外部审批者；恢复时用 <code>Command(resume=...)</code> 提供答案。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> typing </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> TypedDict</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> langgraph.checkpoint.memory </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> InMemorySaver</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> langgraph.graph </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> END</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">START</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, StateGraph</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> langgraph.types </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Command, interrupt</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ApprovalState</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TypedDict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    change_id: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    summary: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    approved: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">bool</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> request_approval</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(state: ApprovalState) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    decision </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> interrupt(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "change_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: state[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"change_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "summary"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: state[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"summary"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "question"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"是否批准执行该变更？"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"approved"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: decision[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"approved"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]}</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> StateGraph(ApprovalState)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_node(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"request_approval"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, request_approval)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_edge(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">START</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"request_approval"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">builder.add_edge(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"request_approval"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">END</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">graph </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> builder.compile(</span><span style="color:#E36209;--shiki-dark:#FFAB70">checkpointer</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">InMemorySaver())</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">config </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"configurable"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"thread_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"change-42"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">paused </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> graph.invoke(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"change_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"CHG-42"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"summary"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"升级 API"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"approved"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">},</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    config</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">config,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">completed </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> graph.invoke(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Command(</span><span style="color:#E36209;--shiki-dark:#FFAB70">resume</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"approved"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}),</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    config</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">config,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p><a id="reference-interrupt-的关键语义"></a></p>
+<h3 id="interrupt-的关键语义">Interrupt 的关键语义</h3>
+<p>恢复时，Runtime 会从包含 <code>interrupt()</code> 的<strong>节点开头重新执行</strong>，不是从 Python 函数中断的那一行继续。因此：</p>
+<ul>
+<li><code>interrupt()</code> 之前的代码可能再次执行。</li>
+<li>中断前的副作用必须幂等，或移到中断之后、拆到独立节点。</li>
+<li>不要用裸 <code>try/except</code> 包住 <code>interrupt()</code>；它通过特殊异常通知 Runtime 暂停。</li>
+<li>同一节点中的多个 Interrupt 依赖稳定顺序，不要在恢复时改变调用顺序。</li>
+<li>传给 Interrupt 的值应可序列化，不要传函数、数据库连接或复杂对象实例。</li>
+</ul>
+<p>Human-in-the-loop 不是一个 UI 按钮，而是“持久化暂停 + 外部身份授权 + 审批数据 + 可恢复执行 + 审计”的组合。</p>
+<p><a id="reference-command"></a></p>
+<h2 id="command">Command</h2>
+<p><code>Command</code> 可以在一个结果中同时表达 State 更新和下一跳，也用于恢复 Interrupt。概念上：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> typing </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Literal</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> langgraph.types </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Command</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> decide</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(state: WorkflowState) -&gt; Command[Literal[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"review"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"execute"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]]:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    target </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "review"</span><span style="color:#D73A49;--shiki-dark:#F97583"> if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"category"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "high_risk"</span><span style="color:#D73A49;--shiki-dark:#F97583"> else</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "execute"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Command(</span><span style="color:#E36209;--shiki-dark:#FFAB70">update</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"evidence"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"routing-complete"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]}, </span><span style="color:#E36209;--shiki-dark:#FFAB70">goto</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">target)</span></span></code></pre>
+<p>普通条件边适合“路由与节点逻辑分离”；<code>Command</code> 适合节点在产生更新的同时决定下一跳。团队应选择一致风格，避免控制流隐藏在各处。</p>
+<p><a id="reference-并行send-与-map-reduce"></a></p>
+<h2 id="并行send-与-map-reduce">并行、Send 与 Map-Reduce</h2>
+<p>一个节点可以扇出到多个节点并行执行。动态数量的并行任务可通过 <code>Send</code> 表达，例如为每份文档派发摘要任务，再通过 Reducer 合并结果。</p>
+<p>并行设计要明确：</p>
+<ul>
+<li>各分支是否读同一版本的 State。</li>
+<li>多分支写同一字段时使用什么 Reducer。</li>
+<li>单个分支失败是终止整轮、重试该分支，还是产生显式失败结果。</li>
+<li>外部 API 的并发、限流和成本上限。</li>
+<li>合并结果是否需要保持稳定顺序。</li>
+</ul>
+<p><a id="reference-subgraph"></a></p>
+<h2 id="subgraph">Subgraph</h2>
+<p>Subgraph 用于封装可复用的工作流或隔离不同 Agent 的状态。常见场景包括：</p>
+<ul>
+<li>主图根据任务类型调用不同领域子图。</li>
+<li>每个子 Agent 拥有自己的内部状态，只把必要结果返回主图。</li>
+<li>团队分别维护审批、检索、代码生成等子流程。</li>
+</ul>
+<p>子图边界应像服务接口一样清晰：输入输出契约稳定、内部 State 不泄漏、错误语义明确。不要把每个函数都变成子图。</p>
+<p><a id="reference-streaming"></a></p>
+<h2 id="streaming">Streaming</h2>
+<p>图可使用 <code>stream</code> / <code>astream</code> 暴露运行中的更新。根据模式可以观察 State 更新、消息 Token、调试事件等。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> event </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> graph.stream(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"messages"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"你好"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}]},</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    stream_mode</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"updates"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(event)</span></span></code></pre>
+<p>流式输出改善用户体验，但不会让后端任务天然可靠。客户端断线后，任务是否继续、如何重连、事件是否重放，需要由部署层、持久化和 API 协议共同定义。</p>
+<p><a id="reference-错误重试与幂等"></a></p>
+<h2 id="错误重试与幂等">错误、重试与幂等</h2>
+<p>应先区分错误类型，再决定策略：</p>
+<table>
+<thead>
+<tr>
+<th>错误类型</th>
+<th>示例</th>
+<th>处理原则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>瞬时基础设施错误</td>
+<td>连接重置、限流、暂时超时</td>
+<td>有界重试、退避、抖动</td>
+</tr>
+<tr>
+<td>永久配置错误</td>
+<td>密钥无效、模型不存在</td>
+<td>立即失败并暴露配置问题</td>
+</tr>
+<tr>
+<td>业务校验错误</td>
+<td>参数非法、状态不允许变更</td>
+<td>不重试，返回明确错误</td>
+</tr>
+<tr>
+<td>模型质量错误</td>
+<td>分类错误、幻觉</td>
+<td>评估、规则约束、人工审核</td>
+</tr>
+<tr>
+<td>副作用不确定</td>
+<td>请求超时但不知道对方是否成功</td>
+<td>使用幂等键并查询权威状态</td>
+</tr>
+</tbody>
+</table>
+<p>Durable Execution 不等于副作用 Exactly-once。节点可能因为恢复、超时或 Interrupt 被再次执行。写操作应以业务操作 ID 作为幂等键，并让服务端能识别重复请求。</p>
+<p><a id="reference-常见失败与诊断"></a></p>
+<h2 id="常见失败与诊断">常见失败与诊断</h2>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>常见原因</th>
+<th>诊断方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>State 字段被意外覆盖</td>
+<td>没有定义 Reducer</td>
+<td>检查并行更新和字段注解</td>
+</tr>
+<tr>
+<td>图一直循环</td>
+<td>路由条件永远不满足结束条件</td>
+<td>记录 State 演进并设置递归上限</td>
+</tr>
+<tr>
+<td>恢复后重复写数据</td>
+<td>Interrupt 或失败导致节点重跑</td>
+<td>拆分副作用并增加幂等键</td>
+</tr>
+<tr>
+<td>同一用户看不到历史</td>
+<td>每次使用了不同 <code>thread_id</code></td>
+<td>检查线程 ID 生成和传递</td>
+</tr>
+<tr>
+<td>不同会话串数据</td>
+<td>复用了不该共享的 <code>thread_id</code></td>
+<td>检查租户、用户、会话分区</td>
+</tr>
+<tr>
+<td>InMemory 本地正常、重启丢失</td>
+<td>使用了非持久 Checkpointer</td>
+<td>换用生产持久化实现并做恢复测试</td>
+</tr>
+<tr>
+<td>并行执行报 State 冲突</td>
+<td>多节点写同一字段且无 Reducer</td>
+<td>定义合并语义或拆分字段</td>
+</tr>
+<tr>
+<td>Human-in-the-loop 无法恢复</td>
+<td>没有 Checkpointer 或 thread_id 不一致</td>
+<td>检查编译参数和恢复配置</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-测试策略"></a></p>
+<h2 id="测试策略">测试策略</h2>
+<p><a id="reference-node-单元测试"></a></p>
+<h3 id="node-单元测试">Node 单元测试</h3>
+<p>直接给函数传入 State，验证返回的部分更新；模型和外部 API 使用可控替身。</p>
+<p><a id="reference-router-单元测试"></a></p>
+<h3 id="router-单元测试">Router 单元测试</h3>
+<p>为每个边界状态验证下一跳，确保存在可达的结束路径。</p>
+<p><a id="reference-graph-路径测试"></a></p>
+<h3 id="graph-路径测试">Graph 路径测试</h3>
+<p>覆盖正常路径、高风险路径、循环退出和并行合并。断言最终 State 和经过的节点，而不只看最后一句模型回复。</p>
+<p><a id="reference-persistence-测试"></a></p>
+<h3 id="persistence-测试">Persistence 测试</h3>
+<p>运行到中间步骤，销毁进程或重新创建 Graph 实例，再用相同 <code>thread_id</code> 验证能否恢复。仅在同一进程内连续 <code>invoke</code> 不算完整恢复验证。</p>
+<p><a id="reference-interrupt-测试"></a></p>
+<h3 id="interrupt-测试">Interrupt 测试</h3>
+<p>验证暂停负载、未审批时无副作用、批准和拒绝两条路径，以及恢复时不会产生重复写。</p>
+<p><a id="reference-故障注入"></a></p>
+<h3 id="故障注入">故障注入</h3>
+<p>在模型、Tool、Checkpointer 和业务 API 的调用点注入超时、限流和未知结果，验证重试上限、幂等和审计记录。</p>
+<p><a id="reference-面试问答"></a></p>
+<h2 id="面试问答">面试问答</h2>
+<p><a id="reference-langgraph-和普通-dag-工作流有什么区别"></a></p>
+<h3 id="langgraph-和普通-dag-工作流有什么区别">LangGraph 和普通 DAG 工作流有什么区别</h3>
+<p>它支持循环、有状态执行、持久化、Interrupt 和 Agentic 决策，适合非固定终止步数的 Agent；传统 DAG 通常更偏无环批处理。LangGraph 仍然可以表达确定性 DAG。</p>
+<p><a id="reference-state-为什么返回部分更新而不是直接修改"></a></p>
+<h3 id="state-为什么返回部分更新而不是直接修改">State 为什么返回部分更新而不是直接修改</h3>
+<p>部分更新让 Runtime 能通过 Reducer 统一合并、记录 Checkpoint、支持并行节点，并更清楚地观测每个节点造成了什么变化。</p>
+<p><a id="reference-checkpointer-和-store-有什么区别"></a></p>
+<h3 id="checkpointer-和-store-有什么区别">Checkpointer 和 Store 有什么区别</h3>
+<p>Checkpointer 保存某个 <code>thread_id</code> 的执行 State 和历史，用于恢复；Store 保存跨线程访问的长期数据。两者都不能自动替代业务数据库。</p>
+<p><a id="reference-interrupt-为什么要求副作用幂等"></a></p>
+<h3 id="interrupt-为什么要求副作用幂等">Interrupt 为什么要求副作用幂等</h3>
+<p>恢复时节点从开头重跑，中断前代码可能再次执行。非幂等写会产生重复记录、重复通知或重复扣款，因此要把副作用移到审批后或用幂等键保护。</p>
+<p><a id="reference-langgraph-是否保证-exactly-once"></a></p>
+<h3 id="langgraph-是否保证-exactly-once">LangGraph 是否保证 Exactly-once</h3>
+<p>不能把编排恢复能力等同于外部副作用 Exactly-once。跨模型、数据库和第三方 API 时，应按可能重复执行设计，并通过幂等、Outbox、核对与补偿达到业务一致性。</p>
+<p><a id="reference-延伸阅读"></a></p>
+<h2 id="延伸阅读">延伸阅读</h2>
+<ul>
+<li><a href="/notes/computer-science/agent/framework/langchain-langgraph/langchain-langgraph-overview/">S00-学习总览</a></li>
+<li><a href="/notes/computer-science/agent/framework/langchain-langgraph/langchain/">S01-LangChain</a></li>
+<li><a href="/notes/computer-science/agent/framework/langchain-langgraph/langchain-langgraph-engineering/">S03-工程实践</a></li>
+<li><a href="https://docs.langchain.com/oss/python/langgraph/overview">LangGraph overview</a></li>
+<li><a href="https://docs.langchain.com/oss/python/langgraph/graph-api">Graph API</a></li>
+<li><a href="https://docs.langchain.com/oss/python/langgraph/persistence">Persistence</a></li>
+<li><a href="https://docs.langchain.com/oss/python/langgraph/interrupts">Interrupts</a></li>
+<li><a href="https://docs.langchain.com/oss/python/langgraph/durable-execution">Durable execution</a></li>
+<li><a href="https://docs.langchain.com/oss/python/langgraph/streaming">Streaming</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>画出一次含并行分支和审批暂停的状态变化。指出哪个字段需要 Reducer，哪个业务 ID 负责幂等，哪个 thread_id 负责定位执行历史；再解释这三者为何不能互相替代。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>最小 Agent 上层接口：<a href="/notes/computer-science/agent/framework/langchain-langgraph/langchain/">S01-LangChain</a>。</li>
+<li>审批和幂等执行案例：<a href="/notes/computer-science/agent/framework/langchain-langgraph/langchain-langgraph-engineering/">S03-工程实践</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#langgraph-解决什么问题">LangGraph 解决什么问题</a></li><li style="--depth: 0"><a href="#为什么-agent-需要-graph">为什么 Agent 需要 Graph</a></li><li style="--depth: 0"><a href="#核心概念">核心概念</a></li><li style="--depth: 1"><a href="#state">State</a></li><li style="--depth: 1"><a href="#node">Node</a></li><li style="--depth: 1"><a href="#edge">Edge</a></li><li style="--depth: 1"><a href="#reducer">Reducer</a></li><li style="--depth: 1"><a href="#graph-编译">Graph 编译</a></li><li style="--depth: 0"><a href="#最小状态图">最小状态图</a></li><li style="--depth: 0"><a href="#手写模型工具循环">手写模型—工具循环</a></li><li style="--depth: 0"><a href="#pregel-与-super-step-心智模型">Pregel 与 Super-step 心智模型</a></li><li style="--depth: 0"><a href="#persistence-与-checkpoint">Persistence 与 Checkpoint</a></li><li style="--depth: 0"><a href="#interrupt-与-human-in-the-loop">Interrupt 与 Human-in-the-loop</a></li><li style="--depth: 1"><a href="#interrupt-的关键语义">Interrupt 的关键语义</a></li><li style="--depth: 0"><a href="#command">Command</a></li><li style="--depth: 0"><a href="#并行send-与-map-reduce">并行、Send 与 Map-Reduce</a></li><li style="--depth: 0"><a href="#subgraph">Subgraph</a></li><li style="--depth: 0"><a href="#streaming">Streaming</a></li><li style="--depth: 0"><a href="#错误重试与幂等">错误、重试与幂等</a></li><li style="--depth: 0"><a href="#常见失败与诊断">常见失败与诊断</a></li><li style="--depth: 0"><a href="#测试策略">测试策略</a></li><li style="--depth: 1"><a href="#node-单元测试">Node 单元测试</a></li><li style="--depth: 1"><a href="#router-单元测试">Router 单元测试</a></li><li style="--depth: 1"><a href="#graph-路径测试">Graph 路径测试</a></li><li style="--depth: 1"><a href="#persistence-测试">Persistence 测试</a></li><li style="--depth: 1"><a href="#interrupt-测试">Interrupt 测试</a></li><li style="--depth: 1"><a href="#故障注入">故障注入</a></li><li style="--depth: 0"><a href="#面试问答">面试问答</a></li><li style="--depth: 1"><a href="#langgraph-和普通-dag-工作流有什么区别">LangGraph 和普通 DAG 工作流有什么区别</a></li><li style="--depth: 1"><a href="#state-为什么返回部分更新而不是直接修改">State 为什么返回部分更新而不是直接修改</a></li><li style="--depth: 1"><a href="#checkpointer-和-store-有什么区别">Checkpointer 和 Store 有什么区别</a></li><li style="--depth: 1"><a href="#interrupt-为什么要求副作用幂等">Interrupt 为什么要求副作用幂等</a></li><li style="--depth: 1"><a href="#langgraph-是否保证-exactly-once">LangGraph 是否保证 Exactly-once</a></li><li style="--depth: 0"><a href="#延伸阅读">延伸阅读</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

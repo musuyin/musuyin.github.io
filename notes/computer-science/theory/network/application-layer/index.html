@@ -1,0 +1,631 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>应用层 · Musuyin&#39; Home</title><meta name="description" content="应用层定义进程交换的消息与规则。HTTP、邮件与 DNS 服务于不同应用需求，选择 TCP 或 UDP 时则要对应可靠性、时延等要求。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/network/application-layer/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="应用层 · Musuyin' Home"><meta property="og:description" content="应用层定义进程交换的消息与规则。HTTP、邮件与 DNS 服务于不同应用需求，选择 TCP 或 UDP 时则要对应可靠性、时延等要求。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/network/application-layer/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">应用层</p><dl><div><dt>发布日期</dt><dd><time datetime="2024-09-23">2024-09-23</time></dd></div><div><dt>字数</dt><dd>5845</dd></div><div><dt>预计阅读</dt><dd>20 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">#计算机网络</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>应用层</h1><time datetime="2024-09-23">2024-09-23</time><p class="tags"><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">#计算机网络</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>应用层定义进程交换的消息与规则。HTTP、邮件与 DNS 服务于不同应用需求，选择 TCP 或 UDP 时则要对应可靠性、时延等要求。</p>
+<p><a id="reference-应用层协议原理"></a></p>
+<h2 id="应用层协议原理">应用层协议原理</h2>
+<p><a id="reference-网络应用体系结构"></a></p>
+<h3 id="网络应用体系结构">网络应用体系结构</h3>
+<p><a id="reference-客户服务器cs"></a></p>
+<h4 id="客户服务器cs">客户/服务器（C/S）</h4>
+<ul>
+<li><strong>服务器</strong>：7×24 小时在线，拥有固定 IP/域名，用大量服务器实现可扩展性</li>
+<li><strong>客户机</strong>：间歇性接入，可能使用动态 IP，不与其他客户机直接通信</li>
+</ul>
+<p><a id="reference-p2p对等"></a></p>
+<h4 id="p2p对等">P2P（对等）</h4>
+<ul>
+<li>没有永远在线的服务器，任意节点间可直接通信</li>
+<li>优点：高度可伸缩；缺点：难于管理，节点 IP 可能变化</li>
+</ul>
+<p><a id="reference-混合结构"></a></p>
+<h4 id="混合结构">混合结构</h4>
+<p>示例 Napster：文件传输用 P2P，文件搜索用 C/S（中央服务器索引）</p>
+<p><a id="reference-应用进程通信"></a></p>
+<h3 id="应用进程通信">应用进程通信</h3>
+<ul>
+<li><strong>套接字（Socket）</strong>：进程通过套接字发送/接收消息，相当于应用层与传输层之间的“门”</li>
+<li><strong>进程寻址</strong>：IP 地址 + 端口号（如 HTTP 服务器：端口 80，邮件服务器：端口 25）</li>
+</ul>
+<p><a id="reference-应用层协议"></a></p>
+<h3 id="应用层协议">应用层协议</h3>
+<p>协议定义了消息的类型（请求/响应）、语法（字段格式）、语义（字段含义）和规则（何时发送/响应）。</p>
+<p>分为<strong>公开协议</strong>（RFC 定义，如 HTTP、SMTP）和<strong>私有协议</strong>（如多数 P2P 应用）。</p>
+<p><a id="reference-应用对传输层服务的需求"></a></p>
+<h3 id="应用对传输层服务的需求">应用对传输层服务的需求</h3>
+<table>
+<thead>
+<tr>
+<th>应用类型</th>
+<th>数据丢失</th>
+<th>带宽要求</th>
+<th>时延要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文件传输、Email</td>
+<td>不可丢失</td>
+<td>弹性</td>
+<td>宽松</td>
+</tr>
+<tr>
+<td>网络电话/视频</td>
+<td>可容忍少量</td>
+<td>有最低要求</td>
+<td>严格（&lt;几百 ms）</td>
+</tr>
+<tr>
+<td>网络游戏</td>
+<td>可容忍少量</td>
+<td>弹性</td>
+<td>严格</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-tcp-vs-udp-提供的服务"></a></p>
+<h4 id="tcp-vs-udp-提供的服务">TCP vs UDP 提供的服务</h4>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>TCP</th>
+<th>UDP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>连接</td>
+<td>面向连接（需握手）</td>
+<td>无连接</td>
+</tr>
+<tr>
+<td>可靠性</td>
+<td>可靠传输</td>
+<td>不可靠</td>
+</tr>
+<tr>
+<td>流量控制</td>
+<td>有</td>
+<td>无</td>
+</tr>
+<tr>
+<td>拥塞控制</td>
+<td>有</td>
+<td>无</td>
+</tr>
+<tr>
+<td>时延/带宽保障</td>
+<td>不提供</td>
+<td>不提供</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-web-应用与-http"></a></p>
+<h2 id="web-应用与-http">Web 应用与 HTTP</h2>
+<p><a id="reference-概述"></a></p>
+<h3 id="概述">概述</h3>
+<ul>
+<li><strong>Web 页面</strong>由多个<strong>对象</strong>（HTML、图片、脚本等）组成，基础是一个 HTML 文件（含对其他对象的引用链接）</li>
+<li>对象通过 **URL（Uniform Resource Locator）**寻址：<code>scheme://host:port/path</code></li>
+<li>HTTP 使用 C/S 结构：浏览器（客户端）向 Web 服务器（端口 <strong>80</strong>）发请求，服务器响应</li>
+<li>HTTP 是<strong>无状态</strong>协议：服务器不记录客户端的历史请求</li>
+</ul>
+<p><a id="reference-http-连接类型"></a></p>
+<h3 id="http-连接类型">HTTP 连接类型</h3>
+<p><a id="reference-非持久性连接http-10"></a></p>
+<h4 id="非持久性连接http-10">非持久性连接（HTTP 1.0）</h4>
+<ul>
+<li>每个 TCP 连接只传输<strong>一个</strong>对象</li>
+<li>响应时间 = <strong>2 RTT</strong> + 文件传输时间（1 RTT 建立 TCP + 1 RTT 请求+响应）</li>
+<li>缺点：每个对象都需建立 TCP 连接，开销大</li>
+</ul>
+<p><a id="reference-持久性连接http-11-默认"></a></p>
+<h4 id="持久性连接http-11-默认">持久性连接（HTTP 1.1 默认）</h4>
+<ul>
+<li>一个 TCP 连接可传输<strong>多个</strong>对象</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>无流水（串行）</strong></td>
+<td>收到响应后才发下一个请求，每个对象耗时约 1 RTT</td>
+</tr>
+<tr>
+<td><strong>带流水（并行）</strong></td>
+<td>遇到引用对象立即发出请求，理想情况约 1 RTT 获取所有对象</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-http-消息格式"></a></p>
+<h3 id="http-消息格式">HTTP 消息格式</h3>
+<p><a id="reference-请求报文"></a></p>
+<h4 id="请求报文">请求报文</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>GET /index.html HTTP/1.1\r\n        ← 请求行</span></span>
+<span class="line"><span>Host: www.example.com\r\n           ← 首部行</span></span>
+<span class="line"><span>Connection: keep-alive\r\n</span></span>
+<span class="line"><span>...</span></span>
+<span class="line"><span>\r\n                                ← 空行（分隔首部和主体）</span></span></code></pre>
+<p><strong>常见方法</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td>请求获取对象</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>提交数据（如表单），数据在消息体中</td>
+</tr>
+<tr>
+<td>HEAD</td>
+<td>只获取首部，不获取对象（测试用）</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>上传文件到指定 URL</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>删除指定 URL 的文件</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-响应报文"></a></p>
+<h4 id="响应报文">响应报文</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>HTTP/1.1 200 OK\r\n                  ← 状态行</span></span>
+<span class="line"><span>Content-Length: 1234\r\n             ← 首部行</span></span>
+<span class="line"><span>...</span></span>
+<span class="line"><span>\r\n</span></span>
+<span class="line"><span>&lt;HTML&gt;...&lt;/HTML&gt;                     ← 对象内容</span></span></code></pre>
+<p><strong>常见状态码</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>状态码</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200 OK</td>
+<td>请求成功</td>
+</tr>
+<tr>
+<td>301 Moved Permanently</td>
+<td>永久重定向</td>
+</tr>
+<tr>
+<td>400 Bad Request</td>
+<td>请求语法错误</td>
+</tr>
+<tr>
+<td>404 Not Found</td>
+<td>对象不存在</td>
+</tr>
+<tr>
+<td>505 HTTP Version Not Supported</td>
+<td>不支持的 HTTP 版本</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-cookie-技术"></a></p>
+<h3 id="cookie-技术">Cookie 技术</h3>
+<p>HTTP 无状态，但可用 Cookie 跟踪用户身份。</p>
+<p>四个组件：</p>
+<ol>
+<li>HTTP 响应消息中的 <code>Set-Cookie</code> 头部</li>
+<li>HTTP 请求消息中的 <code>Cookie</code> 头部</li>
+<li>保存在客户端的 Cookie 文件（浏览器管理）</li>
+<li>服务器端后台数据库</li>
+</ol>
+<p><a id="reference-web-缓存代理服务器"></a></p>
+<h3 id="web-缓存代理服务器">Web 缓存（代理服务器）</h3>
+<p>Web 缓存在不访问原始服务器的前提下满足客户端请求，减少响应时间和机构流量。</p>
+<p>工作方式：</p>
+<ol>
+<li>浏览器将请求发给缓存服务器</li>
+<li>若对象在缓存中 → 直接返回</li>
+<li>若不在缓存中 → 缓存服务器向原始服务器请求，缓存并返回给客户端</li>
+</ol>
+<p><strong>条件 GET</strong>（<code>If-Modified-Since</code>）：缓存先向服务器确认对象是否更新，未更新则服务器返回 <code>304 Not Modified</code>，避免重复传输。</p>
+<p><a id="reference-ftp-文件传输"></a></p>
+<h2 id="ftp-文件传输">FTP 文件传输</h2>
+<p>FTP（File Transfer Protocol）使用<strong>两条 TCP 连接</strong>：</p>
+<ul>
+<li><strong>控制连接</strong>（端口 <strong>21</strong>）：传输命令（持久，带外信令）</li>
+<li><strong>数据连接</strong>（动态建立）：传输文件（传完即关闭）</li>
+</ul>
+<p>服务器维护“状态”（当前目录、认证信息等），是<strong>有状态协议</strong>（与 HTTP 不同）。</p>
+<p><a id="reference-电子邮件email"></a></p>
+<h2 id="电子邮件email">电子邮件（Email）</h2>
+<p><a id="reference-三个核心组件"></a></p>
+<h3 id="三个核心组件">三个核心组件</h3>
+<ol>
+<li><strong>用户代理（User Agent）</strong>：邮件客户端，读写发收邮件</li>
+<li><strong>邮件服务器（Mail Server）</strong>：存储用户邮箱，管理发送队列</li>
+<li><strong>SMTP（Simple Mail Transfer Protocol）</strong>：在邮件服务器之间传送邮件</li>
+</ol>
+<p><a id="reference-smtp"></a></p>
+<h3 id="smtp">SMTP</h3>
+<ul>
+<li>使用 TCP，服务器端口 <strong>25</strong></li>
+<li>是<strong>推协议</strong>：发送方主动将邮件推送给接收方邮件服务器</li>
+<li>要求 <strong>7 位 ASCII</strong> 编码（非 ASCII 内容需用 MIME 扩展编码）</li>
+<li>三个阶段：握手 → 传送消息 → 关闭连接</li>
+<li>邮件结束标记：<code>CRLF.CRLF</code>（只含一个句点的单独一行）</li>
+</ul>
+<p><a id="reference-http-vs-smtp"></a></p>
+<h4 id="http-vs-smtp">HTTP vs SMTP</h4>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>HTTP</th>
+<th>SMTP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>方向</td>
+<td><strong>拉</strong>协议（客户从服务器拉取）</td>
+<td><strong>推</strong>协议（服务器主动推送）</td>
+</tr>
+<tr>
+<td>字符限制</td>
+<td>无</td>
+<td>7 位 ASCII（需 MIME 扩展）</td>
+</tr>
+<tr>
+<td>多媒体</td>
+<td>每个对象单独封装</td>
+<td>所有对象放在同一报文</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-邮件访问协议"></a></p>
+<h3 id="邮件访问协议">邮件访问协议</h3>
+<p>SMTP 用于发送和服务器间传递，收件用以下协议从邮件服务器取回邮件：</p>
+<table>
+<thead>
+<tr>
+<th>协议</th>
+<th>端口</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>POP3</strong></td>
+<td>110</td>
+<td>简单，将邮件下载到本地，服务器可选保留或删除，无状态</td>
+</tr>
+<tr>
+<td><strong>IMAP</strong></td>
+<td>143</td>
+<td>功能强，在服务器上管理邮件，有状态，支持文件夹</td>
+</tr>
+<tr>
+<td><strong>HTTP</strong></td>
+<td>80</td>
+<td>基于 Web 的邮件（如 Gmail），收发都用 HTTP</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-dns域名解析系统"></a></p>
+<h2 id="dns域名解析系统">DNS（域名解析系统）</h2>
+<p><a id="reference-作用"></a></p>
+<h3 id="作用">作用</h3>
+<p>将域名（如 <a href="http://www.example.com%EF%BC%89%E8%A7%A3%E6%9E%90%E4%B8%BA">www.example.com）解析为</a> IP 地址（如 1.2.3.4）。</p>
+<p>DNS 是一个<strong>多层命名服务器构成的分布式数据库</strong> + <strong>应用层协议</strong>，不使用集中式是为了避免单点失效、流量瓶颈和维护问题。</p>
+<p><a id="reference-dns-提供的服务"></a></p>
+<h3 id="dns-提供的服务">DNS 提供的服务</h3>
+<ul>
+<li>域名 → IP 地址翻译</li>
+<li>主机别名（CNAME）</li>
+<li>邮件服务器别名（MX）</li>
+<li>负载均衡（一个域名对应多个 IP）</li>
+</ul>
+<p><a id="reference-dns-层级结构"></a></p>
+<h3 id="dns-层级结构">DNS 层级结构</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>根域名服务器</span></span>
+<span class="line"><span>    └── 顶级域名服务器（TLD）：.com, .org, .cn, ...</span></span>
+<span class="line"><span>            └── 权威域名服务器：各组织自己维护</span></span></code></pre>
+<ul>
+<li><strong>本地域名服务器</strong>：每个 ISP 有一个，作为默认服务器，将查询代理给层级系统</li>
+</ul>
+<p><a id="reference-查询方式"></a></p>
+<h3 id="查询方式">查询方式</h3>
+<ul>
+<li><strong>迭代查询</strong>：被查询服务器返回下一级服务器地址，由本地服务器逐步查询</li>
+<li><strong>递归查询</strong>：将解析任务交给所联系的服务器，由它负责最终解析</li>
+</ul>
+<p>本地服务器<strong>缓存</strong> DNS 查询结果，超时删除（TTL 控制），减少根服务器访问频率。</p>
+<p><a id="reference-dns-资源记录rr"></a></p>
+<h3 id="dns-资源记录rr">DNS 资源记录（RR）</h3>
+<p>格式：<code>(name, value, type, ttl)</code></p>
+<table>
+<thead>
+<tr>
+<th>type</th>
+<th>name</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>主机域名</td>
+<td>IP 地址</td>
+</tr>
+<tr>
+<td>NS</td>
+<td>域</td>
+<td>权威域名服务器的主机域名</td>
+</tr>
+<tr>
+<td>CNAME</td>
+<td>别名</td>
+<td>真实域名</td>
+</tr>
+<tr>
+<td>MX</td>
+<td>邮件服务器别名</td>
+<td>邮件服务器主机名</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-dns-报文格式"></a></p>
+<h3 id="dns-报文格式">DNS 报文格式</h3>
+<p>查询和回复报文格式相同，头部包含：</p>
+<ul>
+<li><strong>Identification</strong>：16 位查询标号，回复使用相同标号匹配</li>
+<li><strong>Flags</strong>：标志位（查询/回复、期望递归、递归可用、权威回答）</li>
+</ul>
+<p><a id="reference-p2p-文件分发"></a></p>
+<h2 id="p2p-文件分发">P2P 文件分发</h2>
+<p><a id="reference-cs-与-p2p-分发时间对比"></a></p>
+<h3 id="cs-与-p2p-分发时间对比">C/S 与 P2P 分发时间对比</h3>
+<p>设文件大小 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi></mrow><annotation encoding="application/x-tex">F</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">F</span></span></span></span>，服务器上行带宽 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>s</mi></msub></mrow><annotation encoding="application/x-tex">u_s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 个客户端，各下行带宽 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">d_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>：</p>
+<ul>
+<li><strong>C/S</strong>：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mrow><mi>C</mi><mi mathvariant="normal">/</mi><mi>S</mi></mrow></msub><mo>≥</mo><mi>max</mi><mo>⁡</mo><mo stretchy="false">{</mo><mi>N</mi><mi>F</mi><mi mathvariant="normal">/</mi><msub><mi>u</mi><mi>s</mi></msub><mo separator="true">,</mo><mi>F</mi><mi mathvariant="normal">/</mi><msub><mrow><mi>min</mi><mo>⁡</mo></mrow><mi>i</mi></msub><msub><mi>d</mi><mi>i</mi></msub><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">T_{C/S} \geq \max{NF/u_s, F/\min_i d_i}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.0385em;vertical-align:-0.3552em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5198em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0715em;">C</span><span class="mord mtight">/</span><span class="mord mathnormal mtight" style="margin-right:0.0576em;">S</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3552em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">max</span><span class="mopen">{</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mord mathnormal" style="margin-right:0.1389em;">F</span><span class="mord">/</span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">F</span><span class="mord">/</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop"><span class="mop">min</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">}</span></span></span></span>（随 N 线性增长）</li>
+<li><strong>P2P</strong>：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mrow><mi>P</mi><mn>2</mn><mi>P</mi></mrow></msub><mo>≥</mo><mi>max</mi><mo>⁡</mo><mo stretchy="false">{</mo><mi>F</mi><mi mathvariant="normal">/</mi><msub><mi>u</mi><mi>s</mi></msub><mo separator="true">,</mo><mi>F</mi><mi mathvariant="normal">/</mi><msub><mrow><mi>min</mi><mo>⁡</mo></mrow><mi>i</mi></msub><msub><mi>d</mi><mi>i</mi></msub><mo separator="true">,</mo><mi>N</mi><mi>F</mi><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><msub><mi>u</mi><mi>s</mi></msub><mo>+</mo><mo>∑</mo><msub><mi>u</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">T_{P2P} \geq \max{F/u_s, F/\min_i d_i, NF/(u_s + \sum u_i)}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.1389em;">P</span><span class="mord mtight">2</span><span class="mord mathnormal mtight" style="margin-right:0.1389em;">P</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">max</span><span class="mopen">{</span><span class="mord mathnormal" style="margin-right:0.1389em;">F</span><span class="mord">/</span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">F</span><span class="mord">/</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mop"><span class="mop">min</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mord mathnormal" style="margin-right:0.1389em;">F</span><span class="mord">/</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)}</span></span></span></span>（增长更缓慢）</li>
+</ul>
+<p><a id="reference-bittorrent"></a></p>
+<h3 id="bittorrent">BitTorrent</h3>
+<ul>
+<li><strong>tracker</strong>：跟踪参与 torrent 的节点</li>
+<li><strong>torrent</strong>：交换同一文件的节点组，文件划分为 <strong>256KB 的 chunk</strong></li>
+</ul>
+<p>关键策略：</p>
+<ul>
+<li><strong>稀缺优先</strong>：优先下载最少节点拥有的 chunk，避免 chunk 垄断</li>
+<li><strong>tit-for-tat（以牙还牙）</strong>：优先向给自己发送速率最快的 4 个邻居上传（每 10s 重评），每 30s 随机解锁一个其他节点（乐观解锁）</li>
+</ul>
+<p><a id="reference-p2p-索引"></a></p>
+<h3 id="p2p-索引">P2P 索引</h3>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>集中式索引</strong></td>
+<td>中央服务器维护节点内容清单，单点失效、性能瓶颈</td>
+</tr>
+<tr>
+<td><strong>泛洪式查询（Gnutella）</strong></td>
+<td>完全分布式，查询广播转发，带宽消耗大</td>
+</tr>
+<tr>
+<td><strong>层次式覆盖网络</strong></td>
+<td>超级节点管理子节点内容，综合两者优点</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-socket-编程"></a></p>
+<h2 id="socket-编程">Socket 编程</h2>
+<p><a id="reference-socket-api-概述"></a></p>
+<h3 id="socket-api-概述">Socket API 概述</h3>
+<p>Socket 是应用进程与传输层之间的接口，通过 IP + 端口号标识通信端点。</p>
+<p><a id="reference-关键-api-函数"></a></p>
+<h4 id="关键-api-函数">关键 API 函数</h4>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>socket()</code></td>
+<td>创建套接字</td>
+</tr>
+<tr>
+<td><code>bind()</code></td>
+<td>绑定本地 IP 和端口</td>
+</tr>
+<tr>
+<td><code>listen()</code></td>
+<td>服务器置于监听状态（仅 TCP）</td>
+</tr>
+<tr>
+<td><code>accept()</code></td>
+<td>接受连接请求，创建新套接字（仅服务器 TCP）</td>
+</tr>
+<tr>
+<td><code>connect()</code></td>
+<td>客户端发起连接（TCP）或指定服务器地址（UDP）</td>
+</tr>
+<tr>
+<td><code>send()/recv()</code></td>
+<td>TCP 套接字收发数据</td>
+</tr>
+<tr>
+<td><code>sendto()/recvfrom()</code></td>
+<td>UDP 套接字收发数据（含地址信息）</td>
+</tr>
+<tr>
+<td><code>closesocket()</code></td>
+<td>关闭套接字</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-tcp-vs-udp-socket-调用流程"></a></p>
+<h4 id="tcp-vs-udp-socket-调用流程">TCP vs UDP Socket 调用流程</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>TCP Server:                    TCP Client:</span></span>
+<span class="line"><span>socket() → bind() →           socket() →</span></span>
+<span class="line"><span>listen() → accept()  ←───── connect()</span></span>
+<span class="line"><span>↕ recv()/send()                ↕ send()/recv()</span></span>
+<span class="line"><span>closesocket()                  closesocket()</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>UDP Server:                    UDP Client:</span></span>
+<span class="line"><span>socket() → bind() →           socket() →</span></span>
+<span class="line"><span>recvfrom() ←─────────────── sendto()</span></span>
+<span class="line"><span>sendto() ──────────────────→ recvfrom()</span></span></code></pre>
+<p><a id="reference-面试追问httpsse-与-websocket"></a></p>
+<h3 id="面试追问httpsse-与-websocket">面试追问：HTTP、SSE 与 WebSocket</h3>
+<p><a id="reference-sse-和-websocket-有何区别"></a></p>
+<h4 id="sse-和-websocket-有何区别">SSE 和 WebSocket 有何区别</h4>
+<p>SSE（Server-Sent Events）是服务器通过一个保持不断开的 HTTP 响应，以 <code>text/event-stream</code> 格式<strong>单向</strong>推送事件；浏览器原生 <code>EventSource</code> 支持自动重连和 <code>Last-Event-ID</code>。它适合通知、日志流、AI 输出流。WebSocket 先经 HTTP Upgrade 握手，随后成为独立的全双工帧协议，客户端和服务端均可随时发消息，适合聊天室、协作编辑、实时游戏。</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>SSE</th>
+<th>WebSocket</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>通信方向</td>
+<td>服务端 → 客户端</td>
+<td>双向全双工</td>
+</tr>
+<tr>
+<td>协议与载荷</td>
+<td>HTTP 流、文本事件</td>
+<td>独立帧协议，可传文本/二进制</td>
+</tr>
+<tr>
+<td>重连</td>
+<td>浏览器内建</td>
+<td>应用自行实现</td>
+</tr>
+<tr>
+<td>代理兼容性</td>
+<td>与普通 HTTP 接近</td>
+<td>要求代理正确转发 Upgrade</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-websocket-是否和-http-使用相同端口"></a></p>
+<h4 id="websocket-是否和-http-使用相同端口">WebSocket 是否和 HTTP 使用相同端口</h4>
+<p>通常是。<code>ws://</code> 默认 80、<code>wss://</code> 默认 443，分别对应 HTTP 和 HTTPS；端口不是协议专属资源，TCP 端口由传输层复用。服务端先依据监听端口和 HTTP 请求中的 <code>Upgrade: websocket</code> 区分协议，因此可在 443 上让 HTTPS 与 WSS 共用反向代理入口。也可显式使用任意未占用端口。</p>
+<p><a id="reference-sse-是否基于-http11websocket-支持-http23-吗"></a></p>
+<h4 id="sse-是否基于-http11websocket-支持-http23-吗">SSE 是否基于 HTTP/1.1；WebSocket 支持 HTTP/2/3 吗</h4>
+<p>SSE 是 HTTP 语义，不限定 1.1：在 HTTP/1.1 用 chunked 的长响应；在 HTTP/2/3 是一个持续的数据流。实践中要关闭代理缓冲并定期发心跳。</p>
+<p>经典 WebSocket 的 Upgrade 只适用于 HTTP/1.1。HTTP/2 用 RFC 8441 的 extended CONNECT，HTTP/3 用 RFC 9220 的 extended CONNECT；是否可用取决于浏览器、CDN、代理和服务端是否都支持。不要把“HTTP/2 天然支持 WebSocket”当成事实。</p>
+<p><a id="reference-从输入-url-到页面渲染"></a></p>
+<h4 id="从输入-url-到页面渲染">从输入 URL 到页面渲染</h4>
+<ol>
+<li>浏览器解析 URL，查浏览器/系统缓存、hosts 和 DNS，获得 IP；HTTPS 还会校验证书链并协商 TLS。</li>
+<li>客户端经路由、ARP/ND 找到下一跳，完成 TCP 三次握手；HTTP/3 则在 QUIC 上完成加密握手。</li>
+<li>浏览器发送 HTTP 请求；CDN、WAF、负载均衡或 Nginx 常先接收，再反向代理到应用实例。应用访问缓存、数据库等，返回响应。</li>
+<li>浏览器校验缓存和响应头，解析 HTML 构建 DOM，解析 CSS 构建 CSSOM，合成 render tree，随后 layout、paint、composite；JS 可能阻塞解析或触发后续请求与重排。</li>
+</ol>
+<p><a id="reference-http-版本的演进"></a></p>
+<h4 id="http-版本的演进">HTTP 版本的演进</h4>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>关键能力</th>
+<th>主要局限/改进</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>短连接</td>
+<td>每个资源重复握手</td>
+</tr>
+<tr>
+<td>1.1</td>
+<td>持久连接、Host、chunked</td>
+<td>管线化实践少，同一连接仍队头阻塞</td>
+</tr>
+<tr>
+<td>2</td>
+<td>二进制分帧、多路复用、HPACK、流优先级</td>
+<td>共用一个 TCP 连接，丢包会阻塞所有流</td>
+</tr>
+<tr>
+<td>3</td>
+<td>HTTP 语义跑在 QUIC/UDP 上，独立流避免 TCP 层队头阻塞，TLS 1.3、连接迁移</td>
+<td>UDP 可能受网络设备限制，CPU 开销更高</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-域名解析到的-ip-是否就是后台服务器"></a></p>
+<h4 id="域名解析到的-ip-是否就是后台服务器">域名解析到的 IP 是否就是后台服务器</h4>
+<p>通常不是。域名可先解析到 CDN Anycast/边缘节点、四层/七层负载均衡或 WAF 的 VIP；再由其按健康检查、权重、路径、灰度规则转到内网应用实例。这样隐藏源站、抗攻击并实现弹性扩缩。</p>
+<p><a id="reference-正向代理和反向代理"></a></p>
+<h4 id="正向代理和反向代理">正向代理和反向代理</h4>
+<p>正向代理代表<strong>客户端</strong>访问外网，目标站知道代理而未必知道真实用户，常用于出网控制、匿名或跨网访问。反向代理代表<strong>服务端</strong>接收公网请求，客户端只面向代理，常做 TLS 终止、路由、负载均衡、缓存、限流和 WAF。Nginx 常作为反向代理；项目回答应如实说明实际使用的 <code>proxy_pass</code>、负载均衡、静态资源、HTTPS、WebSocket Upgrade、限流或缓存配置，不能泛称“都用过”。</p>
+<p><a id="reference-网络字节顺序"></a></p>
+<h3 id="网络字节顺序">网络字节顺序</h3>
+<p>TCP/IP 使用**大端（Big-Endian）**字节序作为网络标准，需要在本地字节序和网络字节序之间转换：</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>转换方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>htons()</code></td>
+<td>主机 → 网络（16 位）</td>
+</tr>
+<tr>
+<td><code>ntohs()</code></td>
+<td>网络 → 主机（16 位）</td>
+</tr>
+<tr>
+<td><code>htonl()</code></td>
+<td>主机 → 网络（32 位）</td>
+</tr>
+<tr>
+<td><code>ntohl()</code></td>
+<td>网络 → 主机（32 位）</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>Cookie 与连接是否同一层面的状态？DNS 查询为什么不等同于获取网页内容？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#应用层协议原理">应用层协议原理</a></li><li style="--depth: 1"><a href="#网络应用体系结构">网络应用体系结构</a></li><li style="--depth: 2"><a href="#客户服务器cs">客户/服务器（C/S）</a></li><li style="--depth: 2"><a href="#p2p对等">P2P（对等）</a></li><li style="--depth: 2"><a href="#混合结构">混合结构</a></li><li style="--depth: 1"><a href="#应用进程通信">应用进程通信</a></li><li style="--depth: 1"><a href="#应用层协议">应用层协议</a></li><li style="--depth: 1"><a href="#应用对传输层服务的需求">应用对传输层服务的需求</a></li><li style="--depth: 2"><a href="#tcp-vs-udp-提供的服务">TCP vs UDP 提供的服务</a></li><li style="--depth: 0"><a href="#web-应用与-http">Web 应用与 HTTP</a></li><li style="--depth: 1"><a href="#概述">概述</a></li><li style="--depth: 1"><a href="#http-连接类型">HTTP 连接类型</a></li><li style="--depth: 2"><a href="#非持久性连接http-10">非持久性连接（HTTP 1.0）</a></li><li style="--depth: 2"><a href="#持久性连接http-11-默认">持久性连接（HTTP 1.1 默认）</a></li><li style="--depth: 1"><a href="#http-消息格式">HTTP 消息格式</a></li><li style="--depth: 2"><a href="#请求报文">请求报文</a></li><li style="--depth: 2"><a href="#响应报文">响应报文</a></li><li style="--depth: 1"><a href="#cookie-技术">Cookie 技术</a></li><li style="--depth: 1"><a href="#web-缓存代理服务器">Web 缓存（代理服务器）</a></li><li style="--depth: 0"><a href="#ftp-文件传输">FTP 文件传输</a></li><li style="--depth: 0"><a href="#电子邮件email">电子邮件（Email）</a></li><li style="--depth: 1"><a href="#三个核心组件">三个核心组件</a></li><li style="--depth: 1"><a href="#smtp">SMTP</a></li><li style="--depth: 2"><a href="#http-vs-smtp">HTTP vs SMTP</a></li><li style="--depth: 1"><a href="#邮件访问协议">邮件访问协议</a></li><li style="--depth: 0"><a href="#dns域名解析系统">DNS（域名解析系统）</a></li><li style="--depth: 1"><a href="#作用">作用</a></li><li style="--depth: 1"><a href="#dns-提供的服务">DNS 提供的服务</a></li><li style="--depth: 1"><a href="#dns-层级结构">DNS 层级结构</a></li><li style="--depth: 1"><a href="#查询方式">查询方式</a></li><li style="--depth: 1"><a href="#dns-资源记录rr">DNS 资源记录（RR）</a></li><li style="--depth: 1"><a href="#dns-报文格式">DNS 报文格式</a></li><li style="--depth: 0"><a href="#p2p-文件分发">P2P 文件分发</a></li><li style="--depth: 1"><a href="#cs-与-p2p-分发时间对比">C/S 与 P2P 分发时间对比</a></li><li style="--depth: 1"><a href="#bittorrent">BitTorrent</a></li><li style="--depth: 1"><a href="#p2p-索引">P2P 索引</a></li><li style="--depth: 0"><a href="#socket-编程">Socket 编程</a></li><li style="--depth: 1"><a href="#socket-api-概述">Socket API 概述</a></li><li style="--depth: 2"><a href="#关键-api-函数">关键 API 函数</a></li><li style="--depth: 2"><a href="#tcp-vs-udp-socket-调用流程">TCP vs UDP Socket 调用流程</a></li><li style="--depth: 1"><a href="#面试追问httpsse-与-websocket">面试追问：HTTP、SSE 与 WebSocket</a></li><li style="--depth: 2"><a href="#sse-和-websocket-有何区别">SSE 和 WebSocket 有何区别</a></li><li style="--depth: 2"><a href="#websocket-是否和-http-使用相同端口">WebSocket 是否和 HTTP 使用相同端口</a></li><li style="--depth: 2"><a href="#sse-是否基于-http11websocket-支持-http23-吗">SSE 是否基于 HTTP/1.1；WebSocket 支持 HTTP/2/3 吗</a></li><li style="--depth: 2"><a href="#从输入-url-到页面渲染">从输入 URL 到页面渲染</a></li><li style="--depth: 2"><a href="#http-版本的演进">HTTP 版本的演进</a></li><li style="--depth: 2"><a href="#域名解析到的-ip-是否就是后台服务器">域名解析到的 IP 是否就是后台服务器</a></li><li style="--depth: 2"><a href="#正向代理和反向代理">正向代理和反向代理</a></li><li style="--depth: 1"><a href="#网络字节顺序">网络字节顺序</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

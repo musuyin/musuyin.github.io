@@ -1,0 +1,926 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>密码学基础 · Musuyin&#39; Home</title><meta name="description" content="密码学从明文、密文和密钥建立概念，再区分对称、非对称及完整性相关机制。古典密码与 DES 等材料用于理解历史结构，不能据此直接选择现代方案。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/safty/cryptography/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="密码学基础 · Musuyin' Home"><meta property="og:description" content="密码学从明文、密文和密钥建立概念，再区分对称、非对称及完整性相关机制。古典密码与 DES 等材料用于理解历史结构，不能据此直接选择现代方案。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/safty/cryptography/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">密码学基础</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-11-06">2025-11-06</time></dd></div><div><dt>字数</dt><dd>21199</dd></div><div><dt>预计阅读</dt><dd>71 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8/">#信息安全</a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/">#密码学</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>密码学基础</h1><time datetime="2025-11-06">2025-11-06</time><p class="tags"><a href="/tags/%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8/">#信息安全</a><a href="/tags/%E5%AF%86%E7%A0%81%E5%AD%A6/">#密码学</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>密码学从明文、密文和密钥建立概念，再区分对称、非对称及完整性相关机制。古典密码与 DES 等材料用于理解历史结构，不能据此直接选择现代方案。</p>
+<p><a id="reference-基本术语"></a></p>
+<h2 id="基本术语">基本术语</h2>
+<ul>
+<li>加密（Encryption）-解密（Decryption）</li>
+<li>密码体制（Crypto System）</li>
+<li>明文（Plaintext）-密文（Ciphertext）</li>
+<li>加密算法（Encryption Alogorithm）</li>
+<li>无密钥密码（Keyless Cipher）
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo>=</mo><mi>E</mi><mo stretchy="false">(</mo><mi>P</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">C=E(P)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mclose">)</span></span></span></span></li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>=</mo><mi>D</mi><mo stretchy="false">(</mo><mi>C</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P=D(C)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mclose">)</span></span></span></span></li>
+</ul>
+</li>
+<li>对称（Symmetric）加密
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo>=</mo><mi>E</mi><mo stretchy="false">(</mo><mi>K</mi><mo separator="true">,</mo><mi>P</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">C=E(K,P)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mclose">)</span></span></span></span></li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>=</mo><mi>D</mi><mo stretchy="false">(</mo><mi>K</mi><mo separator="true">,</mo><mi>C</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P=D(K,C)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mclose">)</span></span></span></span></li>
+</ul>
+</li>
+<li>非对称（Asymmetric）加密
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo>=</mo><mi>E</mi><mo stretchy="false">(</mo><msub><mi>K</mi><mi>E</mi></msub><mo separator="true">,</mo><mi>P</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">C=E(K_E,P)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0576em;">E</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mclose">)</span></span></span></span></li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>=</mo><mi>D</mi><mo stretchy="false">(</mo><msub><mi>K</mi><mi>D</mi></msub><mo separator="true">,</mo><mi>C</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P=D(K_D,C)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">D</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mclose">)</span></span></span></span></li>
+</ul>
+</li>
+</ul>
+<p><img alt="IMG-20260722152300958" loading="lazy" decoding="async" width="411" height="426" src="/_astro/IMG-20260722152300958.DSkLLzTf_Z22Da4w.webp"></p>
+<p><a id="reference-古典加密方法"></a></p>
+<h2 id="古典加密方法">古典加密方法</h2>
+<p><a id="reference-替换法substitution"></a></p>
+<h3 id="替换法substitution">替换法（Substitution）</h3>
+<p><a id="reference-凯撒加密caesar-cipher"></a></p>
+<h4 id="凯撒加密caesar-cipher">凯撒加密（Caesar Cipher）</h4>
+<p>按照字母表顺序前移或后移</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>C</mi><mi>i</mi></msub><mo>=</mo><mi>E</mi><mo stretchy="false">(</mo><msub><mi>P</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><msub><mi>P</mi><mi>i</mi></msub><mo>+</mo><mi>n</mi><mo stretchy="false">)</mo><mtext> mod </mtext><mn>26</mn></mrow><annotation encoding="application/x-tex">C_i=E(P_i)=(P_i+n)\ \text{mod}\ 26</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span><span class="mspace"> </span><span class="mord text"><span class="mord">mod</span></span><span class="mspace"> </span><span class="mord">26</span></span></span></span></span></div>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 可以为任意整数</p>
+<p>破译点：</p>
+<ul>
+<li>空格、重复字母</li>
+<li>常用前缀、后缀，单词结构的分析</li>
+</ul>
+<p><a id="reference-有密钥的替换密码"></a></p>
+<h4 id="有密钥的替换密码">有密钥的替换密码</h4>
+<p><img alt="IMG-20260722152300984" loading="lazy" decoding="async" width="544" height="113" src="/_astro/IMG-20260722152300984.MNPnS5-e_q0G47.webp"></p>
+<p>算法特点：</p>
+<ul>
+<li>采用密钥</li>
+<li>没有空格字母特征</li>
+<li>没有破坏重复结构、单词结构</li>
+</ul>
+<p><a id="reference-一次一密乱码本"></a></p>
+<h4 id="一次一密乱码本">一次一密乱码本</h4>
+<p><a id="reference-弗纳姆密码"></a></p>
+<h5 id="弗纳姆密码">弗纳姆密码</h5>
+<p>结合以下两种实现方式：</p>
+<ul>
+<li>长随机数序列（随机密钥）</li>
+<li>弗纳姆密码（Vernam Cipher）</li>
+</ul>
+<p><img alt="IMG-20260722152301025" loading="lazy" decoding="async" width="761" height="304" src="/_astro/IMG-20260722152301025.DtVAc2V3_Z1jUTBE.webp"></p>
+<p>弗纳姆密码实例：</p>
+<p><img alt="IMG-20260722152301050" loading="lazy" decoding="async" width="762" height="266" src="/_astro/IMG-20260722152301050.Dodv5Bu-_ZNWU8A.webp"></p>
+<p><a id="reference-维吉尼亚密码"></a></p>
+<h5 id="维吉尼亚密码">维吉尼亚密码</h5>
+<ul>
+<li>随机密钥密码本</li>
+<li>维吉尼亚表（Vigenere）</li>
+</ul>
+<p>加密过程：</p>
+<ul>
+<li>明文：行选择器</li>
+<li>密钥：列选择器</li>
+<li>密文：表中的值</li>
+</ul>
+<p>维吉尼亚表：</p>
+<ul>
+<li>表格的第一行（或第一列）是标准的英文字母表：<code>A B C D ... Z</code></li>
+<li>每一行都是前一行<strong>向左循环移位一位</strong>的结果：
+<ul>
+<li>第 0 行（A 行）：A B C D E … Z</li>
+<li>第 1 行（B 行）：B C D E F … A</li>
+<li>第 2 行（C 行）：C D E F G … B</li>
+<li>…</li>
+<li>第 25 行（Z 行）：Z A B C D … Y</li>
+</ul>
+</li>
+</ul>
+<p>这个表格本质上包含了 <strong>26 个凯撒密码表</strong>，每个对应一个偏移量（0 到 25）。</p>
+<ul>
+<li>加密算法：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mi>i</mi></msub><mo>=</mo><mo stretchy="false">(</mo><msub><mi>P</mi><mi>i</mi></msub><mo>+</mo><msub><mi>K</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mtext> mod </mtext><mn>26</mn></mrow><annotation encoding="application/x-tex">C_i=(P_i+K_i)\ \text{mod}\ 26</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace"> </span><span class="mord text"><span class="mord">mod</span></span><span class="mspace"> </span><span class="mord">26</span></span></span></span></li>
+<li>解密算法：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mi>i</mi></msub><mo>=</mo><mo stretchy="false">(</mo><msub><mi>C</mi><mi>i</mi></msub><mo>−</mo><msub><mi>K</mi><mi>i</mi></msub><mo>+</mo><mn>26</mn><mo stretchy="false">)</mo><mtext> mod </mtext><mn>26</mn></mrow><annotation encoding="application/x-tex">P_i=(C_i-K_i+26)\ \text{mod}\ 26</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">26</span><span class="mclose">)</span><span class="mspace"> </span><span class="mord text"><span class="mord">mod</span></span><span class="mspace"> </span><span class="mord">26</span></span></span></span></li>
+</ul>
+<p><a id="reference-置换法transposition"></a></p>
+<h3 id="置换法transposition">置换法（Transposition）</h3>
+<p><a id="reference-简单列置换算法"></a></p>
+<h4 id="简单列置换算法">简单列置换算法</h4>
+<ul>
+<li>加密：行入列出</li>
+<li>解密：列入行出</li>
+</ul>
+<p>加密过程：</p>
+<ul>
+<li><strong>选择一个密钥</strong>（通常是一个单词或数字序列），用于确定列的顺序，相同字母保留最左边。</li>
+<li>将明文按<strong>行</strong>写入一个固定列数的表格中（列数 = 密钥长度）。</li>
+<li>如果明文长度不能整除列数，则在末尾<strong>填充占位符</strong>（如  <code>X</code>  或空格）。</li>
+<li>按照密钥指定的<strong>列顺序</strong>读取列，拼接得到密文。
+<ul>
+<li>列顺序由密钥排序后得到映射</li>
+</ul>
+</li>
+</ul>
+<p>可通过字母组分析进行破译：</p>
+<p><img alt="IMG-20260722152301082" loading="lazy" decoding="async" width="680" height="355" src="/_astro/IMG-20260722152301082.CiuK9caL_1zANt7.webp"></p>
+<p><a id="reference-私钥加密算法对称加密"></a></p>
+<h2 id="私钥加密算法对称加密">私钥加密算法（对称加密）</h2>
+<p>安全的加密算法取决于：</p>
+<ul>
+<li>可靠的数学基础</li>
+<li>被证实是可靠的</li>
+<li>经过时间检验</li>
+<li>商业流行算法：DES、AES、RSA</li>
+</ul>
+<p>特性：</p>
+<ul>
+<li>混乱性（Confusion）</li>
+<li>扩散性（Diffusion）</li>
+</ul>
+<p><a id="reference-流密码和块密码分组密码"></a></p>
+<h3 id="流密码和块密码分组密码">流密码和块密码（分组密码）</h3>
+<p><img alt="IMG-20260722152301108" loading="lazy" decoding="async" width="792" height="380" src="/_astro/IMG-20260722152301108.hPbS15v4_Z1UyKER.webp"></p>
+<table>
+<thead>
+<tr>
+<th><strong>比较维度</strong></th>
+<th><strong>流密码（Stream Cipher）</strong></th>
+<th><strong>块密码（Block Cipher）</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>基本原理</strong></td>
+<td>逐位（或逐字节）加密明文，使用密钥流与明文进行异或（XOR）等操作。</td>
+<td>将明文划分为固定长度的块（如 64 位、128 位），对每个块整体加密。</td>
+</tr>
+<tr>
+<td><strong>加密单位</strong></td>
+<td>比特（bit）或字节（byte）</td>
+<td>固定大小的数据块（如 AES：128 位）</td>
+</tr>
+<tr>
+<td><strong>密钥流生成</strong></td>
+<td>通常由伪随机数生成器（PRNG）基于密钥和初始向量（IV）生成。</td>
+<td>每个块使用相同的密钥，但可通过不同模式（如 CBC、CTR）引入变化。</td>
+</tr>
+<tr>
+<td><strong>典型算法</strong></td>
+<td>RC4、ChaCha20、Salsa20、A5/1（GSM）</td>
+<td>AES、DES、3DES、Blowfish、SM4</td>
+</tr>
+<tr>
+<td><strong>加密速度</strong></td>
+<td><strong>快</strong>，适合实时通信（如音视频流）</td>
+<td>相对较慢（尤其在软件实现中），但现代硬件加速后性能优异</td>
+</tr>
+<tr>
+<td><strong>内存/资源需求</strong></td>
+<td><strong>低</strong>，适合嵌入式设备、物联网（IoT）</td>
+<td>较高（需缓存整个数据块）</td>
+</tr>
+<tr>
+<td><strong>错误传播</strong></td>
+<td><strong>无错误传播</strong>：1 位传输错误只影响对应明文位</td>
+<td>取决于工作模式： <br>- ECB/CBC：错误可能扩散到整块或多块 <br>- CTR：类似流密码，无扩散</td>
+</tr>
+<tr>
+<td><strong>并行处理能力</strong></td>
+<td>通常<strong>不能并行加密</strong>（密钥流依赖前序状态） <br>（但 ChaCha20 等可并行）</td>
+<td>多数模式（如 ECB、CTR）支持<strong>并行加密/解密</strong></td>
+</tr>
+<tr>
+<td><strong>安全性依赖</strong></td>
+<td>密钥流的<strong>不可预测性</strong>和<strong>不重复使用</strong>（重用密钥流=灾难）</td>
+<td>密钥强度、块大小、工作模式选择</td>
+</tr>
+<tr>
+<td><strong>主要优点</strong></td>
+<td>- 转换速度快：每个字符（字节）都可以一读取就加密，加密一个字符（字节）的时间只依赖于加密算法本身，而不是接受明文的时间<br>- 低错误扩散率：每个字符（字节）都是单独编码，加密过程中的错误只影响对应的字符（字节）</td>
+<td>- 高扩散性：明文的信息被扩散到了几个密文符号中；一个密文分组可能依赖于几个明文字母<br>- 无法插入符号：符号按组加密，不可能把一个单独的符号插入到一个分组</td>
+</tr>
+<tr>
+<td><strong>主要缺点</strong></td>
+<td>- 密钥流重用会导致严重漏洞（如 WEP 破解） <br>- 难以认证完整性（需额外机制）<br>- 低扩散性：每个字符（字节）都是单独加密，该字符（字节）的所有信息都包含在密文的一个对应字符（字节）<br>- 易被恶意插入和篡改：每个字符（字节）都是单独加密的，截取者可以拼接报文，伪造可信的新报文</td>
+<td>- 需填充（若明文非整块） <br>- 某些模式（如 ECB）会暴露数据模式 <br>- 加密较慢，实时性较差<br>- 错误扩散：一个错误会影响到同一分组中其他字符的转换</td>
+</tr>
+<tr>
+<td><strong>典型应用场景</strong></td>
+<td>- 无线通信（蓝牙、Wi-Fi WPA-TKIP） <br>- TLS 中的 ChaCha20 <br>- 军事/卫星通信</td>
+<td>- 文件/磁盘加密（BitLocker, VeraCrypt） <br>- TLS/AES <br>- 数据库存储加密 <br>- 区块链</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-desdata-encryption-standard"></a></p>
+<h3 id="desdata-encryption-standard">DES（Data Encryption Standard）</h3>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>明文分组长度</strong></td>
+<td>64 位</td>
+</tr>
+<tr>
+<td><strong>密钥长度</strong></td>
+<td>64 位（实际有效密钥为  <strong>56 位</strong>，其余 8 位为奇偶校验位）</td>
+</tr>
+<tr>
+<td><strong>密文分组长度</strong></td>
+<td>64 位</td>
+</tr>
+<tr>
+<td><strong>加密轮数</strong></td>
+<td>16 轮（Feistel 结构）</td>
+</tr>
+<tr>
+<td><strong>算法类型</strong></td>
+<td>对称加密、分组密码、Feistel 网络</td>
+</tr>
+</tbody>
+</table>
+<p>DES 采用 <strong>Feistel 结构</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>明文（64位）</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>[初始置换 IP]</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>(L₀, R₀) ← 将64位分为左右两半，各32位</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>16轮 Feistel 迭代（每轮使用一个子密钥 Kᵢ）</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>(R₁₆, L₁₆) ← 注意：最后一轮后左右不交换！</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>[逆初始置换 IP⁻¹]</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>密文（64位）</span></span></code></pre>
+<p><img alt="IMG-20260722152301156" loading="lazy" decoding="async" width="455" height="495" src="/_astro/IMG-20260722152301156.C4A3qGSD_Z1JHxkk.webp"></p>
+<p><a id="reference-加密步骤"></a></p>
+<h4 id="加密步骤">加密步骤</h4>
+<p><img alt="IMG-20260722152301185" loading="lazy" decoding="async" width="710" height="666" src="/_astro/IMG-20260722152301185.D70Kpj6h_ZBUz68.webp"></p>
+<p><a id="reference-初始置换-initial-permutation-ip"></a></p>
+<h5 id="初始置换-initial-permutation-ip">初始置换 （Initial Permutation, IP）</h5>
+<ul>
+<li>对 64 位明文进行<strong>固定位置重排</strong>（查 IP 表），无密钥参与。</li>
+<li>目的：打乱输入位顺序，增强扩散性。</li>
+<li>输出仍为 64 位，分为左半部分  L0  和右半部分  R0（各 32 位）。</li>
+</ul>
+<p><a id="reference-feistel-迭代十六轮"></a></p>
+<h5 id="feistel-迭代十六轮">Feistel 迭代（十六轮）</h5>
+<p>每一轮 i（i=1 到 16）执行以下操作：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Lᵢ = Rᵢ₋₁</span></span>
+<span class="line"><span>Rᵢ = Lᵢ₋₁ ⊕ F(Rᵢ₋₁, Kᵢ)</span></span></code></pre>
+<p>其中：</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo separator="true">,</mo><msub><mi>R</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">L_{i−1},R_{i−1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8917em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span>：上一轮的左右半区</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>K</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">K_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> ：第  <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span>  轮的 <strong>48 位子密钥</strong></li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi></mrow><annotation encoding="application/x-tex">F</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">F</span></span></span></span>：<strong>轮函数（Feistel Function）</strong></li>
+</ul>
+<p><a id="reference-最终交换与逆初始置换"></a></p>
+<h5 id="最终交换与逆初始置换">最终交换与逆初始置换</h5>
+<ul>
+<li>16 轮结束后，得到  <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mn>16</mn></msub><mo separator="true">,</mo><msub><mi>R</mi><mn>16</mn></msub></mrow><annotation encoding="application/x-tex">L_{16},R_{16}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">16</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">16</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。</li>
+<li><strong>注意</strong>：Feistel 结构通常在最后一轮<strong>不交换</strong>左右，因此拼接时为  <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><msub><mi>R</mi><mn>16</mn></msub><mo separator="true">,</mo><msub><mi>L</mi><mn>16</mn></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(R_{16},L_{16})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">16</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">16</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>。</li>
+<li>对这 64 位进行  <strong>逆初始置换 IP⁻¹</strong>（IP 的逆操作），得到最终 64 位密文。</li>
+</ul>
+<p>将子密钥顺序倒过来使用即为解密过程</p>
+<p><a id="reference-轮函数"></a></p>
+<h4 id="轮函数">轮函数</h4>
+<ol>
+<li><strong>扩展置换 E（Expansion）</strong>
+<ul>
+<li>将 32 位  Ri−1  扩展为 48 位（通过重复某些位，查 E 表）。</li>
+<li>目的：使输入与 48 位子密钥可进行异或。</li>
+</ul>
+</li>
+<li><strong>与子密钥异或</strong>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false">(</mo><msub><mi>R</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo><mo>⊕</mo><msub><mi>K</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">E(R_{i−1})⊕K_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0077em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⊕</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> → 得到 48 位结果。</li>
+</ul>
+</li>
+<li><strong>S 盒替换（Substitution Boxes, S-boxes）</strong>
+<ul>
+<li>将 48 位分为 8 组，每组 6 位 → 共 8 个 S 盒（S1~S8）。</li>
+<li>每个 6 位输入 → 通过 S 盒查表 → 输出 4 位 → 共输出 32 位。</li>
+<li><strong>S 盒是非线性核心</strong>，提供混淆（confusion），抵抗线性/差分分析。</li>
+</ul>
+</li>
+<li><strong>P 盒置换（Permutation）</strong>
+<ul>
+<li>对 32 位 S 盒输出进行固定位置重排（查 P 表），实现<strong>扩散（diffusion）</strong>：使每一位影响下一轮多个位置。</li>
+</ul>
+</li>
+</ol>
+<p><a id="reference-aesadvanced-encryption-standard"></a></p>
+<h3 id="aesadvanced-encryption-standard">AES（Advanced Encryption Standard）</h3>
+<ul>
+<li>字节替换、行移位、列混合</li>
+<li>加子密钥
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>k</mi><mi>i</mi></msub><mo>=</mo><msub><mi>ω</mi><mn>1</mn></msub><msub><mi>ω</mi><mn>2</mn></msub><msub><mi>ω</mi><mn>3</mn></msub><msub><mi>ω</mi><mn>4</mn></msub></mrow><annotation encoding="application/x-tex">k_i=\omega_1\omega_2\omega_3\omega_4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">4</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>k</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><msubsup><mi>ω</mi><mn>1</mn><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup><mo stretchy="false">(</mo><msub><mi>ω</mi><mn>2</mn></msub><mo>⊕</mo><mi>ω</mi><msup><mn>1</mn><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">)</mo><mo stretchy="false">(</mo><msub><mi>ω</mi><mn>3</mn></msub><mo>⊕</mo><msubsup><mi>ω</mi><mn>1</mn><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup><mo stretchy="false">)</mo><mo stretchy="false">(</mo><msub><mi>ω</mi><mn>4</mn></msub><mo>⊕</mo><msubsup><mi>ω</mi><mn>1</mn><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">k_{i+1}=\omega_1'(\omega _2 \oplus \omega1')(\omega _3 \oplus \omega_1')(\omega _4 \oplus \omega_1')</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.9028em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.0019em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-2.4519em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2481em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⊕</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.0019em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="mord"><span class="mord">1</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⊕</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.0019em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-2.4519em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2481em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">4</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⊕</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.0019em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-2.4519em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2481em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>；<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>ω</mi><mn>1</mn><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup><mo>=</mo><msub><mi>ω</mi><mn>1</mn></msub><mo>&lt;</mo><mo>&lt;</mo><mn>8</mn><mo>⊕</mo><mi>C</mi></mrow><annotation encoding="application/x-tex">\omega_1'=\omega_1 &lt;&lt; 8 \oplus C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.2481em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-2.4519em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2481em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6891em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0359em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0359em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">8</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⊕</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span></span></span></span></li>
+</ul>
+</li>
+<li>分块大小：128 位</li>
+<li>密钥长度：128、192、256 位</li>
+<li>循环次数：9、11、13 次</li>
+<li><strong>混淆（Confusion）</strong>：使密钥与密文之间的关系尽可能复杂（通过  <strong>S 盒</strong>  实现代换）。</li>
+<li><strong>扩散（Diffusion）</strong>：使明文每一位的变化影响密文中多个位（通过  <strong>行移位 + 列混合</strong>  实现）。</li>
+</ul>
+<p>AES 将 128 位（16 字节）明文组织为一个 <strong>4×4 的字节矩阵</strong>，称为 <strong>State</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>明文：b₀ b₁ b₂ ... b₁₅</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>State 矩阵（按列填充）：</span></span>
+<span class="line"><span>[ b₀  b₄  b₈  b₁₂ ]</span></span>
+<span class="line"><span>[ b₁  b₅  b₉  b₁₃ ]</span></span>
+<span class="line"><span>[ b₂  b₆  b₁₀ b₁₄ ]</span></span>
+<span class="line"><span>[ b₃  b₇  b₁₁ b₁₅ ]</span></span></code></pre>
+<p>所有操作都在这个 State 上进行。</p>
+<blockquote>
+<p>以 AES-128 为例</p>
+</blockquote>
+<p>AES 加密 = 初始轮 + 主轮（9 轮） + 最终轮（第 10 轮）</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>明文 → AddRoundKey（轮密钥0）</span></span>
+<span class="line"><span>       ↓</span></span>
+<span class="line"><span>       [Round 1 to 9]:</span></span>
+<span class="line"><span>         SubBytes → ShiftRows → MixColumns → AddRoundKey</span></span>
+<span class="line"><span>       ↓</span></span>
+<span class="line"><span>       [Final Round 10]:</span></span>
+<span class="line"><span>         SubBytes → ShiftRows → AddRoundKey</span></span>
+<span class="line"><span>       ↓</span></span>
+<span class="line"><span>密文</span></span></code></pre>
+<p>最后一轮省略 MixColumns</p>
+<p><a id="reference-密钥扩展"></a></p>
+<h4 id="密钥扩展">密钥扩展</h4>
+<ul>
+<li>输入：128/192/256 位主密钥</li>
+<li>输出：<strong>轮密钥序列</strong>（共 11/13/15 个 128 位密钥，对应 10/12/14 轮 + 初始轮）</li>
+<li>过程：
+<ol>
+<li>将主密钥划分为 4/6/8 个 32 位字（word）</li>
+<li>通过递推公式生成新字：
+<ul>
+<li>每第 4 个字（对 AES-128）会经过  <strong>RotWord → SubWord → XOR 轮常量（Rcon）</strong></li>
+</ul>
+</li>
+<li>每 4 个连续字组成一个轮密钥</li>
+</ol>
+</li>
+</ul>
+<p><a id="reference-解密过程"></a></p>
+<h4 id="解密过程">解密过程</h4>
+<p>AES 解密 ≠ 加密的简单逆序，而是使用<strong>逆操作</strong></p>
+<table>
+<thead>
+<tr>
+<th>加密操作</th>
+<th>解密操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SubBytes</td>
+<td>InvSubBytes</td>
+</tr>
+<tr>
+<td>ShiftRows</td>
+<td>InvShiftRows（右移）</td>
+</tr>
+<tr>
+<td>MixColumns</td>
+<td>InvMixColumns</td>
+</tr>
+<tr>
+<td>AddRoundKey</td>
+<td>AddRoundKey（XOR 自反）</td>
+</tr>
+</tbody>
+</table>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>密文 → AddRoundKey(K₁₀)</span></span>
+<span class="line"><span>       ↓</span></span>
+<span class="line"><span>       InvShiftRows → InvSubBytes → AddRoundKey(K₉)</span></span>
+<span class="line"><span>       ↓</span></span>
+<span class="line"><span>       InvMixColumns → InvShiftRows → InvSubBytes → AddRoundKey(K₈)</span></span>
+<span class="line"><span>       ↓</span></span>
+<span class="line"><span>       ...（重复）</span></span>
+<span class="line"><span>       ↓</span></span>
+<span class="line"><span>       InvMixColumns → InvShiftRows → InvSubBytes → AddRoundKey(K₀)</span></span>
+<span class="line"><span>       ↓</span></span>
+<span class="line"><span>明文</span></span></code></pre>
+<p><a id="reference-工作模式"></a></p>
+<h4 id="工作模式">工作模式</h4>
+<p>AES 本身只加密<strong>单个 128 位块</strong>。为加密任意长度数据，需配合<strong>工作模式</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>特点</th>
+<th>是否需要 IV</th>
+<th>并行</th>
+<th>认证</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ECB</strong></td>
+<td>简单但不安全（相同明文 → 相同密文）</td>
+<td>否</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>CBC</strong></td>
+<td>常用，需填充，错误传播</td>
+<td>是</td>
+<td>否（加密）</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>CTR</strong></td>
+<td>将块密码转为流密码，无需填充</td>
+<td>是（nonce）</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>GCM</strong></td>
+<td><strong>推荐！</strong>  提供加密+认证（AEAD）</td>
+<td>是</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td><strong>CCM</strong></td>
+<td>类似 GCM，但结构不同</td>
+<td>是</td>
+<td>否</td>
+<td>是</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-公钥加密算法非对称加密"></a></p>
+<h2 id="公钥加密算法非对称加密">公钥加密算法（非对称加密）</h2>
+<p>公钥加密（Public-Key Cryptography），又称非对称加密（Asymmetric Cryptography），是现代密码学的一项革命性突破。它解决了对称加密中密钥分发困难的核心问题，并为数字签名、身份认证、安全通信等奠定了基础</p>
+<p><a id="reference-核心思想"></a></p>
+<h3 id="核心思想">核心思想</h3>
+<p>公钥加密使用<strong>一对数学上相关但功能不同的密钥</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>密钥类型</th>
+<th>作用</th>
+<th>是否公开</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>公钥（Public Key）</strong></td>
+<td>用于<strong>加密</strong>或<strong>验证签名</strong></td>
+<td>可公开给任何人</td>
+</tr>
+<tr>
+<td><strong>私钥（Private Key）</strong></td>
+<td>用于<strong>解密</strong>或<strong>生成签名</strong></td>
+<td>必须严格保密</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-对比对称加密"></a></p>
+<h3 id="对比对称加密">对比对称加密</h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>对称加密（如 AES）</th>
+<th>非对称加密（如 RSA）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>密钥数量</td>
+<td>1 个（双方共享）</td>
+<td>2 个（公钥 + 私钥）</td>
+</tr>
+<tr>
+<td>密钥保护</td>
+<td>必须保护</td>
+<td>公钥公开；私钥不可公开</td>
+</tr>
+<tr>
+<td>密钥分发</td>
+<td>困难（需安全通道）</td>
+<td>容易（公钥可公开）</td>
+</tr>
+<tr>
+<td>加密速度</td>
+<td>快（适合大数据）</td>
+<td>慢（适合小数据或密钥交换）</td>
+</tr>
+<tr>
+<td>主要用途</td>
+<td>数据加密</td>
+<td>密钥交换、数字签名、身份认证</td>
+</tr>
+<tr>
+<td>典型算法</td>
+<td>AES, DES, ChaCha20</td>
+<td>RSA, ECC, ElGamal, DH</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-工作流程"></a></p>
+<h3 id="工作流程">工作流程</h3>
+<p>假设 Alice 想安全地发送消息给 Bob：</p>
+<ol>
+<li><strong>Bob 生成密钥对</strong>：
+<ul>
+<li>私钥  skB（自己保管）</li>
+<li>公钥  pkB（发布到网络、证书等）</li>
+</ul>
+</li>
+<li><strong>Alice 获取 Bob 的公钥 pkB</strong>（从可信来源）</li>
+<li><strong>Alice 用 pkB 加密消息 M</strong>：
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo>=</mo><mi>E</mi><mi>n</mi><mi>c</mi><mi>r</mi><mi>y</mi><mi>p</mi><mi>t</mi><mo stretchy="false">(</mo><mi>p</mi><msub><mi>k</mi><mi>B</mi></msub><mo separator="true">,</mo><mi>M</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">C=Encrypt(pk_B,M)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mord mathnormal">n</span><span class="mord mathnormal" style="margin-right:0.0278em;">cr</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mord mathnormal">pt</span><span class="mopen">(</span><span class="mord mathnormal">p</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0502em;">B</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mclose">)</span></span></span></span></li>
+<li><strong>Alice 发送密文 C 给 Bob</strong></li>
+<li><strong>Bob 用自己的私钥 skB 解密</strong>：
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo>=</mo><mi>D</mi><mi>e</mi><mi>c</mi><mi>r</mi><mi>y</mi><mi>p</mi><mi>t</mi><mo stretchy="false">(</mo><mi>s</mi><msub><mi>k</mi><mi>B</mi></msub><mo separator="true">,</mo><mi>C</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">M=Decrypt(sk_B,C)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mord mathnormal" style="margin-right:0.0278em;">ecr</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mord mathnormal">pt</span><span class="mopen">(</span><span class="mord mathnormal">s</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0315em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0502em;">B</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mclose">)</span></span></span></span></li>
+</ol>
+<p><a id="reference-rsa-加密算法"></a></p>
+<h3 id="rsa-加密算法">RSA 加密算法</h3>
+<p>RSA（Rivest–Shamir–Adleman）是<strong>第一个实用的公钥加密算法</strong>，由 Ron Rivest、Adi Shamir 和 Leonard Adleman 于 1977 年提出。它基于<strong>大整数分解难题</strong>，广泛用于<strong>加密、数字签名和密钥交换</strong>，是现代信息安全的基石之一。</p>
+<p><a id="reference-核心思想-1"></a></p>
+<h4 id="核心思想-1">核心思想</h4>
+<p><strong>将两个大质数相乘很容易，但将它们的乘积分解回原始质数极其困难</strong>（当数字足够大时）</p>
+<p>利用这一“单向性”，RSA 构造了一对密钥：</p>
+<ul>
+<li><strong>公钥（Public Key）</strong>：用于加密或验证签名（可公开）</li>
+<li><strong>私钥（Private Key）</strong>：用于解密或生成签名（必须保密）</li>
+</ul>
+<p><a id="reference-密钥生成流程"></a></p>
+<h4 id="密钥生成流程">密钥生成流程</h4>
+<p><a id="reference-选择两个大质数"></a></p>
+<h5 id="选择两个大质数">选择两个大质数</h5>
+<p>随机选择两个<strong>大素数</strong> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi></mrow><annotation encoding="application/x-tex">q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span></span></span></span>（通常为 1024 位或 2048 位）。</p>
+<blockquote>
+<p>示例（教学用小数）：<br>
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mn>61</mn><mo separator="true">,</mo><mi>q</mi><mo>=</mo><mn>53</mn></mrow><annotation encoding="application/x-tex">p=61, q=53</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">61</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">53</span></span></span></span></p>
+</blockquote>
+<p><a id="reference-计算模数-n"></a></p>
+<h5 id="计算模数-n">计算模数  n</h5>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mi>p</mi><mo>×</mo><mi>q</mi></mrow><annotation encoding="application/x-tex">n=p\times q</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span></span></span></span></p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>  是<strong>公钥和私钥的一部分</strong>，也称为<strong>模数（modulus）</strong>。</li>
+<li>加密/解密都在模  <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>  下进行。</li>
+</ul>
+<blockquote>
+<p>示例：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>61</mn><mo>×</mo><mn>53</mn><mo>=</mo><mn>3233</mn></mrow><annotation encoding="application/x-tex">n=61×53=3233</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">61</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">53</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3233</span></span></span></span></p>
+</blockquote>
+<p><a id="reference-计算欧拉函数-ϕn"></a></p>
+<h5 id="计算欧拉函数-ϕn">计算欧拉函数  ϕ(n)</h5>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mi>p</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mi>q</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">ϕ(n)=(p−1)(q−1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">ϕ</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span></p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">ϕ(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">ϕ</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>  表示小于  <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>  且与  <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>  互质的正整数个数。</li>
+</ul>
+<blockquote>
+<p>示例：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi><mo stretchy="false">(</mo><mn>3233</mn><mo stretchy="false">)</mo><mo>=</mo><mn>60</mn><mo>×</mo><mn>52</mn><mo>=</mo><mn>3120</mn></mrow><annotation encoding="application/x-tex">ϕ(3233)=60×52=3120</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">ϕ</span><span class="mopen">(</span><span class="mord">3233</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">60</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">52</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3120</span></span></span></span></p>
+</blockquote>
+<p><a id="reference-选择公钥指数-e"></a></p>
+<h5 id="选择公钥指数-e">选择公钥指数  e</h5>
+<p>选择一个整数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>e</mi></mrow><annotation encoding="application/x-tex">e</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">e</span></span></span></span>，满足：</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>&lt;</mo><mi>e</mi><mo>&lt;</mo><mi>ϕ</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">1&lt;e&lt;ϕ(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6835em;vertical-align:-0.0391em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">e</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">ϕ</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mi>c</mi><mi>d</mi><mo stretchy="false">(</mo><mi>e</mi><mo separator="true">,</mo><mi>ϕ</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">gcd(e,ϕ(n))=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">g</span><span class="mord mathnormal">c</span><span class="mord mathnormal">d</span><span class="mopen">(</span><span class="mord mathnormal">e</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">ϕ</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">))</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>（即  <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>e</mi></mrow><annotation encoding="application/x-tex">e</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">e</span></span></span></span>  与  <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">ϕ(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">ϕ</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>  互质）</li>
+</ul>
+<blockquote>
+<p>常用值：e=65537（= 216+1），因其二进制含少量 1，加速加密。<br>
+示例：选 e=17（因为 gcd(17,3120)=1）</p>
+</blockquote>
+<p><strong>公钥 = (e,n)</strong> → 可公开发布</p>
+<p><a id="reference-计算私钥指数-d"></a></p>
+<h5 id="计算私钥指数-d">计算私钥指数  d</h5>
+<p>求 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> 使得：</p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>⋅</mo><mi>e</mi><mo>≡</mo><mn>1</mn><mo stretchy="false">(</mo><mi>m</mi><mi>o</mi><mi>d</mi><mtext> </mtext><mi>ϕ</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d⋅e≡1(mod\ ϕ(n))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4637em;"></span><span class="mord mathnormal">e</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≡</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mord mathnormal">o</span><span class="mord mathnormal">d</span><span class="mspace"> </span><span class="mord mathnormal">ϕ</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">))</span></span></span></span></p>
+<p>即 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> 是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>e</mi></mrow><annotation encoding="application/x-tex">e</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">e</span></span></span></span> 在模 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">ϕ(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">ϕ</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span> 下的<strong>乘法逆元</strong>。</p>
+<blockquote>
+<p>使用<strong>扩展欧几里得算法</strong>求解。<br>
+示例：解 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>17</mn><mi>d</mi><mo>≡</mo><mn>1</mn><mo stretchy="false">(</mo><mi>m</mi><mi>o</mi><mi>d</mi><mtext> </mtext><mn>3120</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">17d≡1(mod\ 3120)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord">17</span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≡</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mord mathnormal">o</span><span class="mord mathnormal">d</span><span class="mspace"> </span><span class="mord">3120</span><span class="mclose">)</span></span></span></span> → d=2753（因为 17×2753=46801=15×3120+1）</p>
+</blockquote>
+<p><strong>私钥 = (d,n)</strong> → 必须严格保密</p>
+<p>实际中私钥常存储为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>d</mi><mo separator="true">,</mo><mi>p</mi><mo separator="true">,</mo><mi>q</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(d,p,q)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">d</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">q</span><span class="mclose">)</span></span></span></span> 等形式，便于使用中国剩余定理（CRT）加速解密</p>
+<p><a id="reference-加密与解密"></a></p>
+<h4 id="加密与解密">加密与解密</h4>
+<ul>
+<li>保密性转换：用接受者的公钥加密，接受者用自己的私钥解密</li>
+<li>真实性转换：用发送者的私钥加密，接受者用发送者的公钥解密</li>
+</ul>
+<p><a id="reference-密码分析学破译加密体系"></a></p>
+<h2 id="密码分析学破译加密体系">密码分析学：破译加密体系</h2>
+<p>已知信息-破译方法：</p>
+<ul>
+<li>仅有密文
+<ul>
+<li>唯密文攻击（Ciphertext-only Attack）</li>
+</ul>
+</li>
+<li>全部或部分明文
+<ul>
+<li>已知明文（Known Plaintext）攻击</li>
+<li>可能明文（Probable Plaintext）攻击</li>
+</ul>
+</li>
+<li>任意明文的对应密文
+<ul>
+<li>选择明文（Chosen Plaintext）攻击</li>
+</ul>
+</li>
+<li>算法和密文
+<ul>
+<li>选择明文（Chosen Plaintext）攻击</li>
+</ul>
+</li>
+<li>缺陷</li>
+</ul>
+<p><a id="reference-加密应用"></a></p>
+<h2 id="加密应用">加密应用</h2>
+<p><a id="reference-hash-函数"></a></p>
+<h3 id="hash-函数">Hash 函数</h3>
+<p>密码哈希（Hash）函数（散列函数）</p>
+<ul>
+<li>Hash 函数是把可变长输入数据（消息）转换成固定长度输出数据的一种函数。
+<ul>
+<li>这个定长的输出数据称为输入数据的消息摘要，也称为该消息的 Hash 值、散列值、特征值或者数字指纹。</li>
+</ul>
+</li>
+<li>确认信息（文件、报文）的完整性。</li>
+<li>该函数必须依赖于被密封消息的所有位，这样，消息的每一位的变化都会影响到该消息的 Hash 值。</li>
+<li>使用最广的 Hash 函数：MD4（138 位）、MD5（138 位）和 SHA/sHS(SecureHash Algorithm/Standard，16O 位/汉 56 位/384 位/512 位）</li>
+</ul>
+<p><a id="reference-特征"></a></p>
+<h4 id="特征">特征</h4>
+<ul>
+<li>快速性：已知 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span>，计算 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mo>=</mo><mi>H</mi><mi>a</mi><mi>s</mi><mi>h</mi><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">c=Hash(m)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0813em;">H</span><span class="mord mathnormal">a</span><span class="mord mathnormal">s</span><span class="mord mathnormal">h</span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mclose">)</span></span></span></span> 是容易的</li>
+<li>单向性：从 Hash 值倒推原文是困难的，即已知 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mo>=</mo><mi>H</mi><mi>a</mi><mi>s</mi><mi>h</mi><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">c=Hash(m)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0813em;">H</span><span class="mord mathnormal">a</span><span class="mord mathnormal">s</span><span class="mord mathnormal">h</span><span class="mopen">(</span><span class="mord mathnormal">m</span><span class="mclose">)</span></span></span></span>，求 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span> 是困难的</li>
+<li>抗碰撞性：已知 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mi>a</mi><mi>s</mi><mi>h</mi><mo stretchy="false">(</mo><msub><mi>m</mi><mn>1</mn></msub><mo stretchy="false">)</mo><mo>=</mo><mi>c</mi></mrow><annotation encoding="application/x-tex">Hash(m_1)=c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0813em;">H</span><span class="mord mathnormal">a</span><span class="mord mathnormal">s</span><span class="mord mathnormal">h</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span>，构造 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mi>a</mi><mi>s</mi><mi>h</mi><mo stretchy="false">(</mo><msub><mi>m</mi><mn>2</mn></msub><mo stretchy="false">)</mo><mo>=</mo><mi>c</mi></mrow><annotation encoding="application/x-tex">Hash(m_2)=c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0813em;">H</span><span class="mord mathnormal">a</span><span class="mord mathnormal">s</span><span class="mord mathnormal">h</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span> 中的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">m_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 是困难的</li>
+<li>雪崩性：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span> 的每一位都与 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span> 的每一位有关，并有高度的敏感性，改变 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span> 的任意一位都会对 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi></mrow><annotation encoding="application/x-tex">c</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span></span></span></span> 产生影响</li>
+<li>固定长度的输出：接受的输入数据没有长度限制，对输入任何长度的数据都能产生固定长度的输出</li>
+</ul>
+<p><a id="reference-密钥交换"></a></p>
+<h3 id="密钥交换">密钥交换</h3>
+<p>应用场合：</p>
+<ul>
+<li>用 Web 浏览器安全连接一个购物站点（HTTPS）</li>
+<li>加密的 Email</li>
+<li>安排两台主机建立加密受保护的信道</li>
+</ul>
+<p>为了建立一个加密的会话，就需要一个加密的手段来交换会话密钥（往往是对话双方共享的一个对称密钥）。</p>
+<p><a id="reference-数字签名"></a></p>
+<h3 id="数字签名">数字签名</h3>
+<p>数字签名（Digital Signature）是<strong>公钥密码学</strong>的核心应用之一，用于实现信息的<strong>身份认证、数据完整性</strong>和<strong>不可否认性</strong></p>
+<table>
+<thead>
+<tr>
+<th>安全属性</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>身份认证（Authentication）</strong></td>
+<td>接收方能确认消息确实来自声称的发送方</td>
+</tr>
+<tr>
+<td><strong>数据完整性（Integrity）</strong></td>
+<td>消息在传输中未被篡改</td>
+</tr>
+<tr>
+<td><strong>不可否认性（Non-repudiation）</strong></td>
+<td>发送方事后不能否认自己签过该消息</td>
+</tr>
+</tbody>
+</table>
+<p>数字签名 = <strong>私钥签名 + 公钥验证</strong>，通常结合<strong>密码学哈希函数</strong>使用</p>
+<ol>
+<li><strong>签名</strong>：发送方计算消息 M 的哈希值 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mi>H</mi><mo stretchy="false">(</mo><mi>M</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">h = H(M)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">h</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0813em;">H</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mclose">)</span></span></span></span>，再用<strong>私钥</strong>加密 h，得到签名 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mo>=</mo><msub><mi>D</mi><mrow><mi>S</mi><mi>K</mi></mrow></msub><mo stretchy="false">(</mo><mi>h</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">S = D_{SK}(h)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0576em;">S</span><span class="mord mathnormal mtight" style="margin-right:0.0715em;">K</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal">h</span><span class="mclose">)</span></span></span></span>；</li>
+<li><strong>发送</strong>：将 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>M</mi><mo separator="true">,</mo><mi>S</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(M, S)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span><span class="mclose">)</span></span></span></span> 发送给接收方；</li>
+<li><strong>验证</strong>：接收方用发送方<strong>公钥</strong>解密 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi></mrow><annotation encoding="application/x-tex">S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span></span></span></span> 得 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>h</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></mrow><annotation encoding="application/x-tex">h'</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7519em;"></span><span class="mord"><span class="mord mathnormal">h</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span>，同时计算 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mo stretchy="false">(</mo><mi>M</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">H(M)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0813em;">H</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mclose">)</span></span></span></span> 得 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>h</mi><mrow><mo mathvariant="normal">′</mo><mo mathvariant="normal">′</mo></mrow></msup></mrow><annotation encoding="application/x-tex">h''</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7519em;"></span><span class="mord"><span class="mord mathnormal">h</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′′</span></span></span></span></span></span></span></span></span></span></span></span>，若 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>h</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo>=</mo><mo>=</mo><msup><mi>h</mi><mrow><mo mathvariant="normal">′</mo><mo mathvariant="normal">′</mo></mrow></msup></mrow><annotation encoding="application/x-tex">h' == h''</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7519em;"></span><span class="mord"><span class="mord mathnormal">h</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">==</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7519em;"></span><span class="mord"><span class="mord mathnormal">h</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′′</span></span></span></span></span></span></span></span></span></span></span></span> 则验证通过。</li>
+</ol>
+<p><a id="reference-消息认证"></a></p>
+<h3 id="消息认证">消息认证</h3>
+<p>消息认证是使消息接受者能验证收到的消息在传输过程中有没有被纂改、伪造和假冒，消息的完整性、有效性和真实性是否被破坏的过程。</p>
+<p><a id="reference-基于-hash-函数实现"></a></p>
+<h4 id="基于-hash-函数实现">基于 Hash 函数实现</h4>
+<p><img alt="IMG-20260722152301220" loading="lazy" decoding="async" width="1353" height="372" src="/_astro/IMG-20260722152301220.CIOJ3KgP_Z1oiqdW.webp"></p>
+<p><img alt="IMG-20260722152301259" loading="lazy" decoding="async" width="936" height="562" src="/_astro/IMG-20260722152301259.CJDrfxSq_1Qmw4O.webp"></p>
+<p><a id="reference-数字信封技术"></a></p>
+<h3 id="数字信封技术">数字信封技术</h3>
+<p><strong>数字信封（Digital Envelope）</strong> 是一种结合<strong>对称加密</strong>与<strong>公钥加密</strong>优势的混合加密技术，用于<strong>高效、安全地传输机密数据</strong>。其核心思想是：用对称密钥加密数据，再用接收方的公钥加密该<strong>对称密钥</strong>——这个被加密的对称密钥就称为“数字信封”</p>
+<p>结合两者优点：</p>
+<ul>
+<li>用  <strong>AES 快速加密大文件</strong></li>
+<li>用  <strong>RSA 安全传输 AES 密钥</strong></li>
+</ul>
+<p><a id="reference-工作流程-1"></a></p>
+<h4 id="工作流程-1">工作流程</h4>
+<p><a id="reference-生成会话密钥"></a></p>
+<h5 id="生成会话密钥">生成会话密钥</h5>
+<ul>
+<li>Alice 随机生成一个<strong>一次性对称密钥</strong> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>K</mi><mrow><mi>s</mi><mi>e</mi><mi>s</mi><mi>s</mi><mi>i</mi><mi>o</mi><mi>n</mi></mrow></msub></mrow><annotation encoding="application/x-tex">K_{session}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">sess</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> （如 256 位 AES 密钥）</li>
+</ul>
+<p><a id="reference-用对称密钥加密消息"></a></p>
+<h5 id="用对称密钥加密消息">用对称密钥加密消息</h5>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo>=</mo><mi>A</mi><mi>E</mi><msub><mi>S</mi><msub><mi>K</mi><mrow><mi>s</mi><mi>e</mi><mi>s</mi><mi>s</mi><mi>i</mi><mi>o</mi><mi>n</mi></mrow></msub></msub><mo stretchy="false">(</mo><mi>M</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">C=AES_{K_{session}}(M)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.0001em;vertical-align:-0.2501em;"></span><span class="mord mathnormal">A</span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0576em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0576em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0715em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3281em;"><span style="top:-2.357em;margin-left:-0.0715em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="katex-sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">sess</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2501em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mclose">)</span></span></span></span>
+→ 得到密文  <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi></mrow><annotation encoding="application/x-tex">C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span></span></span></span></li>
+</ul>
+<p><a id="reference-用公钥加密会话密钥创建信封"></a></p>
+<h5 id="用公钥加密会话密钥创建信封">用公钥加密会话密钥（创建“信封”）</h5>
+<p>注意是对<strong>密钥</strong>加密</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo>=</mo><mi>R</mi><mi>S</mi><msub><mi>A</mi><mrow><mi>p</mi><mi>u</mi><msub><mi>b</mi><mi>B</mi></msub></mrow></msub><mo stretchy="false">(</mo><msub><mi>K</mi><mrow><mi>s</mi><mi>e</mi><mi>s</mi><mi>s</mi><mi>i</mi><mi>o</mi><mi>n</mi></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">E=RSA_{pub_B}(K_{session})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">u</span><span class="mord mtight"><span class="mord mathnormal mtight">b</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3567em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="katex-sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0502em;">B</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1433em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">sess</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>
+→ <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi></mrow><annotation encoding="application/x-tex">E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span></span></span></span>  就是<strong>数字信封</strong></li>
+</ul>
+<p><a id="reference-发送密文--数字信封"></a></p>
+<h5 id="发送密文--数字信封">发送（密文 + 数字信封）</h5>
+<ul>
+<li>Alice 发送给 Bob：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>C</mi><mo separator="true">,</mo><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(C,E)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mclose">)</span></span></span></span></li>
+</ul>
+<p><a id="reference-解开数字信封并解密"></a></p>
+<h5 id="解开数字信封并解密">解开数字信封并解密</h5>
+<ol>
+<li>用<strong>自己的私钥</strong>解密信封：<br>
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>K</mi><mrow><mi>s</mi><mi>e</mi><mi>s</mi><mi>s</mi><mi>i</mi><mi>o</mi><mi>n</mi></mrow></msub><mo>=</mo><mi>R</mi><mi>S</mi><msub><mi>A</mi><mrow><mi>p</mi><mi>r</mi><mi>i</mi><msub><mi>v</mi><mi>B</mi></msub></mrow></msub><mo stretchy="false">(</mo><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">K_{session}=RSA_{priv_B}(E)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0715em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">sess</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight" style="margin-right:0.0278em;">r</span><span class="mord mathnormal mtight">i</span><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0359em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3567em;margin-left:-0.0359em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="katex-sizing reset-size3 size1 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0502em;">B</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1433em;"><span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mclose">)</span></span></span></span></li>
+<li>用恢复出的会话密钥解密消息：<br>
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo>=</mo><mi>A</mi><mi>E</mi><msubsup><mi>S</mi><msub><mi>K</mi><mrow><mi>s</mi><mi>e</mi><mi>s</mi><mi>s</mi><mi>i</mi><mi>o</mi><mi>n</mi></mrow></msub><mrow><mo>−</mo><mn>1</mn></mrow></msubsup><mo stretchy="false">(</mo><mi>C</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">M=AES_{K_{session}}^{−1}(C)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.2479em;vertical-align:-0.3936em;"></span><span class="mord mathnormal">A</span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0576em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8542em;"><span style="top:-2.4065em;margin-left:-0.0576em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0715em;">K</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3281em;"><span style="top:-2.357em;margin-left:-0.0715em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="katex-sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">sess</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.143em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.1031em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3936em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mclose">)</span></span></span></span></li>
+</ol>
+<p><a id="reference-特点"></a></p>
+<h4 id="特点">特点</h4>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>高效性</strong></td>
+<td>大数据用 AES 加密（快），仅小密钥用 RSA（可接受）</td>
+</tr>
+<tr>
+<td><strong>安全性</strong></td>
+<td>会话密钥一次一密，即使长期私钥泄露，单次会话仍安全（若配合前向安全协议）</td>
+</tr>
+<tr>
+<td><strong>可扩展性</strong></td>
+<td>可同时发给多人：为每人用其公钥加密同一会话密钥</td>
+</tr>
+<tr>
+<td><strong>标准化</strong></td>
+<td>广泛用于 S/MIME、PGP、CMS（Cryptographic Message Syntax）等协议</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-证书"></a></p>
+<h3 id="证书">证书</h3>
+<p>数字证书是一个<strong>由可信第三方签发的电子“身份证”</strong>，将<strong>公钥</strong>与<strong>身份信息</strong>（如域名、组织名）绑定在一起</p>
+<p>标准格式：X.509</p>
+<p><a id="reference-x509"></a></p>
+<h4 id="x509">X.509</h4>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>版本（Version）</strong></td>
+<td>v1, v2, v3（v3 支持扩展）</td>
+</tr>
+<tr>
+<td><strong>序列号（Serial Number）</strong></td>
+<td>证书唯一标识</td>
+</tr>
+<tr>
+<td><strong>签名算法</strong></td>
+<td>CA 签名所用算法（如 SHA256-RSA）</td>
+</tr>
+<tr>
+<td><strong>颁发者（Issuer）</strong></td>
+<td>签发该证书的 CA 名称</td>
+</tr>
+<tr>
+<td><strong>有效期（Validity）</strong></td>
+<td>Not Before / Not After</td>
+</tr>
+<tr>
+<td><strong>主体（Subject）</strong></td>
+<td>证书持有者身份（如  <code>CN=www.example.com</code>）</td>
+</tr>
+<tr>
+<td><strong>主体公钥（Subject Public Key）</strong></td>
+<td>持有者的公钥 + 算法（如 RSA 2048）</td>
+</tr>
+<tr>
+<td><strong>扩展（Extensions）</strong></td>
+<td>（v3 特有）如： <br>• <strong>Key Usage</strong>（用途限制） <br>• <strong>Extended Key Usage</strong>（如 serverAuth, codeSigning） <br>• <strong>Subject Alternative Name (SAN)</strong>（支持多域名）</td>
+</tr>
+<tr>
+<td><strong>CA 签名</strong></td>
+<td>整个证书内容的数字签名（由 CA 私钥生成）</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-公钥基础设施pki-public-key-infrastructure"></a></p>
+<h4 id="公钥基础设施pki-public-key-infrastructure">公钥基础设施（PKI Public Key Infrastructure）</h4>
+<p>PKI 是一套<strong>策略、流程、硬件、软件和标准</strong>的集合，用于创建、管理、分发、使用、存储和撤销数字证书。</p>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>终端实体（End Entity）</strong></td>
+<td>证书使用者（如 Web 服务器、用户、设备）</td>
+</tr>
+<tr>
+<td><strong>证书颁发机构（CA, Certificate Authority）</strong></td>
+<td>可信第三方，负责签发和吊销证书</td>
+</tr>
+<tr>
+<td><strong>注册机构（RA, Registration Authority）</strong></td>
+<td>可选，负责验证申请者身份（可与 CA 合并）</td>
+</tr>
+<tr>
+<td><strong>证书吊销列表（CRL, Certificate Revocation List）</strong></td>
+<td>CA 定期发布的已吊销证书列表</td>
+</tr>
+<tr>
+<td><strong>在线证书状态协议（OCSP, Online Certificate Status Protocol）</strong></td>
+<td>实时查询证书是否有效（替代 CRL）</td>
+</tr>
+<tr>
+<td><strong>证书存储库</strong></td>
+<td>存放证书和 CRL 的公共目录（如 LDAP、HTTP）</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-证书链"></a></p>
+<h4 id="证书链">证书链</h4>
+<p>大多数证书<strong>不是由根 CA 直接签发</strong>，而是通过<strong>中间 CA（Intermediate CA）</strong> 层级签发，形成一条信任链</p>
+<ul>
+<li><strong>安全隔离</strong>：根 CA 离线保存，永不联网，避免私钥泄露</li>
+<li><strong>灵活管理</strong>：不同业务用不同中间 CA（如 Web、邮件、代码签名）</li>
+<li><strong>吊销影响小</strong>：中间 CA 泄露只需吊销它，不影响根</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>[终端实体证书] www.example.com</span></span>
+<span class="line"><span>        ↑ 由 Intermediate CA 1 签名</span></span>
+<span class="line"><span>[中间 CA 证书] Example Corp Intermediate CA</span></span>
+<span class="line"><span>        ↑ 由 Root CA 签名</span></span>
+<span class="line"><span>[根 CA 证书] Example Corp Root CA（自签名）</span></span></code></pre>
+<p><a id="reference-验证过程"></a></p>
+<h4 id="验证过程">验证过程</h4>
+<ol>
+<li>浏览器收到服务器证书（含公钥）</li>
+<li>检查证书是否由<strong>受信任的根 CA</strong>签发
+<ul>
+<li>若直接由根签发 → 用内置根公钥验证</li>
+<li>若由中间 CA 签发 → 需同时提供<strong>中间证书</strong></li>
+</ul>
+</li>
+<li>浏览器逐级向上验证签名，直到找到<strong>本地信任库中的根证书</strong></li>
+<li>同时检查：
+<ul>
+<li>证书是否在有效期内</li>
+<li>域名是否匹配（SAN 或 CN）</li>
+<li>证书是否被吊销（通过 CRL 或 OCSP）</li>
+</ul>
+</li>
+</ol>
+<p>服务器配置 HTTPS 时，必须发送<strong>完整的证书链</strong>（终端 + 所有中间证书），否则客户端可能无法构建信任链</p>
+<p><a id="reference-证书生命周期"></a></p>
+<h4 id="证书生命周期">证书生命周期</h4>
+<ol>
+<li><strong>申请</strong>：生成密钥对，提交 CSR（Certificate Signing Request）给 CA</li>
+<li><strong>验证</strong>：CA 验证申请者身份（域名控制、企业信息等）</li>
+<li><strong>签发</strong>：CA 用私钥签名，生成证书</li>
+<li><strong>部署</strong>：安装到服务器/设备</li>
+<li><strong>使用</strong>：用于 TLS、签名等</li>
+<li><strong>吊销</strong>（如私钥泄露）：
+<ul>
+<li>通过 CRL 或 OCSP 发布吊销状态</li>
+</ul>
+</li>
+<li><strong>过期</strong>：自动失效（通常 90 天 ~ 1 年，Let’s Encrypt 为 90 天）</li>
+</ol>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>加密、哈希与数字签名分别提供什么能力？工作模式为什么会影响分组密码的整体安全性质？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#基本术语">基本术语</a></li><li style="--depth: 0"><a href="#古典加密方法">古典加密方法</a></li><li style="--depth: 1"><a href="#替换法substitution">替换法（Substitution）</a></li><li style="--depth: 2"><a href="#凯撒加密caesar-cipher">凯撒加密（Caesar Cipher）</a></li><li style="--depth: 2"><a href="#有密钥的替换密码">有密钥的替换密码</a></li><li style="--depth: 2"><a href="#一次一密乱码本">一次一密乱码本</a></li><li style="--depth: 3"><a href="#弗纳姆密码">弗纳姆密码</a></li><li style="--depth: 3"><a href="#维吉尼亚密码">维吉尼亚密码</a></li><li style="--depth: 1"><a href="#置换法transposition">置换法（Transposition）</a></li><li style="--depth: 2"><a href="#简单列置换算法">简单列置换算法</a></li><li style="--depth: 0"><a href="#私钥加密算法对称加密">私钥加密算法（对称加密）</a></li><li style="--depth: 1"><a href="#流密码和块密码分组密码">流密码和块密码（分组密码）</a></li><li style="--depth: 1"><a href="#desdata-encryption-standard">DES（Data Encryption Standard）</a></li><li style="--depth: 2"><a href="#加密步骤">加密步骤</a></li><li style="--depth: 3"><a href="#初始置换-initial-permutation-ip">初始置换 （Initial Permutation, IP）</a></li><li style="--depth: 3"><a href="#feistel-迭代十六轮">Feistel 迭代（十六轮）</a></li><li style="--depth: 3"><a href="#最终交换与逆初始置换">最终交换与逆初始置换</a></li><li style="--depth: 2"><a href="#轮函数">轮函数</a></li><li style="--depth: 1"><a href="#aesadvanced-encryption-standard">AES（Advanced Encryption Standard）</a></li><li style="--depth: 2"><a href="#密钥扩展">密钥扩展</a></li><li style="--depth: 2"><a href="#解密过程">解密过程</a></li><li style="--depth: 2"><a href="#工作模式">工作模式</a></li><li style="--depth: 0"><a href="#公钥加密算法非对称加密">公钥加密算法（非对称加密）</a></li><li style="--depth: 1"><a href="#核心思想">核心思想</a></li><li style="--depth: 1"><a href="#对比对称加密">对比对称加密</a></li><li style="--depth: 1"><a href="#工作流程">工作流程</a></li><li style="--depth: 1"><a href="#rsa-加密算法">RSA 加密算法</a></li><li style="--depth: 2"><a href="#核心思想-1">核心思想</a></li><li style="--depth: 2"><a href="#密钥生成流程">密钥生成流程</a></li><li style="--depth: 3"><a href="#选择两个大质数">选择两个大质数</a></li><li style="--depth: 3"><a href="#计算模数-n">计算模数  n</a></li><li style="--depth: 3"><a href="#计算欧拉函数-ϕn">计算欧拉函数  ϕ(n)</a></li><li style="--depth: 3"><a href="#选择公钥指数-e">选择公钥指数  e</a></li><li style="--depth: 3"><a href="#计算私钥指数-d">计算私钥指数  d</a></li><li style="--depth: 2"><a href="#加密与解密">加密与解密</a></li><li style="--depth: 0"><a href="#密码分析学破译加密体系">密码分析学：破译加密体系</a></li><li style="--depth: 0"><a href="#加密应用">加密应用</a></li><li style="--depth: 1"><a href="#hash-函数">Hash 函数</a></li><li style="--depth: 2"><a href="#特征">特征</a></li><li style="--depth: 1"><a href="#密钥交换">密钥交换</a></li><li style="--depth: 1"><a href="#数字签名">数字签名</a></li><li style="--depth: 1"><a href="#消息认证">消息认证</a></li><li style="--depth: 2"><a href="#基于-hash-函数实现">基于 Hash 函数实现</a></li><li style="--depth: 1"><a href="#数字信封技术">数字信封技术</a></li><li style="--depth: 2"><a href="#工作流程-1">工作流程</a></li><li style="--depth: 3"><a href="#生成会话密钥">生成会话密钥</a></li><li style="--depth: 3"><a href="#用对称密钥加密消息">用对称密钥加密消息</a></li><li style="--depth: 3"><a href="#用公钥加密会话密钥创建信封">用公钥加密会话密钥（创建“信封”）</a></li><li style="--depth: 3"><a href="#发送密文--数字信封">发送（密文 + 数字信封）</a></li><li style="--depth: 3"><a href="#解开数字信封并解密">解开数字信封并解密</a></li><li style="--depth: 2"><a href="#特点">特点</a></li><li style="--depth: 1"><a href="#证书">证书</a></li><li style="--depth: 2"><a href="#x509">X.509</a></li><li style="--depth: 2"><a href="#公钥基础设施pki-public-key-infrastructure">公钥基础设施（PKI Public Key Infrastructure）</a></li><li style="--depth: 2"><a href="#证书链">证书链</a></li><li style="--depth: 2"><a href="#验证过程">验证过程</a></li><li style="--depth: 2"><a href="#证书生命周期">证书生命周期</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

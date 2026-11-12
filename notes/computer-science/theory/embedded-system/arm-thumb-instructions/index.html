@@ -1,0 +1,522 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ARM 与 Thumb 汇编指令 · Musuyin&#39; Home</title><meta name="description" content="本篇列出的 LDM/STM、LDR/STR、PUSH/POP 等属于 ARM/Thumb 指令体系。按访存、数据处理、分支与控制类理解指令，再结合寻址后缀和标志位阅读示例。原文件名中的 RISC-V 与这些指令不符，本文依照实际内容更正标题。Arm 的 LDM/STM 说明"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/embedded-system/arm-thumb-instructions/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="ARM 与 Thumb 汇编指令 · Musuyin' Home"><meta property="og:description" content="本篇列出的 LDM/STM、LDR/STR、PUSH/POP 等属于 ARM/Thumb 指令体系。按访存、数据处理、分支与控制类理解指令，再结合寻址后缀和标志位阅读示例。原文件名中的 RISC-V 与这些指令不符，本文依照实际内容更正标题。Arm 的 LDM/STM 说明"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/embedded-system/arm-thumb-instructions/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">ARM 与 Thumb 汇编指令</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-11-07">2025-11-07</time></dd></div><div><dt>字数</dt><dd>3880</dd></div><div><dt>预计阅读</dt><dd>13 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E6%B1%87%E7%BC%96/">#汇编</a><a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>ARM 与 Thumb 汇编指令</h1><time datetime="2025-11-07">2025-11-07</time><p class="tags"><a href="/tags/%E6%B1%87%E7%BC%96/">#汇编</a><a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-指令体系与阅读线索"></a></p>
+<h2 id="指令体系与阅读线索">指令体系与阅读线索</h2>
+<p>本篇列出的 LDM/STM、LDR/STR、PUSH/POP 等属于 ARM/Thumb 指令体系。按访存、数据处理、分支与控制类理解指令，再结合寻址后缀和标志位阅读示例。原文件名中的 RISC-V 与这些指令不符，本文依照实际内容更正标题。<a href="https://support.arm.com/documentation/dui0473/j/arm-and-thumb-instructions/ldm">Arm 的 LDM/STM 说明</a></p>
+<p><a id="reference-指令概述"></a></p>
+<h2 id="指令概述">指令概述</h2>
+<ul>
+<li>程序：计算机执行过程的序列，编写程序就是编写这个过程序列</li>
+<li>指令集的规模
+<ul>
+<li>不宜过小：通过指令的排列组合，能达到高级编程语言的所有效果</li>
+<li>不宜过大：指令集规模应精简，以免增加处理器电路的负担</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-指令格式"></a></p>
+<h2 id="指令格式">指令格式</h2>
+<p><a id="reference-基本格式"></a></p>
+<h3 id="基本格式">基本格式</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;opcode&gt; {&lt;cond&gt;}{S} &lt;Rd&gt;,&lt;Rn&gt;,{&lt;Op2&gt;}	</span><span style="color:#6A737D;--shiki-dark:#6A737D">; comment</span></span></code></pre>
+<p><img alt="" loading="lazy" decoding="async" width="1005" height="314" src="/_astro/IMG-20260722152301654.BXYjapCi_Z2vb1X9.webp"></p>
+<ul>
+<li><code>&lt;&gt;</code> 必须</li>
+<li><code>{}</code> 可选</li>
+</ul>
+<p><a id="reference-指令存储形式"></a></p>
+<h3 id="指令存储形式">指令存储形式</h3>
+<p><img alt="" loading="lazy" decoding="async" width="950" height="434" src="/_astro/IMG-20260722152301681.BF8WroTm_ZHy3yA.webp"></p>
+<p><a id="reference-汇编代码格式"></a></p>
+<h2 id="汇编代码格式">汇编代码格式</h2>
+<p>一个完整的 ARM 汇编由两部分组成：<strong>声明</strong>和<strong>代码段</strong>。</p>
+<p><a id="reference-声明"></a></p>
+<h3 id="声明">声明</h3>
+<ul>
+<li>声明：在一个程序之前先要进行声明
+<ul>
+<li>声明代码段：用 <code>AREA</code> 指令定义一个段，说明所定义段的相关属性（段的名字和段的属性等）</li>
+<li>声明 ARM 指令：用 <code>CODE</code> 来声明程序为 ARM 指令</li>
+<li>声明程序入口：用 <code>ENTRY</code> 指令标识程序的入口点</li>
+</ul>
+</li>
+<li>在程序完成后要用 <code>END</code> 指令声明程序结束。每一个汇编程序段都必须有一条 <code>END</code> 指令，指示代码段的结束。</li>
+</ul>
+<p><a id="reference-代码段"></a></p>
+<h3 id="代码段">代码段</h3>
+<ul>
+<li><strong>段</strong>：在 ARM 汇编语言程序中，以程序段为单位组织代码。段是相对独立的指令或数据序列，具有特定的名称。
+<ul>
+<li>代码段：代码段的内容为执行代码</li>
+<li>数据段：数据段存放代码运行时需要用到的数据</li>
+</ul>
+</li>
+<li>段具有：<code>READONLY</code> 和 <code>READWRITE</code> 等属性。</li>
+<li>注意：一个汇编程序至少有一个代码段。
+<ul>
+<li>如果程序较长时，可以分割为多个代码段和数据段。</li>
+<li>多个段在程序编译连接时最终形成一个可执行的映像文件。</li>
+</ul>
+</li>
+</ul>
+<p>使用 <code>;</code> 进行注释，标号要顶格写</p>
+<p><a id="reference-示例"></a></p>
+<h3 id="示例">示例</h3>
+<p><img alt="" loading="lazy" decoding="async" width="816" height="318" src="/_astro/IMG-20260722152301703.DldrGQQO_k55g6.webp"></p>
+<p><a id="reference-指令详解"></a></p>
+<h2 id="指令详解">指令详解</h2>
+<p><a id="reference-存储器访问指令"></a></p>
+<h3 id="存储器访问指令">存储器访问指令</h3>
+<p>数据传送分为两种：<strong>存储</strong>和<strong>加载</strong>。</p>
+<ul>
+<li>将数据从<strong>寄存器到存储器</strong>的传送叫作存储</li>
+<li>将数据从<strong>存储器到寄存器</strong>的传送叫作加载</li>
+</ul>
+<p><img alt="" loading="lazy" decoding="async" width="1010" height="403" src="/_astro/IMG-20260722152301728.DPx_PUra_7Yez2.webp"></p>
+<p>N 表示不支持这种代码，Y 表示支持这种代码。以上所有指令都不影响标志位</p>
+<p><a id="reference-ldm--stm-加载存储寄存器组"></a></p>
+<h4 id="ldm--stm-加载存储寄存器组"><code>LDM</code> / <code>STM</code> 加载/存储寄存器组</h4>
+<p><strong>寄存器组</strong>加载/存储指令：用于在寄存器和存储器之间进行成组的数据传送</p>
+<ul>
+<li><code>LDM</code>：Load Multiple，把存储器（内存）中的成组数据加载到寄存器组</li>
+<li><code>STM</code>：Store Multiple，把一组寄存器中的数据存储到存储区（内存），使用一个寄存器做基址</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">LDM&lt;addressing_mode&gt; &lt;Rn&gt;{!}, &lt;registers&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">LDMFD </span><span style="color:#005CC5;--shiki-dark:#79B8FF">SP</span><span style="color:#24292E;--shiki-dark:#E1E4E8">!, {R0-R3, PC}	</span><span style="color:#6A737D;--shiki-dark:#6A737D">; 从堆栈弹出数据到R0-R3和PC（函数返回）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">LDMDB R5!, {R0-R4}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">STM&lt;addressing_mode&gt; &lt;Rn&gt;{!}, &lt;registers&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">STMFD </span><span style="color:#005CC5;--shiki-dark:#79B8FF">SP</span><span style="color:#24292E;--shiki-dark:#E1E4E8">!, {R0-R3, LR}	</span><span style="color:#6A737D;--shiki-dark:#6A737D">; 满递减堆栈，压栈R0-R3和LR，并更新SP</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">STMIA R3!, {R0, R4-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">R12</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, LR}</span></span></code></pre>
+<p><a id="reference-寻址模式后缀"></a></p>
+<h5 id="寻址模式后缀">寻址模式后缀</h5>
+<table>
+<thead>
+<tr>
+<th>后缀</th>
+<th>名称</th>
+<th>堆栈类型</th>
+<th>地址变化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FD</td>
+<td>Full Descending</td>
+<td>满递减</td>
+<td>先存数据，地址递减</td>
+</tr>
+<tr>
+<td>FA</td>
+<td>Full Ascending</td>
+<td>满递增</td>
+<td>先存数据，地址递增</td>
+</tr>
+<tr>
+<td>ED</td>
+<td>Empty Descending</td>
+<td>空递减</td>
+<td>先递减地址，再存数据</td>
+</tr>
+<tr>
+<td>EA</td>
+<td>Empty Ascending</td>
+<td>空递增</td>
+<td>先递增地址，再存数据</td>
+</tr>
+<tr>
+<td>IA</td>
+<td>Increment After</td>
+<td>递增</td>
+<td>先访问，后加地址</td>
+</tr>
+<tr>
+<td>IB</td>
+<td>Increment Before</td>
+<td>递增</td>
+<td>先加地址，再访问</td>
+</tr>
+<tr>
+<td>DA</td>
+<td>Decrement After</td>
+<td>递减</td>
+<td>先访问，后减地址</td>
+</tr>
+<tr>
+<td>DB</td>
+<td>Decrement Before</td>
+<td>递减</td>
+<td>先减地址，再访问</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-写回"></a></p>
+<h5 id="写回"><code>!</code>：写回</h5>
+<p>带  <code>!</code>（写回）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">STMFD </span><span style="color:#005CC5;--shiki-dark:#79B8FF">SP</span><span style="color:#24292E;--shiki-dark:#E1E4E8">!, {R0-R3}</span></span></code></pre>
+<ul>
+<li>将 R0–R3 存入堆栈；</li>
+<li><strong>SP 自动更新</strong>（递减，因为是满递减堆栈）；</li>
+<li>相当于：先压栈，再修改 SP 指向新的栈顶。</li>
+</ul>
+<p>不带  <code>!</code>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">STMFD </span><span style="color:#005CC5;--shiki-dark:#79B8FF">SP</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, {R0-R3}</span></span></code></pre>
+<ul>
+<li>数据仍从当前 SP 地址开始存储；</li>
+<li><strong>但 SP 的值不会改变</strong>，后续若继续用 SP 访问堆栈，可能覆盖刚存的数据。</li>
+</ul>
+<p>总结：</p>
+<ul>
+<li><strong><code>!</code>  的作用是让基址寄存器自动更新为操作后的最终地址</strong>；</li>
+<li>在堆栈操作或连续内存块访问中，<strong>通常需要加  <code>!</code></strong>，以确保指针正确移动；</li>
+<li>这是 ARM <strong>前索引寻址</strong>（pre-indexed addressing） 的一部分。</li>
+</ul>
+<p><a id="reference-ldr--str-加载存储单个寄存器"></a></p>
+<h4 id="ldr--str-加载存储单个寄存器"><code>LDR</code> / <code>STR</code> 加载/存储单个寄存器</h4>
+<p>加载/存储单个寄存器指令 <code>LDR</code> 和 <code>STR</code> 用于在寄存器和存储器之间进行<strong>字</strong>、<strong>半字</strong>以及<strong>字节</strong>传送。</p>
+<ul>
+<li><code>LDR</code> 用于把存储器中的 32 位数据加载到寄存器</li>
+<li><code>STR</code> 用于把寄存器中的 32 位数据存储到存储器中</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">LDR{T}, Rd, &lt;address&gt;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">STR</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{T}, Rd, &lt;address&gt;</span></span></code></pre>
+<ul>
+<li><code>{T}</code> 是可选传送后缀</li>
+<li><code>&lt;address&gt;</code> 为地址偏移量</li>
+</ul>
+<p><a id="reference-传送后缀"></a></p>
+<h5 id="传送后缀">传送后缀</h5>
+<ul>
+<li><code>S</code>：有符号操作</li>
+<li><code>SB</code> 和 <code>SH</code> 不可用于 <code>STR</code></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>后缀</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B</td>
+<td>字节传送</td>
+</tr>
+<tr>
+<td>H</td>
+<td>半字传送</td>
+</tr>
+<tr>
+<td>SB</td>
+<td>带符号字节传送</td>
+</tr>
+<tr>
+<td>SH</td>
+<td>带符号半字传送</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>LDRB</code>：把存储器中的 8 位数据字节加载到寄存器</li>
+<li><code>STRB</code>：把寄存器中的<strong>低字节</strong>存储到存储器</li>
+<li><code>LDRH</code>：把存储器中的半字加载到存储器</li>
+<li><code>STRH</code>：把寄存器中的<strong>低半字</strong>存储到存储器</li>
+</ul>
+<p>区分：字、半字、字节</p>
+<p><a id="reference-寻址"></a></p>
+<h5 id="寻址">寻址</h5>
+<ul>
+<li><code>LDR</code>/<code>STR</code> 指令寻址非常灵活，由两部分组成：
+<ul>
+<li>一部分是一个基址寄存器，它可以是任一个通用寄存器；</li>
+<li>另一部分是<strong>地址偏移量</strong></li>
+</ul>
+</li>
+<li>地址偏移量通常有 3 种形式：
+<ul>
+<li>立即数偏移</li>
+<li>寄存器偏移</li>
+<li>寄存器及移位常数</li>
+</ul>
+</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">LDR R2, [R5]	</span><span style="color:#6A737D;--shiki-dark:#6A737D">; 将R5指向地址的字数据存入R2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">LDR R1, [R0, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0x12</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]	</span><span style="color:#6A737D;--shiki-dark:#6A737D">; 将R0+0x12地址处的数据读出，保存到R1中</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">STR</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R1, [R0, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0x04</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]	</span><span style="color:#6A737D;--shiki-dark:#6A737D">; 将R1的数据存储到R0+0x04地址</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">LDRB R3, [R2], #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D">	; 将R2指向地址的字节数据存入R3，并令R2=R2+1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">STRB R6, [R7]		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; 将R7指向地址的字节数据存入R6</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">LDRH R6, [R2], #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#6A737D;--shiki-dark:#6A737D">	; 将R2指向地址的半字节数据存入R6，并令R2=R2+2；半字数据高位用0扩展</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">STRH R1, [R2, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]	</span><span style="color:#6A737D;--shiki-dark:#6A737D">; 将R1的半字数据保存到R2+2地址中，只修改低2字节数据，并令R2=R2+1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">LDRSB R1, [R0, R3]	</span><span style="color:#6A737D;--shiki-dark:#6A737D">; 将R0+R3地址上的字节数据存入R1，高24位用符号扩展</span></span></code></pre>
+<p><a id="reference-无特权访问"></a></p>
+<h5 id="无特权访问">无特权访问</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">LDRT Rd, [Rb, #imme]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">STRT Rd, [Rb, #imme]</span></span></code></pre>
+<p><code>T</code> 后缀的含义是：指令在特权模式下对存储器的访问，将被存储器看成是用户模式（无特权）的访问。这条指令在特权模式下不享有特权</p>
+<p><a id="reference-互斥访问"></a></p>
+<h5 id="互斥访问">互斥访问</h5>
+<p>互斥访问总是成对出现，每个 <code>LDREX</code> 语句后面总是跟随一个 <code>STREX</code> 语句</p>
+<ul>
+<li>可以实现半字和字节访问：可以使用 <code>B</code> 和 <code>H</code> 后缀</li>
+<li>不可以实现带符号数据的存储和加载：不可以使用 <code>SH</code> 和 <code>SB</code></li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">LDREX Rd, [Rb, #imme]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">STREX Rt, Rd, [Rb, #imme]	</span><span style="color:#6A737D;--shiki-dark:#6A737D">; Rt记录指令执行结果</span></span></code></pre>
+<p>互斥清除指令<code>CLREX</code></p>
+<p>互斥清除指令用来清除由指令 <code>LDREX</code> 标注的互斥状态，在执行这条指令以后，内核不再处于互斥状态，后面的指令 <code>STREX</code> 不能正确执行，<code>Rt</code> 返回 1</p>
+<p><a id="reference-堆栈指令-push-和-pop"></a></p>
+<h4 id="堆栈指令-push-和-pop">堆栈指令 PUSH 和 POP</h4>
+<p>这两条指令可以对寄存器组实现操作，是以 SP 为基址的加载和存储指令</p>
+<ul>
+<li>堆栈指针 SP 是隐含的地址基址</li>
+<li>堆是满栈递减堆栈，堆栈向下增长，堆栈指针总是指向最后入栈的数据</li>
+<li>使用入栈指令 PUSH 时，每传送一个数据，堆栈指针就自动减 4；使用出栈指针 POP 时，每传送一个数据，堆栈指针就自动加 4，属于后索引形式</li>
+<li>指令执行完后，堆栈指针的指向已经变化。</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">PUSH</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {register_list}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">POP</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {register_list}</span></span></code></pre>
+<p><a id="reference-通用数据处理指令"></a></p>
+<h3 id="通用数据处理指令">通用数据处理指令</h3>
+<p>数据处理指令是所有微处理器中最基本的指令，用于在寄存器和存储器之间进行数据的双向传输</p>
+<p><img alt="IMG-20260722152301754" loading="lazy" decoding="async" width="795" height="299" src="/_astro/IMG-20260722152301754.DdpqsJ-s_11XOOn.webp"></p>
+<p><a id="reference-加减法指令"></a></p>
+<h4 id="加减法指令">加减法指令</h4>
+<ul>
+<li><code>ADD</code>：两个操作对象相加</li>
+<li><code>SUB</code>：两个操作对象相减</li>
+<li><code>ADC</code>：两个操作对象带进位加</li>
+<li><code>SBC</code>：两个操作对象带借位减</li>
+<li><code>RSB</code>：两个操作对象反减</li>
+<li><code>ADDW</code>：包含 12 位立即数的加法操作</li>
+<li><code>SUBW</code>：包含 12 位立即数的减法操作</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;op&gt;{S} Rd, Rn, &lt;op2&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;op&gt;{S} Rd, Rn, #imme</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">ADD</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R1, R2, R0		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R5 = R2 + R0</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ADDS R1, R1, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D">		; R1 = R1 + 1</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SUB</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R4, R1, R0		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R4 = R1 - R0</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SUBS R0, R0, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D">		; R0 = R0 - 1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SUBS R2, R1, R2		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R2 = R1 - R2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">RSB R3, R1, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0xFF00</span><span style="color:#6A737D;--shiki-dark:#6A737D">	; R3 = 0XFF00 - R1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">RSBS R1, R2, R2, </span><span style="color:#D73A49;--shiki-dark:#F97583">LSL</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#6A737D;--shiki-dark:#6A737D"> ; R1 = (R2 &lt;&lt; 2) - R2</span></span></code></pre>
+<p><a id="reference-乘除法指令"></a></p>
+<h4 id="乘除法指令">乘除法指令</h4>
+<p><a id="reference-乘法指令"></a></p>
+<h5 id="乘法指令">乘法指令</h5>
+<ul>
+<li><code>MUL</code>：32 位乘法运算</li>
+<li><code>MLA</code>：32 位乘加运算</li>
+<li><code>MLS</code>：32 位乘减运算</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">MUL</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {cond}{S} Rd, Rs, Rt</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">MUL</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R0, R1, R2			</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R0 = R1 * R2</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">MLA/MLS {cond}{S} Rd, Rs, Rt, Rm</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">MLA R0, R1, R2, R3		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R0 = R3 + R1 * R2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">MLS R4, R5, R6, R7		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R4 = R7 - R5 * R6</span></span></code></pre>
+<p><a id="reference-长乘法指令"></a></p>
+<h5 id="长乘法指令">长乘法指令</h5>
+<ul>
+<li><code>UMULL</code>：64 位无符号乘法运算</li>
+<li><code>UMLAL</code>：64 位无符号长乘加运算</li>
+<li><code>SMULL</code>：64 位带符号长乘法运算</li>
+<li><code>SMLAL</code>：64 位带符号长乘加运算</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">OP {条件} {S} 目的寄存器低字节, 目的寄存器高字节, 操作数1, 操作数2</span></span></code></pre>
+<p><a id="reference-除法指令"></a></p>
+<h5 id="除法指令">除法指令</h5>
+<ul>
+<li><code>UDIV</code>：无符号除法运算</li>
+<li><code>SDIV</code>：带符号除法运算</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SDIV/UDIV Rd, Rm, Rs</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SDIV/UDIV Rd, Rm</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SDIV R0, R5, R7		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R0 = R5 / R7</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">UDIV </span><span style="color:#005CC5;--shiki-dark:#79B8FF">R8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, R2, R3		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R8 = R2 / R3</span></span></code></pre>
+<ul>
+<li><code>Rd</code>：目标寄存器，也可存放被除数</li>
+<li><code>Rm</code>：存放被除数的寄存</li>
+<li><code>Rs</code>：存放除数的寄存器</li>
+</ul>
+<p>这是 32 位运算指令，结果是一个 32 位的数据，存储在目标寄存器中。如果不能被整除，余数将丢失</p>
+<p><a id="reference-逻辑操作指令"></a></p>
+<h4 id="逻辑操作指令">逻辑操作指令</h4>
+<ul>
+<li><code>AND</code>：两个操作对象相与</li>
+<li><code>ORR</code>：两个操作对象相或</li>
+<li><code>EOR</code>：两个操作对象异或</li>
+<li><code>BIC</code>：对寄存器按位清 0</li>
+<li><code>ORN</code>：对寄存器进行非或，先对第 2 操作数进行非运算，再和第 1 操作数进行或运算</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;op&gt;{cond}{S} Rd, Rn, &lt;Op2&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">AND</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R1, R2, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0x80</span><span style="color:#6A737D;--shiki-dark:#6A737D">		; R8 = R4 &amp; 0x80</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">AND</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R5, R6				</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R5 = R5 &amp; R6</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ANDS R0, R0, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0x01</span><span style="color:#6A737D;--shiki-dark:#6A737D">		; R0 = R0 &amp; 0x01，取出最低位数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ORR R6, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0x40</span><span style="color:#6A737D;--shiki-dark:#6A737D">			; R6 = R6 | 0x40</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ORR R0, R0, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0x0F</span><span style="color:#6A737D;--shiki-dark:#6A737D"> 		; R0 = R0 | 0x0F，将R0的低4位置为1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ORR R3, R1, R3, </span><span style="color:#D73A49;--shiki-dark:#F97583">LSL</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span><span style="color:#6A737D;--shiki-dark:#6A737D">	; R3 = R1 | (R3 &lt;&lt; 8)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">EOR </span><span style="color:#005CC5;--shiki-dark:#79B8FF">R9</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, R6, R5			</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R9 = R6 ^ R5</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">EOR R1, R1, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0x0F</span><span style="color:#6A737D;--shiki-dark:#6A737D">		; R1 = R1 ^ 0x0F，将R1的低4位取反</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">BIC R1, R1, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0x0F</span><span style="color:#6A737D;--shiki-dark:#6A737D">		; R1的低4位清零</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ORN R1, R2, R3			</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R1 = (!R3) | R2</span></span></code></pre>
+<p><a id="reference-位移操作指令"></a></p>
+<h4 id="位移操作指令">位移操作指令</h4>
+<ul>
+<li><code>LSL</code>：逻辑左移（Logical Shift Left），寄存器中字的低端空出的有效位补 0</li>
+<li><code>LSR</code>：逻辑右移（Logical Shift Right），寄存器中字的高端空出的有效位补 0</li>
+<li><code>ASR</code>：算术右移（Arithmetic Shift Right），算术移位的对象是带符号数，在移位过程中必须保持操作数的符号位不变
+<ul>
+<li>若源操作数为正，则字的高端空出的有效位补 0</li>
+<li>若源操作数为负数，则字的高端空出的有效位补 1</li>
+</ul>
+</li>
+<li><code>ROR</code>：循环右移（Rotate Right），从字的最低端移出的有效位依次填入空出字的高端有效位</li>
+<li><code>RRX</code>：扩展为 1 的循环右移（Rotate Right Extended），按操作数所指定的数量向右循环移位，空位用原来 C 标志位填充</li>
+</ul>
+<p><img alt="IMG-20260722152301789" loading="lazy" decoding="async" width="558" height="453" src="/_astro/IMG-20260722152301789.BEN4Uqu5_Z2nffww.webp"></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;op&gt; Rd, {Rn}, Rs/#n</span></span></code></pre>
+<ul>
+<li><code>op</code> 指的是 <code>LSL</code>/<code>LSR</code>/<code>ASR</code>/<code>ROR</code>/<code>RRX</code>；</li>
+<li><code>Rd</code> 是指目标寄存器；</li>
+<li><code>Rn</code> 是指移位寄存器；</li>
+<li><code>Rs</code> 是指移位长度寄存器，其数值是 <code>Rn</code> 移位的位数,范围是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>255</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0 ,255]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">255</span><span class="mclose">]</span></span></span></span></li>
+<li><code>n</code> 是指移位长度，<code>ASR</code>、<code>LSR</code> 和 <code>ROR</code> 是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mn>31</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1 ,31]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">31</span><span class="mclose">]</span></span></span></span>，<code>LSL</code> 是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>31</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0 ,31]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">31</span><span class="mclose">]</span></span></span></span></li>
+</ul>
+<p><a id="reference-比较操作指令"></a></p>
+<h4 id="比较操作指令">比较操作指令</h4>
+<ul>
+<li><code>CMP</code>：两个操作对象的比较操作，用于把一个寄存器的内容和另一个寄存器的内容或立即数进行比较，同时更新 CPSR（Current Program Status Register，程序状态寄存器）中条件标志位的值</li>
+<li><code>CMN</code>：两个操作对象的取反比较操作，用于把一个寄存器的内容和另一个寄存器的内容或立即数<strong>取反</strong>后进行比较，同时更新 CPSR 中条件标志位的值</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CMP</span><span style="color:#24292E;--shiki-dark:#E1E4E8">/CMN{cond} Rs, Rt</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CMP</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R1, R0		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; if (R1 - R0 &gt; 0) CPSR: N = 0 else if (R1 - R0 == 0) CPSR: Z = 1 else CPSR: N = 1</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CMP</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R1, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">100</span><span style="color:#6A737D;--shiki-dark:#6A737D">	; R1 - 100</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">CMN R1, R0		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R1 + R0</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">CMN R1, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">100</span><span style="color:#6A737D;--shiki-dark:#6A737D">	; R1 + 100</span></span></code></pre>
+<p><a id="reference-数据传送指令"></a></p>
+<h4 id="数据传送指令">数据传送指令</h4>
+<p>这是一组只有两个操作对象的指令</p>
+<ul>
+<li><code>MOV</code>：把第 2 操作对象内容传送到第 1 操作对象</li>
+<li><code>MVN</code>：把第 2 操作对象内容的<strong>非</strong>传送到第 1 操作对象</li>
+<li><code>MOVW</code>：把 16 位立即数放到寄存器的低 16 位，高 16 位清 0</li>
+<li><code>MOVT</code>：把 16 位立即数放到寄存器的高 16 位，低 16 位不影响</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;op&gt;{cond}{S} Rd, Rs</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">MOV</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R1, R0				</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R1 = R0</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">MOV</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R1, R0, </span><span style="color:#D73A49;--shiki-dark:#F97583">LSL</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span><span style="color:#6A737D;--shiki-dark:#6A737D">		; R1 = R0 &lt;&lt; 3</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">MOV</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R7, PC				</span><span style="color:#6A737D;--shiki-dark:#6A737D">; PC + 4, R7 = PC</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">MOVW R7, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0xFF12</span><span style="color:#6A737D;--shiki-dark:#6A737D">		; 0xFF12传送到R7的低16位，高16位清零</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">MOVT R3, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0xF123</span><span style="color:#6A737D;--shiki-dark:#6A737D">		; 0xF123传送到R3的高16位，低16位不影响</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">MVN R0, #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#6A737D;--shiki-dark:#6A737D">				; R0 = !0，将立即数0取反后赋值给R0，即R0 = -1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">MVN R4, R6				</span><span style="color:#6A737D;--shiki-dark:#6A737D">; R4 = !R6</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">MOVS</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R1, R2, </span><span style="color:#D73A49;--shiki-dark:#F97583">LSL</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> #</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#6A737D;--shiki-dark:#6A737D">		; R1 = R2 &lt;&lt; 2，条件标志位刷新</span></span></code></pre>
+<ul>
+<li><code>{S}</code>：表示是否更新 CPSR 的条件码标志到状态寄存器的条件标志位</li>
+</ul>
+<p><a id="reference-分支控制指令"></a></p>
+<h4 id="分支控制指令">分支控制指令</h4>
+<p><img alt="IMG-20260722152301823" loading="lazy" decoding="async" width="886" height="190" src="/_astro/IMG-20260722152301823.DBlfVwG__2rP6GS.webp"></p>
+<p><a id="reference-分支指令"></a></p>
+<h5 id="分支指令">分支指令</h5>
+<ul>
+<li><code>B</code> / <code>BX</code>：程序简单跳转</li>
+<li><code>BL</code> / <code>BLX</code>：分支链接指令，保存跳转处地址</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">B/</span><span style="color:#005CC5;--shiki-dark:#79B8FF">BL</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Label		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; 跳转到目标标签</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">BX</span><span style="color:#24292E;--shiki-dark:#E1E4E8">/BLX Rm		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; Rm是存储转移地址的寄存器</span></span></code></pre>
+<ul>
+<li>指令 <code>BL</code> 和 <code>BLX</code> 除引导程序跳转外，还把下一条语句的地址记录在链接寄存器 <code>LR</code> 中，以便程序返回使用</li>
+</ul>
+<p><a id="reference-比较分支指令"></a></p>
+<h5 id="比较分支指令">比较分支指令</h5>
+<ul>
+<li><code>CBZ</code>：比较结果为 0 的跳转</li>
+<li><code>CBNZ</code>：比较结果非 0 的跳转</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">CBZ/CBNZ Rn, Label</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">CBZ R5, Label1		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; if R5 == 0: jump to Label1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">CBNZ R0, Label2		</span><span style="color:#6A737D;--shiki-dark:#6A737D">; if R0 != 0: jump to Label2</span></span></code></pre>
+<ul>
+<li><code>Rn</code> 是比较寄存器，只能是低位寄存器 R0 ～ R7</li>
+<li>这是两条不可以使用条件后缀的指令</li>
+<li>这些指令不会改变条件标志位，但是可以判断是否需要跳转</li>
+<li>这些指令只能向后跳转，不能向前跳转，跳转的范围限制在 4 ～ 130 字节内</li>
+</ul>
+<p><a id="reference-条件分支指令"></a></p>
+<h5 id="条件分支指令">条件分支指令</h5>
+<ul>
+<li>条件分支指令只有一条即 <code>IT</code>，是 IF-THEN 的简写</li>
+<li>指令 <code>IT</code> 必须和一个条件后缀组成一条语句，随后跟随的语句由条件是否成立决定是否执行
+<ul>
+<li>如果本条语句的条件成立，则执行随后被标注 <code>T</code> 的语句</li>
+<li>如果本条语句的条件不成立，则执行随后被标注 <code>E</code> 的语句</li>
+</ul>
+</li>
+<li>每条 <code>IT</code> 语句最多可以跟随 4 条被执行的语句，每条语句的标注符号 <code>T</code> 和 <code>E</code> 紧随 <code>IT</code>，不适用有其他符号或空格
+<ul>
+<li>需要注意的是，指令本身已经有一个 <code>T</code>，这个 <code>T</code> 标注了随后的第 1 条语句是否条件成立</li>
+</ul>
+</li>
+</ul>
+<p><img alt="IMG-20260722152301853" loading="lazy" decoding="async" width="655" height="293" src="/_astro/IMG-20260722152301853.CZ37pXn7_1sNW3J.webp"></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">IT {x} S</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">IT {x}{y} S</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">IT {x}{y}{</span><span style="color:#D73A49;--shiki-dark:#F97583">z</span><span style="color:#24292E;--shiki-dark:#E1E4E8">} S</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">CMP</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R1, R0			</span><span style="color:#6A737D;--shiki-dark:#6A737D">; 比较R1和R0，产生条件</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ITTEE EQ			</span><span style="color:#6A737D;--shiki-dark:#6A737D">; T-T-E-E</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">ADD</span><span style="color:#6A737D;--shiki-dark:#6A737D">					; 相等（EQ）执行-对应T</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SUB</span><span style="color:#6A737D;--shiki-dark:#6A737D">					; 相等（EQ）执行-对应T</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">MUL</span><span style="color:#6A737D;--shiki-dark:#6A737D">					; 不相等执行-对应E</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">DIV</span><span style="color:#6A737D;--shiki-dark:#6A737D">					; 不相等执行-对应E</span></span></code></pre>
+<ul>
+<li><code>S</code> 表示条件后缀</li>
+<li>x、y 和 z 依次表示第 2 条、第 3 条和第 4 条语句的标注，都是可选的，都有 T 和 E 两种
+<ul>
+<li><code>T</code> 表示条件成立执行第 i 条语句</li>
+<li><code>E</code> 表示条件不成立执行第 i 条语句</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-汇编语法"></a></p>
+<h2 id="汇编语法">汇编语法</h2>
+<p><a id="reference-格式规范"></a></p>
+<h3 id="格式规范">格式规范</h3>
+<ul>
+<li>所有的标号必须顶格写</li>
+<li>所有的指令均不能顶个书写，指令前面应该有空格，一般用 Tab 键</li>
+<li>ARM 汇编器对标识符的大小写敏感，因此书写标志及指令时，大小写要一致，指令、寄存器名可以全部为大写，也可以全部为小写，但是不能大小写混合使用（对于单个指令要保持一致，指令之间不需要）</li>
+<li>使用注释时，注释内容由“；”开始一直到此行结束，注释可以顶格写</li>
+<li>定义变量、常量时，其标识符必须顶格书写，否则编译器报错</li>
+<li>函数名需要顶格写</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">AREA Reset, DATA, READONLY</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">START</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	AND</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	ADD</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">NEXT</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	sub</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	orr</span></span></code></pre>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>地址写回后缀 ! 改变了哪个寄存器？寄存器组传送与单寄存器传送有何区别？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#指令体系与阅读线索">指令体系与阅读线索</a></li><li style="--depth: 0"><a href="#指令概述">指令概述</a></li><li style="--depth: 0"><a href="#指令格式">指令格式</a></li><li style="--depth: 1"><a href="#基本格式">基本格式</a></li><li style="--depth: 1"><a href="#指令存储形式">指令存储形式</a></li><li style="--depth: 0"><a href="#汇编代码格式">汇编代码格式</a></li><li style="--depth: 1"><a href="#声明">声明</a></li><li style="--depth: 1"><a href="#代码段">代码段</a></li><li style="--depth: 1"><a href="#示例">示例</a></li><li style="--depth: 0"><a href="#指令详解">指令详解</a></li><li style="--depth: 1"><a href="#存储器访问指令">存储器访问指令</a></li><li style="--depth: 2"><a href="#ldm--stm-加载存储寄存器组">LDM / STM 加载/存储寄存器组</a></li><li style="--depth: 3"><a href="#寻址模式后缀">寻址模式后缀</a></li><li style="--depth: 3"><a href="#写回">!：写回</a></li><li style="--depth: 2"><a href="#ldr--str-加载存储单个寄存器">LDR / STR 加载/存储单个寄存器</a></li><li style="--depth: 3"><a href="#传送后缀">传送后缀</a></li><li style="--depth: 3"><a href="#寻址">寻址</a></li><li style="--depth: 3"><a href="#无特权访问">无特权访问</a></li><li style="--depth: 3"><a href="#互斥访问">互斥访问</a></li><li style="--depth: 2"><a href="#堆栈指令-push-和-pop">堆栈指令 PUSH 和 POP</a></li><li style="--depth: 1"><a href="#通用数据处理指令">通用数据处理指令</a></li><li style="--depth: 2"><a href="#加减法指令">加减法指令</a></li><li style="--depth: 2"><a href="#乘除法指令">乘除法指令</a></li><li style="--depth: 3"><a href="#乘法指令">乘法指令</a></li><li style="--depth: 3"><a href="#长乘法指令">长乘法指令</a></li><li style="--depth: 3"><a href="#除法指令">除法指令</a></li><li style="--depth: 2"><a href="#逻辑操作指令">逻辑操作指令</a></li><li style="--depth: 2"><a href="#位移操作指令">位移操作指令</a></li><li style="--depth: 2"><a href="#比较操作指令">比较操作指令</a></li><li style="--depth: 2"><a href="#数据传送指令">数据传送指令</a></li><li style="--depth: 2"><a href="#分支控制指令">分支控制指令</a></li><li style="--depth: 3"><a href="#分支指令">分支指令</a></li><li style="--depth: 3"><a href="#比较分支指令">比较分支指令</a></li><li style="--depth: 3"><a href="#条件分支指令">条件分支指令</a></li><li style="--depth: 0"><a href="#汇编语法">汇编语法</a></li><li style="--depth: 1"><a href="#格式规范">格式规范</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

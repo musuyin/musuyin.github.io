@@ -1,0 +1,298 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Permission · Musuyin&#39; Home</title><meta name="description" content="权限判断控制工具能否执行，不能由提示词中的安全承诺代替。教学版用 deny、ask、allow 展示顺序；生产分析进一步区分验证、规则来源、自动审批与向父 Agent 冒泡。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/tool-permissions/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Permission · Musuyin' Home"><meta property="og:description" content="权限判断控制工具能否执行，不能由提示词中的安全承诺代替。教学版用 deny、ask、allow 展示顺序；生产分析进一步区分验证、规则来源、自动审批与向父 Agent 冒泡。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/tool-permissions/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Permission</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-07-21">2026-07-21</time></dd></div><div><dt>字数</dt><dd>1793</dd></div><div><dt>预计阅读</dt><dd>6 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Permission</h1><time datetime="2026-07-21">2026-07-21</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>权限判断控制工具能否执行，不能由提示词中的安全承诺代替。教学版用 deny、ask、allow 展示顺序；生产分析进一步区分验证、规则来源、自动审批与向父 Agent 冒泡。</p>
+<p><a id="reference-permission--执行前做权限判断"></a></p>
+<h2 id="permission--执行前做权限判断">Permission — 执行前做权限判断</h2>
+<blockquote>
+<p><em>“工具执行前先做权限判断”</em> — 权限管线决定哪些操作需要审批。</p>
+<p><strong>Harness 层</strong>：权限——在工具执行前加一道门。</p>
+</blockquote>
+<p><a id="reference-问题"></a></p>
+<h3 id="问题">问题</h3>
+<p>S02 的 Agent 有 5 个工具。file tools 受 <code>safe_path</code> 保护，但 bash 不受限制。让它“清理一下项目”，可能执行 <code>rm -rf /</code>。</p>
+<p>安全不能靠信任模型，要靠代码——在工具执行之前做判断。</p>
+<p><a id="reference-解决方案"></a></p>
+<h3 id="解决方案">解决方案</h3>
+<p><img alt="IMG-20260928133931260" loading="lazy" decoding="async" width="720" height="320" src="/_astro/IMG-20260928133931260.BOoMVnsu_Z20fiGB.svg"></p>
+<p>S02 的循环完全保留。唯一的变动在工具执行前插入 <code>check_permission()</code>——每个工具调用经过三道闸门，顺序固定：硬拒绝优先，软询问次之，都没命中就放行。</p>
+<p>三道闸门对应三种决策：</p>
+<table>
+<thead>
+<tr>
+<th>闸门</th>
+<th>作用</th>
+<th>命中后</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 拒绝列表</td>
+<td>永远禁止的操作（<code>rm -rf /</code>、<code>sudo</code>）</td>
+<td>直接拒绝，不执行</td>
+</tr>
+<tr>
+<td>2. 规则匹配</td>
+<td>取决于上下文的操作（写工作区外、<code>rm</code> 文件）</td>
+<td>交给闸门 3</td>
+</tr>
+<tr>
+<td>3. 用户审批</td>
+<td>闸门 2 命中后，暂停等用户确认</td>
+<td>用户决定允许或拒绝</td>
+</tr>
+</tbody>
+</table>
+<p>三道都没命中 → 直接执行。大部分日常操作走这条路。</p>
+<p><a id="reference-工作原理"></a></p>
+<h3 id="工作原理">工作原理</h3>
+<p><img alt="IMG-20260928133931434" loading="lazy" decoding="async" width="720" height="280" src="/_astro/IMG-20260928133931434.BA7iOKXo_Z18ONb0.svg">
+<strong>闸门 1</strong>：一张硬拒绝表，先查，命中就返回阻止信息。（教学示意：简单字符串匹配不是可靠安全机制，命令变体和 shell 展开可能绕过。CC 的做法见附录。）</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">DENY_LIST</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "rm -rf /"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"sudo"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"shutdown"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"reboot"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "mkfs"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dd if="</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"&gt; /dev/sda"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> check_deny_list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(command: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> pattern </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> DENY_LIST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> pattern </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> command:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Blocked: '</span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">pattern</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">' is on the deny list"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span></span></code></pre>
+<p><strong>闸门 2</strong>：规则匹配——描述“什么时候需要问用户”。每条规则指定工具和检查条件。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">PERMISSION_RULES</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "tools"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"write_file"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"edit_file"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "check"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#D73A49;--shiki-dark:#F97583">lambda</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> args: </span><span style="color:#D73A49;--shiki-dark:#F97583">not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#005CC5;--shiki-dark:#79B8FF">WORKDIR</span><span style="color:#D73A49;--shiki-dark:#F97583"> /</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> args.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"path"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)).resolve().is_relative_to(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">WORKDIR</span><span style="color:#24292E;--shiki-dark:#E1E4E8">),</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Writing outside workspace"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    },</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "tools"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"bash"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "check"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#D73A49;--shiki-dark:#F97583">lambda</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> args: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">any</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(kw </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> args.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"command"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> kw </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"rm "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"&gt; /etc/"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"chmod 777"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]),</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Potentially destructive command"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    },</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> check_rules</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(tool_name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, args: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> rule </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> PERMISSION_RULES</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tool_name </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> rule[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"tools"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> rule[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"check"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">](args):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> rule[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span></span></code></pre>
+<p><strong>闸门 3</strong>：规则命中后，暂停等用户输入。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ask_user</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(tool_name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, args: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, reason: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">⚠  </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">reason</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"   Tool: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">tool_name</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">args</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">)"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    choice </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> input</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"   Allow? [y/N] "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">).strip().lower()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "allow"</span><span style="color:#D73A49;--shiki-dark:#F97583"> if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> choice </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"y"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"yes"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">else</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "deny"</span></span></code></pre>
+<p><strong>三道闸门串在一起</strong>，插在工具执行之前：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> check_permission</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(block) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 闸门 1: 硬拒绝</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> block.name </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "bash"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        reason </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> check_deny_list(block.input.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"command"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> reason:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">            print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">⛔ </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">reason</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> False</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 闸门 2 + 3: 规则匹配 → 用户审批</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    reason </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> check_rules(block.name, block.input)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> reason:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        decision </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ask_user(block.name, block.input, reason)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> decision </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "deny"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> False</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> True</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 在 agent_loop 中——s02 的循环只加了一行：</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> block </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.content:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> block.type </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "tool_use"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> check_permission(block):           </span><span style="color:#6A737D;--shiki-dark:#6A737D"># ← 新增</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            results.append({</span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Permission denied."</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            continue</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        output </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> TOOL_HANDLERS</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[block.name](</span><span style="color:#D73A49;--shiki-dark:#F97583">**</span><span style="color:#24292E;--shiki-dark:#E1E4E8">block.input)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># s02 原有</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        results.append(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p><a id="reference-相对-s02-的变更"></a></p>
+<h3 id="相对-s02-的变更">相对 S02 的变更</h3>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s02)</th>
+<th>之后 (s03)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>安全模型</td>
+<td>无（信任模型）</td>
+<td>三道闸门权限管线</td>
+</tr>
+<tr>
+<td>新函数</td>
+<td>—</td>
+<td>check_deny_list, check_rules, ask_user, check_permission</td>
+</tr>
+<tr>
+<td>循环</td>
+<td>直接执行所有工具</td>
+<td>执行前插入 check_permission()</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-试一下"></a></p>
+<h3 id="试一下">试一下</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> learn-claude-code</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">python</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> s03_permission/code.py</span></span></code></pre>
+<p>试试这些 prompt：</p>
+<ol>
+<li><code>Create a file called test.txt in the current directory</code>（应该直接通过）</li>
+<li><code>Delete the file test.txt</code>（bash + rm 会触发闸门 2）</li>
+<li><code>What files are in the current directory?</code>（只读，全部通过）</li>
+<li><code>Try to write a file to /etc/something</code>（写工作区外，触发闸门 2）</li>
+</ol>
+<p>观察重点：哪些操作直接通过？哪些需要你确认？哪些被直接拒绝？</p>
+<p><a id="reference-接下来"></a></p>
+<h3 id="接下来">接下来</h3>
+<p>权限检查做了——但每次都在循环里硬编码 <code>check_permission()</code>。如果我想在每次工具执行前后加日志？如果想在某些操作后自动触发 git commit？这些扩展逻辑散落在 loop 里，循环很快就会膨胀。</p>
+<p>S04 Hooks → 给循环加钩子，扩展逻辑挂在钩子上，循环保持干净。</p>
+<p><a id="reference-claude-code"></a></p>
+<h2 id="claude-code">Claude Code</h2>
+<blockquote>
+<p>以下基于 CC 源码 <code>types/permissions.ts</code>、<code>utils/permissions/permissions.ts</code>、<code>toolExecution.ts</code>、<code>utils/permissions/yoloClassifier.ts</code>、<code>tools/AgentTool/forkSubagent.ts</code> 的核查。</p>
+</blockquote>
+<p><a id="reference-permissionresult不是-3-种是-4-种"></a></p>
+<h3 id="permissionresult不是-3-种是-4-种">PermissionResult：不是 3 种，是 4 种</h3>
+<p>教学版的三道闸门（deny → ask → allow）和 CC 不完全对应。CC 的 <code>PermissionResult</code> 有 4 个 behavior（<code>types/permissions.ts:241-266</code>）：</p>
+<table>
+<thead>
+<tr>
+<th>behavior</th>
+<th>含义</th>
+<th>教学版对应</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>allow</code></td>
+<td>直接允许</td>
+<td>闸门 3 通过</td>
+</tr>
+<tr>
+<td><code>deny</code></td>
+<td>直接拒绝</td>
+<td>闸门 1 命中</td>
+</tr>
+<tr>
+<td><code>ask</code></td>
+<td>弹出对话框问用户</td>
+<td>闸门 2 命中</td>
+</tr>
+<tr>
+<td><code>passthrough</code></td>
+<td>工具不表态，交给通用管线决定</td>
+<td>教学版无</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-生产版的验证阶段"></a></p>
+<h3 id="生产版的验证阶段">生产版的验证阶段</h3>
+<p>CC 的工具调用不是经过三道闸门，而是经过多个阶段，分布在 <code>checkPermissionsAndCallTool()</code>（<code>toolExecution.ts:599-1745</code>）、hooks、<code>hasPermissionsToUseToolInner()</code>（<code>utils/permissions/permissions.ts:1158-1310</code>）和 classifier 逻辑里：</p>
+<ol>
+<li><strong>Zod schema 验证</strong>（<code>toolExecution.ts:614-680</code>）— 参数类型检查</li>
+<li><strong>validateInput()</strong>（<code>toolExecution.ts:682-733</code>）— 工具级语义验证</li>
+<li><strong>backfillObservableInput()</strong>（<code>toolExecution.ts:784</code>）— 补全遗留字段</li>
+<li><strong>PreToolUse hooks</strong>（<code>toolExecution.ts:800-862</code>）— 钩子可以返回 allow/deny/ask</li>
+<li><strong>resolveHookPermissionDecision()</strong>（<code>toolExecution.ts:921-931</code>）— 协调钩子+管线决策</li>
+<li><strong>hasPermissionsToUseToolInner()</strong>（<code>permissions.ts:1158-1310</code>）— 多层规则检查：
+<ul>
+<li>整个工具被 deny rule 禁用 → <code>deny</code></li>
+<li>整个工具被 ask rule 标记 → <code>ask</code></li>
+<li><code>tool.checkPermissions()</code> 工具自己的判断</li>
+<li>工具自己返回 deny → <code>deny</code></li>
+<li><code>requiresUserInteraction()</code> → <code>ask</code></li>
+<li>内容相关的 ask 规则 → <code>ask</code>（不可绕过）</li>
+<li>安全检查违规 → <code>ask</code>（不可绕过）</li>
+<li>bypassPermissions 模式 → <code>allow</code></li>
+<li>整个工具被 allow rule 放行 → <code>allow</code></li>
+<li>passthrough → 转为 <code>ask</code></li>
+</ul>
+</li>
+</ol>
+<p><a id="reference-拒绝列表不是一个文件是-8-个来源"></a></p>
+<h3 id="拒绝列表不是一个文件是-8-个来源">拒绝列表：不是一个文件，是 8 个来源</h3>
+<p>CC 没有单一的 deny list。权限规则来自 8 个来源（<code>types/permissions.ts:54-62</code>）：</p>
+<table>
+<thead>
+<tr>
+<th>来源</th>
+<th>配置位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>userSettings</code></td>
+<td><code>~/.claude/settings.json</code></td>
+</tr>
+<tr>
+<td><code>projectSettings</code></td>
+<td><code>.claude/settings.json</code></td>
+</tr>
+<tr>
+<td><code>localSettings</code></td>
+<td><code>settings.local.json</code></td>
+</tr>
+<tr>
+<td><code>flagSettings</code></td>
+<td>Feature flags</td>
+</tr>
+<tr>
+<td><code>policySettings</code></td>
+<td>企业管理策略</td>
+</tr>
+<tr>
+<td><code>cliArg</code></td>
+<td><code>--allowedTools</code> / <code>--deniedTools</code></td>
+</tr>
+<tr>
+<td><code>command</code></td>
+<td>内联命令</td>
+</tr>
+<tr>
+<td><code>session</code></td>
+<td>会话内临时授权</td>
+</tr>
+</tbody>
+</table>
+<p>每条规则格式：<code>{ toolName: "Bash", ruleBehavior: "deny", ruleContent: "npm publish:*" }</code>。多个来源的规则合并，高优先级来源覆盖低优先级（从低到高：user &lt; project &lt; local &lt; flag &lt; policy，加上 cliArg、command、session）。</p>
+<p><a id="reference-isdestructive-是什么"></a></p>
+<h3 id="isdestructive-是什么">isDestructive() 是什么</h3>
+<p>CC 中 <code>isDestructive</code>（<code>Tool.ts:405-406</code>）<strong>纯粹是 UI 展示用的</strong>——在工具列表里显示 <code>[destructive]</code> 标签。它不参与权限决策。默认所有工具都返回 <code>false</code>。只有 ExitWorktree（remove 时）和 MCP 工具（依赖 <code>annotations.destructiveHint</code>）覆写了它。</p>
+<p><a id="reference-yoloclassifier自动审批"></a></p>
+<h3 id="yoloclassifier自动审批">YoloClassifier（自动审批）</h3>
+<p>CC 的 auto 模式下，不会每次都弹对话框。<code>classifyYoloAction</code>（<code>utils/permissions/yoloClassifier.ts:1012</code>）把工具调用 + 对话上下文发给一个分类器 LLM 判断是否安全。先尝试 acceptEdits 模式模拟（<code>permissions.ts:620-656</code>，如果 acceptEdits 允许 → 直接批准），再查安全工具白名单（<code>permissions.ts:658-686</code>），最后才调分类器。分类器连续拒绝太多次 → 回退到人工审批。</p>
+<p><a id="reference-权限冒泡"></a></p>
+<h3 id="权限冒泡">权限冒泡</h3>
+<p>子 Agent（通过 AgentTool fork 出来的）的 <code>permissionMode</code> 设为 <code>'bubble'</code>（<code>forkSubagent.ts:50</code>）。意思是权限弹窗<strong>冒泡到父 Agent 的终端</strong>，而不是在子 Agent 里静默拒绝。Bash 分类器在这个过程中继续跑——给权限对话框显示的同时在后台判断是否可以自动批准。</p>
+<p><a id="reference-教学版的简化是刻意的"></a></p>
+<h4 id="教学版的简化是刻意的">教学版的简化是刻意的</h4>
+<ul>
+<li>多阶段管线 → 3 道闸门：理解门槛大幅降低</li>
+<li>8 个规则来源 → 1 个本地 DENY_LIST：概念量可控</li>
+<li>isDestructive → 忽略（教学版没有 UI 层，CC 里它也不参与权限决策）</li>
+<li>YoloClassifier → 省略（依赖于额外的 LLM 调用和遥测系统）</li>
+<li>权限冒泡 → 省略（S15 才涉及多 Agent）</li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>找到 Bash 不受 safe_path 约束的位置。说明简单字符串黑名单为何只适合演示，权限结果又怎样反馈给模型。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续理解相关机制：<a href="/notes/computer-science/agent/framework/learn-claude-code/agent-hooks/">S04-Hooks</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#permission--执行前做权限判断">Permission — 执行前做权限判断</a></li><li style="--depth: 1"><a href="#问题">问题</a></li><li style="--depth: 1"><a href="#解决方案">解决方案</a></li><li style="--depth: 1"><a href="#工作原理">工作原理</a></li><li style="--depth: 1"><a href="#相对-s02-的变更">相对 S02 的变更</a></li><li style="--depth: 1"><a href="#试一下">试一下</a></li><li style="--depth: 1"><a href="#接下来">接下来</a></li><li style="--depth: 0"><a href="#claude-code">Claude Code</a></li><li style="--depth: 1"><a href="#permissionresult不是-3-种是-4-种">PermissionResult：不是 3 种，是 4 种</a></li><li style="--depth: 1"><a href="#生产版的验证阶段">生产版的验证阶段</a></li><li style="--depth: 1"><a href="#拒绝列表不是一个文件是-8-个来源">拒绝列表：不是一个文件，是 8 个来源</a></li><li style="--depth: 1"><a href="#isdestructive-是什么">isDestructive() 是什么</a></li><li style="--depth: 1"><a href="#yoloclassifier自动审批">YoloClassifier（自动审批）</a></li><li style="--depth: 1"><a href="#权限冒泡">权限冒泡</a></li><li style="--depth: 2"><a href="#教学版的简化是刻意的">教学版的简化是刻意的</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

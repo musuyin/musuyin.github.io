@@ -1,0 +1,602 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kubernetes Storage · Musuyin&#39; Home</title><meta name="description" content="把存储分成需求、供给和挂载三个环节：PVC 描述需求，PV 表示存储资源，StorageClass 与 CSI 参与供应和接入。Pod 的启动故障可能只是存储链路问题的外在表现。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-storage/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Kubernetes Storage · Musuyin' Home"><meta property="og:description" content="把存储分成需求、供给和挂载三个环节：PVC 描述需求，PV 表示存储资源，StorageClass 与 CSI 参与供应和接入。Pod 的启动故障可能只是存储链路问题的外在表现。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-storage/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Kubernetes Storage</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-03-24">2026-03-24</time></dd></div><div><dt>字数</dt><dd>2444</dd></div><div><dt>预计阅读</dt><dd>9 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Kubernetes/">#Kubernetes</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Kubernetes Storage</h1><time datetime="2026-03-24">2026-03-24</time><p class="tags"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Kubernetes/">#Kubernetes</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>把存储分成需求、供给和挂载三个环节：PVC 描述需求，PV 表示存储资源，StorageClass 与 CSI 参与供应和接入。Pod 的启动故障可能只是存储链路问题的外在表现。</p>
+<p><a id="reference-学习目标"></a></p>
+<h2 id="学习目标">学习目标</h2>
+<p>学完本章后，应当能够：</p>
+<ul>
+<li>解释 Volume、PV、PVC、StorageClass 与 CSI 的职责及绑定链路。</li>
+<li>根据数据生命周期和访问方式选择临时存储或持久存储。</li>
+<li>读懂访问模式、回收策略、绑定模式和扩容能力对业务的影响。</li>
+<li>排查 PVC Pending、Volume Attach/Mount 失败和磁盘空间不足，并避免误删数据。</li>
+</ul>
+<blockquote>
+<p>Pod 只声明“挂载哪个 PVC”，PVC 描述存储需求，StorageClass/CSI 负责供应，PV 代表实际存储。任何一层不匹配，都可能表现为 Pod 无法启动。</p>
+</blockquote>
+<p><a id="reference-概念"></a></p>
+<h2 id="概念">概念</h2>
+<p><img alt="IMG-20260817143945199" loading="lazy" decoding="async" width="1156" height="508" src="/_astro/IMG-20260817143945199.BsHqsdJ7_2lylAI.webp"></p>
+<p><em>Volume</em> 用于为 Pod 和容器保存<strong>数据与状态</strong>。</p>
+<p><img alt="IMG-20260817143945262" loading="lazy" decoding="async" width="2651" height="665" src="/_astro/IMG-20260817143945262.CwfCtmDj_ZNhvXF.webp"></p>
+<blockquote>
+<p>图：Pod 引用 PVC、PVC 绑定 PV、StorageClass/CSI 动态供给并最终挂载到底层存储的完整路径。</p>
+</blockquote>
+<ul>
+<li>一个 Pod 可以挂载多个 Volume。</li>
+<li>容器通过 <code>mountPath</code> 访问 Volume。</li>
+</ul>
+<p><a id="reference-存储类型"></a></p>
+<h3 id="存储类型">存储类型</h3>
+<ul>
+<li>Volumes</li>
+<li>PersistentVolumes</li>
+<li>PersistentVolumeClaims</li>
+<li>StorageClasses</li>
+</ul>
+<p><a id="reference-volume"></a></p>
+<h2 id="volume">Volume</h2>
+<ul>
+<li>Volume 引用一个存储位置。</li>
+<li>名称必须唯一。</li>
+<li>Volume 挂载到 Pod，其生命周期是否与 Pod 绑定取决于 Volume 类型。</li>
+<li><em>Volume Mount</em> 通过<strong>名称</strong>引用 Volume，并<strong>定义 <code>mountPath</code></strong>。</li>
+</ul>
+<p><a id="reference-volume-类型"></a></p>
+<h3 id="volume-类型">Volume 类型</h3>
+<ul>
+<li><em>emptyDir</em>：用于存储临时数据的空目录，生命周期与 Pod 相同；适合在<strong>同一 Pod 的容器之间</strong>共享文件（临时存储）。</li>
+<li><em>hostPath</em>：将 Pod 挂载到 <strong>Node 的文件系统</strong>。</li>
+<li><em>Network File System</em>（NFS）：将 NFS 共享目录挂载到 Pod。</li>
+<li><em>configMap/secret</em>：让 Pod 访问 Kubernetes 资源的特殊 Volume 类型。</li>
+<li><em>persistentVolumeClaim</em>：为 Pod 提供更<strong>持久</strong>、且屏蔽底层细节的存储选择。</li>
+<li><em>cloud</em>：集群范围的云存储。</li>
+</ul>
+<p><a id="reference-emptydir-volume"></a></p>
+<h4 id="emptydir-volume">emptyDir Volume</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Pod</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx-alpine-volume</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx:alpine</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    volumeMounts</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">html</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        mountPath</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/usr/share/nginx/html</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        readOnly</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">html-updater</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">alpine</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    command</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/bin/sh"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"-c"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    args</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">while true; do date &gt;&gt; /html/index.html;sleep 10; done</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    volumeMounts</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">html</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        mountPath</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/html</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  volumes</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">html</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    emptyDir</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {} </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 生命周期与 Pod 绑定</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># kubectl apply -f nginx-alpine-emptyDir.pod.yml</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># kubectl port-forward nginx-alpine-volume 8080:80</span></span></code></pre>
+<p><img alt="IMG-20260817143945337" loading="lazy" decoding="async" width="1179" height="603" src="/_astro/IMG-20260817143945337.CuHORY2X_dpxXQ.webp"></p>
+<p><a id="reference-hostpath-volume"></a></p>
+<h4 id="hostpath-volume">hostPath Volume</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Pod</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">docker-volume</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">docker</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">docker</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    command</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"sleep"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    args</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"100000"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    volumeMounts</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">docker-socket</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      mountPath</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/var/run/docker.sock</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  volumes</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">docker-socket</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    hostPath</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/var/run/docker.sock</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Socket</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Pod 创建后可进入其中执行 Docker 命令：</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># kubectl exec -it [pod-name] -- sh</span></span></code></pre>
+<p>合法的 <code>type</code> 包括：</p>
+<ul>
+<li>DirectoryOrCreate</li>
+<li>Directory</li>
+<li>FileOrCreate</li>
+<li>File</li>
+<li>Socket</li>
+<li>CharDevice</li>
+<li>BlockDevice</li>
+</ul>
+<p><img alt="IMG-20260817143945386" loading="lazy" decoding="async" width="1164" height="586" src="/_astro/IMG-20260817143945386.BH-HKVXI_Z1qxyu7.webp"></p>
+<p><a id="reference-云-volume"></a></p>
+<h4 id="云-volume">云 Volume</h4>
+<p>各云厂商支持的 Volume 类型不同：</p>
+<ul>
+<li>Azure: Azure Disk and Azure File</li>
+<li>AWS: Elastic Block Store</li>
+<li>GCP: GCE Persistent Disk</li>
+</ul>
+<p><img alt="IMG-20260817143945411" loading="lazy" decoding="async" width="1214" height="567" src="/_astro/IMG-20260817143945411.B68knSqG_utfAz.webp"></p>
+<p><img alt="IMG-20260817143945492" loading="lazy" decoding="async" width="1193" height="548" src="/_astro/IMG-20260817143945492.Duhx0lwg_Z1AbeMl.webp"></p>
+<p><img alt="IMG-20260817143945523" loading="lazy" decoding="async" width="1179" height="544" src="/_astro/IMG-20260817143945523.IY28icV3_Z1g4Cwj.webp"></p>
+<p><a id="reference-查看"></a></p>
+<h3 id="查看">查看</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod_name]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 以 YAML 格式查看 Pod</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod_name] -o yaml</span></span></code></pre>
+<p><a id="reference-persistentvolume-与-persistentvolumeclaim"></a></p>
+<h2 id="persistentvolume-与-persistentvolumeclaim">PersistentVolume 与 PersistentVolumeClaim</h2>
+<p><em>PersistentVolume</em>（PV）是由管理员提供的集群范围存储单元，<strong>生命周期独立于 Pod</strong>。</p>
+<p><em>PersistentVolumeClaim</em>（PVC）是对存储单元（PV）的申请。</p>
+<p><img alt="IMG-20260817143945560" loading="lazy" decoding="async" width="822" height="203" src="/_astro/IMG-20260817143945560.C8fvMQOU_Z18gu3d.webp"></p>
+<ul>
+<li>PersistentVolume 是依赖网络附加存储（NAS）的集群范围存储资源。</li>
+<li>通常由集群管理员提供。</li>
+<li>即使 Pod 被重新调度到其他 Node，也仍可供其使用。</li>
+<li>依赖 NFS、云存储或其他存储提供方。</li>
+<li>通过 PersistentVolumeClaim 与 Pod 关联。</li>
+</ul>
+<p><a id="reference-pvcpv-的核心设计意义"></a></p>
+<h3 id="pvcpv-的核心设计意义">PVC/PV 的核心设计意义</h3>
+<p><strong>为什么要设计 PVC/PV 这一层抽象？</strong></p>
+<p>在 PVC/PV 出现之前，开发者需要直接指定底层存储细节（NFS 服务器地址、云存储 bucket 名等），这导致两个问题：</p>
+<ol>
+<li><strong>耦合度高</strong>：应用 YAML 与基础设施紧密耦合，迁移集群或更换存储提供方需要修改所有应用配置</li>
+<li><strong>权限混乱</strong>：开发者需要知道集群的底层存储拓扑，这原本应该是运维的职责</li>
+</ol>
+<p><strong>PVC/PV 解决方案（声明式分离）：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>┌─────────────────────────────────────────────────────┐</span></span>
+<span class="line"><span>│  开发者（应用开发）                                  │</span></span>
+<span class="line"><span>│  ↓                                                   │</span></span>
+<span class="line"><span>│  "我需要 10Gi 可读写存储"  ← PVC（只声明需求）     │</span></span>
+<span class="line"><span>│                                                     │</span></span>
+<span class="line"><span>├─────────────────────────────────────────────────────┤</span></span>
+<span class="line"><span>│  Kubernetes 管理平面                                │</span></span>
+<span class="line"><span>│  ↓                                                   │</span></span>
+<span class="line"><span>│  自动绑定 PVC 到可用的 PV  ← 运维不用介入          │</span></span>
+<span class="line"><span>│                                                     │</span></span>
+<span class="line"><span>├─────────────────────────────────────────────────────┤</span></span>
+<span class="line"><span>│  运维/集群管理员                                    │</span></span>
+<span class="line"><span>│  ↓                                                   │</span></span>
+<span class="line"><span>│  "我提供 100Gi NFS 存储"  ← PV（具体存储资源）     │</span></span>
+<span class="line"><span>└─────────────────────────────────────────────────────┘</span></span></code></pre>
+<p><strong>关键优势：</strong></p>
+<table>
+<thead>
+<tr>
+<th>角度</th>
+<th>好处</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>开发者</strong></td>
+<td>只需关心“我需要多少存储、访问模式”，不用关心底层是 NFS/EBS/Azure Disk</td>
+</tr>
+<tr>
+<td><strong>运维</strong></td>
+<td>统一管理 PV 资源，开发者申请时自动绑定，不用逐个配置存储挂载</td>
+</tr>
+<tr>
+<td><strong>可移植性</strong></td>
+<td>同一个应用 YAML（含 PVC）可以跑在不同集群（AWS/Azure/内网 NFS），只需运维提供对应的 PV</td>
+</tr>
+<tr>
+<td><strong>生命周期</strong></td>
+<td>PV 独立于 Pod，Pod 删除后存储保留，新 Pod 仍可绑定同一 PVC 使用旧数据</td>
+</tr>
+</tbody>
+</table>
+<p><strong>类比理解（面试好用）：</strong></p>
+<blockquote>
+<p>PVC/PV 就像“餐厅点菜系统”：顾客（Pod）说“我要份 200g 牛排”（PVC），厨房（运维）准备好 50 份 200g 牛排（PV），系统自动分配一份给这个顾客。顾客不关心牛排从哪来，厨房也不关心每个顾客的具体需求，通过这层抽象双方都轻松了。</p>
+</blockquote>
+<p><a id="reference-persistentvolume-工作流程"></a></p>
+<h3 id="persistentvolume-工作流程">PersistentVolume 工作流程</h3>
+<ol>
+<li>创建网络存储资源（NFS、云存储等）。</li>
+<li>定义 PV 并提交到 Kubernetes API。</li>
+<li>创建 PVC。</li>
+<li>Kubernetes 将 PVC 绑定到 PV。</li>
+<li>Pod 的 Volume 引用 PVC。</li>
+</ol>
+<p><img alt="IMG-20260817143945599" loading="lazy" decoding="async" width="1035" height="313" src="/_astro/IMG-20260817143945599.CsROpZb5_Z21k6vg.webp"></p>
+<p><a id="reference-yaml"></a></p>
+<h3 id="yaml">YAML</h3>
+<p><a id="reference-创建-pv"></a></p>
+<h4 id="创建-pv">创建 PV</h4>
+<p><img alt="IMG-20260817143945622" loading="lazy" decoding="async" width="1177" height="561" src="/_astro/IMG-20260817143945622.Mtk_raHd_14AHhy.webp"></p>
+<p><a id="reference-创建-pvc"></a></p>
+<h4 id="创建-pvc">创建 PVC</h4>
+<p><img alt="IMG-20260817143945658" loading="lazy" decoding="async" width="1204" height="421" src="/_astro/IMG-20260817143945658.CjJ1WGbb_10CR53.webp"></p>
+<p><a id="reference-创建引用"></a></p>
+<h4 id="创建引用">创建引用</h4>
+<p><img alt="IMG-20260817143945689" loading="lazy" decoding="async" width="1046" height="602" src="/_astro/IMG-20260817143945689.DeqxTy27_xOqb8.webp"></p>
+<p><a id="reference-storageclass"></a></p>
+<h2 id="storageclass">StorageClass</h2>
+<p><em>StorageClass</em>（SC）是一种存储模板，可用于动态供给存储。</p>
+<p><img alt="IMG-20260817143945717" loading="lazy" decoding="async" width="470" height="303" src="/_astro/IMG-20260817143945717.ko_txsXd_ZbGljx.webp"></p>
+<ul>
+<li>用于定义不同等级的存储。</li>
+<li>充当存储模板。</li>
+<li>支持动态创建 PersistentVolume。</li>
+<li>无需预先创建 PV。</li>
+</ul>
+<p><a id="reference-storageclass-的核心设计意义面试角度"></a></p>
+<h3 id="storageclass-的核心设计意义面试角度">StorageClass 的核心设计意义（面试角度）</h3>
+<p><strong>为什么需要 StorageClass？</strong></p>
+<p>在 StorageClass 出现之前，存储供给流程是<strong>手动的</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>运维需要做的：</span></span>
+<span class="line"><span>1. 在云上创建存储资源（EBS volume、NFS share）</span></span>
+<span class="line"><span>2. 手动创建 PV 对象，指定这个存储资源的详细信息</span></span>
+<span class="line"><span>3. 等待开发者提交 PVC 申请</span></span>
+<span class="line"><span>4. 人工确认是否绑定</span></span></code></pre>
+<p>这导致几个问题：</p>
+<ul>
+<li><strong>扩展性差</strong>：每次申请存储都需要运维手动介入</li>
+<li><strong>配置复杂</strong>：PV 需要写很多云厂商特定的参数（provisioner、parameters）</li>
+<li><strong>不够灵活</strong>：无法根据不同业务需求灵活选择存储等级（SSD vs HDD、高性能 vs 成本优化）</li>
+</ul>
+<p><strong>StorageClass 解决方案（动态供给）：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>┌──────────────────────────────────────────────────────┐</span></span>
+<span class="line"><span>│  运维：定义一次 StorageClass 模板                     │</span></span>
+<span class="line"><span>│  ↓                                                    │</span></span>
+<span class="line"><span>│  "名为 fast-ssd 的存储"                              │</span></span>
+<span class="line"><span>│  provisioner: ebs.csi.aws.com                        │</span></span>
+<span class="line"><span>│  parameters: type: gp3, iops: 3000                   │</span></span>
+<span class="line"><span>│                                                      │</span></span>
+<span class="line"><span>├──────────────────────────────────────────────────────┤</span></span>
+<span class="line"><span>│  开发者：每次创建 PVC 时只需引用 StorageClass      │</span></span>
+<span class="line"><span>│  ↓                                                    │</span></span>
+<span class="line"><span>│  PVC:                                                │</span></span>
+<span class="line"><span>│    storageClassName: fast-ssd                        │</span></span>
+<span class="line"><span>│    storage: 20Gi                                     │</span></span>
+<span class="line"><span>│                                                      │</span></span>
+<span class="line"><span>├──────────────────────────────────────────────────────┤</span></span>
+<span class="line"><span>│  Kubernetes 自动化：                                 │</span></span>
+<span class="line"><span>│  ↓                                                    │</span></span>
+<span class="line"><span>│  K8s 看到 PVC → 查找 fast-ssd SC                    │</span></span>
+<span class="line"><span>│  → 调用 ebs.csi.aws.com provisioner                 │</span></span>
+<span class="line"><span>│  → 在 AWS 上创建 20Gi gp3 EBS volume                 │</span></span>
+<span class="line"><span>│  → 自动创建 PV → 自动绑定 PVC                       │</span></span>
+<span class="line"><span>└──────────────────────────────────────────────────────┘</span></span></code></pre>
+<p><strong>关键优势：</strong></p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>自动化</strong></td>
+<td>从 PVC 申请到 PV 创建全自动，无需人工介入</td>
+</tr>
+<tr>
+<td><strong>参数化</strong></td>
+<td>SC 定义一次，PVC 可重复使用，减少重复配置</td>
+</tr>
+<tr>
+<td><strong>多等级</strong></td>
+<td>同一集群可以有多个 SC（fast-ssd、standard-hdd、high-throughput），满足不同应用需求</td>
+</tr>
+<tr>
+<td><strong>云无关</strong></td>
+<td>SC 的 provisioner 负责与云 API 对接，应用 YAML 不变</td>
+</tr>
+<tr>
+<td><strong>按需创建</strong></td>
+<td>PV 不需要预先创建，PVC 申请时动态创建，充分利用资源</td>
+</tr>
+</tbody>
+</table>
+<p><strong>面试类比：</strong></p>
+<blockquote>
+<p>StorageClass 就像“云厂商的模板库”。运维在 AWS 上定义一个“SSD 存储模板”，指定了磁盘类型、IOPS、加密方式等参数。之后开发者每次需要存储时，只需说“给我按 SSD 模板创建 20Gi 存储”，K8s 会自动调用 AWS API 创建对应的 EBS volume 并绑定到 PVC，完全自动化，无需人工操作。</p>
+</blockquote>
+<p><a id="reference-storageclass-工作流程"></a></p>
+<h3 id="storageclass-工作流程">StorageClass 工作流程</h3>
+<ol>
+<li>创建 StorageClass（运维定义一次）。</li>
+<li>开发者创建引用该 SC 的 PVC。</li>
+<li>Kubernetes 监测到 PVC 并调用 SC 的 provisioner。</li>
+<li>Provisioner 在底层存储系统创建存储资源（AWS EBS、Azure Disk 等）。</li>
+<li>K8s 自动创建对应的 PV 并绑定到 PVC。</li>
+<li>Pod 的 Volume 引用 PVC 进行挂载。</li>
+</ol>
+<p><img alt="IMG-20260817143945754" loading="lazy" decoding="async" width="830" height="299" src="/_astro/IMG-20260817143945754.CZ1F68PA_12SH9r.webp"></p>
+<p><a id="reference-storageclass-核心参数"></a></p>
+<h3 id="storageclass-核心参数">StorageClass 核心参数</h3>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>provisioner</strong></td>
+<td>存储供给器，决定如何在哪个平台创建存储</td>
+<td><code>ebs.csi.aws.com</code>（AWS）、<code>kubernetes.io/azure-disk</code>（Azure）、<code>pd.csi.storage.gke.io</code>（GCP）</td>
+</tr>
+<tr>
+<td><strong>parameters</strong></td>
+<td>云厂商特定的参数</td>
+<td>AWS: <code>type: gp3, iops: 3000</code>；Azure: <code>cachingmode: ReadWrite, kind: Managed</code></td>
+</tr>
+<tr>
+<td><strong>reclaimPolicy</strong></td>
+<td>PVC 删除后 PV 的回收策略</td>
+<td><code>Retain</code>（保留）、<code>Delete</code>（删除）、<code>Recycle</code>（回收，过时）</td>
+</tr>
+<tr>
+<td><strong>volumeBindingMode</strong></td>
+<td>PV 何时绑定到 PVC</td>
+<td><code>Immediate</code>（立即）、<code>WaitForFirstConsumer</code>（等待 Pod 调度）</td>
+</tr>
+<tr>
+<td><strong>allowVolumeExpansion</strong></td>
+<td>是否允许扩容</td>
+<td><code>true</code> 或 <code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-yaml-1"></a></p>
+<h3 id="yaml-1">YAML</h3>
+<p><a id="reference-定义-sc"></a></p>
+<h4 id="定义-sc">定义 SC</h4>
+<p><img alt="IMG-20260817143945786" loading="lazy" decoding="async" width="1212" height="549" src="/_astro/IMG-20260817143945786.1rM9h3ha_Z1A01Jm.webp"></p>
+<p><a id="reference-定义-pv"></a></p>
+<h4 id="定义-pv">定义 PV</h4>
+<p><img alt="IMG-20260817143945812" loading="lazy" decoding="async" width="1172" height="585" src="/_astro/IMG-20260817143945812.kP2dLqnO_wHcEQ.webp"></p>
+<p><a id="reference-定义-pvc"></a></p>
+<h4 id="定义-pvc">定义 PVC</h4>
+<p><img alt="IMG-20260817143945854" loading="lazy" decoding="async" width="1189" height="456" src="/_astro/IMG-20260817143945854.7xl510IX_JTtoL.webp"></p>
+<p><img alt="IMG-20260817143945884" loading="lazy" decoding="async" width="1180" height="421" src="/_astro/IMG-20260817143945884.BwVUBjl__1e44FK.webp"></p>
+<p><a id="reference-mongo-示例"></a></p>
+<h2 id="mongo-示例">Mongo 示例</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ConfigMap</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-env</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-env</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">data</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  MONGODB_DBNAME</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">codeWithDan</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  # 不建议将密码存入 ConfigMap；此处仅用于演示。</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  MONGODB_PASSWORD</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">password</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  MONGODB_ROLE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">readWrite</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  # 不建议将密码存入 ConfigMap；此处仅用于演示。</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  MONGODB_ROOT_PASSWORD</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">password</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  MONGODB_ROOT_ROLE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">root</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  MONGODB_ROOT_USERNAME</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">dbadmin</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  MONGODB_USERNAME</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">webrole</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">---</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">StorageClass</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">storage.k8s.io/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">local-storage</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">provisioner</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">kubernetes.io/no-provisioner</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 回收策略作用于 PV，而非 StorageClass 本身。</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用此 StorageClass 创建的 PV/PVC 会继承这里设置的回收策略。</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">reclaimPolicy</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Retain</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">volumeBindingMode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">WaitForFirstConsumer</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">---</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 注意：本地存储 PV 虽可使用，但更推荐 NFS、云存储等更可靠的方案。</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 此示例用于 Docker Desktop Kubernetes；其环境仅支持单个 Node。</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># https://kubernetes.io/blog/2018/04/13/local-persistent-volumes-beta/</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">PersistentVolume</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-pv</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  capacity</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    storage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">1Gi</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  volumeMode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Filesystem</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  accessModes</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ReadWriteOnce</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  # StorageClass has a reclaim policy default so it'll be "inherited" by the PV</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  # persistentVolumeReclaimPolicy: Retain</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  storageClassName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">local-storage</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  hostPath</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/private/tmp/data/db</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">DirectoryOrCreate</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  nodeAffinity</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    required</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      nodeSelectorTerms</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">matchExpressions</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        - </span><span style="color:#22863A;--shiki-dark:#85E89D">key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">kubernetes.io/hostname</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          operator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">In</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          values</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">docker-desktop</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">---</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">PersistentVolumeClaim</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-pvc</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  accessModes</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ReadWriteOnce</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  storageClassName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">local-storage</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    requests</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      storage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">1Gi</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">---</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Service</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  selector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  ports</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">27017</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    targetPort</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">27017</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">---</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">apps/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">StatefulSet</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  serviceName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  replicas</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  selector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    matchLabels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  template</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        - </span><span style="color:#22863A;--shiki-dark:#85E89D">image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          ports</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          - </span><span style="color:#22863A;--shiki-dark:#85E89D">containerPort</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">27017</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          command</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongod</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"--auth"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {}</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          volumeMounts</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-volume</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            mountPath</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/data/db</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          env</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_DBNAME</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              valueFrom</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                configMapKeyRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_DBNAME</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-env</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_PASSWORD</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              valueFrom</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                configMapKeyRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_PASSWORD</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-env</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_ROLE</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              valueFrom</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                configMapKeyRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_ROLE</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-env</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_ROOT_PASSWORD</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              valueFrom</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                configMapKeyRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_ROOT_PASSWORD</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-env</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_ROOT_ROLE</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              valueFrom</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                configMapKeyRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_ROOT_ROLE</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-env</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_ROOT_USERNAME</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              valueFrom</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                configMapKeyRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_ROOT_USERNAME</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-env</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_USERNAME</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">              valueFrom</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                configMapKeyRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MONGODB_USERNAME</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">                  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-env</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      volumes</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-volume</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        persistentVolumeClaim</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          claimName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">mongo-pvc</span></span></code></pre>
+<p><a id="reference-sre存储故障排查与生产检查"></a></p>
+<h3 id="sre存储故障排查与生产检查">SRE：存储故障排查与生产检查</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># PVC 长期 Pending：先确认 StorageClass、事件与可匹配 PV</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pvc,pv,storageclass</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pvc/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">clai</span><span style="color:#24292E;--shiki-dark:#E1E4E8">m</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Pod 挂载失败：查看 Pod 事件与 CSI 相关 Pod（名称随环境不同）</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> events</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --sort-by=.lastTimestamp</span></span></code></pre>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>优先判断</th>
+<th>处理方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PVC <code>Pending</code></td>
+<td>StorageClass 是否存在、provisioner 是否工作、容量/访问模式是否匹配</td>
+<td>修复 SC/CSI、容量或 PVC 规格，不要直接删 PVC</td>
+</tr>
+<tr>
+<td><code>FailedMount</code></td>
+<td>Secret/ConfigMap/PVC 是否存在、CSI 与节点是否健康</td>
+<td>根据事件定位对象、权限或节点插件</td>
+</tr>
+<tr>
+<td>磁盘即将写满</td>
+<td>文件系统使用率、应用日志增长、PVC 扩容能力</td>
+<td>清理前确认保留策略；评估在线扩容和应用是否支持</td>
+</tr>
+</tbody>
+</table>
+<p>生产环境避免把业务数据放在 <code>hostPath</code>；明确 <code>reclaimPolicy</code>（删除 PVC 后数据是否保留）、备份恢复目标以及故障演练频率。删除 PV/PVC 前必须确认数据生命周期与关联工作负载。</p>
+<p><a id="reference-实践与验收"></a></p>
+<h2 id="实践与验收">实践与验收</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> 创建动态供应的 PVC，确认 PVC 与 PV 的 StorageClass、容量和访问模式匹配。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 引用不存在的 StorageClass，观察 PVC Pending 事件并修复。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 删除并重建使用同一 PVC 的 Pod，确认数据是否仍在。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 在隔离环境演练 PVC 扩容，并同时验证文件系统和应用是否识别新容量。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 执行一次真实恢复验证，而不只确认“备份任务成功”。</li>
+</ul>
+<p>验收时应能解释：<code>ReadWriteOnce</code> 表示卷可被单个 Node 读写挂载，不等同于只能被一个 Pod 使用；具体并发能力仍取决于驱动、访问模式和应用一致性要求。</p>
+<p><a id="reference-生产基线"></a></p>
+<h2 id="生产基线">生产基线</h2>
+<ul>
+<li>关键数据使用受支持的 CSI 驱动、加密存储和合适的 StorageClass。</li>
+<li>明确容量告警、扩容流程、快照/备份策略、RPO、RTO 和恢复责任人。</li>
+<li><code>Retain</code> 与 <code>Delete</code> 的选择经过数据所有者确认，危险删除受权限和流程保护。</li>
+<li>多可用区场景评估卷拓扑、故障切换时间、跨区限制和 <code>WaitForFirstConsumer</code>。</li>
+</ul>
+<p><a id="reference-官方参考"></a></p>
+<h2 id="官方参考">官方参考</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/storage/volumes/">Kubernetes：Volumes</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">Kubernetes：Persistent Volumes</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/storage/storage-classes/">Kubernetes：StorageClass</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/storage/volume-snapshots/">Kubernetes：Volume Snapshots</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>分别追踪 PVC Pending、Attach 失败和 Mount 失败；删除哪个对象可能影响实际数据，由什么策略决定？</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/kubernetes/kubernetes-advanced-workloads/">L08-Advanced Workloads</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#学习目标">学习目标</a></li><li style="--depth: 0"><a href="#概念">概念</a></li><li style="--depth: 1"><a href="#存储类型">存储类型</a></li><li style="--depth: 0"><a href="#volume">Volume</a></li><li style="--depth: 1"><a href="#volume-类型">Volume 类型</a></li><li style="--depth: 2"><a href="#emptydir-volume">emptyDir Volume</a></li><li style="--depth: 2"><a href="#hostpath-volume">hostPath Volume</a></li><li style="--depth: 2"><a href="#云-volume">云 Volume</a></li><li style="--depth: 1"><a href="#查看">查看</a></li><li style="--depth: 0"><a href="#persistentvolume-与-persistentvolumeclaim">PersistentVolume 与 PersistentVolumeClaim</a></li><li style="--depth: 1"><a href="#pvcpv-的核心设计意义">PVC/PV 的核心设计意义</a></li><li style="--depth: 1"><a href="#persistentvolume-工作流程">PersistentVolume 工作流程</a></li><li style="--depth: 1"><a href="#yaml">YAML</a></li><li style="--depth: 2"><a href="#创建-pv">创建 PV</a></li><li style="--depth: 2"><a href="#创建-pvc">创建 PVC</a></li><li style="--depth: 2"><a href="#创建引用">创建引用</a></li><li style="--depth: 0"><a href="#storageclass">StorageClass</a></li><li style="--depth: 1"><a href="#storageclass-的核心设计意义面试角度">StorageClass 的核心设计意义（面试角度）</a></li><li style="--depth: 1"><a href="#storageclass-工作流程">StorageClass 工作流程</a></li><li style="--depth: 1"><a href="#storageclass-核心参数">StorageClass 核心参数</a></li><li style="--depth: 1"><a href="#yaml-1">YAML</a></li><li style="--depth: 2"><a href="#定义-sc">定义 SC</a></li><li style="--depth: 2"><a href="#定义-pv">定义 PV</a></li><li style="--depth: 2"><a href="#定义-pvc">定义 PVC</a></li><li style="--depth: 0"><a href="#mongo-示例">Mongo 示例</a></li><li style="--depth: 1"><a href="#sre存储故障排查与生产检查">SRE：存储故障排查与生产检查</a></li><li style="--depth: 0"><a href="#实践与验收">实践与验收</a></li><li style="--depth: 0"><a href="#生产基线">生产基线</a></li><li style="--depth: 0"><a href="#官方参考">官方参考</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

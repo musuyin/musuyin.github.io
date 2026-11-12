@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>内存管理 · Musuyin&#39; Home</title><meta name="description" content="内存问题先分为分配位置、对象存活与资源生命周期。逃逸分析决定对象能否留在栈上；GC 只回收不可达对象，无法替业务解除被长期持有的引用或停止仍在等待的 goroutine。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/go/golang/memory-management/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="内存管理 · Musuyin' Home"><meta property="og:description" content="内存问题先分为分配位置、对象存活与资源生命周期。逃逸分析决定对象能否留在栈上；GC 只回收不可达对象，无法替业务解除被长期持有的引用或停止仍在等待的 goroutine。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/go/golang/memory-management/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">内存管理</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-23">2026-08-23</time></dd></div><div><dt>字数</dt><dd>1509</dd></div><div><dt>预计阅读</dt><dd>6 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Go/">#Go</a><a href="/tags/%E5%B9%B6%E5%8F%91/">#并发</a><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>内存管理</h1><time datetime="2026-08-23">2026-08-23</time><p class="tags"><a href="/tags/Go/">#Go</a><a href="/tags/%E5%B9%B6%E5%8F%91/">#并发</a><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a></p></header><div class="prose"><p>内存问题先分为分配位置、对象存活与资源生命周期。逃逸分析决定对象能否留在栈上；GC 只回收不可达对象，无法替业务解除被长期持有的引用或停止仍在等待的 goroutine。</p>
+<p><a id="reference-内存分配"></a></p>
+<h2 id="内存分配">内存分配</h2>
+<p>Go 语言的内存分配采用了<strong>TCMalloc 算法</strong>的改进版本，核心是分级分配和本地缓存。</p>
+<p><a id="reference-分配器架构"></a></p>
+<h3 id="分配器架构">分配器架构</h3>
+<p><strong>分配器架构</strong>：Go 内存分配有三个层级：</p>
+<ul>
+<li><strong>mcache</strong>（线程缓存）：每个 P 都有独立的 mcache，避免了锁竞争</li>
+<li><strong>mcentral</strong>（中央缓存）：mcentral 按对象大小分类管理</li>
+<li><strong>mheap</strong>（页堆）：mheap 负责从操作系统申请大块内存</li>
+</ul>
+<p><a id="reference-对象分类分配"></a></p>
+<h4 id="对象分类分配">对象分类分配</h4>
+<p><strong>对象分类分配</strong>：根据对象大小分为三类处理：</p>
+<ul>
+<li><strong>微小对象</strong>（&lt;16 字节）：在 mcache 的 tiny 分配器中分配，多个微小对象可以共享一个内存块</li>
+<li><strong>小对象</strong>（16 字节-32KB）：通过 size class 机制，预定义了 67 种大小规格
+<ul>
+<li>优先从 P 的 mcache 对应的 mspan 中分配</li>
+<li>如果 mcache 没有内存，则从 mcentral 获取</li>
+<li>如果 mcentral 也没有，则向 mheap 申请</li>
+<li>如果 mheap 也没有，则从操作系统申请内存。</li>
+</ul>
+</li>
+<li><strong>大对象</strong>（&gt;32KB）：直接从 mheap 分配，跨越多个页面</li>
+</ul>
+<p><img alt="IMG-20260831131256423" loading="lazy" decoding="async" width="1774" height="887" src="/_astro/IMG-20260831131256423.DuYJ1J-q_ZiHgFB.webp"></p>
+<p><a id="reference-channel-分配"></a></p>
+<h3 id="channel-分配">channel 分配</h3>
+<p>channel 分配在堆上，Channel 被设计用来实现协程间通信的组件，其作用域和生命周期不可能仅限于某个函数内部，所以一般情况下直接将其分配在堆上</p>
+<p><a id="reference-内存逃逸"></a></p>
+<h2 id="内存逃逸">内存逃逸</h2>
+<p>内存逃逸是编译器在程序编译时期根据逃逸分析策略，将原本应该分配到<strong>栈</strong>上的对象分配到<strong>堆</strong>上的一个过程</p>
+<p><a id="reference-主要逃逸场景"></a></p>
+<h3 id="主要逃逸场景">主要逃逸场景</h3>
+<ul>
+<li><strong>返回局部变量指针</strong>：函数返回内部变量的地址，变量必须逃逸到堆上</li>
+<li><strong>接口装箱</strong>：是否逃逸取决于值的使用与编译优化，不能仅由传给 interface{} 推断</li>
+<li><strong>闭包捕获</strong>：捕获变量是否逃逸取决于闭包能否超出当前栈帧生命周期</li>
+<li><strong>切片/map 动态扩容</strong>：当容量超出编译期确定范围时会逃逸</li>
+<li><strong>大对象</strong>：超过栈大小限制的对象直接分配到堆上</li>
+</ul>
+<p><a id="reference-函数参数类型选择"></a></p>
+<h4 id="函数参数类型选择">函数参数类型选择</h4>
+<p>对于函数参数，不应机械地全部传指针。指针会扩大别名范围，使调用方和被调方可共享修改、引入数据竞争和 nil 处理，也可能让小对象逃逸到堆、增加 GC 压力并降低可读性。</p>
+<ul>
+<li>值传递复制的是值，编译器会优化小对象</li>
+<li>slice、map、channel、interface、func 本身已是描述符/引用语义</li>
+</ul>
+<p>选择依据是语义（是否允许修改/可为 nil）、对象大小、所有权和 profiling 结果，而不是“指针一定更快”。</p>
+<p><a id="reference-影响"></a></p>
+<h3 id="影响">影响</h3>
+<p>堆对象需要垃圾回收机制来释放内存，栈对象会跟随函数结束被编译器回收，所以大量的内存逃逸会给 gc 带来压力</p>
+<p><a id="reference-内存泄漏"></a></p>
+<h2 id="内存泄漏">内存泄漏</h2>
+<p><a id="reference-场景"></a></p>
+<h3 id="场景">场景</h3>
+<ul>
+<li><strong>goroutine 泄漏</strong>：这是最常见的泄漏场景。goroutine 没有正常退出会一直占用内存，比如从 channel 读取数据但 channel 永远不会有数据写入，或者死循环没有退出条件。</li>
+<li><strong>channel 与等待者</strong>：未关闭不等于泄漏；仍可达的阻塞 goroutine 及其引用可能导致对象长期保留。比如生产者已经结束但没有关闭 channel，消费者 goroutine 会一直阻塞等待，造成内存无法回收。</li>
+<li><strong>slice 引用大数组</strong>：当 slice 引用一个大数组的小部分时，整个底层数组都无法被 GC 回收。解决方法是使用 copy 创建新的 slice。</li>
+<li><strong>map 元素过多</strong>：map 中删除元素只是标记删除，底层 bucket 不会缩减。如果 map 曾经很大后来元素减少，内存占用仍然很高。</li>
+<li><strong>定时器版本差异</strong>：Go 1.23 起，不可达且未停止的 timer/ticker 可被 GC 回收；Stop 仍用于结束不再需要的定时行为。旧版本需特别检查定时器保留问题，见 <a href="https://go.dev/doc/go1.23">Go 1.23 发布说明</a>。</li>
+<li><strong>循环引用</strong>：不可达的循环引用可被追踪式 GC 回收。泄漏应检查是否仍由根对象间接持有。</li>
+</ul>
+<p><a id="reference-定位"></a></p>
+<h3 id="定位">定位</h3>
+<ul>
+<li><strong>pprof</strong>：最重要的工具，通过 <code>go tool pprof http://localhost:port/debug/pprof/heap</code> 分析堆内存分布，<code>go tool pprof http://localhost:port/debug/pprof/goroutine</code> 分析 goroutine 泄漏</li>
+<li><strong>trace 工具</strong>：<code>go tool trace</code> 可以看到 goroutine 的生命周期和阻塞情况</li>
+<li><strong>runtime 统计</strong>：通过 <code>runtime.ReadMemStats()</code> 监控内存使用趋势，<code>runtime.NumGoroutine()</code> 监控协程数量</li>
+</ul>
+<p>先看内存增长曲线，如果内存持续上涨不回收，就用 pprof 分析哪个函数分配内存最多。如果是 goroutine 泄漏，会看到 goroutine 数量异常增长，然后分析这些 goroutine 阻塞在哪里</p>
+<p><a id="reference-优化"></a></p>
+<h3 id="优化">优化</h3>
+<ul>
+<li><strong>goroutine 泄漏</strong>：使用 context 设置超时，确保 goroutine 有退出机制，避免无限阻塞</li>
+<li><strong>channel 泄漏</strong>：及时关闭 channel，按协议提供取消或关闭路径；不要用 select+default 忙轮询掩盖生命周期问题</li>
+<li><strong>slice 引用优化</strong>：对大数组的小 slice 使用 copy 创建独立副本</li>
+<li><strong>定时器清理</strong>：手动调用 <code>timer.Stop()</code> 释放资源</li>
+</ul>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>返回指针是否意味着任何编译配置下都必然发生堆分配？</li>
+<li>小切片为什么会保留大数组？</li>
+<li>关闭 channel 与内存回收是什么关系？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#内存分配">内存分配</a></li><li style="--depth: 1"><a href="#分配器架构">分配器架构</a></li><li style="--depth: 2"><a href="#对象分类分配">对象分类分配</a></li><li style="--depth: 1"><a href="#channel-分配">channel 分配</a></li><li style="--depth: 0"><a href="#内存逃逸">内存逃逸</a></li><li style="--depth: 1"><a href="#主要逃逸场景">主要逃逸场景</a></li><li style="--depth: 2"><a href="#函数参数类型选择">函数参数类型选择</a></li><li style="--depth: 1"><a href="#影响">影响</a></li><li style="--depth: 0"><a href="#内存泄漏">内存泄漏</a></li><li style="--depth: 1"><a href="#场景">场景</a></li><li style="--depth: 1"><a href="#定位">定位</a></li><li style="--depth: 1"><a href="#优化">优化</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

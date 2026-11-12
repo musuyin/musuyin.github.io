@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Sync · Musuyin&#39; Home</title><meta name="description" content="同步原语需要按保护范围选择：原子操作更新一个状态，Mutex 维护临界区不变量，Once 管理一次初始化，WaitGroup 等待任务结束，sync.Map 提供特定访问模式下的并发映射。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/go/golang/synchronization/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Sync · Musuyin' Home"><meta property="og:description" content="同步原语需要按保护范围选择：原子操作更新一个状态，Mutex 维护临界区不变量，Once 管理一次初始化，WaitGroup 等待任务结束，sync.Map 提供特定访问模式下的并发映射。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/go/golang/synchronization/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Sync</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-23">2026-08-23</time></dd></div><div><dt>字数</dt><dd>2900</dd></div><div><dt>预计阅读</dt><dd>10 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Go/">#Go</a><a href="/tags/%E5%B9%B6%E5%8F%91/">#并发</a><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Sync</h1><time datetime="2026-08-23">2026-08-23</time><p class="tags"><a href="/tags/Go/">#Go</a><a href="/tags/%E5%B9%B6%E5%8F%91/">#并发</a><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a></p></header><div class="prose"><p>同步原语需要按保护范围选择：原子操作更新一个状态，Mutex 维护临界区不变量，Once 管理一次初始化，WaitGroup 等待任务结束，sync.Map 提供特定访问模式下的并发映射。</p>
+<p><strong>版本边界</strong>：后文 read/dirty 双 map 是旧版 <code>sync.Map</code> 的实现模型；Go 1.24 已改用并发哈希树，不能把旧模型作为当前实现。见 <a href="https://go.dev/doc/go1.24">Go 1.24 发布说明</a>。</p>
+<p><a id="reference-安全读写共享变量"></a></p>
+<h2 id="安全读写共享变量">安全读写共享变量</h2>
+<ul>
+<li>Mutex</li>
+<li>信号量</li>
+<li>channel</li>
+<li>原子操作</li>
+</ul>
+<p><a id="reference-原子操作"></a></p>
+<h3 id="原子操作">原子操作</h3>
+<p><a id="reference-原理"></a></p>
+<h4 id="原理">原理</h4>
+<p>Go 语言实现原子操作，其根本是<strong>依赖底层 CPU 硬件提供的原子指令</strong>，而不是通过操作系统或更上层的锁机制。</p>
+<p>Go 的 <code>sync/atomic</code> 包中的函数，在编译时会被编译器识别，并直接转换成对应目标硬件平台（如 x86、ARM）的单条原子机器指令。例如，在 x86 架构上，<code>atomic.AddInt64</code> 这类操作会对应到像 <code>LOCK; ADD</code> 这样的指令。前面的 <code>LOCK</code> 前缀是关键，它会锁住总线或缓存行，确保后续的 <code>ADD</code> 指令在执行期间，其他 CPU 核心不能访问这块内存，从而保证了整个操作的原子性。</p>
+<p><a id="reference-和锁的区别"></a></p>
+<h4 id="和锁的区别">和锁的区别</h4>
+<p>原子操作和锁最核心的区别在于它们的<strong>实现层级</strong>和<strong>保护范围</strong>。</p>
+<ul>
+<li><strong>原子操作</strong>是 CPU 硬件层面的“微观”机制，它保证对单个数据（通常是整型或指针）的单次读改写操作是绝对不可分割的，性能极高，因为它不涉及操作系统内核的介入和 goroutine 的挂起</li>
+<li><strong>锁</strong>则是操作系统或语言运行时提供的“宏观”机制，它保护的是一个<strong>代码块</strong>（临界区），而不仅仅是单个变量。当获取锁失败时，它会让 goroutine 休眠，而不是空耗 CPU。虽然锁的开销远大于原子操作，但它能保护一段复杂的、涉及多个变量的业务逻辑。</li>
+</ul>
+<p>所以，对于简单的计数器或标志位更新，用原子操作追求极致性能；而只要需要保护一段逻辑或多个变量的一致性，就必须用锁。</p>
+<p><a id="reference-syncmutex"></a></p>
+<h2 id="syncmutex">sync.Mutex</h2>
+<p><a id="reference-实现原理"></a></p>
+<h3 id="实现原理">实现原理</h3>
+<p><a id="reference-数据结构"></a></p>
+<h4 id="数据结构">数据结构</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Mutex</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	state </span><span style="color:#D73A49;--shiki-dark:#F97583">int32</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	sema  </span><span style="color:#D73A49;--shiki-dark:#F97583">uint32</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>mutex 底层是通过原子操作加信号量来实现的，通过 atomic 包中的一些<strong>原子操作</strong>来实现锁的锁定，通过<strong>信号量</strong>来实现协程的阻塞与唤醒</p>
+<ul>
+<li><code>state</code>：锁的状态：锁定、被唤醒、饥饿模式</li>
+</ul>
+<p><img alt="IMG-20260831131239931" loading="lazy" decoding="async" width="1693" height="929" src="/_astro/IMG-20260831131239931.C4tJFR3N_Z1B0Uxg.webp"></p>
+<ul>
+<li><code>sema</code>：信号量，mutex 阻塞队列，实现 goroutine 的阻塞和唤醒</li>
+</ul>
+<p><img alt="IMG-20260831131239972" loading="lazy" decoding="async" width="1536" height="1024" src="/_astro/IMG-20260831131239972.4eAzJmfB_Z15m3L1.webp"></p>
+<p><a id="reference-工作模式"></a></p>
+<h3 id="工作模式">工作模式</h3>
+<p>即锁被释放后的获取模式</p>
+<ul>
+<li>正常模式（Normal Mode）
+<ul>
+<li>这是默认模式，讲究的是性能。<strong>新请求锁的 goroutine 会和等待队列头部的 goroutine 竞争</strong>，新来的 goroutine 有几次<strong>自旋</strong>的机会，如果在此期间锁被释放，它就可以<strong>直接抢到锁</strong>。</li>
+<li>这种方式吞吐量高，但可能会导致队列头部的 goroutine 等待很久，即“不公平”。</li>
+</ul>
+</li>
+<li>饥饿模式（Starvation Mode）
+<ul>
+<li>当一个 goroutine 在等待队列中等待超过 1 毫秒（1ms）后，Mutex 就会切换到此模式，讲究的是公平。</li>
+<li>在此模式下，锁的所有权会直接从解锁的 goroutine 移交给<strong>等待队列的头部</strong>，新来的 goroutine 不会自旋，必须排到队尾。这样可以确保队列中的等待者不会被“饿死”。</li>
+</ul>
+</li>
+</ul>
+<p>当等待队列为空，或者一个 goroutine 拿到锁时发现它的等待时间小于 1ms，饥饿模式就会结束，切换回正常模式。这两种模式的动态切换，是 Go 在性能和公平性之间做的精妙平衡。</p>
+<p><a id="reference-自旋"></a></p>
+<h3 id="自旋">自旋</h3>
+<ul>
+<li>自旋不是无休止的空转，它有严格的次数和时间限制，通常只持续几十纳秒。</li>
+<li>自旋仅仅在特定条件下才会发生，比如 CPU 核数大于 1，并且当前机器不算繁忙（没有太多 goroutine 在排队）</li>
+</ul>
+<p>它是在赌，与其付出<strong>goroutine 挂起和唤醒</strong>这种涉及内核调度的巨大代价，不如原地稍等一下，因为锁可能马上就释放了。</p>
+<p>这种自旋是一种机会主义的短线优化，目的是用极小的 CPU 开销去避免一次昂贵的上下文切换，在锁竞争不激烈、占用时间极短的场景下，它反而是<strong>节省</strong>了资源。</p>
+<p><a id="reference-synconce"></a></p>
+<h2 id="synconce">sync.Once</h2>
+<ul>
+<li><code>sync.Once</code>的作用是<strong>确保一个函数在程序生命周期内，无论在多少个 goroutine 中被调用，都只会被执行一次</strong>。它常用于<strong>单例对象的初始化</strong>或一些只需要执行一次的全局配置加载</li>
+<li><code>sync.Once</code> 保证代码段只执行 1 次的原理主要是其内部维护了一个<strong>标识位</strong>，当它 == 0 时表示还没执行过函数，此时会<strong>加锁修改</strong>标识位，然后执行对应函数。后续再执行时发现标识位 != 0，则不会再执行后续动作了</li>
+</ul>
+<p><a id="reference-实现原理double-check"></a></p>
+<h3 id="实现原理double-check">实现原理（Double-Check）</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Once</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	done </span><span style="color:#D73A49;--shiki-dark:#F97583">uint32</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // 标识位</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	m    </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Mutex</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>核心依赖一个 <code>uint32</code> 的 <code>done</code> 标志位和一个互斥锁 <code>Mutex</code></p>
+<p>当 <code>Once.Do(f)</code> 首次被调用时：</p>
+<ol>
+<li>通过原子操作检查 <code>done</code>：<code>atomic.LoadUint32</code> 快速检查 <code>done</code> 标志位。</li>
+<li>如果 <code>done</code> 为 1，说明初始化已完成，直接返回，这个路径完全无锁，开销极小。</li>
+<li>如果 <code>done</code> 为 0，说明为第一次调用，进入慢路径（<code>doSlow</code>）</li>
+<li>在慢路径里，它会先<strong>加锁</strong>，然后<strong>再次检查</strong> <code>done</code> 标志位。这个“双重检查”（Double-Checked Locking）是关键，它防止了在多个 goroutine 同时进入慢路径时，函数 <code>f</code> 被重复执行。</li>
+<li>如果此时 <code>done</code> 仍然为 0，那么当前 goroutine 就会执行传入的函数 <code>f</code>。执行完毕后，它会通过原子操作（<code>atomic.StoreUint32</code>）将 <code>done</code> 标志位置为 1，最后<strong>解锁</strong>。</li>
+<li>之后任何再调用 <code>Do</code> 的 goroutine，都会在第一步的原子 <code>Load</code> 操作时发现 <code>done</code> 为 1 而直接返回。整个过程结合了原子操作的速度和互斥锁的安全性，高效且线程安全地实现了“仅执行一次”的保证</li>
+</ol>
+<p><a id="reference-syncwaitgroup"></a></p>
+<h2 id="syncwaitgroup">sync.WaitGroup</h2>
+<p><a id="reference-实现原理-1"></a></p>
+<h3 id="实现原理-1">实现原理</h3>
+<p><code>WaitGroup</code> 实现等待，本质上是一个<strong>原子计数器</strong>和一个<strong>信号量</strong>的协作。</p>
+<ul>
+<li>调用 <code>Add</code> 会增加计数值，<code>Done</code> 会减计数值。</li>
+<li><code>Wait</code> 方法会检查这个计数器，如果不为零，就利用信号量将当前 goroutine 高效地挂起。</li>
+<li>直到最后一个 <code>Done</code> 调用将计数器清零，它就会通过这个信号量，一次性唤醒所有在 <code>Wait</code> 处等待的 goroutine，从而实现等待目的。</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// A WaitGroup waits for a collection of goroutines to finish.</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// The main goroutine calls Add to set the number of goroutines to wait for.</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// Then each of the goroutines runs and calls Done when finished. At the same</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// time, Wait can be used to block until all goroutines have finished.</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// A WaitGroup must not be copied after first use.</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> WaitGroup</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	noCopy </span><span style="color:#6F42C1;--shiki-dark:#B392F0">noCopy</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // 用于vet工具检查是否被复制</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 64位的值：高32位是计数器，低32位是等待的goroutine数量。</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 通过原子操作访问，保存了状态和等待者数量。</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	state </span><span style="color:#6F42C1;--shiki-dark:#B392F0">atomic</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Uint64</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 用于等待者休眠的信号量。</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	sema </span><span style="color:#D73A49;--shiki-dark:#F97583">uint32</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li><code>noCopy</code>：用于静态分析工具（<code>go vet</code>）在编译时检查 <code>WaitGroup</code> 实例是否被复制。
+<ul>
+<li><code>WaitGroup</code> 被复制后会导致状态不一致，可能引发程序错误，因此该字段的存在旨在防止此类问题的发生。</li>
+</ul>
+</li>
+<li><code>state</code>: 这是 <code>WaitGroup</code> 的核心，一个 64 位的无符号整型，通过 <code>sync/atomic</code> 包进行原子操作，以保证并发安全。这个 64 位的空间被地分成了两部分
+<ul>
+<li><strong>高 32 位</strong>: 作为<strong>计数器（counter）</strong>，记录了需要等待的 goroutine 的数量。</li>
+<li><strong>低 32 位</strong>: 作为<strong>等待者计数器（waiter count）</strong>，记录了调用 <code>Wait()</code> 方法后被阻塞的 goroutine 的数量。</li>
+</ul>
+</li>
+<li><code>sema</code>: 这是一个信号量，用于实现 goroutine 的阻塞和唤醒。
+<ul>
+<li>当主 goroutine 调用 <code>Wait()</code> 方法且计数器不为零时，它会通过这个信号量进入休眠状态。</li>
+<li>当所有子 goroutine 完成任务后，会通过这个信号量来唤醒等待的主 goroutine。</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-syncmap"></a></p>
+<h2 id="syncmap">sync.Map</h2>
+<p><code>sync.Map</code> 适合读多写少的场景，而不是适合写多读少的场景</p>
+<p>因为我们期望将更多的流量在 read map 这一层进行拦截，从而避免加锁访问 dirty map 对于更新，删除，读取，read map 可以尽量通过一些原子操作，让整个操作变得无锁化，这样就可以避免进一步加锁访问 dirty map。倘若写操作过多，sync.Map 基本等价于一把互斥锁 + map，其读写效率会大大下降</p>
+<p><a id="reference-实现原理-2"></a></p>
+<h3 id="实现原理-2">实现原理</h3>
+<p><code>sync.Map</code> 的底层核心是<strong>空间换时间</strong>，通过<strong>两个 Map</strong>（<code>read</code> 和 <code>dirty</code>） 的冗余结构，实现“读写分离”，最终达到<strong>针对特定场景的“读”操作无锁优化</strong>。</p>
+<ul>
+<li><code>read</code> 是一个只读的 <code>map</code>，提供无锁的并发读取，速度极快。</li>
+<li>写操作会先操作<strong>一个加了锁的、可读写</strong>的 <code>dirty</code> map。
+<ul>
+<li>当 <code>dirty</code> map 的数据积累到一定程度，或者 <code>read</code> map 中没有某个 key 时，<code>sync.Map</code> 会将 <code>dirty</code> map 里的数据<strong>晋升并覆盖掉旧的 <code>read</code> map</strong>，完成一次数据同步。</li>
+</ul>
+</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Map</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	mu     </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Mutex</span><span style="color:#6A737D;--shiki-dark:#6A737D">                  //  用于保护dirty字段的锁</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	read   </span><span style="color:#6F42C1;--shiki-dark:#B392F0">atomic</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Value</span><span style="color:#6A737D;--shiki-dark:#6A737D">           // 只读字段，其实际的数据类型是一个readOnly结构</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	dirty  </span><span style="color:#D73A49;--shiki-dark:#F97583">map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#D73A49;--shiki-dark:#F97583">interface</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{}]</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">entry</span><span style="color:#6A737D;--shiki-dark:#6A737D"> //需要加锁才能访问的map，其中包含在read中除了被expunged(删除)以外的所有元素以及新加入的元素</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	misses </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#6A737D;--shiki-dark:#6A737D">                    // 计数器，记录在从read中读取数据的时候，没有命中的次数，当misses值等于dirty长度时，dirty提升为read</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><code>read</code> 字段的类型是 <code>atomic.Value</code>，但是在使用中里面其实存储的是 <code>readOnly</code> 结构，<code>readOnly</code> 结构定义如下：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// readOnly is an immutable struct stored atomically in the Map.read field.</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> readOnly</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">   m       </span><span style="color:#D73A49;--shiki-dark:#F97583">map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#D73A49;--shiki-dark:#F97583">interface</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{}]</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">entry</span><span style="color:#6A737D;--shiki-dark:#6A737D">   // key为任意可比较类型，value为entry指针</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">   amended </span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // amended为true，表明dirty中包含read中没有的数据，为false表明dirty中的数据在read中都存在</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> entry</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	p </span><span style="color:#6F42C1;--shiki-dark:#B392F0">unsafe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Pointer</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // p指向真正的value所在的地址</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><img alt="IMG-20260831131240005" loading="lazy" decoding="async" width="1691" height="930" src="/_astro/IMG-20260831131240005.DR4uvGC1_Z1fF6PR.webp"></p>
+<p><a id="reference-read-map-和-dirty-map"></a></p>
+<h3 id="read-map-和-dirty-map"><code>read</code> map 和 <code>dirty</code> map</h3>
+<p><strong>只读缓存</strong>和<strong>最新全集</strong></p>
+<ul>
+<li><code>read</code> map 是 <code>dirty</code> map 的一个不完全、且可能是过期的只读快照。
+<ul>
+<li><code>read</code> map 中的所有数据，在 <code>dirty</code> map 里一定存在。一个 key 如果在 <code>read</code> map 里，那它的 value 要么就是最终值，要么就是一个特殊指针，指向 <code>dirty</code> map 里对应的条目</li>
+</ul>
+</li>
+<li><code>dirty</code> map 则包含了所有的最新数据
+<ul>
+<li><code>dirty</code> map 里有，<code>read</code> map 里却可能没有，因为 <code>dirty</code> 是最新、最全的</li>
+<li>当 <code>dirty</code> map 积累了足够多的新数据后，它会“晋升”为新的 <code>read</code> map，旧的 <code>read</code> map 则被废弃。这个过程，就完成了“缓存”的更新。</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-删除状态"></a></p>
+<h3 id="删除状态">删除状态</h3>
+<p>存在 <code>nil</code> 和 <code>expunged</code> 两种删除状态：为了解决<strong>在 <code>sync.Map</code> 的“读写分离”架构下，如何高效、无锁地处理“删除”操作</strong>。</p>
+<ul>
+<li><code>read</code> map 本身是只读的，我们不能直接从中删除一个 key。所以，当用户调用  <code>Delete</code>  时，如果这个 key 存在于  <code>read</code>  中，系统会通过原子操作把 entry.p 置为  <code>nil</code>（<strong>这就是“逻辑删除”状态</strong>），后续的读操作如果看到  <code>nil</code>  就直接返回  <code>nil, false</code>。</li>
+<li><code>expunged</code>  是更彻底的删除标记：当之后某次写操作需要基于  <code>read</code> <strong>重建  <code>dirty</code> map</strong>  时，会扫描  <code>read</code>，把所有  <code>p == nil</code>  的 entry <strong>进一步标记为  <code>expunged</code></strong>，表示“该 key 不再被复制到新的 dirty 中”。后续如果要重新  <code>Store</code>  一个 expunged 的 key，必须先把它从  <code>expunged</code>  回退为  <code>nil</code>  并同步到  <code>dirty</code>，再写入。</li>
+</ul>
+<p>它避免了因为一次 <code>Delete</code> 操作就引发加锁和 map 的整体复制，把真正的物理删除延迟到了 <code>dirty</code> map“晋升”为 <code>read</code> map 的那一刻，是典型的用状态标记来换取无锁性能的设计。</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>原子地更新两个变量，能否自然保证它们的组合一致性？</li>
+<li>WaitGroup 的计数与任务启动应如何排序？</li>
+<li>Once 的函数 panic 后会重新执行吗？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#安全读写共享变量">安全读写共享变量</a></li><li style="--depth: 1"><a href="#原子操作">原子操作</a></li><li style="--depth: 2"><a href="#原理">原理</a></li><li style="--depth: 2"><a href="#和锁的区别">和锁的区别</a></li><li style="--depth: 0"><a href="#syncmutex">sync.Mutex</a></li><li style="--depth: 1"><a href="#实现原理">实现原理</a></li><li style="--depth: 2"><a href="#数据结构">数据结构</a></li><li style="--depth: 1"><a href="#工作模式">工作模式</a></li><li style="--depth: 1"><a href="#自旋">自旋</a></li><li style="--depth: 0"><a href="#synconce">sync.Once</a></li><li style="--depth: 1"><a href="#实现原理double-check">实现原理（Double-Check）</a></li><li style="--depth: 0"><a href="#syncwaitgroup">sync.WaitGroup</a></li><li style="--depth: 1"><a href="#实现原理-1">实现原理</a></li><li style="--depth: 0"><a href="#syncmap">sync.Map</a></li><li style="--depth: 1"><a href="#实现原理-2">实现原理</a></li><li style="--depth: 1"><a href="#read-map-和-dirty-map">read map 和 dirty map</a></li><li style="--depth: 1"><a href="#删除状态">删除状态</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>计算机系统概述 · Musuyin&#39; Home</title><meta name="description" content="操作系统作为资源管理者与服务接口，在硬件上提供进程、存储和 I/O 抽象。并发、共享、虚拟与异步说明它需要协调的问题，运行机制再说明控制权如何切换。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/operating-system/os-overview/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="计算机系统概述 · Musuyin' Home"><meta property="og:description" content="操作系统作为资源管理者与服务接口，在硬件上提供进程、存储和 I/O 抽象。并发、共享、虚拟与异步说明它需要协调的问题，运行机制再说明控制权如何切换。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/operating-system/os-overview/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">计算机系统概述</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-04-01">2025-04-01</time></dd></div><div><dt>字数</dt><dd>5628</dd></div><div><dt>预计阅读</dt><dd>19 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">#操作系统</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>计算机系统概述</h1><time datetime="2025-04-01">2025-04-01</time><p class="tags"><a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">#操作系统</a></p></header><div class="prose"><p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>操作系统作为资源管理者与服务接口，在硬件上提供进程、存储和 I/O 抽象。并发、共享、虚拟与异步说明它需要协调的问题，运行机制再说明控制权如何切换。</p>
+<p><a id="reference-操作系统的概念功能和目标"></a></p>
+<h2 id="操作系统的概念功能和目标">操作系统的概念、功能和目标</h2>
+<p><a id="reference-概念"></a></p>
+<h3 id="概念">概念</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1091" height="608" src="/_astro/IMG-20260722152422346.CB6HEkLO_1vCOtc.webp"></p>
+<p>操作系统（Operating System，OS）是指控制和管理整个计算机系统的硬件和软件资源，并合理地组织调度计算机的工作和资源的分配；以提供给用户和其他软件方便的接口和环境；它是计算机系统中最基本的<strong>系统软件</strong></p>
+<ol>
+<li>操作系统是系统资源的管理者</li>
+<li>向上层提供方便易用的服务</li>
+<li>最接近硬件的一层软件</li>
+</ol>
+<p><a id="reference-功能和目标"></a></p>
+<h3 id="功能和目标">功能和目标</h3>
+<p><a id="reference-作为系统资源的管理者"></a></p>
+<h4 id="作为系统资源的管理者">作为系统资源的管理者</h4>
+<ul>
+<li>提供的功能
+<ul>
+<li>处理机（CPU）管理</li>
+<li>存储器管理</li>
+<li>文件管理</li>
+<li>设备管理</li>
+</ul>
+</li>
+<li>目标：安全高效</li>
+</ul>
+<p><a id="reference-向上层提供方便易用的服务"></a></p>
+<h4 id="向上层提供方便易用的服务">向上层提供方便易用的服务</h4>
+<p>封装思想：操作系统把一些丑陋的硬件功能封装成简单易用的服务，使用户能更方便地使用计算机，用户无需关心底层硬件的原理，只需要对操作系统发出命令即可</p>
+<p>服务举例：</p>
+<ol>
+<li>GUI 图形用户界面</li>
+<li>联机命令接口（交互式命令接口）：用户输入一句，操作系统执行一句</li>
+<li>脱机命令接口（批处理命令接口）：用户输入一快，操作系统执行一块</li>
+<li>程序接口：可以在程序中进行系统调用来使用程序接口。普通用户不能直接使用程序接口，只能使用程序代码间接使用</li>
+</ol>
+<p><img alt="image" loading="lazy" decoding="async" width="1157" height="390" src="/_astro/IMG-20260722152422381.5xd9Kz25_1Mf5di.webp"></p>
+<p><a id="reference-对硬件机器的扩展"></a></p>
+<h4 id="对硬件机器的扩展">对硬件机器的扩展</h4>
+<ul>
+<li>没有任何软件支持的计算机称为<strong>裸机</strong>。在裸机上安装的操作系统，可以提供资源管理功能和方便用户的服务功能，将裸机改造成功能更强、使用更方便的机器</li>
+<li>通常把覆盖了软件的机器成为扩充机器，又称之为虚拟机</li>
+<li>操作系统对硬件机器的拓展：将 CPU、内存、磁盘、显示器、键盘等硬件合理地组织起来，让各种硬件能够相互协调配合，实现更多更复杂的功能普通用户无需关心这些硬件在底层是怎么组织起来工作的，只需直接使用操作系统提供的接口即可</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1117" height="511" src="/_astro/IMG-20260722152422409.CDXBRZPK_Z1cfzAS.webp"></p>
+<p><a id="reference-操作系统的特征"></a></p>
+<h2 id="操作系统的特征">操作系统的特征</h2>
+<ul>
+<li>并发</li>
+<li>共享</li>
+<li>虚拟</li>
+<li>异步</li>
+</ul>
+<p>并发与共享是两个最基本的特征，二者互为存在条件</p>
+<p><img alt="image" loading="lazy" decoding="async" width="666" height="240" src="/_astro/IMG-20260722152422441.CkdeSk8c_Zn3ykN.webp"></p>
+<p><a id="reference-并发"></a></p>
+<h3 id="并发">并发</h3>
+<ul>
+<li>并发：指两个或多个事件在同一时间间隔内发生。这些事件<strong>宏观上是同时发生</strong>的，但<strong>微观上是交替发生</strong>的。</li>
+<li>并行：指两个或多个事件<strong>在同一时刻同时发生</strong>。</li>
+</ul>
+<p>操作系统的并发性：计算机系统中“同时”运行着多个程序，这些程序宏观上看是同时运行的，但是微观上看是交替运行的</p>
+<ul>
+<li>单核 CPU 同一时刻只能执行一个程序，各个程序只能<strong>并发</strong>执行</li>
+<li>多核 CPU 同一时刻可以同时执行多个程序，多个程序可以<strong>并行</strong>执行</li>
+</ul>
+<p>并发性是操作系统最基本的一个特性</p>
+<p><a id="reference-共享"></a></p>
+<h3 id="共享">共享</h3>
+<p>共享：资源共享，指系统中的资源可供内存中多个<strong>并发执行</strong>的进程共同使用</p>
+<p>两种资源共享方式：</p>
+<ul>
+<li>互斥共享</li>
+<li>同时共享</li>
+</ul>
+<p><a id="reference-互斥共享方式"></a></p>
+<h4 id="互斥共享方式">互斥共享方式</h4>
+<p>资源虽然可以提供给多个进程使用，但<strong>一个时间段内只允许一个进程</strong>访问该资源</p>
+<blockquote>
+<p>使用 QQ 和微信视频。同一时间段内摄像头只能分配给其中一个进程</p>
+</blockquote>
+<p><a id="reference-同时共享方式"></a></p>
+<h4 id="同时共享方式">同时共享方式</h4>
+<p>资源允许一个时间段内由<strong>多个进程同时</strong>对它们进行访问</p>
+<ul>
+<li>“同时”往往是宏观上的</li>
+<li>在微观上，这些进程可能是交替地对该资源进行访问的（即分时共享），但是也有可能在微观上也是同时分享的（比如播放音乐）</li>
+</ul>
+<blockquote>
+<p>使用 QQ 发送文件 A，同时使用微信发送文件 B。宏观上看，两边都在同时读取并发送文件，说明两个进程都在访问硬盘资源，从中读取数据。微观上看，两个进程是交替着访问硬盘的。</p>
+</blockquote>
+<p><a id="reference-并发与共享"></a></p>
+<h4 id="并发与共享">并发与共享</h4>
+<ul>
+<li>并发性：指计算机系统中同时存在着多个运行着的程序</li>
+<li>共享性：指系统中的资源可供内存中多个并发执行的进程共同使用</li>
+</ul>
+<p>如果失去并发性，则系统中只会有一个程序运行，则共享性失去意义。</p>
+<p>如果失去共享性，则多个程序无法同时访问系统资源，无法实现并发（假设它们需要用的资源强相关）</p>
+<p><a id="reference-虚拟"></a></p>
+<h3 id="虚拟">虚拟</h3>
+<p>虚拟：指把一个物理上的实体变为若干个逻辑上的对应物。物理实体是实际存在的，而逻辑实体是用户感受到的</p>
+<p>注：一个程序需要放入内存并分配 CPU 才能执行</p>
+<ul>
+<li>空分复用</li>
+<li>时分复用：微观上处理机在各个微小的时间段内交替着为各个进程服务</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="450" height="86" src="/_astro/IMG-20260722152422462.C4hCGeZ1_Z2dhLIg.webp"></p>
+<p>显然，如果失去了并发性，则一个时间段内系统中只需运行一道程序，那么就失去了实现虚拟性的意义了。因此，没有并发性，就谈不上虚拟性</p>
+<p><a id="reference-异步"></a></p>
+<h3 id="异步">异步</h3>
+<p>异步：在多道程序环境下，允许多个程序并发执行，但由于资源有限，进程的执行不是一贯到底的，而是<strong>走走停停，以不可预知的速度向前推进</strong></p>
+<p>如果失去了并发性，即系统只能串行地运行各个程序，那么每个程序的执行会一贯到底。只有系统拥有并发性，才有可能导致异步性。</p>
+<p><a id="reference-操作系统的发展和分类"></a></p>
+<h2 id="操作系统的发展和分类">操作系统的发展和分类</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1037" height="577" src="/_astro/IMG-20260722152422489.DeWoyQ4X_Z1QbwKa.webp"></p>
+<p><a id="reference-手工操作阶段"></a></p>
+<h3 id="手工操作阶段">手工操作阶段</h3>
+<p>用户独占全机、人机速度矛盾导致资源利用率极低</p>
+<p><a id="reference-批处理阶段-单道批处理系统"></a></p>
+<h3 id="批处理阶段-单道批处理系统">批处理阶段 （单道批处理系统）</h3>
+<p>引入脱机输入/输出技术（外围机 + 磁带），并由监督程序负责控制作业的输入输出</p>
+<ul>
+<li>优点：缓解了一定程度的人机速度矛盾，资源利用率有所提升。</li>
+<li>缺点：内存中仅能有<strong>一道程序</strong>运行，只有该程序运行结束之后才能调入下一道程序。CPU 有大量的时间是在空闲等待 I/O 完成。资源利用率依然很低。</li>
+</ul>
+<p><a id="reference-批处理阶段-多道批处理系统"></a></p>
+<h3 id="批处理阶段-多道批处理系统">批处理阶段 （多道批处理系统）</h3>
+<ul>
+<li>优点：多道程序并发执行，共享计算机资源。资源利用率大幅提升，CPU 和其他资源更能保持“忙碌”状态，系统吞吐量增大。</li>
+<li>缺点：用户响应时间长，没有人机交互功能（用户提交自己的作业之后就只能等待计算机处理完成，中间不能控制自己的作业执行。eg：无法调试程序/无法在程序运行过程中输入一些参数）</li>
+</ul>
+<p><a id="reference-分时操作系统"></a></p>
+<h3 id="分时操作系统">分时操作系统</h3>
+<p>计算机以时间片为单位轮流为各个用户/作业服务，各个用户可通过终端与计算机进行交互。</p>
+<ul>
+<li>优点：用户请求可以被即时响应，解决了人机交互问题。允许多个用户同时使用一台计算机，并且用户对计算机的操作相互独立，感受不到别人的存在。</li>
+<li>缺点：不能优先处理一些紧急任务。操作系统对各个用户/作业都是完全公平的，循环地为每个用户/作业服务一个时间片，不区分任务的紧急性。</li>
+</ul>
+<p><a id="reference-实时操作系统"></a></p>
+<h3 id="实时操作系统">实时操作系统</h3>
+<p>计算机系统接收到外部信号后及时进行处理，并且要在严格的时限内处理完事件。实时操作系统的主要特点是及时性和可靠性</p>
+<ul>
+<li>优点：能够优先响应一些紧急任务，某些紧急任务不需时间片排队。</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="873" height="129" src="/_astro/IMG-20260722152422523.7iCO9Trc_zlVCD.webp"></p>
+<p><a id="reference-网络操作系统"></a></p>
+<h3 id="网络操作系统">网络操作系统</h3>
+<p>是伴随着计算机网络的发展而诞生的，能把网络中各个计算机有机地结合起来，实现数据传送等功能，实现网络中各种资源的共享（如文件共享）和各台计算机之间的通信。（如：Windows NT 就是一种典型的网络操作系统，网站服务器就可以使用）</p>
+<p><a id="reference-分布式操作系统"></a></p>
+<h3 id="分布式操作系统">分布式操作系统</h3>
+<p>主要特点是分布性和并行性。系统中的各台计算机地位相同，任何工作都可以分布在这些计算机上，由它们并行、协同完成这个任务。</p>
+<p><a id="reference-个人计算机操作系统"></a></p>
+<h3 id="个人计算机操作系统">个人计算机操作系统</h3>
+<p>如 Windows XP、MacOS，方便个人使用。</p>
+<p><a id="reference-操作系统的运行机制"></a></p>
+<h2 id="操作系统的运行机制">操作系统的运行机制</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="825" height="467" src="/_astro/IMG-20260722152422564.C1VuHyCl_Z12JAXT.webp"></p>
+<p><a id="reference-程序如何运行"></a></p>
+<h3 id="程序如何运行">程序如何运行</h3>
+<ul>
+<li>语言代码 -&gt; 编译器翻译 -&gt; 机器指令（二进制）
+<ul>
+<li>一条高级语言的代码经过翻译可能会对应多条机器指令</li>
+<li>程序运行的过程就是 CPU 执行一条一条指令的过程</li>
+</ul>
+</li>
+<li>指令：CPU 能识别、执行的最基本命令</li>
+</ul>
+<p><a id="reference-内核程序应用程序"></a></p>
+<h3 id="内核程序应用程序">内核程序&amp;应用程序</h3>
+<ul>
+<li>应用程序：编写的普通程序</li>
+<li>内核程序：实现操作系统的程序
+<ul>
+<li>由很多内核程序组成了“操作系统内核”，或简称“内核（Kernel）”</li>
+<li>内核是操作系统最重要最核心的部分，也是最接近硬件的部分甚至可以说，一个操作系统只要有内核就够了</li>
+<li>操作系统的功能未必都在内核中，如图形化用户界面 GUI</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-特权指令非特权指令"></a></p>
+<h3 id="特权指令非特权指令">特权指令&amp;非特权指令</h3>
+<ul>
+<li>特权指令：操作系统内核作为“管理者”，可以让 CPU 执行特权指令，如内存清零指令。这类指令只允许“管理者”即操作系统内核调用。
+<ul>
+<li>CPU 设计和生产时就划分了特权指令和非特权指令，因此 CPU 能够根据执行的指令判断出程序的类型</li>
+</ul>
+</li>
+<li>非特权指令：应用程序只能使用非特权指令，如加法指令、减法指令</li>
+</ul>
+<p><a id="reference-内核态用户态"></a></p>
+<h3 id="内核态用户态">内核态&amp;用户态</h3>
+<p>CPU 有两种状态：<em>内核态</em>和<em>用户态</em></p>
+<ul>
+<li>处于内核态：此时正在运行内核程序，可以执行<strong>特权指令</strong></li>
+<li>处于用户态：此时正在运行应用程序，<strong>只能执行非特权指令</strong></li>
+</ul>
+<p>CPU 使用 <strong>程序状态字寄存器（PSW）</strong> 来标记 CPU 的状态</p>
+<ul>
+<li>1：内核态（=核心态=管态）</li>
+<li>0：用户态（=目态）</li>
+</ul>
+<p><a id="reference-状态切换"></a></p>
+<h4 id="状态切换">状态切换</h4>
+<ul>
+<li>
+<p>开机时，CPU 为<strong>内核态</strong>，操作系统内核程序先在 CPU 运行</p>
+<ul>
+<li>开启完成后，用户启动应用程序</li>
+</ul>
+</li>
+<li>
+<p>操作系统内核程序在合适的时候主动让出 CPU，让该应用程序在 CPU 上运行。在让出 CPU 之前，操作系统内核程序会使用<strong>特权指令</strong>修改 PSW 标志位为<strong>用户态</strong></p>
+<ul>
+<li>此时应用程序运行在用户态</li>
+</ul>
+</li>
+<li>
+<p>若向应用程序中插入一条特权指令企图破坏系统运行，则 CPU 在运行到这条指令时，发现这条指令时特权指令但是自身处于用户态（即发现一个非法事件）</p>
+<ul>
+<li>那么这个非法事件将引发一个<strong>中断信号</strong>，中断将使操作系统再次夺回 CPU 的控制权</li>
+</ul>
+</li>
+<li>
+<p>CPU 检测到中断信号后，会立即变为<strong>内核态</strong>，并停止运行当前的应用程序，转而运行处理中断信号的内核程序</p>
+<ul>
+<li>处理完成后，操作系统内核程序再将 CPU 的使用权交给其他应用程序</li>
+</ul>
+</li>
+<li>
+<p>内核态 -&gt; 用户态：执行特权指令，修改 PSW 的标志位为<strong>用户态</strong>，操作系统主动让出 CPU 使用权</p>
+</li>
+<li>
+<p>用户态 -&gt; 内核态：由<strong>中断</strong>引发，<strong>硬件自动完成变态过程</strong>，出发中断信号意味着操作系统将强行夺回 CPU 的使用权</p>
+<ul>
+<li>除了非法使用特权指令外，还有很多事件会触发中断信号。</li>
+<li>共性是：但凡需要操作系统介入的地方，都会触发中断信号</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-中断和异常"></a></p>
+<h2 id="中断和异常">中断和异常</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="905" height="455" src="/_astro/IMG-20260722152422592.OeeukqeV_ZDqWXr.webp"></p>
+<p><a id="reference-中断的作用"></a></p>
+<h3 id="中断的作用">中断的作用</h3>
+<p>CPU 上会运行两种程序，一种是<strong>操作系统内核程序</strong>，一种是<strong>应用程序</strong></p>
+<ul>
+<li>在合适的情况下，操作系统内核会把 CPU 的使用权主动让给应用程序
+<ul>
+<li>内核态 -&gt; 用户态：执行特权指令，修改 PSW 的标志位为<strong>用户态</strong>，操作系统主动让出 CPU 使用权</li>
+</ul>
+</li>
+<li><em>中断</em>是让操作系统内核夺回 CPU 使用权的唯一途径
+<ul>
+<li>用户态 -&gt; 内核态：由<strong>中断</strong>引发，<strong>硬件自动完成变态过程</strong>，出发中断信号意味着操作系统将强行夺回 CPU 的使用权</li>
+<li>如果没有中断机制，那么一旦应用程序上 CPU 运行，CPU 就会一直运行这个应用程序</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-中断的类型"></a></p>
+<h3 id="中断的类型">中断的类型</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="834" height="355" src="/_astro/IMG-20260722152422631.Cvop68D4_1A5qBz.webp"></p>
+<p>“中断”特指狭义的中断，即外中断。而内中断一般称为“异常”</p>
+<ul>
+<li>
+<p>内中断（异常）</p>
+<ul>
+<li>与当前执行的指令<strong>有关</strong>，中断信号来源于 <strong>CPU 内部</strong></li>
+</ul>
+</li>
+<li>
+<p>外中断（中断）</p>
+<ul>
+<li>与当前执行的指令<strong>无关</strong>，中断信号来源于 <strong>CPU 外部</strong></li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-内中断异常"></a></p>
+<h4 id="内中断异常">内中断（异常）</h4>
+<p>与当前执行的指令<strong>有关</strong>，中断信号来源于 <strong>CPU 内部</strong></p>
+<ol>
+<li>
+<p>若当前应用程序执行的指令是非法的，则会引发一个中断信号</p>
+<ul>
+<li>如被插入了一条特权指令、除法指令中的除数为 0</li>
+</ul>
+</li>
+<li>
+<p>若应用程序需要请求操作系统内核的服务，则会执行<strong>陷入指令</strong>，主动引发一个内部中断信号</p>
+<ul>
+<li>如<strong>系统调用</strong>就是通过陷入指令完成的</li>
+<li>陷入指令不是特权指令</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>陷入、陷阱（trap）：由应用程序主动调用陷入指令引发</li>
+<li>故障（fault）：由错误条件引起，可能可以被内核程序修复。内核程序修复故障后会把 CPU 使用权交还给应用程序（如缺页故障）</li>
+<li>终止（abort）：由致命错误引起，内核程序无法修复该错误，因此一般不会再将 CPU 使用权还给引发终止的应用程序，而是直接终止该应用程序（如整数除 0、非法使用特权指令）</li>
+</ul>
+<p><a id="reference-外中断中断"></a></p>
+<h4 id="外中断中断">外中断（中断）</h4>
+<p>与当前执行的指令<strong>无关</strong>，中断信号来源于 <strong>CPU 外部</strong></p>
+<ol>
+<li>
+<p>时钟中断：由时钟部件发来的中断信号</p>
+<ul>
+<li>时钟部件每隔一个时间片会给 CPU 发送一个时钟中断信号</li>
+<li>操作系统内核决定接下来让另一个应用程序上 CPU 运行</li>
+</ul>
+</li>
+<li>
+<p>I/O 中断：由输入/输出设备发来的中断信号</p>
+<ul>
+<li>当输入输出任务完成时，设备将向 CPU 发送中断信号</li>
+</ul>
+</li>
+</ol>
+<p>每一条指令执行结束时，CPU 都会例行检查每一条指令执行结束是否有外中断信号</p>
+<p><a id="reference-中断机制的基本原理"></a></p>
+<h3 id="中断机制的基本原理">中断机制的基本原理</h3>
+<p><span data-type="text" style="background-color: var(--b3-font-background1);">不同的中断信号，需要用不同的中断处理程序来处理</span>。当 CPU 检测到中断信号后，会根据中断信号的类型去查询“<strong>中断向量表</strong>”，以此来找到相应的中断处理程序在内存中的存放位置。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="677" height="449" src="/_astro/IMG-20260722152422653.Br4OlV_e_ZYNGPJ.webp"></p>
+<p>中断处理程序一定是内核程序，需要运行在“内核态”</p>
+<p><a id="reference-系统调用"></a></p>
+<h2 id="系统调用">系统调用</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="712" height="518" src="/_astro/IMG-20260722152422690.twEFW0KL_2oBWCO.webp"></p>
+<p><a id="reference-系统调用-1"></a></p>
+<h3 id="系统调用-1">系统调用</h3>
+<ul>
+<li>操作系统作为用户和计算机硬件之间的接口，需要向上提供一些简单易用的服务。</li>
+<li>主要包括命令接口和程序接口。其中，程序接口由一组系统调用组成。</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="958" height="241" src="/_astro/IMG-20260722152422739.CAH3hALT_1E9MDu.webp"></p>
+<ul>
+<li>系统调用：操作系统提供给应用程序使用的接口，可以理解为一种可供应用程序调用的特殊函数。应用程序可以通过系统调用来请求获得操作系统内核的服务</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="584" height="500" src="/_astro/IMG-20260722152422760.P6a4T7aT_Z2vBr16.webp"></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left">类型</th>
+<th style="text-align: left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left">普通应用程序</td>
+<td style="text-align: left">可直接进行系统调用，也可使用库函数。有的库函数涉及系统调用，有的不涉及</td>
+</tr>
+<tr>
+<td style="text-align: left">编程语言</td>
+<td style="text-align: left">向上提供库函数。有时会将系统调用封装成库函数，以隐藏系统调用那个的一些细节，使得编程更加方便</td>
+</tr>
+<tr>
+<td style="text-align: left">操作系统</td>
+<td style="text-align: left">向上提供系统调用，使得上层程序能够请求内核的服务</td>
+</tr>
+<tr>
+<td style="text-align: left">裸机</td>
+<td style="text-align: left"></td>
+</tr>
+</tbody>
+</table>
+<p>系统调用协调共享资源：操作系统内核对共享资源进行统一的管理，并向上提供“系统调用” ，用户进程想要使用共享资源，只能通过系统调用向操作系统内核发出请求。内核会对各个请求进行协调处理。</p>
+<p><a id="reference-系统调用应用"></a></p>
+<h3 id="系统调用应用">系统调用应用</h3>
+<ul>
+<li>应用程序通过<strong>系统调用</strong>请求操作系统的服务。</li>
+<li>而系统中的各种共享资源都由操作系统内核统一掌管，因此凡是与<strong>共享资源</strong>有关的操作（如存储分配、I/O 操作、文件管理等），都必须通过系统调用的方式向操作系统内核提出服务请求，由操作系统内核代为完成。</li>
+<li>这样可以保证系统的稳定性和安全性，防止用户进行非法操作。</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="984" height="269" src="/_astro/IMG-20260722152422799.QQT6WTBC_15EVSY.webp"></p>
+<p><a id="reference-系统调用过程"></a></p>
+<h3 id="系统调用过程">系统调用过程</h3>
+<ol>
+<li>传递系统调用参数</li>
+<li>执行<strong>陷入指令</strong>（=<strong>trap 指令</strong>=<strong>访管指令</strong>）（用户态），触发内中断</li>
+<li>执行相应的内请求核程序处理系统调用（内核态）</li>
+<li>返回应用程序</li>
+</ol>
+<p><a id="reference-操作系统的体系结构"></a></p>
+<h2 id="操作系统的体系结构">操作系统的体系结构</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="3286" height="2016" src="/_astro/IMG-20260722152422823.JM_QYHTz_ZPBB0M.webp"></p>
+<p><a id="reference-内核"></a></p>
+<h3 id="内核">内核</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1270" height="495" src="/_astro/IMG-20260722152422849.CD4gNzHu_sPTz1.webp"></p>
+<ul>
+<li>内核是操作系统最基本、最核心的部分</li>
+<li>实现操作系统内核功能的程序就是内核程序</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="795" height="439" src="/_astro/IMG-20260722152422890.usYwj71L_dfVa0.webp"></p>
+<ul>
+<li>操作系统内核需要运行在内核态</li>
+<li>操作系统的非内核功能运行在用户态</li>
+</ul>
+<p><a id="reference-大内核微内核"></a></p>
+<h4 id="大内核微内核">大内核&amp;微内核</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1277" height="511" src="/_astro/IMG-20260722152422913.BAVHtcop_ZTH0E.webp"></p>
+<p>CPU 状态转换（变态）的过程是有成本的，频繁地变态会降低系统性能</p>
+<ul>
+<li>大内核（宏内核、单内核）：Linux、Unix</li>
+<li>微内核：Windows NT</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="793" height="243" src="/_astro/IMG-20260722152422942.DIfi4d2M_FDuei.webp"></p>
+<p><a id="reference-分层结构"></a></p>
+<h3 id="分层结构">分层结构</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="2218" height="1588" src="/_astro/IMG-20260722152422974.O1MI1Ekz_2066yB.webp"></p>
+<ul>
+<li>最底层是硬件，最高层是用户接口</li>
+<li>每层可调用更低一层</li>
+</ul>
+<p><a id="reference-模块化"></a></p>
+<h3 id="模块化">模块化</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="2192" height="994" src="/_astro/IMG-20260722152423007.Cl12PLXR_Z1zRWKT.webp"></p>
+<ul>
+<li>主模块：进程、内存等模块，如果不加载这些模块则无法运行</li>
+<li>可加载内核模块：DLC</li>
+</ul>
+<p><a id="reference-外核"></a></p>
+<h3 id="外核">外核</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="460" height="329" src="/_astro/IMG-20260722152423042.CGcg00xk_LjzLs.webp"></p>
+<ul>
+<li>外核直接为进程分配未经抽象的系统空间（未经过内存页表映射的物理地址）</li>
+<li>保证使用安全</li>
+</ul>
+<p><a id="reference-操作系统引导boot"></a></p>
+<h2 id="操作系统引导boot">操作系统引导（boot）</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="872" height="368" src="/_astro/IMG-20260722152423066.BYthq9nj_2caUMa.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="916" height="395" src="/_astro/IMG-20260722152423249.DNk34BEd_Z2falNE.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="1258" height="471" src="/_astro/IMG-20260722152423276.DBZ-uwE__Z1FSdn3.webp"></p>
+<ul>
+<li>RAM：会因为断电丢失</li>
+<li>ROM：BIOS 基本输入输出系统；不会因为断电丢失</li>
+</ul>
+<p>操作系统引导。注：MBR、PBR 本质上都是一个程序</p>
+<ul>
+<li>CPU 从一个特定主存地址开始，取指令，执行 ROM 中的引导程序（先进行硬件自检，再开机）</li>
+<li>将磁盘的第一块——<strong>主引导记录（MBR）</strong> 读入内存，执行磁盘引导程序，扫描分区表</li>
+<li>从活动分区（又称主分区，即安装了操作系统的分区）读入分区引导记录，执行其中的<strong>引导记录（PBR）</strong></li>
+<li>从根目录下找到完整的操作系统初始化程序（即<strong>启动管理器</strong>）并执行，完成“开机”的一系列动作</li>
+</ul>
+<p><a id="reference-虚拟机"></a></p>
+<h2 id="虚拟机">虚拟机</h2>
+<p><a id="reference-传统计算机"></a></p>
+<h3 id="传统计算机">传统计算机</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="716" height="449" src="/_astro/IMG-20260722152423313.C6WCkNLo_28pEws.webp"></p>
+<p><a id="reference-虚拟机-1"></a></p>
+<h3 id="虚拟机-1">虚拟机</h3>
+<ul>
+<li>虚拟机：使用虚拟化技术，将一台物理机器虚拟化为多台虚拟机器（Virtual Machine, VM），每个虚拟机器都可以独立运行一个操作系统</li>
+<li>同义术语：虚拟机管理程序/虚拟机监控程序/Virtual Machine Monitor/Hypervisor</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1345" height="487" src="/_astro/IMG-20260722152423338.Bv49roBf_Z2ixqXJ.webp"></p>
+<p><a id="reference-比较"></a></p>
+<h4 id="比较">比较</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="2772" height="1666" src="/_astro/IMG-20260722152423374.D9es9769_14TyEB.webp"></p>
+<p><a id="reference-虚拟化-cpu"></a></p>
+<h3 id="虚拟化-cpu">虚拟化 CPU</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="686" height="492" src="/_astro/IMG-20260722152423404.BHm84qDh_Zq2KJ4.webp"></p>
+<ul>
+<li>Ring 3 最低权限的指令</li>
+<li>Ring 0 最高权限的指令</li>
+</ul>
+<p>通过进行划分特权级，可以令第一类 VMM 更高效地实现虚拟用户空间、虚拟内核空间，不用频繁检测是否调用了特权指令</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>并发与并行有何区别？系统调用为什么需要从用户态进入内核态？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#操作系统的概念功能和目标">操作系统的概念、功能和目标</a></li><li style="--depth: 1"><a href="#概念">概念</a></li><li style="--depth: 1"><a href="#功能和目标">功能和目标</a></li><li style="--depth: 2"><a href="#作为系统资源的管理者">作为系统资源的管理者</a></li><li style="--depth: 2"><a href="#向上层提供方便易用的服务">向上层提供方便易用的服务</a></li><li style="--depth: 2"><a href="#对硬件机器的扩展">对硬件机器的扩展</a></li><li style="--depth: 0"><a href="#操作系统的特征">操作系统的特征</a></li><li style="--depth: 1"><a href="#并发">并发</a></li><li style="--depth: 1"><a href="#共享">共享</a></li><li style="--depth: 2"><a href="#互斥共享方式">互斥共享方式</a></li><li style="--depth: 2"><a href="#同时共享方式">同时共享方式</a></li><li style="--depth: 2"><a href="#并发与共享">并发与共享</a></li><li style="--depth: 1"><a href="#虚拟">虚拟</a></li><li style="--depth: 1"><a href="#异步">异步</a></li><li style="--depth: 0"><a href="#操作系统的发展和分类">操作系统的发展和分类</a></li><li style="--depth: 1"><a href="#手工操作阶段">手工操作阶段</a></li><li style="--depth: 1"><a href="#批处理阶段-单道批处理系统">批处理阶段 （单道批处理系统）</a></li><li style="--depth: 1"><a href="#批处理阶段-多道批处理系统">批处理阶段 （多道批处理系统）</a></li><li style="--depth: 1"><a href="#分时操作系统">分时操作系统</a></li><li style="--depth: 1"><a href="#实时操作系统">实时操作系统</a></li><li style="--depth: 1"><a href="#网络操作系统">网络操作系统</a></li><li style="--depth: 1"><a href="#分布式操作系统">分布式操作系统</a></li><li style="--depth: 1"><a href="#个人计算机操作系统">个人计算机操作系统</a></li><li style="--depth: 0"><a href="#操作系统的运行机制">操作系统的运行机制</a></li><li style="--depth: 1"><a href="#程序如何运行">程序如何运行</a></li><li style="--depth: 1"><a href="#内核程序应用程序">内核程序&amp;应用程序</a></li><li style="--depth: 1"><a href="#特权指令非特权指令">特权指令&amp;非特权指令</a></li><li style="--depth: 1"><a href="#内核态用户态">内核态&amp;用户态</a></li><li style="--depth: 2"><a href="#状态切换">状态切换</a></li><li style="--depth: 0"><a href="#中断和异常">中断和异常</a></li><li style="--depth: 1"><a href="#中断的作用">中断的作用</a></li><li style="--depth: 1"><a href="#中断的类型">中断的类型</a></li><li style="--depth: 2"><a href="#内中断异常">内中断（异常）</a></li><li style="--depth: 2"><a href="#外中断中断">外中断（中断）</a></li><li style="--depth: 1"><a href="#中断机制的基本原理">中断机制的基本原理</a></li><li style="--depth: 0"><a href="#系统调用">系统调用</a></li><li style="--depth: 1"><a href="#系统调用-1">系统调用</a></li><li style="--depth: 1"><a href="#系统调用应用">系统调用应用</a></li><li style="--depth: 1"><a href="#系统调用过程">系统调用过程</a></li><li style="--depth: 0"><a href="#操作系统的体系结构">操作系统的体系结构</a></li><li style="--depth: 1"><a href="#内核">内核</a></li><li style="--depth: 2"><a href="#大内核微内核">大内核&amp;微内核</a></li><li style="--depth: 1"><a href="#分层结构">分层结构</a></li><li style="--depth: 1"><a href="#模块化">模块化</a></li><li style="--depth: 1"><a href="#外核">外核</a></li><li style="--depth: 0"><a href="#操作系统引导boot">操作系统引导（boot）</a></li><li style="--depth: 0"><a href="#虚拟机">虚拟机</a></li><li style="--depth: 1"><a href="#传统计算机">传统计算机</a></li><li style="--depth: 1"><a href="#虚拟机-1">虚拟机</a></li><li style="--depth: 2"><a href="#比较">比较</a></li><li style="--depth: 1"><a href="#虚拟化-cpu">虚拟化 CPU</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

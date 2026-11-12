@@ -1,0 +1,287 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>OpenStack · Musuyin&#39; Home</title><meta name="description" content="以“创建一台虚拟机”为线索，先区分 Keystone 的身份认证、Nova 的实例管理、Placement 的资源记录，以及 Neutron、Glance 和 Cinder 的协作职责。再分开检查 API 接受请求、实例运行、业务网络和应用可用这几层状态。理解这些边界后，再把 OpenStack 放到 Ter"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/component/openstack/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="OpenStack · Musuyin' Home"><meta property="og:description" content="以“创建一台虚拟机”为线索，先区分 Keystone 的身份认证、Nova 的实例管理、Placement 的资源记录，以及 Neutron、Glance 和 Cinder 的协作职责。再分开检查 API 接受请求、实例运行、业务网络和应用可用这几层状态。理解这些边界后，再把 OpenStack 放到 Ter"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/component/openstack/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">OpenStack</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-11-09">2026-11-09</time></dd></div><div><dt>字数</dt><dd>3384</dd></div><div><dt>预计阅读</dt><dd>12 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/OpenStack/">#OpenStack</a><a href="/tags/IaaS/">#IaaS</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>OpenStack</h1><time datetime="2026-11-09">2026-11-09</time><p class="tags"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/OpenStack/">#OpenStack</a><a href="/tags/IaaS/">#IaaS</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>以“创建一台虚拟机”为线索，先区分 Keystone 的身份认证、Nova 的实例管理、Placement 的资源记录，以及 Neutron、Glance 和 Cinder 的协作职责。再分开检查 API 接受请求、实例运行、业务网络和应用可用这几层状态。理解这些边界后，再把 OpenStack 放到 <a href="/notes/computer-science/cloud/component/terraform/">Terraform</a> 的资源管理与 <a href="/notes/computer-science/cloud/component/gardener/">Gardener</a> 的集群生命周期管理之间定位。</p>
+<p><a id="reference-openstack-的定位"></a></p>
+<h2 id="openstack-的定位">OpenStack 的定位</h2>
+<p>OpenStack 是一组开源云基础设施服务。它把服务器、网络和存储组织成资源池，通过应用程序接口（API）提供按需申请和管理能力。</p>
+<p>它主要提供基础设施即服务（IaaS，Infrastructure as a Service），常用于私有云，也能支撑公有云。云运营团队维护底层硬件和 OpenStack 服务；用户在权限与配额范围内创建虚拟机、网络和存储。</p>
+<p><a id="reference-创建虚拟机的工作主线"></a></p>
+<h2 id="创建虚拟机的工作主线">创建虚拟机的工作主线</h2>
+<p>用户提交镜像、规格和网络配置。OpenStack 验证身份，选择计算节点，准备磁盘和网络，再启动虚拟机。</p>
+<pre class="mermaid">flowchart TD
+    U[用户：Horizon 或 openstack 命令行工具] --&gt; K[Keystone：认证与服务目录]
+    U --&gt;|携带令牌提交创建请求| N[Nova：管理虚拟机生命周期]
+    N --&gt; S[nova-scheduler：选择计算节点]
+    S --&gt;|查询容量与记录资源分配| P[Placement：资源清单与用量]
+    N --&gt; C[nova-compute：执行节点上的操作]
+    C --&gt; G[Glance：读取镜像]
+    C --&gt; E[Neutron：准备网络端口]
+    C --&gt;|使用云硬盘时| V[Cinder：准备块存储卷]
+    C --&gt; H[虚拟化驱动与 Hypervisor]
+    H --&gt; VM[虚拟机]</pre>
+<p>此图展示逻辑依赖，省略 <code>nova-conductor</code> 和消息通信细节。实际调用顺序受启动方式、服务版本和网络后端影响。</p>
+<ol>
+<li>用户通过 Keystone 获取令牌和服务目录。服务目录提供各服务的 API 地址。</li>
+<li>用户向 <code>nova-api</code> 提交请求。Nova 验证权限、配额和请求参数。</li>
+<li><code>nova-conductor</code> 协调构建流程。<code>nova-scheduler</code> 根据 Placement 的资源信息及调度约束选择节点。</li>
+<li>Nova 为实例建立资源分配记录，并把构建任务交给目标节点的 <code>nova-compute</code>。</li>
+<li>Nova 与 Glance、Neutron 协作，获取镜像并准备网络端口。使用云硬盘时，还与 Cinder 协作。</li>
+<li><code>nova-compute</code> 通过虚拟化驱动启动实例。常见实现使用 libvirt 管理 KVM/QEMU 虚拟机。</li>
+<li>用户查询实例状态，并测试网络和应用。<code>ACTIVE</code> 表示实例处于运行状态，不代表应用已经可用。</li>
+</ol>
+<p>创建通常是异步过程。API 接受请求后，实例可能经历 <code>BUILD</code>，再进入 <code>ACTIVE</code> 或 <code>ERROR</code>。</p>
+<p><a id="reference-核心服务与职责"></a></p>
+<h2 id="核心服务与职责">核心服务与职责</h2>
+<table>
+<thead>
+<tr>
+<th>服务</th>
+<th>管理对象</th>
+<th>主要职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Keystone</td>
+<td>身份、项目、角色、服务目录</td>
+<td>认证用户并提供服务发现；各服务按策略执行授权</td>
+</tr>
+<tr>
+<td>Nova</td>
+<td>实例（Server）</td>
+<td>创建、调度、启动、停止和删除虚拟机</td>
+</tr>
+<tr>
+<td>Placement</td>
+<td>资源提供者、容量、资源分配</td>
+<td>跟踪计算等资源的清单和用量，为调度提供依据</td>
+</tr>
+<tr>
+<td>Neutron</td>
+<td>网络、子网、端口、路由器、安全组</td>
+<td>提供网络连接、地址管理和网络访问规则</td>
+</tr>
+<tr>
+<td>Glance</td>
+<td>镜像（Image）</td>
+<td>管理镜像元数据，并通过存储后端提供镜像数据</td>
+</tr>
+<tr>
+<td>Cinder</td>
+<td>云硬盘（Volume）</td>
+<td>创建、挂载和管理持久化块存储</td>
+</tr>
+<tr>
+<td>Swift</td>
+<td>容器与对象（Container / Object）</td>
+<td>通过对象存储 API 保存和读取数据</td>
+</tr>
+<tr>
+<td>Horizon</td>
+<td>Web 操作界面</td>
+<td>调用服务 API，让用户通过浏览器管理资源</td>
+</tr>
+</tbody>
+</table>
+<p>Nova 管理虚拟机生命周期；Hypervisor 执行虚拟机。Hypervisor 是管理虚拟机运行的虚拟化软件。Placement 提供资源信息和分配记录，调度决策由 <code>nova-scheduler</code> 执行。</p>
+<p>Glance、Cinder 和 Swift 管理不同类型的数据。Glance 和 Cinder 可以使用不同后端，也可以共享 Ceph 等存储系统。共享后端不改变服务职责。</p>
+<table>
+<thead>
+<tr>
+<th>数据类型</th>
+<th>服务</th>
+<th>使用方式</th>
+<th>生命周期要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>系统镜像</td>
+<td>Glance</td>
+<td>作为创建实例或启动卷的模板</td>
+<td>通常独立于实例保存</td>
+</tr>
+<tr>
+<td>本地实例磁盘</td>
+<td>Nova 管理</td>
+<td>作为实例的根盘或临时盘</td>
+<td>通常随实例删除而删除，取决于启动方式</td>
+</tr>
+<tr>
+<td>持久化块存储</td>
+<td>Cinder</td>
+<td>作为磁盘挂载到实例</td>
+<td>能独立于实例保留；删除行为取决于配置</td>
+</tr>
+<tr>
+<td>对象存储</td>
+<td>Swift</td>
+<td>通过 API 读取和写入对象</td>
+<td>对象独立于实例保存</td>
+</tr>
+</tbody>
+</table>
+<p>OpenStack 按需部署服务。Swift 并非所有云都安装；Glance 或 Cinder 使用 Ceph，也不代表该云提供 Swift。</p>
+<p>常见扩展服务包括：</p>
+<ul>
+<li><strong>Heat</strong>：根据模板编排多个基础设施资源。</li>
+<li><strong>Octavia</strong>：提供负载均衡服务。</li>
+<li><strong>Ironic</strong>：管理裸金属服务器的部署和生命周期。</li>
+<li><strong>Manila</strong>：提供共享文件系统服务。</li>
+</ul>
+<p><a id="reference-资源与隔离概念"></a></p>
+<h2 id="资源与隔离概念">资源与隔离概念</h2>
+<ul>
+<li><strong>Project（项目）</strong>：资源归属、权限范围和配额的管理单位。用户可通过角色加入多个项目。</li>
+<li><strong>Role（角色）</strong>：授权策略使用的身份属性。实际权限还取决于服务策略和请求范围。</li>
+<li><strong>Quota（配额）</strong>：项目能申请的资源上限。配额充足不代表底层资源足够。</li>
+<li><strong>Region（区域）</strong>：服务目录中的区域标识，用于选择服务端点。区域划分由云运营团队定义。</li>
+<li><strong>Availability zone（可用区）</strong>：服务暴露给用户的资源分组。实际故障隔离程度取决于部署设计。</li>
+<li><strong>Flavor（规格）</strong>：实例所需的虚拟 CPU、内存和磁盘等配置，也可包含调度约束。</li>
+<li><strong>Image（镜像）</strong>：实例的操作系统模板。镜像中的初始化工具和配置影响密钥注入及网络设置。</li>
+<li><strong>Port（端口）</strong>：Neutron 中代表网络接入点的对象，包含地址和安全组等配置。</li>
+<li><strong>Fixed IP（固定 IP）</strong>：分配给端口的子网内地址，不代表公网地址。</li>
+<li><strong>Floating IP（浮动 IP）</strong>：可关联到端口固定 IP 的外部网络地址。是否公网可达取决于外部网络。</li>
+<li><strong>Security group（安全组）</strong>：作用于端口的网络访问规则集合，不替代实例内部防火墙。</li>
+</ul>
+<p><a id="reference-部署架构与通信"></a></p>
+<h2 id="部署架构与通信">部署架构与通信</h2>
+<p>一个逻辑服务可能包含多个进程，并部署在多台机器上。常见节点职责如下，实际部署可以合并或拆分这些职责。</p>
+<ul>
+<li><strong>控制节点</strong>：运行 API、认证、调度和协调进程，并连接数据库与消息队列。</li>
+<li><strong>计算节点</strong>：运行 <code>nova-compute</code>、虚拟化软件及相关网络组件，承载虚拟机。</li>
+<li><strong>网络节点或网关节点</strong>：处理路由、外部网络连接等功能。某些网络实现将部分功能分布到计算节点。</li>
+<li><strong>存储节点</strong>：提供镜像、块存储或对象存储的后端容量。</li>
+</ul>
+<p>服务之间主要通过 API 协作。Nova 等服务内部还使用远程过程调用（RPC）和消息队列，把任务交给工作进程。RabbitMQ 是常见消息队列实现，MariaDB/MySQL 是常见数据库选择。</p>
+<p>数据库保存资源状态，消息队列传递任务。虚拟机的业务流量不经过消息队列。生产部署还需单独设计 API、数据库、消息队列、网络和存储的高可用性。</p>
+<p><a id="reference-虚拟机的网络访问路径"></a></p>
+<h2 id="虚拟机的网络访问路径">虚拟机的网络访问路径</h2>
+<p>在常见 IPv4 租户网络中，外部客户端可以通过浮动 IP 访问实例：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>客户端 → 外部网络 → 路由或网关的地址转换</span></span>
+<span class="line"><span>      → 浮动 IP 对应的实例固定 IP → 实例网卡 → 应用监听端口</span></span></code></pre>
+<p>Neutron 的网络后端实现路由和转发；Horizon、Keystone 和 Nova API 不转发这条业务流量。实际路径可以经过集中网关，也可以使用分布式路由。</p>
+<p>访问成功还需要外部路由、安全组、实例防火墙和应用监听配置共同允许连接。浮动 IP 绑定成功只说明地址关联完成。实例也可以通过直连外部网络等方式提供访问，无须使用浮动 IP。</p>
+<p><a id="reference-配置与基本使用"></a></p>
+<h2 id="配置与基本使用">配置与基本使用</h2>
+<p>使用前，云运营团队提供 API 地址、身份凭证、项目权限和可用资源。以下示例使用 <code>python-openstackclient</code> 提供的 <code>openstack</code> 命令。</p>
+<p><a id="reference-配置认证"></a></p>
+<h3 id="配置认证">配置认证</h3>
+<p>安装客户端：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">python3</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -m</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pip</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> install</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> python-openstackclient</span></span></code></pre>
+<p>加载云运营团队提供的 OpenRC 文件，将路径替换为实际文件路径：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">source</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /path/to/project-openrc.sh</span></span></code></pre>
+<p>OpenRC 设置 <code>OS_AUTH_URL</code>、项目和认证方式等环境变量。常见密码认证文件还要求你输入密码。认证是否需要域、区域等参数，取决于云的配置。</p>
+<p>客户端也支持 <code>clouds.yaml</code>。如果你已配置名为 <code>lab</code> 的云，可以通过 <code>openstack --os-cloud lab ...</code> 选择它。凭证文件应保存在笔记仓库之外。</p>
+<p><a id="reference-查看可用资源"></a></p>
+<h3 id="查看可用资源">查看可用资源</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">openstack</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> catalog</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> list</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">openstack</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> image</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> list</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">openstack</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> flavor</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> list</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">openstack</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> network</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> list</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">openstack</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> security</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> group</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> list</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">openstack</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> keypair</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> list</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">openstack</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> server</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> list</span></span></code></pre>
+<p>结果受项目权限和云配置限制。查询成功说明对应 API 可用，不证明实例创建或业务网络可用。</p>
+<p><a id="reference-创建并检查实例"></a></p>
+<h3 id="创建并检查实例">创建并检查实例</h3>
+<p>将镜像、规格、网络、安全组和密钥对名称替换为实际值。示例要求这些资源已存在；安全组需要允许你使用的访问方式。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">openstack</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> server</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --image</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ubuntu-image</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --flavor</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> small</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --network</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> private-net</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --security-group</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> web-sg</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --key-name</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> lab-key</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --wait</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  web-01</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">openstack</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> server</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> show</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> web-01</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">openstack</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> port</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> list</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --server</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> web-01</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">openstack</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> console</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> log</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> show</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> web-01</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">openstack</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> server</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> event</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> list</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> web-01</span></span></code></pre>
+<p><code>--wait</code> 等待实例创建完成，不等待应用启动。密钥对用于实例登录；镜像需要支持相应的密钥注入机制。控制台日志和事件详情可能受权限限制。</p>
+<p>该示例未配置浮动 IP 或应用。你需要按实际网络设计建立访问路径，再测试应用端口与请求结果。客户端参数和 API 功能应对照所用版本检查。</p>
+<p><a id="reference-与-kubernetesgardener-和-terraform-的关系"></a></p>
+<h2 id="与-kubernetesgardener-和-terraform-的关系">与 Kubernetes、Gardener 和 Terraform 的关系</h2>
+<p>OpenStack 可以提供 Kubernetes 节点使用的虚拟机、网络和存储。Kubernetes 再管理这些节点上的 Pod 和应用资源。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>物理服务器、网络与存储</span></span>
+<span class="line"><span>  → OpenStack 创建基础设施资源</span></span>
+<span class="line"><span>  → Kubernetes 节点运行在虚拟机或裸金属上</span></span>
+<span class="line"><span>  → Kubernetes 管理 Pod、Service 和应用</span></span></code></pre>
+<ul>
+<li><strong><a href="/notes/computer-science/cloud/component/terraform/">Terraform</a></strong>：通过 OpenStack Provider 调用 API，创建和管理实例、网络、云硬盘等资源。它管理基础设施配置。</li>
+<li><strong><a href="/notes/computer-science/cloud/component/gardener/">Gardener</a></strong>：通过 OpenStack 扩展管理 Kubernetes 集群所需的基础设施。它管理集群生命周期。</li>
+<li><strong>OpenStack Cloud Controller Manager</strong>：Kubernetes 的云控制器组件。配置相应集成后，它可处理节点云信息、负载均衡器等云资源操作。</li>
+<li><strong>Cinder CSI 驱动</strong>：通过容器存储接口（CSI，Container Storage Interface）连接 Kubernetes 与 Cinder，创建和挂载持久化卷。参见 <a href="/notes/computer-science/cloud/kubernetes/kubernetes-storage/">L05-Storage</a>。</li>
+<li><strong><a href="/notes/computer-science/cloud/component/helm/">Helm</a></strong>：打包和部署 Kubernetes 应用资源。其作用位于 Kubernetes 应用部署层。</li>
+</ul>
+<p>安装 OpenStack 不会自动安装这些集成。Kubernetes 的 Pod 网络仍由容器网络接口（CNI，Container Network Interface）插件负责；Neutron 通常提供节点网络，也可通过专门集成参与容器网络。</p>
+<p><a id="reference-常见问题与排查方向"></a></p>
+<h2 id="常见问题与排查方向">常见问题与排查方向</h2>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>优先检查</th>
+<th>状态的含义与限制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API 返回 <code>401</code> 或 <code>403</code></td>
+<td>认证参数、令牌、项目范围、角色和服务策略</td>
+<td>认证失败与授权不足需要分别判断</td>
+</tr>
+<tr>
+<td>实例长时间处于 <code>BUILD</code></td>
+<td>实例事件、Nova 工作进程、消息队列、镜像及网络准备</td>
+<td>API 已接受请求，但构建尚未完成</td>
+</tr>
+<tr>
+<td>创建失败，提示 <code>No valid host</code></td>
+<td>Placement 容量、规格约束、可用区及计算服务状态</td>
+<td>调度没有找到满足条件的节点</td>
+</tr>
+<tr>
+<td>实例为 <code>ACTIVE</code>，但无法连接</td>
+<td>路由、端口绑定、浮动 IP、安全组、实例防火墙及应用监听</td>
+<td>实例运行状态不等于网络或应用可用</td>
+</tr>
+<tr>
+<td>云硬盘挂载失败</td>
+<td>Cinder 状态、后端连接、可用区及计算节点的存储连接</td>
+<td>卷创建成功不等于实例挂载成功</td>
+</tr>
+<tr>
+<td>删除实例后云硬盘仍存在</td>
+<td>卷的删除策略及是否还有数据需要保留</td>
+<td>独立保留的卷可能符合预期</td>
+</tr>
+</tbody>
+</table>
+<p>用户先检查可见的资源状态、事件和控制台日志。云运营团队再沿请求 ID 检查服务日志、消息队列和后端状态。</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>沿创建实例请求说明 Keystone、Nova、Placement、Glance、Neutron 和 Cinder 各自提供什么能力。为什么配额充足仍可能出现 <code>No valid host</code>？实例已是 <code>ACTIVE</code> 且浮动 IP 已绑定，仍无法访问应用时，应如何区分路由、安全组、实例防火墙与应用监听的问题？</p>
+<p>比较 Glance 镜像、Nova 本地磁盘、Cinder 卷与 Swift 对象的用途及删除生命周期。再解释 OpenStack、Terraform、Gardener、Kubernetes 和 Helm 分别管理哪一层资源，为什么安装 OpenStack 不等于完成 Kubernetes 云集成。</p>
+<p><a id="reference-参考资料"></a></p>
+<h2 id="参考资料">参考资料</h2>
+<p>本文介绍通用架构，不绑定某个 OpenStack 发行版。部署拓扑、功能范围和权限策略以实际云环境为准。</p>
+<ul>
+<li><a href="https://docs.openstack.org/install-guide/get-started-with-openstack.html#the-openstack-services">OpenStack 服务概览</a></li>
+<li><a href="https://docs.openstack.org/install-guide/get-started-logical-architecture.html">OpenStack 逻辑架构</a></li>
+<li><a href="https://docs.openstack.org/nova/latest/admin/architecture.html">Nova 架构</a></li>
+<li><a href="https://docs.openstack.org/python-openstackclient/latest/configuration/index.html">OpenStackClient 配置</a></li>
+<li><a href="https://docs.openstack.org/python-openstackclient/latest/cli/command-objects/server.html">OpenStackClient server 命令</a></li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+<script src="/note-runtime/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,securityLevel:"strict",theme:"neutral"});document.querySelectorAll(".mermaid").forEach(node=>mermaid.run({nodes:[node]}).catch(()=>{}));</script>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#openstack-的定位">OpenStack 的定位</a></li><li style="--depth: 0"><a href="#创建虚拟机的工作主线">创建虚拟机的工作主线</a></li><li style="--depth: 0"><a href="#核心服务与职责">核心服务与职责</a></li><li style="--depth: 0"><a href="#资源与隔离概念">资源与隔离概念</a></li><li style="--depth: 0"><a href="#部署架构与通信">部署架构与通信</a></li><li style="--depth: 0"><a href="#虚拟机的网络访问路径">虚拟机的网络访问路径</a></li><li style="--depth: 0"><a href="#配置与基本使用">配置与基本使用</a></li><li style="--depth: 1"><a href="#配置认证">配置认证</a></li><li style="--depth: 1"><a href="#查看可用资源">查看可用资源</a></li><li style="--depth: 1"><a href="#创建并检查实例">创建并检查实例</a></li><li style="--depth: 0"><a href="#与-kubernetesgardener-和-terraform-的关系">与 Kubernetes、Gardener 和 Terraform 的关系</a></li><li style="--depth: 0"><a href="#常见问题与排查方向">常见问题与排查方向</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#参考资料">参考资料</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hooks · Musuyin&#39; Home</title><meta name="description" content="Hook 把日志、校验和其他扩展放到稳定执行点，减少主循环中的业务分支。阅读时区分调用前、调用后和停止阶段，并追踪 Hook 的阻止结果如何影响后续流程。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/agent-hooks/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Hooks · Musuyin' Home"><meta property="og:description" content="Hook 把日志、校验和其他扩展放到稳定执行点，减少主循环中的业务分支。阅读时区分调用前、调用后和停止阶段，并追踪 Hook 的阻止结果如何影响后续流程。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/agent-hooks/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Hooks</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-07-21">2026-07-21</time></dd></div><div><dt>字数</dt><dd>1806</dd></div><div><dt>预计阅读</dt><dd>7 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Hooks</h1><time datetime="2026-07-21">2026-07-21</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>Hook 把日志、校验和其他扩展放到稳定执行点，减少主循环中的业务分支。阅读时区分调用前、调用后和停止阶段，并追踪 Hook 的阻止结果如何影响后续流程。</p>
+<p><a id="reference-hooks--挂在循环上不写进循环里"></a></p>
+<h2 id="hooks--挂在循环上不写进循环里">Hooks — 挂在循环上，不写进循环里</h2>
+<blockquote>
+<p><em>“挂在循环上，不写进循环里”</em> — hook 在工具执行前后注入扩展逻辑。</p>
+<p><strong>Harness 层</strong>：hook——扩展点不侵入循环。</p>
+</blockquote>
+<p><a id="reference-问题"></a></p>
+<h3 id="问题">问题</h3>
+<p>S03 的 Agent 有权限检查了。但每次加一个新检查，比如“记录每次 bash 调用”、“操作后自动 git add”，都要修改 <code>agent_loop</code> 函数。</p>
+<p>循环很快就变成了这样：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> agent_loop</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    while</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # ... LLM call ...</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> block </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.content:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> block.type </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "tool_use"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                continue</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            log_to_file(block)          </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 加一行</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            check_permission(block)     </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 加一行</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            notify_slack(block)         </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 又加一行</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            output </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> execute(block)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            auto_git_add(block)         </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 再加一行</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            # ... 很快循环就认不出来了</span></span></code></pre>
+<p>你想扩展的是 Agent 的行为，但你改的却是循环本身。循环应该是一个稳定的核心，扩展应该挂在外面。</p>
+<p><a id="reference-解决方案"></a></p>
+<h3 id="解决方案">解决方案</h3>
+<p><img alt="Hooks Overview|717" loading="lazy" decoding="async" width="800" height="460" src="/_astro/IMG-20260928133931283.1rweBq_l_Z2dF1WF.svg"></p>
+<p>s03 的循环和权限逻辑完全保留。唯一的变动是把 <code>check_permission()</code> 从循环体内移到了 hook 上，循环不再直接调用任何检查函数，改为 <code>trigger_hooks("PreToolUse", block)</code>，由注册表决定跑什么。</p>
+<p>四个事件，覆盖一个完整的 agent cycle：</p>
+<table>
+<thead>
+<tr>
+<th>事件</th>
+<th>触发时机</th>
+<th>典型用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UserPromptSubmit</td>
+<td>用户输入提交后、进入 LLM 前</td>
+<td>输入验证、注入上下文</td>
+</tr>
+<tr>
+<td>PreToolUse</td>
+<td>工具执行前</td>
+<td>权限检查、日志记录</td>
+</tr>
+<tr>
+<td>PostToolUse</td>
+<td>工具执行后</td>
+<td>副作用（自动 git add 等）、输出检查</td>
+</tr>
+<tr>
+<td>Stop</td>
+<td>循环即将退出时</td>
+<td>收尾清理（CC 还支持强制续跑）</td>
+</tr>
+</tbody>
+</table>
+<p>扩展通过 <code>register_hook()</code> 添加，循环只调用 <code>trigger_hooks()</code>。</p>
+<p><a id="reference-工作原理"></a></p>
+<h3 id="工作原理">工作原理</h3>
+<p><em>hook 注册表</em>：一个字典，事件名映射到回调列表。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">HOOKS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "UserPromptSubmit"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [],</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "PreToolUse"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [],</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "PostToolUse"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [],</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "Stop"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [],</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> register_hook</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(event: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, callback):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    HOOKS</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[event].append(callback)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> trigger_hooks</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(event: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">args):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> callback </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> HOOKS</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[event]:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        result </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> callback(</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">args)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result </span><span style="color:#D73A49;--shiki-dark:#F97583">is</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 返回值 ≠ None → hook 说"停"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span></span></code></pre>
+<p>教学版中，PreToolUse 的非 None 返回值会阻止本次工具执行，Stop 的非 None 返回值会强制续跑。UserPromptSubmit 和 PostToolUse 的返回值未被使用。</p>
+<p><strong>UserPromptSubmit</strong>，用户输入提交后、进入 LLM 前触发。CC 中可以拦截或修改输入，教学版只做日志演示：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> context_inject_hook</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(query: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    """Inject current working directory info into every prompt."""</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\033</span><span style="color:#032F62;--shiki-dark:#9ECBFF">[90m[HOOK] UserPromptSubmit: working in </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{WORKDIR}\033</span><span style="color:#032F62;--shiki-dark:#9ECBFF">[0m"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#6A737D;--shiki-dark:#6A737D">   # return None = no modification, let prompt through</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">register_hook(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"UserPromptSubmit"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, context_inject_hook)</span></span></code></pre>
+<p>在主循环中，用户输入后立即触发：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">query </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> input</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"s04 &gt;&gt; "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">trigger_hooks(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"UserPromptSubmit"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, query)   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># ← 进入 LLM 之前</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">history.append({</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: query})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">agent_loop(history)</span></span></code></pre>
+<p><strong>PreToolUse / PostToolUse</strong>，工具执行前后的 hook。s03 的权限检查逻辑现在包装成 PreToolUse hook，再加一个日志 hook 和一个大输出提醒：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># PreToolUse: 权限检查（s03 的逻辑，从循环移到 hook）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> permission_hook</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(block):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> block.name </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "bash"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> pattern </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> DENY_LIST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> pattern </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> block.input.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"command"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Permission denied by deny list"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> block.name </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"write_file"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"edit_file"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        path </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> block.input.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"path"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#005CC5;--shiki-dark:#79B8FF">WORKDIR</span><span style="color:#D73A49;--shiki-dark:#F97583"> /</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> path).resolve().is_relative_to(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">WORKDIR</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            choice </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> input</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"   Allow? [y/N] "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">).strip().lower()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> choice </span><span style="color:#D73A49;--shiki-dark:#F97583">not</span><span style="color:#D73A49;--shiki-dark:#F97583"> in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"y"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"yes"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Permission denied by user"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># PreToolUse: 日志</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> log_hook</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(block):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"[HOOK] </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">block.name</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">(...)"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># PostToolUse: 大文件提醒</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> large_output_hook</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(block, output):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(output)) </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 100000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"[HOOK] ⚠ Large output from </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">block.name</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">register_hook(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"PreToolUse"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, permission_hook)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">register_hook(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"PreToolUse"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, log_hook)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">register_hook(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"PostToolUse"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, large_output_hook)</span></span></code></pre>
+<p><strong>Stop</strong>，循环即将退出时触发（<code>stop_reason != "tool_use"</code>）。教学版用于打印收尾统计：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> summary_hook</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    """Print a summary when the loop is about to stop."""</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    tool_count </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> sum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#D73A49;--shiki-dark:#F97583"> for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> m </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> messages</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                     for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> b </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (m.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> isinstance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(m.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">), </span><span style="color:#005CC5;--shiki-dark:#79B8FF">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">else</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [])</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                     if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> isinstance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(b, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> b.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "tool_result"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\033</span><span style="color:#032F62;--shiki-dark:#9ECBFF">[90m[HOOK] Stop: session used </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">tool_count</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> tool calls</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\033</span><span style="color:#032F62;--shiki-dark:#9ECBFF">[0m"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#6A737D;--shiki-dark:#6A737D">   # return None = allow stop, return string = force continuation</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">register_hook(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Stop"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, summary_hook)</span></span></code></pre>
+<p>在 agent_loop 中，退出前触发：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.stop_reason </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "tool_use"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    force </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> trigger_hooks(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Stop"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, messages)   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># ← 退出之前</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> force:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # hook returned a message → inject it and continue</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        messages.append({</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: force})</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        continue</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span></span></code></pre>
+<p><strong>循环里只改了一处</strong>：s03 直接调用 <code>check_permission(block)</code>，s04 改为 <code>trigger_hooks("PreToolUse", block)</code>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> block </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.content:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> block.type </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "tool_use"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        continue</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # s03: if not check_permission(block): ...</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # s04: hook 替代硬编码</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    blocked </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> trigger_hooks(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"PreToolUse"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, block)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> blocked:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        results.append({</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"tool_result"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"tool_use_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: block.id,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">                        "content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(blocked)})</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        continue</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    handler </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> TOOL_HANDLERS</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.get(block.name)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    output </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> handler(</span><span style="color:#D73A49;--shiki-dark:#F97583">**</span><span style="color:#24292E;--shiki-dark:#E1E4E8">block.input) </span><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> handler </span><span style="color:#D73A49;--shiki-dark:#F97583">else</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Unknown: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">block.name</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    trigger_hooks(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"PostToolUse"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, block, output)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    results.append({</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"tool_result"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"tool_use_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: block.id,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">                    "content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: output})</span></span></code></pre>
+<p>四个 hook 覆盖了 agent cycle 的关键节点：输入 → 执行前 → 执行后 → 退出。循环只负责调用 trigger_hooks()，具体逻辑全在 hook 回调里。</p>
+<p><a id="reference-相对-s03-的变更"></a></p>
+<h3 id="相对-s03-的变更">相对 S03 的变更</h3>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s03)</th>
+<th>之后 (s04)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>扩展方式</td>
+<td>check_permission() 硬编码在循环里</td>
+<td>HOOKS 注册表 + trigger_hooks()</td>
+</tr>
+<tr>
+<td>新函数</td>
+<td>—</td>
+<td>register_hook, trigger_hooks</td>
+</tr>
+<tr>
+<td>hook 回调</td>
+<td>—</td>
+<td>context_inject_hook, permission_hook, log_hook, large_output_hook, summary_hook</td>
+</tr>
+<tr>
+<td>循环</td>
+<td>直接调用 check_permission()</td>
+<td>调用 trigger_hooks(“PreToolUse”, …)</td>
+</tr>
+<tr>
+<td>退出控制</td>
+<td>无</td>
+<td>trigger_hooks(“Stop”, …) 可阻止退出</td>
+</tr>
+<tr>
+<td>输入拦截</td>
+<td>无</td>
+<td>trigger_hooks(“UserPromptSubmit”, …) 可注入上下文</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-试一下"></a></p>
+<h3 id="试一下">试一下</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> learn-claude-code</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">python</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> s04_hooks/code.py</span></span></code></pre>
+<p>试试这些 prompt：</p>
+<ol>
+<li><code>Read the file README.md</code>（应该直接通过，观察 hook 日志）</li>
+<li><code>Create a file called test.txt</code>（通过后观察 PostToolUse 是否触发）</li>
+<li><code>Delete all temporary files in /tmp</code>（bash + rm 触发权限 hook）</li>
+</ol>
+<p>观察重点：每次工具执行前，是否出现了 <code>[HOOK]</code> 日志？权限被拒时，是 hook 拦截的还是循环里硬编码的？</p>
+<p><a id="reference-接下来"></a></p>
+<h3 id="接下来">接下来</h3>
+<p>Agent 现在能安全执行操作了。但它有没有停下来想过“我应该先做什么，再做什么”？给它一个复杂任务，它是一上来就动手，还是先列个计划？</p>
+<p>S05 TodoWrite → 给 Agent 一个计划工具。先列清单，再做。</p>
+<p><a id="reference-claude-code"></a></p>
+<h2 id="claude-code">Claude Code</h2>
+<blockquote>
+<p>以下基于 CC 源码 <code>toolHooks.ts</code>（650 行）、<code>hooks.ts</code>、<code>stopHooks.ts</code>、<code>coreTypes.ts</code> 的完整分析。</p>
+</blockquote>
+<p><a id="reference-hook-事件不止这-4-个而是-27-个"></a></p>
+<h3 id="hook-事件不止这-4-个而是-27-个">Hook 事件：不止这 4 个，而是 27 个</h3>
+<p>教学版只讲了 PreToolUse 和 PostToolUse。CC 实际有 27 个 hook 事件（<code>coreTypes.ts:25-53</code>）：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>事件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工具相关</td>
+<td><code>PreToolUse</code>, <code>PostToolUse</code>, <code>PostToolUseFailure</code></td>
+</tr>
+<tr>
+<td>会话相关</td>
+<td><code>SessionStart</code>, <code>SessionEnd</code>, <code>Stop</code>, <code>StopFailure</code>, <code>Setup</code></td>
+</tr>
+<tr>
+<td>用户交互</td>
+<td><code>UserPromptSubmit</code>, <code>Notification</code>, <code>PermissionRequest</code>, <code>PermissionDenied</code></td>
+</tr>
+<tr>
+<td>子 Agent</td>
+<td><code>SubagentStart</code>, <code>SubagentStop</code></td>
+</tr>
+<tr>
+<td>压缩相关</td>
+<td><code>PreCompact</code>, <code>PostCompact</code></td>
+</tr>
+<tr>
+<td>团队相关</td>
+<td><code>TeammateIdle</code>, <code>TaskCreated</code>, <code>TaskCompleted</code></td>
+</tr>
+<tr>
+<td>其他</td>
+<td><code>Elicitation</code>, <code>ElicitationResult</code>, <code>ConfigChange</code>, <code>WorktreeCreate</code>, <code>WorktreeRemove</code>, <code>InstructionsLoaded</code>, <code>CwdChanged</code>, <code>FileChanged</code></td>
+</tr>
+</tbody>
+</table>
+<p>教学版只讲 4 个核心事件（UserPromptSubmit、PreToolUse、PostToolUse、Stop），因为它们覆盖了一个完整 agent cycle 的关键节点。其他 23 个都是同样的模式。</p>
+<p><a id="reference-hookresult-常用字段摘录"></a></p>
+<h3 id="hookresult-常用字段摘录">HookResult 常用字段摘录</h3>
+<p>CC 的 <code>HookResult</code>（<code>types/hooks.ts:260-275</code>）有 14 个字段，以下是常用字段：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>message</code></td>
+<td>Message</td>
+<td>可选 UI 消息</td>
+</tr>
+<tr>
+<td><code>blockingError</code></td>
+<td>HookBlockingError</td>
+<td>阻塞错误 → 注入对话让模型自纠</td>
+</tr>
+<tr>
+<td><code>outcome</code></td>
+<td>success/blocking/non_blocking_error/cancelled</td>
+<td>执行结果</td>
+</tr>
+<tr>
+<td><code>preventContinuation</code></td>
+<td>boolean</td>
+<td>阻止后续执行</td>
+</tr>
+<tr>
+<td><code>stopReason</code></td>
+<td>string</td>
+<td>停止原因描述</td>
+</tr>
+<tr>
+<td><code>permissionBehavior</code></td>
+<td>allow/deny/ask/passthrough</td>
+<td>hook 返回权限决策</td>
+</tr>
+<tr>
+<td><code>updatedInput</code></td>
+<td>Record</td>
+<td>修改工具输入</td>
+</tr>
+<tr>
+<td><code>additionalContext</code></td>
+<td>string</td>
+<td>附加上下文</td>
+</tr>
+<tr>
+<td><code>updatedMCPToolOutput</code></td>
+<td>unknown</td>
+<td>MCP 工具输出修改</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-关键不变式hook-allow-不能绕过-denyask-规则"></a></p>
+<h3 id="关键不变式hook-allow-不能绕过-denyask-规则">关键不变式：Hook ‘allow’ 不能绕过 deny/ask 规则</h3>
+<p>这是 CC 权限系统最重要的安全设计（<code>toolHooks.ts:325-331</code>）：<strong>hook 返回 allow 时，仍然要检查 settings.json 的 deny/ask 规则</strong>。即使用户的 hook 脚本说“允许”，如果在 settings.json 中禁用了这个工具，操作仍然会被阻止。</p>
+<p>教学版没有这个层次，只把 PreToolUse 的非 None 返回值解释为阻止本次工具执行。这在教学场景中够了，但在生产环境中会形成安全漏洞。</p>
+<p><a id="reference-stophookactive-机制"></a></p>
+<h3 id="stophookactive-机制"><em>stopHookActive</em> 机制</h3>
+<p>CC 的 Stop hooks 有一个防无限循环机制（<code>query.ts:212,1300</code>）：<code>stopHookActive</code> 状态字段。当 stop hooks 产生 blockingError 时，循环带 <code>stopHookActive: true</code> 重入下一轮。后续迭代中 stop hooks 看到这个标志就不会再次触发。这防止了一个永不停机的 bug：模型自纠后 stop hook 再次报错 → 模型再自纠 → stop hook 再报错……</p>
+<p><a id="reference-hook_stopped_continuation"></a></p>
+<h3 id="hook_stopped_continuation">hook_stopped_continuation</h3>
+<p>PostToolUse hooks 返回 <code>preventContinuation: true</code> 时，会产生一个 <code>hook_stopped_continuation</code> 附件（<code>toolHooks.ts:117-130</code>）。query.ts（L1388-1393）检测到后设置 <code>shouldPreventContinuation = true</code>，循环退出。这是 “hook 优雅地让 Agent 停机” 的机制，不是崩溃，是完成。</p>
+<p><a id="reference-教学版的简化是刻意的"></a></p>
+<h4 id="教学版的简化是刻意的">教学版的简化是刻意的</h4>
+<ul>
+<li>27 个事件 → 4 个（UserPromptSubmit/PreToolUse/PostToolUse/Stop）：覆盖 agent cycle 关键节点</li>
+<li>14 个字段 → 简单的返回值（None = 继续，非 None = 阻止/续跑）：心智负担降到最低</li>
+<li>Hook allow vs deny/ask 不变式 → 省略：教学版没有 settings.json 层</li>
+<li>stopHookActive → 省略：教学版 Stop hook 只做简单续跑，不涉及防无限循环机制</li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>能否用 Hook 扩展行为而不修改循环？依据原文解释为什么 Hook 返回 allow 不应越过已有 deny/ask 规则。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续理解相关机制：<a href="/notes/computer-science/agent/framework/learn-claude-code/agent-todo-planning/">S05-Todo Write</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#hooks--挂在循环上不写进循环里">Hooks — 挂在循环上，不写进循环里</a></li><li style="--depth: 1"><a href="#问题">问题</a></li><li style="--depth: 1"><a href="#解决方案">解决方案</a></li><li style="--depth: 1"><a href="#工作原理">工作原理</a></li><li style="--depth: 1"><a href="#相对-s03-的变更">相对 S03 的变更</a></li><li style="--depth: 1"><a href="#试一下">试一下</a></li><li style="--depth: 1"><a href="#接下来">接下来</a></li><li style="--depth: 0"><a href="#claude-code">Claude Code</a></li><li style="--depth: 1"><a href="#hook-事件不止这-4-个而是-27-个">Hook 事件：不止这 4 个，而是 27 个</a></li><li style="--depth: 1"><a href="#hookresult-常用字段摘录">HookResult 常用字段摘录</a></li><li style="--depth: 1"><a href="#关键不变式hook-allow-不能绕过-denyask-规则">关键不变式：Hook ‘allow’ 不能绕过 deny/ask 规则</a></li><li style="--depth: 1"><a href="#stophookactive-机制">stopHookActive 机制</a></li><li style="--depth: 1"><a href="#hook_stopped_continuation">hook_stopped_continuation</a></li><li style="--depth: 2"><a href="#教学版的简化是刻意的">教学版的简化是刻意的</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

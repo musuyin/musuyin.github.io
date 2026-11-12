@@ -1,0 +1,729 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>记忆机制 · Musuyin&#39; Home</title><meta name="description" content="记忆设计先决定信息的生命周期，再决定存储和取回方式。当前输入、上下文历史、结构化事实与长期资料承担不同职责；向量检索只是召回手段，不能代替有效期、来源和冲突管理。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/theory/agent-memory/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="记忆机制 · Musuyin' Home"><meta property="og:description" content="记忆设计先决定信息的生命周期，再决定存储和取回方式。当前输入、上下文历史、结构化事实与长期资料承担不同职责；向量检索只是召回手段，不能代替有效期、来源和冲突管理。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/theory/agent-memory/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">记忆机制</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-09-11">2026-09-11</time></dd></div><div><dt>字数</dt><dd>10905</dd></div><div><dt>预计阅读</dt><dd>37 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a><a href="/tags/Memory/">#Memory</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>记忆机制</h1><time datetime="2026-09-11">2026-09-11</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a><a href="/tags/Memory/">#Memory</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>记忆设计先决定信息的生命周期，再决定存储和取回方式。当前输入、上下文历史、结构化事实与长期资料承担不同职责；向量检索只是召回手段，不能代替有效期、来源和冲突管理。</p>
+<p>Agent 需要记忆才能在多步任务中保持状态、跨任务积累知识。</p>
+<p>记忆机制分四层：</p>
+<ul>
+<li>感知记忆：当前输入的原始内容</li>
+<li>短期记忆：context window 里的对话历史</li>
+<li>长期记忆：存在外部数据库、语义检索召回</li>
+<li>实体记忆：结构化提取的关键事实</li>
+</ul>
+<p>实际设计时要解决三个核心问题：存什么、怎么存、什么时候取出来用，根据信息类型选合适的存储方式，再搭配主动检索和按需检索两种策略使用。</p>
+<p><a id="reference-记忆类型"></a></p>
+<h2 id="记忆类型">记忆类型</h2>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>载体</th>
+<th>容量</th>
+<th>生命周期</th>
+<th>访问方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>感知记忆</td>
+<td>当次输入</td>
+<td>极小</td>
+<td>单次调用</td>
+<td>即时访问</td>
+</tr>
+<tr>
+<td>短期记忆</td>
+<td>context window</td>
+<td>受 token 限制</td>
+<td>一次任务</td>
+<td>直接读取</td>
+</tr>
+<tr>
+<td>长期记忆</td>
+<td>向量/关系数据库</td>
+<td>可扩展，受存储限制</td>
+<td>持久</td>
+<td>语义或精确检索</td>
+</tr>
+<tr>
+<td>实体记忆</td>
+<td>结构化存储</td>
+<td>可扩展，受存储限制</td>
+<td>持久</td>
+<td>精确查询</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-感知记忆-sensory-memory"></a></p>
+<h3 id="感知记忆-sensory-memory">感知记忆 Sensory Memory</h3>
+<p>这是最短暂的一层，就是「当前这次调用的原始输入」，用户发来的这条消息、上传的截图、传入的文档。它的生命周期只有一次调用，处理完就消失，不会主动保留。类比到人的话，就是你刚听到的一句话，如果没有主动去记，几秒后就忘了。感知记忆就是这个「刚进来还没处理」的原始感知，它存在的意义是给模型提供一个「入口」来接收外部信息。</p>
+<p><a id="reference-短期记忆-short-term-memory"></a></p>
+<h3 id="短期记忆-short-term-memory">短期记忆 Short-term Memory</h3>
+<p>这是当前模型请求可见的 <code>messages</code> 或上下文视图，包括用户消息、模型输出及工具结果。应用保存的完整历史可能比这个视图更大；裁剪或压缩后，模型本次只看到保留的片段和摘要。会话关闭是否清空、是否可以恢复，由应用的持久化机制决定，不是模型窗口本身决定的。</p>
+<p><a id="reference-长期记忆-long-term-memory"></a></p>
+<h3 id="长期记忆-long-term-memory">长期记忆 Long-term Memory</h3>
+<p>这是跨任务保留的信息，存在外部数据库里，通常是向量数据库、关系数据库或 Key-Value 存储。任务结束了，信息不会消失，下次需要时去检索拿回来用。</p>
+<p>向量数据库支持「语义检索」：不需要知道存的时候用了什么关键词，只要意思相近就能检索到候选内容。对任务状态、准确 ID 和用户约束，结构化存储与精确查询同样重要，长期记忆不必全部经过 embedding。</p>
+<p><a id="reference-情节记忆-episodic-memory"></a></p>
+<h4 id="情节记忆-episodic-memory">情节记忆 Episodic Memory</h4>
+<p>存的是具体的事件经历。一段完整的任务经历，包含了时间、场景、过程和结果。</p>
+<p>情节记忆的价值在于，当 Agent 遇到类似的新任务时，可以检索出历史上的相似经历，参考上次是怎么解决的，避免重复踩坑。</p>
+<p><a id="reference-语义记忆-semantic-memory"></a></p>
+<h4 id="语义记忆-semantic-memory">语义记忆 Semantic Memory</h4>
+<p>存的是从多次经历中提炼出来的通用知识和规律</p>
+<p>不再是某一次具体的事件记录，而是跨多次经验总结出来的抽象知识。语义记忆的信息密度更高，检索时也更容易命中，因为它直接存储的就是结论而不是过程</p>
+<p><a id="reference-程序记忆-procedural-memory"></a></p>
+<h4 id="程序记忆-procedural-memory">程序记忆 Procedural Memory</h4>
+<p>存的是怎么做某件事的操作流程。</p>
+<p>程序记忆在处理重复性任务时特别有用，Agent 不需要每次都从头推理，直接调出对应的 SOP 执行就行，既快又稳。</p>
+<p><a id="reference-实体记忆-entity-memory"></a></p>
+<h3 id="实体记忆-entity-memory">实体记忆 Entity Memory</h3>
+<p>比长期记忆更精炼，它不是存原文，而是把对话中出现的关键实体和事实主动提取出来，存成结构化字段</p>
+<p>信息密度高，查询快，而且不受原始表述方式影响。</p>
+<p><a id="reference-设计要点"></a></p>
+<h2 id="设计要点">设计要点</h2>
+<p><a id="reference-存什么"></a></p>
+<h3 id="存什么">存什么</h3>
+<p>不是所有内容都值得写入长期记忆，存太多反而会引入噪音，让检索的精准度下降。判断标准其实很简单：「这条信息，下次任务开始时如果知道，会让 Agent 做得更好吗？」</p>
+<p>通常值得存的有三类：用户偏好和习惯（语言风格、技术栈偏好、工作习惯）、任务执行中产生的关键结论和决策（比如「调研发现竞品 A 的定价策略是按用量收费」）、以及外部知识（产品文档、FAQ、历史案例）。</p>
+<p>通常不需要全部写入知识检索库的有：冗长的中间过程、完整日志和无关闲聊。这些内容会稀释知识检索的信噪比，但“不进入知识库”不等于“删除原始记录”。工具结果、操作记录和用户原话仍可能需要按应用的隐私与保留策略保存，用于追溯、恢复或业务验证。</p>
+<p><a id="reference-怎么存"></a></p>
+<h3 id="怎么存">怎么存</h3>
+<p>根据信息的类型选合适的存储介质，而不是一刀切地全部塞进向量数据库。</p>
+<ul>
+<li>需要语义检索的内容，比如文档知识、对话摘要这类非结构化的文本，适合存进向量数据库，用 embedding 编码后通过相似度检索。</li>
+<li>结构化的用户偏好和状态字段，比如语言偏好、项目配置这些可以精确查询的内容，更适合用关系数据库或 Key-Value 存储，查询速度快，不需要语义理解。</li>
+</ul>
+<p>混合存储是主流做法：结构化的偏好字段用关系数据库精确查，非结构化的知识和历史用向量数据库语义检索，两者配合使用。</p>
+<p><a id="reference-何时取"></a></p>
+<h3 id="何时取">何时取</h3>
+<ul>
+<li>主动检索：在任务开始前，用当前任务描述检索相关记忆，作为有来源标记的背景资料加入上下文，减少用户重复交代背景。检索数据不应自动提升为 system 级规则。</li>
+<li>被动触发：Agent 在推理过程中，判断当前步骤需要某类特定知识时，主动发起检索。具体做法是把「查记忆」封装成一个 Tool，让 Agent 自己决定什么时候调。这种方式更灵活，但依赖模型判断什么时候该去查。</li>
+</ul>
+<p>实践中可以结合两种方式：session 开始时加载必要偏好和背景，任务执行中再按需检索。采用哪种组合，应依据召回率、任务成功率和成本评估；加载时保留用户偏好、事实资料和平台规则各自的来源与权限边界。</p>
+<p><a id="reference-context-window-管理"></a></p>
+<h2 id="context-window-管理">Context Window 管理</h2>
+<p>短期记忆存在有限的 context window 中。多步任务不断加入对话和工具结果，输入可能超过模型服务上限。服务可能直接拒绝请求；某些框架会自动截断，但截断是框架策略，不是所有模型共有的行为。</p>
+<p>完整记录保存在应用侧，并不意味着模型每次都需要看到完整记录。管理上下文的关键是：从完整记录中选择本轮需要的内容，并让被移出的重要信息可以准确找回。</p>
+<p>记忆框架：Mem0、Letta、Zep</p>
+<p><a id="reference-完整记录与模型上下文分开"></a></p>
+<h3 id="完整记录与模型上下文分开">完整记录与模型上下文分开</h3>
+<p>建议区分三类数据：</p>
+<table>
+<thead>
+<tr>
+<th>数据</th>
+<th>内容</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>原始事件记录</td>
+<td>用户原话、模型输出、工具参数与结果、时间和执行状态</td>
+<td>追溯与恢复，不因压缩被摘要覆盖</td>
+</tr>
+<tr>
+<td>活跃上下文</td>
+<td>固定指令、关键状态、历史摘要、最近完整交互、必要证据</td>
+<td>下一次发送给模型的有限视图</td>
+</tr>
+<tr>
+<td>结构化任务状态</td>
+<td>当前目标、用户约束、任务依赖、操作标识、验收结果</td>
+<td>稳定保存不能靠摘要猜测的事实</td>
+</tr>
+</tbody>
+</table>
+<p>记录应按授权范围和保留期限保存。摘要只是对某一段记录的派生表示，应有覆盖范围、版本和来源标识；摘要不能成为唯一事实来源。</p>
+<p><a id="reference-压缩触发与预算"></a></p>
+<h3 id="压缩触发与预算">压缩触发与预算</h3>
+<p>每次模型调用前，根据完整请求估算或计算 token，其中包括工具 schema、检索资料和消息封装。窗口与输入预算的区别见 <a href="/notes/computer-science/agent/theory/llm-runtime-requests/#reference-%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AA%97%E5%8F%A3%E4%B8%8E%E5%BA%94%E7%94%A8%E9%A2%84%E7%AE%97">S06-LLM</a>。</p>
+<p>设输入达到应用阈值时开始压缩，阈值必须给输出、安全余量和后续工具结果留空间。没有通用的“到 80% 必须压缩”常量；大日志工具与短查询工具所需的余量不同。</p>
+<p>不能只按轮数触发：十轮短消息可能很小，一轮大文件可能超限。还可以在任务阶段切换时压缩已经完成的阶段，使摘要围绕当前目标组织。</p>
+<p>压缩调用自己也有输入与输出预算。历史已经超出压缩模型窗口时，应按完整交互组分段处理、先移出可按引用读取的大结果，或使用配置好的更大窗口模型；这些都需要明确实现和记录，不能直接再次发送同一份超限请求。</p>
+<p><a id="reference-压缩策略"></a></p>
+<h3 id="压缩策略">压缩策略</h3>
+<p><a id="reference-工具结果裁剪与引用"></a></p>
+<h4 id="工具结果裁剪与引用">工具结果裁剪与引用</h4>
+<p>先减少不必要的输入：日志工具支持时间过滤、分页，文件工具支持行范围读取；不要先把整份数据放进上下文，再付费让模型把它压回去。</p>
+<p>对确实需要留存的大结果，先保存原文，再把活跃上下文中的内容替换成有限预览与稳定引用，注明是否截断及如何读取完整结果。后续读取历史结果与重新调用工具不同：重新查询得到的内容可能已经变化，写入类工具更不能为“恢复记忆”再次执行。</p>
+<p><a id="reference-滑动窗口"></a></p>
+<h4 id="滑动窗口">滑动窗口</h4>
+<p>只保留最近若干轮或一定 token 预算内的交互。实现简单，但早期用户约束、关键决策和执行记录可能退出模型视野，因此通常还需要固定保留区或结构化状态。</p>
+<p>裁剪边界应按完整交互组确定。例如一个 assistant 消息提出多个工具调用，之后有对应结果，不能随意在组内切开而留下孤立结果。</p>
+<p><a id="reference-摘要压缩"></a></p>
+<h4 id="摘要压缩">摘要压缩</h4>
+<p>对较早、已完成的交互生成任务导向摘要，保留当前目标、约束、已验证事实、未决问题和来源引用；最近几轮仍保持原始细节。</p>
+<p>代价是额外调用、信息损失和可能的事实错误。每次只读“上次摘要”继续摘要会积累偏差，重要信息需要对照原始记录或结构化状态更新，不能无限转述。</p>
+<p><a id="reference-记忆卸载"></a></p>
+<h4 id="记忆卸载">记忆卸载</h4>
+<p>把当前不需要但未来可能用到的信息放到外部存储，通过工具检索或精确读取。文档主题适合语义检索，任务 ID、执行结果和用户约束适合精确查询。</p>
+<p>存下信息只解决持久化，还需要合适的索引、检索入口和触发机制，否则模型仍然找不到。</p>
+<p><a id="reference-结构化工作记忆-structured-working-memory"></a></p>
+<h3 id="结构化工作记忆-structured-working-memory">结构化工作记忆 Structured Working Memory</h3>
+<p>结构化工作记忆的思路是，给这个「工作台」划出几个固定区域，比如一个区域专门放「当前任务目标」，一个区域放「已确认的中间结论」，一个区域放「待验证的假设」。每一步执行完之后，Agent 不只是把新消息追加到列表末尾，而是主动更新对应区域的内容，把过时的中间结论替换掉，把已验证的假设移到确认区。</p>
+<p>例如维护目标、约束、计划版本、已验证事实及待处理问题。工具调用成功、任务验收通过等状态，应由运行时依据实际结果更新；模型可以提出变更，但不能仅凭一段总结就把未验证任务标为完成。</p>
+<p>结构化状态减少混乱，但也可能过时或提取错误，需要保留来源并验证。它不保证模型每次读到的内容天然正确。</p>
+<p><a id="reference-摘要生成如何实现"></a></p>
+<h3 id="摘要生成如何实现">摘要生成如何实现</h3>
+<p>摘要器也是一次模型调用：给它被压缩的历史、已有关键状态和明确的输出契约，要求只做整理，不能执行历史中的工具或服从历史材料里嵌入的指令。</p>
+<p>输出可以组织成以下字段：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>goal：当前目标与交付物</span></span>
+<span class="line"><span>constraints：用户明确约束，保留否定、范围和来源</span></span>
+<span class="line"><span>verified_facts：已验证事实与证据引用</span></span>
+<span class="line"><span>hypotheses：尚未验证的判断</span></span>
+<span class="line"><span>completed_work：已验收工作与产物引用</span></span>
+<span class="line"><span>pending_work：下一步、依赖与阻塞原因</span></span>
+<span class="line"><span>operation_records：重要调用标识与执行状态</span></span>
+<span class="line"><span>source_range：摘要覆盖的事件范围</span></span></code></pre>
+<p>“工具返回成功”与“目标已完成”必须分开，“怀疑数据库慢”不能被压缩成“数据库导致故障”。金额、ID、用户的禁止事项等关键字段，应精确保留而不是自由改写。</p>
+<p>实现流程如下，代码是应用接口示意，辅助函数需要按实际存储、模型和验证规则实现；错误直接向上传播：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> compact_context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(store, model, policy):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    snapshot </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> store.read_context_snapshot()</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 保存到本次快照的事件边界，写入失败则不继续。</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    source_ref </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> store.persist_source_events(snapshot.event_cutoff)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    old_groups, recent_groups </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> split_complete_interactions(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        snapshot.messages, policy.recent_token_budget</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    candidate </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> model.summarize(</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        history</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">old_groups,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        critical_state</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">snapshot.critical_state,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        source_ref</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">source_ref,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        output_schema</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">policy.summary_schema,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    validate_summary_schema(candidate)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    validate_critical_facts(candidate, snapshot.critical_state)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    validate_source_references(candidate, source_ref)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    next_view </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> build_context_view(</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        instructions</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">snapshot.instructions,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        critical_state</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">snapshot.critical_state,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        summary</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">candidate,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        recent_interactions</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">recent_groups,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    validate_tool_call_pairs(next_view)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    validate_context_budget(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        next_view, </span><span style="color:#E36209;--shiki-dark:#FFAB70">tools</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">snapshot.selected_tools, </span><span style="color:#E36209;--shiki-dark:#FFAB70">policy</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">policy</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 原子提交；压缩期间如果上下文版本已改变，提交报错而不是覆盖新消息。</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    store.commit_context(</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        expected_version</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">snapshot.version,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        messages</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">next_view,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        source_ref</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">source_ref,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> next_view</span></span></code></pre>
+<p>关键事实校验可以比较原始约束、任务 ID、数值和状态字段是否一致；来源校验检查引用是否存在。这些机械校验能发现部分错误，但不能证明所有语义都正确，仍需要离线评估和运行时任务验收。</p>
+<p>压缩阈值、摘要大小和最近历史预算应由配置明确给出。不能让摘要无限长，否则“压缩成功”之后依然可能超限。</p>
+<p><a id="reference-压缩失败时如何处理"></a></p>
+<h3 id="压缩失败时如何处理">压缩失败时如何处理</h3>
+<p>失败既可能是服务异常，也可能是摘要生成成功但内容错误。应区别处理，并保留事件范围、模型配置、输入大小与失败原因用于定位。</p>
+<table>
+<thead>
+<tr>
+<th>失败</th>
+<th>处理原则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>原始记录保存失败</td>
+<td>不删除活跃内容，不提交摘要，显式报错</td>
+</tr>
+<tr>
+<td>摘要请求超限</td>
+<td>报告摘要输入过大；需要明确的分段或预算调整流程</td>
+</tr>
+<tr>
+<td>摘要模型超时或服务异常</td>
+<td>候选不提交；仅在已定义的恢复协议内有限重试</td>
+</tr>
+<tr>
+<td>Schema 非法、关键字段缺失或篡改</td>
+<td>拒绝摘要，报告校验失败，保留原始记录</td>
+</tr>
+<tr>
+<td>新上下文仍超限</td>
+<td>拒绝替换，报告预算错误，不无限重复相同压缩</td>
+</tr>
+<tr>
+<td>并发版本冲突</td>
+<td>拒绝覆盖新状态，基于新快照重新发起明确的压缩流程</td>
+</tr>
+</tbody>
+</table>
+<p>失败后保留旧视图是为了保护数据，并不代表可以忽略错误继续运行。旧视图若已经超限，业务循环需要暂停或终止，直到恢复成功；旧视图仍可用时，也必须依据应用定义的恢复协议处理，不能静默回退。</p>
+<p>重要事实缺失属于语义失败，不能只检查“摘要 API 返回了 200”。</p>
+<p><a id="reference-重要记忆丢失时如何恢复"></a></p>
+<h3 id="重要记忆丢失时如何恢复">重要记忆丢失时如何恢复</h3>
+<p>先辨别信息是退出了模型上下文，还是底层记录真的丢失。</p>
+<ol>
+<li>原始记录还在：依据摘要的来源范围、事实 ID 或工具调用 ID 精确读取，再把当前需要的片段加入上下文。</li>
+<li>外部记忆存在但检索未命中：使用准确 ID、关键词或元数据过滤验证，不把一次向量召回失败当成“没有记录”。</li>
+<li>原始记录也没保存：无法靠另一轮 LLM 准确还原；应说明缺失并重新获取信息。重新查询外部状态只能得到新的观察，不能伪造历史。</li>
+</ol>
+<p>预防上，用户限制、授权范围、关键 ID、金额、验收结果和写入操作记录不应只依赖自然语言摘要。把它们保存在有来源的结构化状态中，并在相关调用前固定加载，能降低关键事实退出上下文的风险。</p>
+<p>“固定加载”是可见性策略，不等于把所有记忆升级成 system 指令；外部文本仍保留外部资料的信任边界。</p>
+<p><a id="reference-如何评估压缩策略"></a></p>
+<h3 id="如何评估压缩策略">如何评估压缩策略</h3>
+<p>压缩的目标是降低资源消耗，同时让 Agent 在后续任务中保留足够证据与状态。仅看摘要短不短、读起来顺不顺，不能说明策略有效。</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>可测指标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>大小</td>
+<td>被压缩片段的原 token / 新摘要 token；完整新上下文大小</td>
+</tr>
+<tr>
+<td>成本</td>
+<td>摘要额外费用、后续检索费用、整项任务总费用、每个成功任务费用</td>
+</tr>
+<tr>
+<td>时延</td>
+<td>压缩耗时、后续补读次数、整项任务平均与 P95 时延</td>
+</tr>
+<tr>
+<td>信息保真</td>
+<td>关键事实保留率、错误事实与来源引用比例、否定与条件是否保留</td>
+</tr>
+<tr>
+<td>行为正确性</td>
+<td>约束违反率、重复写入比例、遗漏任务与错误完成判断比例</td>
+</tr>
+<tr>
+<td>稳定性</td>
+<td>摘要失败率、超限比例、工具调用配对错误、连续多次压缩后的质量</td>
+</tr>
+<tr>
+<td>最终效果</td>
+<td>真实任务验收通过率、准确恢复所需证据的比例</td>
+</tr>
+</tbody>
+</table>
+<p>关键事实保留率可以定义为：压缩后仍准确存在于新上下文或可可靠检索的关键事实数 / 标注的关键事实总数。关键权限或金额错误应单独统计，不能让它们被大量普通事实的高平均分掩盖。</p>
+<p>评估分两层：</p>
+<ul>
+<li>固定轨迹回放：对同一份历史分别使用滑动窗口、摘要、摘要加最近历史、结构化状态加检索，检查保留信息及恢复能力。</li>
+<li>端到端继续执行：从压缩点继续跑后续任务，用实际产物和业务条件验收，观察是否忘了约束、重复操作或误判完成。</li>
+</ul>
+<p>测试集应包含：早期给出的禁止事项、相似 ID、大工具结果、失败后未知状态、需求修正、互相矛盾的观察，以及连续多次压缩。相同窗口、输出预算、模型和任务条件下比较，随机生成场景重复运行；超出同一窗口的无压缩方案应记录为超限，不能换成更大模型后声称公平对照。</p>
+<p>LLM 评审可以辅助判断语义，但关键约束与最终完成应尽量用确定性断言、来源核对或人工标注验证。压缩模型评判自己的摘要，不能独自提供可靠的正确性证据。</p>
+<p><a id="reference-长期记忆"></a></p>
+<h2 id="长期记忆">长期记忆</h2>
+<p>长期记忆的存储按访问需求选择。向量数据库加 Embedding 适合语义检索，关系数据库、Key-Value 存储或文件记录适合精确状态与可追溯原文。</p>
+<p><a id="reference-embedding"></a></p>
+<h3 id="embedding">Embedding</h3>
+<p>Embedding 是把一段文字转化成一组数字的过程。这组数字通常有几百到几千个维度，它们共同捕捉了这段文字的「语义」。语义相近的文字，转化出来的数字向量在空间里也靠得很近。</p>
+<p><a id="reference-向量数据库"></a></p>
+<h3 id="向量数据库">向量数据库</h3>
+<p>专门存这些数字向量的数据库。它最核心的能力是「相似度检索」：给你一个查询向量，找出数据库里和它距离最近的几条记录，也就是语义最相关的内容。</p>
+<p><a id="reference-记忆整合"></a></p>
+<h2 id="记忆整合">记忆整合</h2>
+<p>Agent 用久了之后，长期记忆里会积累大量的碎片化信息。同一个主题可能存了十几条不同时间的记忆，有些内容重复，有些已经过时，有些甚至互相矛盾。如果不做整理，检索时噪音越来越大，有用的记忆被淹没在无用的碎片里。</p>
+<p>记忆整合可以在新事实写入时增量执行，也可以定期处理历史积累。它实际包含候选检索、事实关系判定、修订决策和持久化提交。向量数据库负责帮助找出相关记录，事实是否等价、是否冲突、哪条可以生效，由应用的事实模型与证据规则决定。</p>
+<p><a id="reference-存储单位是带来源的事实声明"></a></p>
+<h3 id="存储单位是带来源的事实声明">存储单位是带来源的事实声明</h3>
+<p>只存「文本 + embedding + 更新时间」，很难可靠去重和处理冲突。需要从原话提取原子事实，一条记录尽量只表示一个可比较的声明，并保留原话作为证据。</p>
+<p>例如「项目 A 的预算是 3000 元，报告用中文」应拆成预算与报告语言两个事实，不能在预算变化时覆盖整段文字，顺便丢掉语言要求。</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>memory_id</code></td>
+<td>某条声明的稳定标识，修订后仍可追溯</td>
+</tr>
+<tr>
+<td><code>owner_id</code>、<code>subject</code></td>
+<td>谁的记忆、关于谁或什么，防止跨用户或跨实体合并</td>
+</tr>
+<tr>
+<td><code>predicate</code>、<code>value</code>、<code>negated</code></td>
+<td>规范化属性、带类型或单位的值、否定信息</td>
+</tr>
+<tr>
+<td><code>scope</code></td>
+<td>适用的项目、任务或环境</td>
+</tr>
+<tr>
+<td><code>valid_from</code>、<code>valid_to</code></td>
+<td>事实声称适用的时间区间</td>
+</tr>
+<tr>
+<td><code>recorded_at</code></td>
+<td>系统何时收到声明，与事实有效时间不同</td>
+</tr>
+<tr>
+<td><code>source_event_id</code>、<code>source_quote</code></td>
+<td>原始消息或观察及准确引文</td>
+</tr>
+<tr>
+<td><code>status</code>、<code>version</code></td>
+<td>当前确认状态和修订版本</td>
+</tr>
+<tr>
+<td><code>supersedes</code>、<code>retracts</code></td>
+<td>替代哪条旧版本，或撤回哪条错误声明</td>
+</tr>
+</tbody>
+</table>
+<p>例如，同一项目预算的声明可以表示为：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "memory_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"m_budget_1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "owner_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user_1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "subject"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"project_A"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "predicate"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"budget_limit"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "value"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span><span style="color:#005CC5;--shiki-dark:#79B8FF">"amount"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">"currency"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"CNY"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">},</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "negated"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "scope"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"project_A:current_plan"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "valid_from"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"2026-10-28T09:00:00+08:00"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "valid_to"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "recorded_at"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"2026-10-28T09:00:00+08:00"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "source_event_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"event_1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "source_quote"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"项目 A 的预算上限是 3000 元"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "status"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"confirmed"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "version"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>这里的 confirmed 表示已按应用策略确认这条用户要求，不代表系统证明了一项客观财务事实。confirmed、pending、superseded、retracted 等状态是应用设计的协议，不是向量数据库自带的事实判断能力。</p>
+<p>提取器可以是 LLM，但需约束输出 schema，并验证引用确实存在、数值与否定没有被改写。实体 ID、属性枚举和单位转换按显式规则规范化；不确定的实体、范围或时间保留为待解析，不能猜一个日期或实体后参与自动覆盖。</p>
+<p><a id="reference-候选检索如何实现"></a></p>
+<h3 id="候选检索如何实现">候选检索如何实现</h3>
+<p>新声明到来后，先保存原始事件，再查找可能相关的旧声明。候选集合可以由以下查询取并集，并按 memory_id 去除重复候选：</p>
+<ol>
+<li><strong>事件与事实精确查询</strong>：检查同一 source_event_id、提取版本和原子事实序号是否已经处理，防止重放时重复写入。</li>
+<li><strong>事实键查询</strong>：按 owner_id、subject、predicate、scope 查询已有记录，比较有效时间；不同值也要查到，才能发现冲突。</li>
+<li><strong>向量检索</strong>：在允许的用户与实体范围内找语义相近记录，发现属性别名或不同措辞表达的同一事实。</li>
+<li><strong>关键词或别名查询</strong>：补充准确 ID、金额、缩写等向量检索可能遗漏的候选。</li>
+</ol>
+<p>例如，使用 SQL 主记录时，已知事实键的当前冲突候选可以这样查询。以下字段对应应用自己的 memory_claims 表，参数绑定由数据库驱动完成：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SELECT</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> memory_id, value_json, negated, valid_from, valid_to,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       source_event_id, source_quote, </span><span style="color:#D73A49;--shiki-dark:#F97583">status</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">version</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">FROM</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> memory_claims</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">WHERE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> owner_id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> :owner_id</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  AND</span><span style="color:#D73A49;--shiki-dark:#F97583"> subject</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> :</span><span style="color:#D73A49;--shiki-dark:#F97583">subject</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  AND</span><span style="color:#D73A49;--shiki-dark:#F97583"> predicate</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> :</span><span style="color:#D73A49;--shiki-dark:#F97583">predicate</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  AND</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> scope </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> :scope</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  AND</span><span style="color:#D73A49;--shiki-dark:#F97583"> status</span><span style="color:#D73A49;--shiki-dark:#F97583"> IN</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'confirmed'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'pending'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  AND</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (valid_to </span><span style="color:#D73A49;--shiki-dark:#F97583">IS</span><span style="color:#D73A49;--shiki-dark:#F97583"> NULL</span><span style="color:#D73A49;--shiki-dark:#F97583"> OR</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> valid_to </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> :new_valid_from)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">  AND</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (:new_valid_to </span><span style="color:#D73A49;--shiki-dark:#F97583">IS</span><span style="color:#D73A49;--shiki-dark:#F97583"> NULL</span><span style="color:#D73A49;--shiki-dark:#F97583"> OR</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> valid_from </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> :new_valid_to);</span></span></code></pre>
+<p>这里没有按 value 过滤，因此旧预算 3000 与新预算 30000 会进入同一组比较。时间需存为统一、可比较的类型或 UTC 编码；复合索引可围绕 owner_id、subject、predicate、scope 建立。修正历史声明时，另按准确 memory_id 或来源查询历史版本，不能只使用当前状态过滤。</p>
+<p>向量查询则对新声明的规范文本做 embedding，按同一 owner_id 等隔离字段过滤后取语义候选，再通过 memory_id 读取完整主记录。把这批 ID 与上述精确查询 ID 取并集，交给关系比较器；向量查询的具体 filter、search 和分页参数由所选数据库适配。</p>
+<p>已知事实键的旧记录不能只依赖向量 top-k：一个冲突声明可能没有进入候选，而相似无关文本占满了结果。记录很多时可以按明确的时间与属性分区、分页处理；候选不完整时不得声称已完成整个分区的冲突检查。</p>
+<p>向量相似度阈值需要用实际数据校准，只用于筛选候选。不存在通用的“相似度大于某个数就可以合并”的规则；embedding 模型、语言和属性都会影响得分。</p>
+<p><a id="reference-去重具体如何判定"></a></p>
+<h3 id="去重具体如何判定">去重具体如何判定</h3>
+<p>去重分为处理重复事件与合并等价事实。二者不能混用：同一事件重试不是新证据，不同消息表达同一事实则可以增加来源记录，但不必增加一个新的检索事实。</p>
+<table>
+<thead>
+<tr>
+<th>情况</th>
+<th>判定与处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>同一事件和提取版本被再次处理</td>
+<td>使用幂等键阻止重复写入，不重复计为支持证据</td>
+</tr>
+<tr>
+<td>事实键、规范化值、否定和有效区间完全相同</td>
+<td>指向同一个规范事实，附加不重复的来源关系</td>
+</tr>
+<tr>
+<td>「用 Go」与「使用 Golang」</td>
+<td>先按已定义的属性与别名规则规范化，再验证范围与含义相同</td>
+</tr>
+<tr>
+<td>同一值但有效区间不同</td>
+<td>保留各自的时间证据，不能凭文本相似扩大适用区间</td>
+</tr>
+<tr>
+<td>一条只说「用 Go」，另一条增加「仅项目 A」</td>
+<td>重新检查适用范围；不能直接合成全局偏好</td>
+</tr>
+<tr>
+<td>一条说「喜欢 Go」，另一条说「不喜欢 Go」</td>
+<td>否定相反，是冲突候选，不是重复事实</td>
+</tr>
+</tbody>
+</table>
+<p>精确事实指纹可以对 owner、subject、predicate、scope、规范化值、否定和有效区间做稳定序列化后计算哈希。哈希用于快速查找，最后仍比较完整规范字段；不同用户和不同范围不得共用一个事实。</p>
+<p>自由文本无法直接规范化时，可以让 LLM 比较候选对。明确给它两条原话、提取字段和适用区间，要求返回 duplicate、compatible、conflict、different_scope、different_time 或 uncertain，以及支持判断的引用。</p>
+<p>具体比较要求应包括：主体与范围是否相同、否定是否相同、值是否语义等价、时间是否重叠、是否只是增加限制条件。禁止只根据相似度判断，禁止凭更新时间选择事实。LLM 输出仍是候选关系；引用、金额、范围和关键状态需要程序检查。uncertain 进入待处理状态，不执行自动合并。</p>
+<p>不能把“向量 A 接近 B，B 接近 C”当作三条事实等价。相似关系不具备这种传递保证；批量聚类只能缩小比较范围，合并仍需验证组内事实等价。</p>
+<p>合并时保留规范事实与来源列表，旧来源不因合并被删除。不要平均两个向量来表示“合并后的知识”；规范文本改变后应重新计算它的 embedding。</p>
+<p><a id="reference-冲突如何判定"></a></p>
+<h3 id="冲突如何判定">冲突如何判定</h3>
+<p>冲突需要先确认两条声明在同一主体、属性、范围和重叠有效时间内，无法同时成立。</p>
+<table>
+<thead>
+<tr>
+<th>声明关系</th>
+<th>示例</th>
+<th>处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>等价</td>
+<td>项目 A 预算 3000 元；同范围预算 0.3 万元</td>
+<td>规范单位后去重并保留证据</td>
+</tr>
+<tr>
+<td>可共存</td>
+<td>喜欢 Go；喜欢 Python</td>
+<td>多值偏好可以共存</td>
+</tr>
+<tr>
+<td>不同范围</td>
+<td>项目 A 用 Go；项目 B 用 Python</td>
+<td>分别保存</td>
+</tr>
+<tr>
+<td>不同有效时间</td>
+<td>截至昨天住上海；从今天开始住北京</td>
+<td>保存时间变化，不把旧事实判为错误</td>
+</tr>
+<tr>
+<td>单值属性不同</td>
+<td>同一计划的预算上限是 3000；又说是 30000</td>
+<td>冲突候选，需要更新或修正依据</td>
+</tr>
+<tr>
+<td>同一对象否定相反</td>
+<td>允许自动提交；不允许自动提交</td>
+<td>冲突候选，相关动作不能凭相似度决定</td>
+</tr>
+</tbody>
+</table>
+<p>属性规则必须明确：主要回复语言可以被设计成单值，喜欢的语言通常是多值。数值范围、单位换算、条件性规则还需要专门比较器，不能把所有不同文本都视为互斥。</p>
+<p>recorded_at 较晚只说明声明较晚进入系统。例如今天导入去年“住上海”的聊天，不应覆盖昨天确认的“现在住北京”。应先使用来源与有效时间比较，再判断是否真的是变化或修正。</p>
+<p>对于个人偏好，用户明确表达的改变通常是主要依据；对于账户余额等外部状态，经过认证的业务查询可能是更合适的来源。这是按属性定义的证据规则，不应把“工具永远比用户正确”或“用户最新消息永远正确”写成统一规则。</p>
+<p>真实性判断应区分格式合法、内部一致与外部证据支持。LLM 可以识别矛盾、发现可疑输入，并结合业务查询、原始文件或测试结果辅助核验；仅凭一段缺少独立证据的文本，无法保证声明真实，也无法可靠区分口误与真实改变。核验结论应注明证据的来源、范围与时间，而不能只记录模型置信度。</p>
+<p>用户确认主要解决“用户本来想表达什么”的歧义，并不自动证明客观事实正确。例如用户可以确认自己的预算要求，但确认账户余额仍可能需要查询账户系统。只有缺少可用证据、歧义又影响当前决策时，才需要用户澄清；仍无法验证的声明保留为“用户陈述”或“未验证”，不能升级为已核实事实。</p>
+<p><a id="reference-最新输入可能是口误时"></a></p>
+<h3 id="最新输入可能是口误时">最新输入可能是口误时</h3>
+<p>假设已确认记录是「项目 A 的预算上限 3000 元」，新消息却说「按 30000 元预算整理」。两个值都合法，可能是口误，也可能是计划改变，仅凭原文无法确定。</p>
+<p>处理可以按以下明确策略执行：</p>
+<ol>
+<li>保存新原话和提取值，不自动把 30000 改为 3000。</li>
+<li>对同一事实键记录冲突，将新声明设为 pending，并将该事实的当前状态设为 conflicted。</li>
+<li>将差异带给需要这个事实的调用或用户确认，例如「此前是 3000 元，本次是 30000 元，是调整预算了吗？」</li>
+<li>获得明确修正或变更依据后，提交对应版本更新；未经解决，不能把任何一条当作已确认的当前预算使用。</li>
+</ol>
+<p>旧声明可以继续保留原来的确认记录，但当前事实键必须暴露冲突；只把新声明藏在 pending 区、继续把旧值当作当前真值，同样可能掩盖用户实际改变了需求。</p>
+<p>相应状态可以表示为：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "fact_key"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user_1:project_A:budget_limit:current_plan"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "state"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"conflicted"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "previous_claim_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"m_budget_1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "candidate_claim_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"m_budget_2"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "reason"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"同一计划预算出现不同值，尚无明确修正或变更依据"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>格式、量纲、已配置范围等检查可以发现可疑输入。例如不合法日期或不能解析的币种应形成校验错误，但“数字多一个零”只能作为疑点，不能证明应删除哪个零。LLM 自报高置信度也不构成纠正用户原话的依据。</p>
+<p>确认后还要区分两种更新：</p>
+<ul>
+<li><strong>事实发生改变</strong>：「从现在起预算改为 30000。」建立新版本，并按明确的有效时间结束旧版本。旧值在之前的时间仍然成立。</li>
+<li><strong>以前说错了</strong>：「刚才多打一个零，应该是 3000。」记录 correction 或 retraction 关系，撤回错误声明，保留其原话与修正来源。不能把错误记录伪装成过去曾经有效的预算。</li>
+</ul>
+<p>并非所有差异都需要再问一次。用户已明确修正并满足应用的确认规则，可以直接处理；当前任务的临时指令也不应自动变成全局长期偏好。对不确定且影响后续决策的冲突才进行澄清，避免把任何变化都拦成重复确认。</p>
+<p>重复表达只能说明再次观察到声明，不保证它正确。来源相同的转述、被重复导入的消息不能叠加成独立证据；稳定性、时间与出现频率不能替代修正依据。</p>
+<p><a id="reference-规范事实的关系判定代码"></a></p>
+<h3 id="规范事实的关系判定代码">规范事实的关系判定代码</h3>
+<p>下面的核心比较代码可独立运行，演示已规范化的标量或枚举等值声明。cardinality 来自属性配置，one 表示单值，many 表示多值。否定、范围和有效区间参与比较，更新时间不参与“谁正确”的选择。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dataclasses </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dataclass</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> datetime </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> datetime</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> enum </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Enum</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Relation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    DUPLICATE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "duplicate"</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    COMPATIBLE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "compatible"</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    DIFFERENT_SCOPE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "different_scope"</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    DIFFERENT_TIME</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "different_time"</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    CONFLICT</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "conflict"</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@dataclass</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">frozen</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Claim</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    owner_id: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    subject: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    predicate: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    scope: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    value: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    negated: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">bool</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    valid_from: datetime</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    valid_to: datetime </span><span style="color:#D73A49;--shiki-dark:#F97583">|</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">property</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.owner_id, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.subject, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.predicate, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.scope)</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> classify_claims</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(old: Claim, new: Claim, cardinality: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; Relation:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> cardinality </span><span style="color:#D73A49;--shiki-dark:#F97583">not</span><span style="color:#D73A49;--shiki-dark:#F97583"> in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"one"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"many"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        raise</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> ValueError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"属性的单值或多值规则必须明确配置"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> claim </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (old, new):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> all</span><span style="color:#24292E;--shiki-dark:#E1E4E8">((claim.owner_id, claim.subject, claim.predicate,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    claim.scope, claim.value)):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            raise</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> ValueError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"事实键和值不能为空"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(claim.negated) </span><span style="color:#D73A49;--shiki-dark:#F97583">is</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            raise</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> ValueError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"negated 必须是布尔值"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> claim.valid_from.utcoffset() </span><span style="color:#D73A49;--shiki-dark:#F97583">is</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            raise</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> ValueError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"有效时间必须包含时区"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> claim.valid_to </span><span style="color:#D73A49;--shiki-dark:#F97583">is</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> claim.valid_to.utcoffset() </span><span style="color:#D73A49;--shiki-dark:#F97583">is</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                raise</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> ValueError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"有效时间必须包含时区"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> claim.valid_to </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> claim.valid_from:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                raise</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> ValueError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"有效区间必须是非空的左闭右开区间"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> old.key </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> new.key:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">DIFFERENT_SCOPE</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> old.valid_to </span><span style="color:#D73A49;--shiki-dark:#F97583">is</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> old.valid_to </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> new.valid_from:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">DIFFERENT_TIME</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> new.valid_to </span><span style="color:#D73A49;--shiki-dark:#F97583">is</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> new.valid_to </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> old.valid_from:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">DIFFERENT_TIME</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> old.value </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> new.value:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> old.negated </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> new.negated:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">CONFLICT</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (old.valid_from, old.valid_to) </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (new.valid_from, new.valid_to):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">DUPLICATE</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">COMPATIBLE</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> cardinality </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "one"</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> old.negated </span><span style="color:#D73A49;--shiki-dark:#F97583">and</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> new.negated:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">CONFLICT</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">COMPATIBLE</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> write_action</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(relation: Relation, explicit_update: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                 update_evidence_verified: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> relation </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">CONFLICT</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> explicit_update </span><span style="color:#D73A49;--shiki-dark:#F97583">and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> update_evidence_verified:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "COMMIT_VERSIONED_UPDATE"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "RECORD_PENDING_CONFLICT"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">DUPLICATE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"LINK_SOURCE_TO_CANONICAL_FACT"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">COMPATIBLE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"KEEP_SEPARATE_CLAIMS"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">DIFFERENT_SCOPE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"KEEP_SEPARATE_CLAIMS"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Relation.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">DIFFERENT_TIME</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"KEEP_SEPARATE_CLAIMS"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }[relation]</span></span></code></pre>
+<p>3000 与 30000 在相同预算属性、范围和重叠区间下会得到 CONFLICT；没有明确且已核验的更新依据，写入动作是 RECORD_PENDING_CONFLICT。unknown 属性配置报错，未识别关系不能进入默认的“接受新值”分支。</p>
+<p>该代码不处理自然语言抽取、范围约束、未知有效时间或值别名。它们应先经过各自明确的规范化与比较流程；无法确认时保留待解析记录，不伪造输入来调用此比较器。</p>
+<p>update_evidence_verified 应由应用检查原话中的修正对象、来源身份、适用范围及需要的确认结果，不能直接复制 LLM 的 confidence 字段。CONFLICT 只是判断无法同时成立，不能由这个关系标签推导出谁错了。</p>
+<p><a id="reference-合并与修订如何落到数据库"></a></p>
+<h3 id="合并与修订如何落到数据库">合并与修订如何落到数据库</h3>
+<p>可以用结构化主记录保存声明、证据关系和事实当前状态，向量数据库作为语义检索索引。支持相应事务与条件更新的数据库也可以承担两种职责；需要检查实际能力，不能假设所有向量数据库都有跨记录原子事务。</p>
+<p>一次提交需要明确变更哪些记录：</p>
+<table>
+<thead>
+<tr>
+<th>写入动作</th>
+<th>主记录变更</th>
+<th>检索索引变更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>等价事实去重</td>
+<td>原始事件保留，新增不重复的事实来源关系</td>
+<td>继续使用同一规范事实；文本未变不必重复 embedding</td>
+</tr>
+<tr>
+<td>新的兼容事实</td>
+<td>插入独立声明与来源，保留各自范围和有效时间</td>
+<td>为新声明生成向量并 upsert</td>
+</tr>
+<tr>
+<td>待确认冲突</td>
+<td>插入 pending 声明、冲突关系，事实当前状态标为 conflicted</td>
+<td>冲突候选不作为确定性事实提供；保留供核查的索引</td>
+</tr>
+<tr>
+<td>明确的时间变化</td>
+<td>插入新版本、记录 supersedes，更新旧有效区间与当前指针</td>
+<td>新版本重新 embedding；旧版本保留为历史</td>
+</tr>
+<tr>
+<td>明确的错误修正</td>
+<td>插入修正证据、记录 retracts，撤回错误声明并更新当前状态</td>
+<td>错误版本退出普通事实召回，但可按授权查历史</td>
+</tr>
+</tbody>
+</table>
+<p>在主记录事务里同时写入声明、证据关系、事实当前状态、审计记录及索引更新任务，使用版本条件或锁防止并发整合相互覆盖。版本冲突必须报错并重新读取，不能覆盖后来写入的事实。</p>
+<p>若主记录与向量库分开，可以使用事务性 outbox：主记录提交时把索引任务一同落库，后台按稳定 memory_id 和版本进行 embedding 与 upsert，成功后标记任务完成。每项任务需要幂等处理；更新失败应显式保留失败状态，而不是宣称整合已全部完成。</p>
+<p>旧索引任务晚到时，先核对主记录版本，不能把新向量覆盖回旧版本。改变规范文本时重算向量，仅增加来源证据且文本不变时通常不需要重算。</p>
+<p>向量索引可能短暂落后，因此读取时还要核对主记录的当前版本、状态、适用范围和时间。检索结果即使 metadata 写着 confirmed，也可能已被主记录撤回；不能只相信异步索引的旧状态。</p>
+<p><a id="reference-整合后的记忆如何使用"></a></p>
+<h3 id="整合后的记忆如何使用">整合后的记忆如何使用</h3>
+<p>普通召回应按用户和范围筛选，取到候选后读取对应主记录，再核对有效时间与状态。superseded 或 retracted 不作为当前事实，conflicted 需要返回冲突摘要与证据，而不是任选相似度最高的一条。</p>
+<p>对预算、权限、收件人等直接影响执行的事实，在使用点检查该事实键是否存在未解决冲突。冲突不解决，就不能执行依赖某个确定值的动作；与该冲突无关的工作仍可继续。</p>
+<p>历史查询则按查询所指定的有效时间读取历史版本。用户今天修正了旧口误与今天发生真实变化，对历史答案的影响不同，需要依据 retracts 与 supersedes 关系区分。</p>
+<p><a id="reference-抽象提炼保留证据边界"></a></p>
+<h3 id="抽象提炼保留证据边界">抽象提炼保留证据边界</h3>
+<p>把多条情节记忆提炼成通用经验时，创建新的派生记忆，记录 derived_from、适用范围和支持事件，而不是覆盖原始经历。</p>
+<p>例如多个项目选择 Go，只能在有证据时总结为“这些项目选择了 Go”，不能直接升级成“用户所有项目都只用 Go”。多次类似经历可以产生候选规律，但跨范围推广仍需要验证。</p>
+<p>来源被修正或撤回后，依赖它的派生记忆需要标记待重评，重新检查剩余证据。否则原始口误已经纠正，派生总结仍会把错误带回检索结果。</p>
+<p><a id="reference-验证整合是否正确"></a></p>
+<h3 id="验证整合是否正确">验证整合是否正确</h3>
+<p>用标注的声明对和修订序列验证关系判定与最终状态，至少覆盖：</p>
+<ul>
+<li>重复事件重放、同义表达、相似但否定相反。</li>
+<li>单值冲突、多值共存、不同项目和不重叠有效时间。</li>
+<li>新导入的旧事实、用户口误、明确修正与真实时间变化。</li>
+<li>未知范围或时间、不能规范化的值、模型关系判定不确定。</li>
+<li>并发修订、向量更新失败、旧索引任务晚到、派生记忆来源被撤回。</li>
+</ul>
+<p>指标应分别统计等价事实合并的准确率、冲突候选召回率、错误覆盖率、未确认事实被使用的比例、可追溯来源覆盖率，以及整合后的检索与任务成功率。错误合并会损坏事实，不能只以“记忆条数减少了多少”衡量收益。</p>
+<p><a id="reference-记忆模块运行机制"></a></p>
+<h2 id="记忆模块运行机制">记忆模块运行机制</h2>
+<p><a id="reference-读记忆"></a></p>
+<h3 id="读记忆">读记忆</h3>
+<p><strong>第一阶段：任务开始前，先「读」记忆</strong></p>
+<p>用户发来新请求时，应用可以先从结构化存储读取相关偏好与约束，再按任务检索历史背景。把有来源的信息按预算加入上下文，不必加载完整“用户画像”，也不应把外部记忆文本直接作为高优先级规则。</p>
+<p><a id="reference-用记忆"></a></p>
+<h3 id="用记忆">用记忆</h3>
+<p><strong>第二阶段：任务执行中，持续「用」记忆</strong></p>
+<p>任务执行时，用户消息、模型输出和工具结果写入事件记录，并更新活跃上下文。每次调用 LLM 携带的是本轮筛选后的视图，包括必要的关键状态、摘要、近期交互与证据，而不是无限增长的完整历史。</p>
+<p>如果某个执行步骤需要特定的专业知识（比如查某个 API 的文档、回想某次历史决策），Agent 可以临时发起一次长期记忆检索，把「查记忆」封装成一个 Tool，用当前上下文作为查询词，把检索结果注入到这一步的 context 里，用完即走，不需要永久保留在 messages 中。</p>
+<p><a id="reference-写记忆"></a></p>
+<h3 id="写记忆">写记忆</h3>
+<p><strong>第三阶段：任务结束后，主动「写」记忆</strong></p>
+<p>任务结束后，应用可以按授权与记忆策略保存已验证的结论、用户偏好和相关来源，选择结构化存储或语义索引。是否清空活跃视图、是否保留会话记录，由应用生命周期与保留策略决定；不能把未验证总结直接写成长期事实。</p>
+<p><a id="reference-知识图谱"></a></p>
+<h2 id="知识图谱">知识图谱</h2>
+<p>向量数据库做语义检索，本质上是「一条一条」地存记忆、「一条一条」地取记忆，每条记忆之间是独立的，没有关联</p>
+<p>知识图谱用「实体 -&gt; 关系 -&gt; 实体」的三元组结构来存储信息。把一条知识拆成「主语、谓语、宾语」三个部分，每一组就是一个三元组。实体和实体之间通过明确的关系连接起来，形成一张网状的知识网络。</p>
+<p>查询时可以沿着关系链条做多跳推理</p>
+<p>通常是和向量数据库配合使用的。向量数据库负责处理模糊的语义检索（比如用户说「之前那个项目」，向量检索能找到最相关的项目记忆），知识图谱负责处理精确的关系推理（比如查某个用户的所有相关公司和角色），两者互补。</p>
+<p>具体做法是：对话过程中用 LLM 自动提取出实体和关系，存入知识图谱。检索时先用向量检索拿到一批候选记忆，再用知识图谱补充关联信息，最后把两部分结果合并后注入 context。</p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>分别追踪一个偏好、一条任务中间结果和一个经常变更的事实，解释写入、更新、检索和遗忘发生在哪里。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>衔接相关实践：<a href="/notes/computer-science/agent/framework/learn-claude-code/agent-file-memory/">S09-Memory</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#记忆类型">记忆类型</a></li><li style="--depth: 1"><a href="#感知记忆-sensory-memory">感知记忆 Sensory Memory</a></li><li style="--depth: 1"><a href="#短期记忆-short-term-memory">短期记忆 Short-term Memory</a></li><li style="--depth: 1"><a href="#长期记忆-long-term-memory">长期记忆 Long-term Memory</a></li><li style="--depth: 2"><a href="#情节记忆-episodic-memory">情节记忆 Episodic Memory</a></li><li style="--depth: 2"><a href="#语义记忆-semantic-memory">语义记忆 Semantic Memory</a></li><li style="--depth: 2"><a href="#程序记忆-procedural-memory">程序记忆 Procedural Memory</a></li><li style="--depth: 1"><a href="#实体记忆-entity-memory">实体记忆 Entity Memory</a></li><li style="--depth: 0"><a href="#设计要点">设计要点</a></li><li style="--depth: 1"><a href="#存什么">存什么</a></li><li style="--depth: 1"><a href="#怎么存">怎么存</a></li><li style="--depth: 1"><a href="#何时取">何时取</a></li><li style="--depth: 0"><a href="#context-window-管理">Context Window 管理</a></li><li style="--depth: 1"><a href="#完整记录与模型上下文分开">完整记录与模型上下文分开</a></li><li style="--depth: 1"><a href="#压缩触发与预算">压缩触发与预算</a></li><li style="--depth: 1"><a href="#压缩策略">压缩策略</a></li><li style="--depth: 2"><a href="#工具结果裁剪与引用">工具结果裁剪与引用</a></li><li style="--depth: 2"><a href="#滑动窗口">滑动窗口</a></li><li style="--depth: 2"><a href="#摘要压缩">摘要压缩</a></li><li style="--depth: 2"><a href="#记忆卸载">记忆卸载</a></li><li style="--depth: 1"><a href="#结构化工作记忆-structured-working-memory">结构化工作记忆 Structured Working Memory</a></li><li style="--depth: 1"><a href="#摘要生成如何实现">摘要生成如何实现</a></li><li style="--depth: 1"><a href="#压缩失败时如何处理">压缩失败时如何处理</a></li><li style="--depth: 1"><a href="#重要记忆丢失时如何恢复">重要记忆丢失时如何恢复</a></li><li style="--depth: 1"><a href="#如何评估压缩策略">如何评估压缩策略</a></li><li style="--depth: 0"><a href="#长期记忆">长期记忆</a></li><li style="--depth: 1"><a href="#embedding">Embedding</a></li><li style="--depth: 1"><a href="#向量数据库">向量数据库</a></li><li style="--depth: 0"><a href="#记忆整合">记忆整合</a></li><li style="--depth: 1"><a href="#存储单位是带来源的事实声明">存储单位是带来源的事实声明</a></li><li style="--depth: 1"><a href="#候选检索如何实现">候选检索如何实现</a></li><li style="--depth: 1"><a href="#去重具体如何判定">去重具体如何判定</a></li><li style="--depth: 1"><a href="#冲突如何判定">冲突如何判定</a></li><li style="--depth: 1"><a href="#最新输入可能是口误时">最新输入可能是口误时</a></li><li style="--depth: 1"><a href="#规范事实的关系判定代码">规范事实的关系判定代码</a></li><li style="--depth: 1"><a href="#合并与修订如何落到数据库">合并与修订如何落到数据库</a></li><li style="--depth: 1"><a href="#整合后的记忆如何使用">整合后的记忆如何使用</a></li><li style="--depth: 1"><a href="#抽象提炼保留证据边界">抽象提炼保留证据边界</a></li><li style="--depth: 1"><a href="#验证整合是否正确">验证整合是否正确</a></li><li style="--depth: 0"><a href="#记忆模块运行机制">记忆模块运行机制</a></li><li style="--depth: 1"><a href="#读记忆">读记忆</a></li><li style="--depth: 1"><a href="#用记忆">用记忆</a></li><li style="--depth: 1"><a href="#写记忆">写记忆</a></li><li style="--depth: 0"><a href="#知识图谱">知识图谱</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

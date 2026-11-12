@@ -1,0 +1,923 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>内存 · Musuyin&#39; Home</title><meta name="description" content="内存管理连接逻辑地址、装入与物理分配。连续分配和分页分段采用不同映射方式，虚拟内存再把缺页处理、置换与工作集引入运行过程。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/operating-system/memory-management/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="内存 · Musuyin' Home"><meta property="og:description" content="内存管理连接逻辑地址、装入与物理分配。连续分配和分页分段采用不同映射方式，虚拟内存再把缺页处理、置换与工作集引入运行过程。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/operating-system/memory-management/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">内存</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-05-02">2025-05-02</time></dd></div><div><dt>字数</dt><dd>22453</dd></div><div><dt>预计阅读</dt><dd>75 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">#操作系统</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>内存</h1><time datetime="2025-05-02">2025-05-02</time><p class="tags"><a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">#操作系统</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>内存管理连接逻辑地址、装入与物理分配。连续分配和分页分段采用不同映射方式，虚拟内存再把缺页处理、置换与工作集引入运行过程。</p>
+<p><a id="reference-内存的基本概念"></a></p>
+<h2 id="内存的基本概念">内存的基本概念</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1178" height="575" src="/_astro/IMG-20260722152428155.BkDf_f19_Z1jk1KM.webp"></p>
+<p><a id="reference-内存"></a></p>
+<h3 id="内存">内存</h3>
+<p>内存可存放数据。程序执行前需要先放到内存中才能被 CPU 处理——缓和 CPU 与硬盘之间的速度矛盾</p>
+<p><img alt="image" loading="lazy" decoding="async" width="245" height="335" src="/_astro/IMG-20260722152428183.Bn2mRVVD_1JBXri.webp"></p>
+<ul>
+<li>
+<p>存储单元</p>
+<ul>
+<li>按字节编址：1B</li>
+<li>按字编址：1 字 = 计算机字长</li>
+</ul>
+</li>
+<li>
+<p>内存地址：从 0 开始，每个编号对应一个存储单元</p>
+</li>
+<li>
+<p>4GB 内存，指该内存中可以存放 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn><mo>∗</mo><msup><mn>2</mn><mn>30</mn></msup></mrow><annotation encoding="application/x-tex">4*2^{30}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">30</span></span></span></span></span></span></span></span></span></span></span></span> 个字节。如果是按字节编址的话存在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>32</mn></msup></mrow><annotation encoding="application/x-tex">2^{32}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">32</span></span></span></span></span></span></span></span></span></span></span></span> 个存储单元，需要 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>32</mn></msup></mrow><annotation encoding="application/x-tex">2^{32}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">32</span></span></span></span></span></span></span></span></span></span></span></span> 个地址才能一一标识，需要 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>32</mn></mrow><annotation encoding="application/x-tex">32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span> 位 bit 来表示</p>
+</li>
+</ul>
+<p><a id="reference-进程运行的基本原理"></a></p>
+<h3 id="进程运行的基本原理">进程运行的基本原理</h3>
+<p><a id="reference-指令的工作原理"></a></p>
+<h4 id="指令的工作原理">指令的工作原理</h4>
+<ul>
+<li>指令的工作基于“地址”。每个地址对应一个数据的存储单元</li>
+<li>代码要翻译成 CPU 能识别的指令。这些指令会告诉 CPU 应该去内存的哪个地址读/写数据，这个数据应该做什么样的处理</li>
+</ul>
+<p><a id="reference-逻辑地址和物理地址"></a></p>
+<h4 id="逻辑地址和物理地址">逻辑地址和物理地址</h4>
+<ul>
+<li>默认让这个进程的相关内容从地址 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">#</mi><mn>0</mn></mrow><annotation encoding="application/x-tex">#0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord">#0</span></span></span></span> 开始连续存放，指令中的地址参数直接给出了变量 x 的实际存放地址（<strong>物理地址</strong>）。如果进程不是从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">#</mi><mn>0</mn></mrow><annotation encoding="application/x-tex">#0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord">#0</span></span></span></span> 开始存储，则会影响指令运行</li>
+<li>程序经过编译、链接后生成的指令中指明的是相对地址（逻辑地址），即：相对于进程的起始地址而言的地址</li>
+</ul>
+<p><a id="reference-地址装入方式"></a></p>
+<h4 id="地址装入方式">地址装入方式</h4>
+<ul>
+<li>
+<p>绝对装入</p>
+<ul>
+<li>在编译时，如果知道程序将放到内存中的位置，则编译程序直接产生<strong>绝对地址</strong>的目标代码。装入程序按照装入模块中的地址，将程序和数据装入内存</li>
+<li>只适用于单道程序环境，灵活性低，可扩展性低</li>
+</ul>
+</li>
+<li>
+<p>静态重定位（可重定位装入）</p>
+<ul>
+<li>指令中使用的地址、数据存放的地址是相对于起始地址而言的逻辑地址，根据内存的当前情况将装入模块装入到内存的适当位置</li>
+<li>装入时对地址进行<strong>重定位</strong>，将逻辑地址变换为物理地址（比如全部地址相关参数 +100）</li>
+<li>在一个作业装入内存时，必须分配其要求的<strong>全部内存空间</strong>。作业一旦进入内存后，在运行期间就不能进行移动，也不能再申请内存空间</li>
+</ul>
+</li>
+<li>
+<p>动态重定位（动态运行时装入）</p>
+<ul>
+<li>
+<p>编译、链接后的装入模块的地址都是从 0 开始的</p>
+</li>
+<li>
+<p>装入程序把装入模块装入内存后，并不会立即把逻辑地址转换为物理地址，而是把地址转换推迟到程序真正要执行时才进行。因此装入内存后所有的地址依然是逻辑地址</p>
+</li>
+<li>
+<p>这种方式需要一个<strong>重定位寄存器</strong>的支持</p>
+<ul>
+<li>存放装入模块存放的起始位置</li>
+</ul>
+</li>
+<li>
+<p>可将程序分配到不连续的存储区中；在程序运行前只需装入它的部分代码即可投入运行，然后在程序运行期间，根据需要动态申请分配内存；便于程序段的共享，可以向用户提供一个比存储空间大得多的地址空间</p>
+</li>
+<li>
+<p>动态重定位时允许程序在内存中发生移动</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-程序编写到程序运行"></a></p>
+<h4 id="程序编写到程序运行">程序编写到程序运行</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1145" height="392" src="/_astro/IMG-20260722152428227.DpumjrgX_ZJzuM8.webp"></p>
+<ul>
+<li>编译：由编译程序将用户源代码编译成若干个目标模块（编译就是把高级语言翻译为机器语言）</li>
+<li>链接：由链接程序将编译后形成的一组目标模块，以及所需库函数链接在一起，形成一个完整的装入模块</li>
+<li>装入（装载）：由装入程序将装入模块装入内存运行</li>
+</ul>
+<p><a id="reference-链接方式"></a></p>
+<h4 id="链接方式">链接方式</h4>
+<ol>
+<li>
+<p>静态链接：在程序运行之前，先将各目标模块及它们所需的库函数连接成一个完整的可执行文件（装入模块），之后不再拆开</p>
+<p><img alt="image" loading="lazy" decoding="async" width="798" height="478" src="/_astro/IMG-20260722152428254.Bi3095E__Z2mhnv8.webp"></p>
+</li>
+<li>
+<p>装入时动态链接：将各目标模块装入内存时，边装入边链接</p>
+<p><img alt="image" loading="lazy" decoding="async" width="660" height="478" src="/_astro/IMG-20260722152428287.BI19aqif_Z2t6AKK.webp"></p>
+</li>
+<li>
+<p>运行时动态链接：在程序执行中需要该目标模块时，才进行链接。优点是便于修改和更新，便于实现对目标模块的共享</p>
+<p><img alt="image" loading="lazy" decoding="async" width="673" height="489" src="/_astro/IMG-20260722152428335.Zukz5WZT_2qx5cL.webp"></p>
+</li>
+</ol>
+<p><a id="reference-内存管理"></a></p>
+<h2 id="内存管理">内存管理</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1048" height="613" src="/_astro/IMG-20260722152428375.Bi7FwqJf_ZjWn5W.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="1303" height="522" src="/_astro/IMG-20260722152428414.fDu0ng8m_2axwJg.webp"></p>
+<ol>
+<li>操作系统负责内存空间的分配与回收</li>
+<li>操作系统需要提供某种技术从<strong>逻辑</strong>上对内存空间进行扩充——虚拟技术</li>
+<li>操作系统需要提供地址转换功能，负责程序的逻辑地址与物理地址的转换</li>
+<li>操作系统需要提供内存保护功能。保证各进程在各自存储空间内运行，互不干扰</li>
+</ol>
+<p><a id="reference-内存空间的分配和回收"></a></p>
+<h2 id="内存空间的分配和回收">内存空间的分配和回收</h2>
+<p>操作系统负责内存空间的分配与回收</p>
+<p><img alt="image" loading="lazy" decoding="async" width="840" height="325" src="/_astro/IMG-20260722152428449.D2Vytxx4_Z2h5BmR.webp"></p>
+<p><a id="reference-连续分配管理方式"></a></p>
+<h3 id="连续分配管理方式">连续分配管理方式</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="960" height="539" src="/_astro/IMG-20260722152428494.DoJzASwB_Z2cIHjB.webp"></p>
+<ul>
+<li><strong>内部碎片</strong>：分配给某进程的内存区域中，如果有些部分没有用上</li>
+<li><strong>外部碎片</strong>：是指内存中的某些空闲分区由于太小而难以利用</li>
+</ul>
+<p><a id="reference-单一连续分配"></a></p>
+<h4 id="单一连续分配">单一连续分配</h4>
+<ul>
+<li>
+<p>单一连续分配方式中，内存被分为<strong>系统区</strong>和<strong>用户区</strong></p>
+<ul>
+<li>系统区通常位于内存的<strong>低地址</strong>部分，用于存放操作系统相关数据</li>
+<li>用户区用于存放用户进程相关数据。</li>
+</ul>
+</li>
+<li>
+<p>内存中只能有一道用户程序，<strong>用户程序独占整个用户区空间</strong></p>
+</li>
+</ul>
+<p>优点：实现简单；无外部碎片；可以采用覆盖技术扩充内存；不一定需要采取内存保护（eg：早期的 PC 操作系统 MS-DOS）</p>
+<p>缺点：只能用于单用户、单任务的操作系统中；有<strong>内部碎片</strong>；存储器利用率极低</p>
+<p><img alt="image" loading="lazy" decoding="async" width="466" height="479" src="/_astro/IMG-20260722152428518.Gj7JSeTC_7o5t.webp"></p>
+<p><a id="reference-固定分区分配"></a></p>
+<h4 id="固定分区分配">固定分区分配</h4>
+<p>为了能在内存中装入多道程序，且这些程序之间又不会相互干扰，于是将整个用户空间划分为若干个固定大小的分区，在每个分区中只装入一道作业，这样就形成了最早的、最简单的一种可运行多道程序的内存管理方式。</p>
+<ul>
+<li>分区大小相等：缺乏灵活性，但是很适合用于用一台计算机控制多个相同对象的场合</li>
+<li>分区大小不等：增加了灵活性，可以满足不同大小的进程需求。根据常在系统中运行的作业大小情况进行划分</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="447" height="476" src="/_astro/IMG-20260722152428554.oNR7Y2uM_Z2hPbMA.webp"></p>
+<ul>
+<li>操作系统需要建立一个数据结构——<strong>分区说明表</strong>，来实现各个分区的分配与回收</li>
+<li>每个表项对应一个分区，通常按分区大小排列</li>
+<li>每个表项包括对应分区的大小、起始地址、状态（是否已分配）</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="761" height="194" src="/_astro/IMG-20260722152428597.DH4OWyFp_2ifXJV.webp"></p>
+<p>当某用户程序要装入内存时，由操作系统内核程序根据用户程序大小检索该表，从中找到一个能满足大小的、未分配的分区，将之分配给该程序，然后修改状态为“已分配”</p>
+<p>优点：实现简单，无外部碎片。</p>
+<p>缺点：</p>
+<ol>
+<li>当用户程序太大时，可能所有的分区都不能满足需求，此时不得不采用覆盖技术来解决，但这又会降低性能</li>
+<li>会产生内部碎片，内存利用率低。</li>
+</ol>
+<p><a id="reference-动态分区分配"></a></p>
+<h4 id="动态分区分配">动态分区分配</h4>
+<p><strong>动态分区分配</strong>又称为<strong>可变分区分配</strong></p>
+<p>这种分配方式不会预先划分内存分区，而是在进程装入内存时，根据进程的大小动态地建立分区，并使分区的大小正好适合进程的需要。因此系统分区的大小和数目是可变的</p>
+<p><img alt="image" loading="lazy" decoding="async" width="495" height="104" src="/_astro/IMG-20260722152428624.BNEHu377_1hltlI.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="803" height="397" src="/_astro/IMG-20260722152428674.BtPBC63i_Z19G2Sm.webp"></p>
+<ul>
+<li>分配：把一个新作业装入内存时，须按照一定的<strong>动态分区分配算法</strong>，从空闲分区表（或空闲分区链）中选出一个分区分配给该作业</li>
+<li>回收
+<ul>
+<li>回收区的后面有一个相邻的空闲分区：两个相邻的空闲分区合并为一个</li>
+<li>回收区的前面有一个相邻的空闲分区：两个相邻的空闲分区合并为一个</li>
+<li>回收区的前、后各有一个相邻的空闲分区：三个相邻的空闲分区合并为一个</li>
+<li>回收区的前、后都没有相邻的空闲分区：新增表项（被回收的空间）</li>
+</ul>
+</li>
+</ul>
+<p>动态分区分配没有内部碎片，但是有外部碎片</p>
+<p>如果内存中空闲空间的总和本来可以满足某进程的要求，但由于进程需要的是一整块连续的内存空间，因此这些“碎片”不能满足进程的需求。可以通过紧凑（拼凑，Compaction）技术来解决外部碎片</p>
+<p><strong>动态分区分配要使用：动态重定位装入</strong></p>
+<p><a id="reference-动态分区分配算法"></a></p>
+<h5 id="动态分区分配算法">动态分区分配算法</h5>
+<p>动态分区分配算法：在动态分区分配方式中， 当很多个空闲分区都能满足需求时，应该选择哪个分区进行分配</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1010" height="498" src="/_astro/IMG-20260722152428705.D4YPpn-L_ZwAb5q.webp"></p>
+<p><a id="reference-首次适应算法-first-fit"></a></p>
+<h6 id="首次适应算法-first-fit">首次适应算法 First Fit</h6>
+<ul>
+<li>每次都从低地址开始查找，找到第一个能满足大小的空闲分区</li>
+<li>空闲分区以<strong>地址递增</strong>的次序排列。每次分配内存时顺序查找空闲分区链（或空闲分区表），找到大小能满足要求的第一个空闲分区</li>
+</ul>
+<p><a id="reference-最佳适应算法-beat-fit"></a></p>
+<h6 id="最佳适应算法-beat-fit">最佳适应算法 Beat Fit</h6>
+<ul>
+<li>由于动态分区分配是一种连续分配方式，为各进程分配的空间必须是连续的一整片区域。因此为了保证当“大进程”到来时能有连续的大片空间，可以尽可能多地留下大片的空闲区，即，优先使用更小的空闲区。</li>
+<li>空闲分区按<strong>容量递增</strong>次序链接。每次分配内存时顺序查找空闲分区链（或空闲分区表），找到大小能满足要求的第一个空闲分区</li>
+<li>缺点：每次都选最小的分区进行分配，会留下越来越多的、很小的、难以利用的内存块。因此这种方法会产生很多的外部碎片</li>
+</ul>
+<p><a id="reference-最坏适应算法-worst-fit"></a></p>
+<h6 id="最坏适应算法-worst-fit">最坏适应算法 Worst Fit</h6>
+<ul>
+<li>为了解决最佳适应算法的问题——即留下太多难以利用的小碎片，可以在每次分配时优先使用最大的连续空闲区，这样分配后剩余的空闲区就不会太小，更方便使用。</li>
+<li>空闲分区按<strong>容量递减</strong>次序链接。每次分配内存时顺序查找空闲分区链（或空闲分区表），找到大小能满足要求的第一个空闲分区</li>
+<li>缺点：每次都选最大的分区进行分配，虽然可以让分配后留下的空闲区更大，更可用，但是这种方式会导致较大的连续空闲区被迅速用完。如果之后有“大进程”到达，就没有内存分区可用了</li>
+</ul>
+<p><a id="reference-邻近适应算法-next-fit"></a></p>
+<h6 id="邻近适应算法-next-fit">邻近适应算法 Next Fit</h6>
+<ul>
+<li>
+<p>首次适应算法每次都从链头开始查找的。这可能会导致低地址部分出现很多小的空闲分区，而每次分配查找时，都要经过这些分区，因此也增加了查找的开销。如果每次都从上次查找结束的位置开始检索，就能解决上述问题。</p>
+</li>
+<li>
+<p>空闲分区以<strong>地址递增</strong>的顺序排列（可排成一个<strong>循环链表</strong>）。每次分配内存时<strong>从上次查找结束的位置</strong>开始查找空闲分区链（或空闲分区表），找到大小能满足要求的第一个空闲分区</p>
+</li>
+<li>
+<p>优点：首次适应算法每次都要从头查找，每次都需要检索低地址的小分区。 但是这种规则也决定了当低地址部分有更小的分区可以满足需求时，会更有可能用到低地址部分的小分区，也会更有可能把高地址部分的大分区保留下来（最佳适应算法的优点）</p>
+<p>缺点：邻近适应算法的规则可能会导致无论低地址、高地址部分的空闲分区都有相同的概率被使用，也就导致了高地址部分的大分区更可能被使用，划分为小分区，最后导致无大分区可用（最大适应算法的缺点）</p>
+</li>
+</ul>
+<p>综合来看，四种算法中，首次适应算法的效果反而更好</p>
+<p><a id="reference-基本分页存储管理"></a></p>
+<h3 id="基本分页存储管理">基本分页存储管理</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="950" height="488" src="/_astro/IMG-20260722152428738.Dv7rxf6M_28Nvrl.webp"></p>
+<p><a id="reference-基本概念"></a></p>
+<h4 id="基本概念">基本概念</h4>
+<ul>
+<li>连续分配：为用户进程分配的必须是一个连续的内存空间</li>
+<li>非连续分配：为用户进程分配的可以是一些分散的内存空间</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="258" height="564" src="/_astro/IMG-20260722152428774.EgSPWuPn_1d0jRf.webp"></p>
+<ul>
+<li><strong>内存空间</strong>（物理空间）分为一个个大小相等的分区（比如：每个分区 4KB），每个分区就是一个“<strong>页框</strong>”（页框=页帧=内存块=物理块=物理页面）
+<ul>
+<li>每个页框有一个编号，即“页框号”（页框号=页帧号=内存块号=物理块号=物理页号），页框号从 0 开始</li>
+</ul>
+</li>
+<li>进程的<strong>逻辑地址空间</strong>也分为与页框大小相等的一个个部分，每个部分称为一个“<strong>页</strong>”或“页面”
+<ul>
+<li>每个页面也有一个编号，即“页号”，页号也是从 0 开始</li>
+</ul>
+</li>
+<li>操作系统以<strong>页框</strong>为单位为各个进程分配内存空间。进程的<strong>每个页面分别放入一个页框中</strong>
+<ul>
+<li>也就是说，<strong>进程的页面与内存的页框有一一对应的关系</strong></li>
+<li>各个页面不必连续存放，可以放到不相邻的各个页框中</li>
+</ul>
+</li>
+<li>进程的最后一个页面可能没有一个页框那么大。也就是说，分页存储有可能产生内部碎片，因此页框不能太大，否则可能产生过大的内部碎片造成浪费</li>
+</ul>
+<p><a id="reference-页表"></a></p>
+<h4 id="页表">页表</h4>
+<ul>
+<li>为了能知道进程的每个页面在内存中存放的位置，操作系统要为每个进程建立一张<strong>页表</strong></li>
+<li>页表通常存在 PCB（进程控制块）中</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1028" height="316" src="/_astro/IMG-20260722152428806.DemXna5b_Z2mEDaV.webp"></p>
+<ol>
+<li><strong>一个进程对应一张页表</strong></li>
+<li>进程的每个页面对应一个页表项</li>
+<li>每个页表项由“页号”和“块号”组成</li>
+<li>页表记录进程页面和实际存放的内存块之间的映射关系</li>
+<li>每个页表项的长度是相同的</li>
+</ol>
+<p><a id="reference-页表项大小"></a></p>
+<h5 id="页表项大小">页表项大小</h5>
+<blockquote>
+<p>Eg：假设某系统物理内存大小为 4GB，页面大小为 4KB，则每个页表项至少应该为多少字节？</p>
+</blockquote>
+<ul>
+<li>内存块大小=页面大小=<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> KB= <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>12</mn></msup></mrow><annotation encoding="application/x-tex">2^{12}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">12</span></span></span></span></span></span></span></span></span></span></span></span> B</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> GB 的内存总共会被分为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>32</mn></msup><mi mathvariant="normal">/</mi><msup><mn>2</mn><mn>12</mn></msup><mo>=</mo><msup><mn>2</mn><mn>20</mn></msup></mrow><annotation encoding="application/x-tex">2^{32}/2^{12}=2^{20}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">32</span></span></span></span></span></span></span></span></span><span class="mord">/</span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">12</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">20</span></span></span></span></span></span></span></span></span></span></span></span>  个内存块</li>
+<li>内存块号的范围应该是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><msup><mn>2</mn><mn>20</mn></msup><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,2^{20}-1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">20</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span></li>
+<li>内存块号至少要用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>20</mn></mrow><annotation encoding="application/x-tex">20</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">20</span></span></span></span> bit 来表示</li>
+<li>至少要用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn></mrow><annotation encoding="application/x-tex">3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3</span></span></span></span> B 来表示块号（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn><mo>∗</mo><mn>8</mn><mo>=</mo><mn>24</mn><mi>b</mi><mi>i</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">3*8=24bit</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">8</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord">24</span><span class="mord mathnormal">bi</span><span class="mord mathnormal">t</span></span></span></span>）</li>
+<li>页表中的页号可以是隐含的，即页号不占用存储空间。i 号页表项的存放地址 = <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>+</mo><mn>3</mn><mo>∗</mo><mi>i</mi></mrow><annotation encoding="application/x-tex">X + 3*i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn></mrow><annotation encoding="application/x-tex">3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3</span></span></span></span> 为块号大小，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi></mrow><annotation encoding="application/x-tex">X</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span></span></span></span> 为起始地址</li>
+<li>因此每个页表项占 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn></mrow><annotation encoding="application/x-tex">3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3</span></span></span></span> B，存储整个页表至少需要 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn><mo>∗</mo><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">3*(n+1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span> B</li>
+<li>页表记录的只是内存块号，而不是内存块的起始地址。J 号内存块的起始地址 = <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>J</mi><mo>∗</mo><mtext>内存块大小</mtext></mrow><annotation encoding="application/x-tex">J * 内存块大小</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0962em;">J</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord cjk_fallback">内存块大小</span></span></span></span></li>
+</ul>
+<p>页表项会按顺序连续地存放在内存中如果该页表在内存中存放的起始地址为 X ，则 M 号页对应的页表项是存放在内存地址为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>+</mo><mn>3</mn><mo>∗</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">X + 3*M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span></p>
+<p>一个页面为 4KB，则每个页框可以存放 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4096</mn><mi mathvariant="normal">/</mi><mn>3</mn><mo>=</mo><mn>1365</mn></mrow><annotation encoding="application/x-tex">4096/3 = 1365</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">4096/3</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1365</span></span></span></span> 个页表项，但是这个页框会剩余 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4096</mn><mi mathvariant="normal">%</mi><mn>3</mn><mo>=</mo><mn>1</mn><mi>B</mi></mrow><annotation encoding="application/x-tex">4096 % 3 = 1 B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">4096%3</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord">1</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> 页内碎片
+因此，1365 号页表项存放的地址为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>+</mo><mn>3</mn><mo>∗</mo><mn>1365</mn><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">X + 3*1365 + 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0785em;">X</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1365</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 如果每个页表项占 4 字节，则每个页框刚好可存放 1024 个页表项</p>
+<p>理论上，页表项长度为 3B 即可表示内存块号的范围，但是，为了方便页表的查询，常常会让一个页表项占更多的字节，使得每个页面恰好可以装得下整数个页表项</p>
+<p><a id="reference-地址转换功能"></a></p>
+<h5 id="地址转换功能">地址转换功能</h5>
+<ul>
+<li>连续存放时：重定位寄存器：指明了进程在内存中的起始位置</li>
+<li>分页：虽然进程的各个页面是离散存放的，但是页面内部是连续存放的</li>
+</ul>
+<blockquote>
+<p>Eg：在某计算机系统中，页面大小是 50B。某进程逻辑地址空间大小为 200B，则逻辑地址 110 对应的页号、页内偏移量是多少？</p>
+</blockquote>
+<ol>
+<li>逻辑地址 -&gt; 页号 + 页面偏移量
+2. <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>页号</mtext><mo>=</mo><mfrac><mtext>逻辑地址</mtext><mtext>页面大小</mtext></mfrac></mrow><annotation encoding="application/x-tex">\text{页号}=\frac{\text{逻辑地址}}{\text{页面大小}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord cjk_fallback">页号</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.2173em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8723em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord cjk_fallback mtight">页面大小</span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord cjk_fallback mtight">逻辑地址</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>
+3. <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>页面偏移量</mtext><mo>=</mo><mtext>逻辑地址</mtext><mi mathvariant="normal">%</mi><mtext>页面大小</mtext></mrow><annotation encoding="application/x-tex">\text{页面偏移量}=\text{逻辑地址}%\text{页面大小}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord cjk_fallback">页面偏移量</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord text"><span class="mord cjk_fallback">逻辑地址</span></span><span class="mord">%</span><span class="mord text"><span class="mord cjk_fallback">页面大小</span></span></span></span></span></li>
+<li>页号 -&gt; 页框号
+5. 查找页表</li>
+<li>页框号 + 页面偏移量 -&gt; 物理地址
+7. <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>物理地址</mtext><mo>=</mo><mtext>页框号</mtext><mo>∗</mo><mtext>页面大小</mtext><mo>+</mo><mtext>页面偏移量</mtext></mrow><annotation encoding="application/x-tex">物理地址=页框号*页面大小+页面偏移量</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord cjk_fallback">物理地址</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord cjk_fallback">页框号</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord cjk_fallback">页面大小</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord cjk_fallback">页面偏移量</span></span></span></span></li>
+</ol>
+<ul>
+<li>如果页面大小刚好是 2 的整数幂，则计算机硬件可以很快速的把逻辑地址拆分成 <code>(页号，页内偏移量)</code></li>
+<li>如果每个页面大小为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>k</mi></msup></mrow><annotation encoding="application/x-tex">2^k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8491em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span></span></span></span></span></span></span></span> B，用二进制数表示逻辑地址，则末尾 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">K</span></span></span></span> 位即为页内偏移量，其余部分就是页号</li>
+<li>只需把页表中记录的物理块号拼接上页内偏移量就能得到对应的物理地址</li>
+</ul>
+<p><a id="reference-逻辑地址结构"></a></p>
+<h4 id="逻辑地址结构">逻辑地址结构</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="833" height="91" src="/_astro/IMG-20260722152428837.2NK39iKo_Z7we4R.webp"></p>
+<p>地址结构包含两个部分：前一部分为页号，后一部分为页内偏移量 W。在上图所示的例子中，地址长度为 32 位，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>11</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,11]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">11</span><span class="mclose">]</span></span></span></span> 位 为“页内偏移量”，或称“页内地址” ；<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>12</mn><mo separator="true">,</mo><mn>31</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[12,31]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">12</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">31</span><span class="mclose">]</span></span></span></span> 位为“页号”</p>
+<ul>
+<li>如果有 K 位表示“页内偏移量”，则说明该系统中一个页面的大小是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>k</mi></msup></mrow><annotation encoding="application/x-tex">2^k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8491em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0315em;">k</span></span></span></span></span></span></span></span></span></span></span> 个内存单元</li>
+<li>如果有 M 位表示“页号”，则说明在该系统中一个进程最多允许有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>M</mi></msup></mrow><annotation encoding="application/x-tex">2^M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8413em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.109em;">M</span></span></span></span></span></span></span></span></span></span></span> 个页面</li>
+</ul>
+<p><a id="reference-基本地址变换机构"></a></p>
+<h4 id="基本地址变换机构">基本地址变换机构</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1233" height="604" src="/_astro/IMG-20260722152428871.CA7Hin6l_bJIM8.webp"></p>
+<ul>
+<li>基本地址变换机构可以借助进程的页表将逻辑地址转换为物理地址</li>
+<li>通常会在系统中设置一个<strong>页表寄存器（PTR）</strong> ，存放页表在内存中的<strong>起始地址 F</strong> 和<strong>页表长度 M</strong></li>
+<li>进程未执行时，页表的<strong>始址</strong>和<strong>页表长度</strong>放在进程控制块（PCB）中，当进程被调度时，操作系统内核会把它们放到页表寄存器中</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1174" height="663" src="/_astro/IMG-20260722152428908.B3RLqXD__ZAc8V9.webp"></p>
+<ol>
+<li>
+<p>计算页号 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span></span></span></span> 和页内偏移量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi></mrow><annotation encoding="application/x-tex">W</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">W</span></span></span></span>（ 如果用十进制数手算，则 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>=</mo><mi>A</mi><mi mathvariant="normal">/</mi><mi>L</mi></mrow><annotation encoding="application/x-tex">P=A/L</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">A</span><span class="mord">/</span><span class="mord mathnormal">L</span></span></span></span>，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi><mo>=</mo><mi>A</mi><mi mathvariant="normal">%</mi><mi>L</mi></mrow><annotation encoding="application/x-tex">W=A%L</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">W</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord mathnormal">A</span><span class="mord">%</span><span class="mord mathnormal">L</span></span></span></span>；但是在计算机实际运行时，逻辑地址结构是固定不变的，因此计算机硬件可以更快地得到二进制表示的页号、页内偏移量）</p>
+</li>
+<li>
+<p><strong>比较页号</strong> <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span></span></span></span></strong> <strong>和页表长度</strong> <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span></strong>，若 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>≥</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">P≥M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8193em;vertical-align:-0.136em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span>，则产生越界中断，否则继续执行。（注意：页号是从 0 开始的，而页表长度至少是 1，因此 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>=</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">P=M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> 时也会越界）</p>
+</li>
+<li>
+<p>页表中页号 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi></mrow><annotation encoding="application/x-tex">P</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span></span></span></span> 对应的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>页表项地址</mtext><mo>=</mo><mtext>页表起始地址</mtext><mi>F</mi><mo>+</mo><mtext>页号</mtext><mi>P</mi><mo>∗</mo><mtext>页表项长度</mtext></mrow><annotation encoding="application/x-tex">页表项地址 = 页表起始地址F + 页号P * 页表项长度</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord cjk_fallback">页表项地址</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord cjk_fallback">页表起始地址</span><span class="mord mathnormal" style="margin-right:0.1389em;">F</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord cjk_fallback">页号</span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord cjk_fallback">页表项长度</span></span></span></span>，取出该页表项内容 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi></mrow><annotation encoding="application/x-tex">b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span></span></span></span>，即为内存块号。</p>
+<ol start="4">
+<li>注意区分页表项长度、页表长度、页面大小的区别。</li>
+<li>页表长度指的是这个页表中总共有几个页表项，即总共有几个页</li>
+<li>页表项长度指的是每个页表项占多大的存储空间</li>
+<li>页面大小指的是一个页面占多大的存储空间</li>
+</ol>
+</li>
+<li>
+<p>计算 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo>=</mo><mi>b</mi><mo>∗</mo><mi>L</mi><mo>+</mo><mi>W</mi></mrow><annotation encoding="application/x-tex">E = b * L + W</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">L</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">W</span></span></span></span>，用得到的物理地址 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi></mrow><annotation encoding="application/x-tex">E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span></span></span></span> 去访存。（如果内存块号、页面偏移量是用二进制表示的，那么把二者拼接起来就是最终的物理地址了）</p>
+</li>
+</ol>
+<p>页式管理中地址是<strong>一维</strong>的。只要给出一个逻辑地址，系统就可以自动地算出页号、页内偏移量两个部分，并不需要显式地告诉系统这个逻辑地址中，页内偏移量占多少位</p>
+<p><a id="reference-具有快表的地址变换机构"></a></p>
+<h4 id="具有快表的地址变换机构">具有快表的地址变换机构</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1031" height="429" src="/_astro/IMG-20260722152428935.CFImLNU4_tM4Jf.webp"></p>
+<p><strong>快表</strong>，又称<strong>联想寄存器（TLB</strong>，translation lookaside buffer ），是一种访问速度比内存快很多的高速缓存（不是内存），用来存放最近访问的页表项的副本，可以加速地址变换的速度。与此对应，内存中的页表常称为慢表</p>
+<p>TLB 和 普通 Cache 的区别：TLB 中只有页表项的副本，而普通 Cache 中可能会有其他各种数据的副本</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1160" height="630" src="/_astro/IMG-20260722152428968.Df3_v_7Z_zyHfk.webp"></p>
+<ol>
+<li>
+<p>CPU 给出逻辑地址，由某个硬件算得页号、页内偏移量，将页号与<strong>快表</strong>中的所有页号进行比较。</p>
+</li>
+<li>
+<p>如果找到匹配的页号，说明要访问的页表项在快表中有副本，则<strong>直接从中取出该页对应的内存块号</strong>，再将内存块号与页内偏移量拼接形成物理地址，最后，访问该物理地址对应的内存单元</p>
+<ol start="3">
+<li>若快表命中，则访问某个逻辑地址仅需<strong>一次访存</strong>即可。</li>
+</ol>
+</li>
+<li>
+<p>如果没有找到匹配的页号，则需要<strong>访问内存中的页表</strong>，找到对应页表项，得到页面存放的内存块号，再将内存块号与页内偏移量拼接形成物理地址，最后，访问该物理地址对应的内存单元</p>
+<ol start="5">
+<li>若快表未命中，则访问某个逻辑地址需要<strong>两次访存</strong></li>
+<li>注意：在找到页表项后，应同时将其存入快表，以便后面可能的再次访问。但若快表已满，则必须按照一定的算法对旧的页表项进行替换</li>
+</ol>
+</li>
+</ol>
+<p>考虑计算平均查询时间：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>快表命中率</mtext><mo>∗</mo><mo stretchy="false">(</mo><msub><mi>t</mi><mtext>快表</mtext></msub><mo>+</mo><msub><mi>t</mi><mtext>页表</mtext></msub><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mtext>快表命中率</mtext><mo stretchy="false">)</mo><mo>∗</mo><mo stretchy="false">(</mo><msub><mi>t</mi><mtext>快表</mtext></msub><mo>+</mo><mn>2</mn><mo>∗</mo><msub><mi>t</mi><mtext>页表</mtext></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">快表命中率*(t_{快表}+t_{页表})+(1-快表命中率)<em>(t_{快表}+2</em>t_{页表})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord cjk_fallback">快表命中率</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord cjk_fallback mtight">快表</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord cjk_fallback mtight">页表</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord cjk_fallback">快表命中率</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord cjk_fallback mtight">快表</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord cjk_fallback mtight">页表</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></p>
+<p><a id="reference-局部性原理"></a></p>
+<h5 id="局部性原理">局部性原理</h5>
+<ul>
+<li>时间局部性：如果执行了程序中的某条指令，那么不久后这条指令很有可能再次执行；如果某个数据被访问过，不久之后该数据很可能再次被访问。（因为程序中存在大量的循环）</li>
+<li>空间局部性：一旦程序访问了某个存储单元，在不久之后，其附近的存储单元也很有可能被访问。（因为很多数据在内存中都是连续存放的）</li>
+</ul>
+<p>由于局部性原理，可能连续很多次查到的都是同一个页表项，所以快表命中率会较高</p>
+<p><a id="reference-基本分段存储管理"></a></p>
+<h3 id="基本分段存储管理">基本分段存储管理</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1056" height="506" src="/_astro/IMG-20260722152429005.C-8QfLRo_1JbYqR.webp"></p>
+<p><a id="reference-分段"></a></p>
+<h4 id="分段">分段</h4>
+<ul>
+<li>进程的地址空间：按照程序自身的逻辑关系划分为若干个段，每个段都有一个段名，每段从 0 开始编址</li>
+<li>内存分配规则：以<strong>段为单位</strong>进行分配，每个段在内存中占据<strong>连续空间</strong>，但各段之间可以不相邻</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1088" height="424" src="/_astro/IMG-20260722152429032.bRL73rjq_2w9wxF.webp"></p>
+<ul>
+<li>写程序时使用的段名 <code>[D]</code>、<code>[X]</code> 会被编译程序翻译成对应<strong>段号</strong></li>
+<li><code>&lt;A&gt;</code> 单元、<code>&lt;B&gt;</code> 单元会被编译程序翻译成<strong>段内地址</strong></li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="885" height="135" src="/_astro/IMG-20260722152429064.D2_r7j9T_52qOn.webp"></p>
+<ul>
+<li>段号的位数决定了每个进程最多可以分几个段</li>
+<li>段内地址位数决定了每个段的最大长度是多少</li>
+</ul>
+<p><a id="reference-段表"></a></p>
+<h4 id="段表">段表</h4>
+<p>程序分多个段，各段离散地装入内存，为了保证程序能正常运行，就必须能从物理内存中找到各个逻辑段的存放位置。为此，需为每个进程建立一张段映射表，简称“段表”</p>
+<ol>
+<li>
+<p>每个段对应一个段表项，其中记录了该段在内存中的<strong>起始位置</strong>（又称“基址”）和<strong>段的长度</strong></p>
+</li>
+<li>
+<p>各个<strong>段表项的长度是相同</strong>的</p>
+<ol start="3">
+<li>例如：某系统按字节寻址，采用分段存储管理，逻辑地址结构为（段号 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>16</mn></mrow><annotation encoding="application/x-tex">16</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">16</span></span></span></span> 位, 段内地址 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>16</mn></mrow><annotation encoding="application/x-tex">16</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">16</span></span></span></span> 位），因此用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>16</mn></mrow><annotation encoding="application/x-tex">16</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">16</span></span></span></span> 位即可表示最大段长。</li>
+<li>若物理内存大小为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span> GB，可用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>32</mn></mrow><annotation encoding="application/x-tex">32</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">32</span></span></span></span> 位表示整个物理内存地址空间。可以让每个段表项占 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>16</mn><mo>+</mo><mn>32</mn><mo>=</mo><mn>48</mn></mrow><annotation encoding="application/x-tex">16+32 = 48</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">16</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">32</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">48</span></span></span></span> 位，即 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn></mrow><annotation encoding="application/x-tex">6</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">6</span></span></span></span> B。</li>
+<li>由于段表项长度相同，因此段号可以是隐含的，不占存储空间。若段表存放的起始地址为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span>，则 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">K</span></span></span></span> 号段对应的段表项存放的地址为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo>+</mo><mi>K</mi><mo>∗</mo><mn>6</mn></mrow><annotation encoding="application/x-tex">M + K*6</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">6</span></span></span></span></li>
+</ol>
+</li>
+</ol>
+<p><a id="reference-地址变换"></a></p>
+<h4 id="地址变换">地址变换</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1158" height="663" src="/_astro/IMG-20260722152429110.BOpE3CVk_1BOPhW.webp"></p>
+<p><a id="reference-分页分段对比"></a></p>
+<h4 id="分页分段对比">分页、分段对比</h4>
+<table>
+<thead>
+<tr>
+<th>分页</th>
+<th>分段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>页是信息的<strong>物理单位</strong>。分页的主要目的是为了实现离散分配，提高内存利用率。分页仅仅是系统管理上的需要，完全是系统行为，对用户是不可见的</td>
+<td>段是信息的<strong>逻辑单位</strong>。分段的主要目的是更好地满足用户需求。一个段通常包含着一组属于一个逻辑模块的信息。分段对用户是可见的，用户编程时需要显式地给出段名</td>
+</tr>
+<tr>
+<td>页的大小固定且由系统决定</td>
+<td>段的长度却不固定，决定于用户编写的程序</td>
+</tr>
+<tr>
+<td>分页的用户进程地址空间是<strong>一维</strong>的，程序员只需给出一个记忆符即可表示一个地址</td>
+<td>分段的用户进程地址空间是<strong>二维</strong>的，程序员在标识一个地址时，既要给出段名，也要给出段内地址</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>分段比分页更容易实现信息的共享和保护</li>
+<li>不能被修改的代码称为纯代码或可重入代码（不属于临界资源），这样的代码是可以共享的。可修改的代码是不能共享的</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1063" height="429" src="/_astro/IMG-20260722152429147.xN1IMSL-_1Chn5c.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="1094" height="501" src="/_astro/IMG-20260722152429181.BZuLgAzd_2clStU.webp"></p>
+<blockquote>
+<p>访问一个逻辑地址需要几次访存？</p>
+</blockquote>
+<ul>
+<li>分页（单级页表）：第一次访存——查内存中的页表，第二次访存——访问目标内存单元。总共两次访存</li>
+<li>分段：第一次访存——查内存中的段表，第二次访存——访问目标内存单元。总共两次访存</li>
+</ul>
+<p>与分页系统类似，分段系统中也可以引入快表机构，将近期访问过的段表项放到快表中，这样可以少一次访问，加快地址变换速度。</p>
+<p><a id="reference-段页式管理方式"></a></p>
+<h3 id="段页式管理方式">段页式管理方式</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1315" height="647" src="/_astro/IMG-20260722152429214.BFaJsiTS_Z1r2ymy.webp"></p>
+<p><a id="reference-分页分段优缺点"></a></p>
+<h4 id="分页分段优缺点">分页分段优缺点</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1001" height="159" src="/_astro/IMG-20260722152429261.BI5H9_6Y_Z2uElHp.webp"></p>
+<p><a id="reference-段页式管理"></a></p>
+<h4 id="段页式管理">段页式管理</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="905" height="442" src="/_astro/IMG-20260722152429289.DR4qnBQH_t8CD6.webp"></p>
+<p>将进程按逻辑模块分段，再将各段分页</p>
+<p><a id="reference-地址结构"></a></p>
+<h4 id="地址结构">地址结构</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="828" height="141" src="/_astro/IMG-20260722152429328.2k_7GCru_Z1Ul2N3.webp"></p>
+<ul>
+<li>段号的位数决定了每个进程最多可以分几个段</li>
+<li>页号位数决定了每个段最大有多少页</li>
+<li>页内偏移量决定了页面大小、内存块大小是多少</li>
+</ul>
+<p>“分段”对用户是可见的，程序员编程时需要显式地给出段号、段内地址。而将各段“分页”对用户是不可见的。系统会根据段内地址自动划分页号和页内偏移量。因此段页式管理的地址结构是<strong>二维的</strong></p>
+<p><a id="reference-段表页表"></a></p>
+<h4 id="段表页表">段表页表</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1080" height="612" src="/_astro/IMG-20260722152429374.DfOxycMY_Z1UpEVl.webp"></p>
+<p>注意段表中存放的是 <code>(页表长度, 页表存放块号)</code></p>
+<p><a id="reference-地址变换-1"></a></p>
+<h4 id="地址变换-1">地址变换</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1185" height="628" src="/_astro/IMG-20260722152429401.D432pOui_ZnkyOj.webp"></p>
+<p><a id="reference-内存空间的扩充"></a></p>
+<h2 id="内存空间的扩充">内存空间的扩充</h2>
+<p>操作系统需要提供某种技术从<strong>逻辑</strong>上对内存空间进行扩充——虚拟技术</p>
+<p><a id="reference-覆盖与交换"></a></p>
+<h3 id="覆盖与交换">覆盖与交换</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1106" height="579" src="/_astro/IMG-20260722152429443.DytWTAu2_ZD1u0.webp"></p>
+<p><a id="reference-覆盖"></a></p>
+<h4 id="覆盖">覆盖</h4>
+<p>解决“程序大小超过物理内存总和”的问题</p>
+<ul>
+<li>将程序分为多个段（多个模块）</li>
+<li>常用的段常驻内存，不常用的段在需要时调入内存。</li>
+<li>内存中分为一个“固定区”和若干个“覆盖区”。</li>
+<li>需要常驻内存的段放在“固定区”中，调入后就不再调出（除非运行结束）</li>
+<li>不常用的段放在“覆盖区”，需要用到时调入内存，用不到时调出内存</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1045" height="428" src="/_astro/IMG-20260722152429475.CRx0CD_v_Zhw9nF.webp"></p>
+<ul>
+<li>B 和 C 区不会同时被访问</li>
+<li>DEF 同理</li>
+</ul>
+<p>必须由程序员声明覆盖结构，操作系统完成自动覆盖。</p>
+<p>缺点：对用户不透明，增加了用户编程负担。</p>
+<p>覆盖技术只用于早期的操作系统中</p>
+<p><a id="reference-交换"></a></p>
+<h4 id="交换">交换</h4>
+<p>内存空间紧张时，系统将内存中某些<strong>进程</strong>暂时<strong>换出</strong>外存，把外存中某些已具备运行条件的进程<strong>换入</strong>内存（<strong>进程在内存与磁盘间动态调度</strong>）</p>
+<p>是对于不同进程的</p>
+<p><strong>中级调度（内存调度）</strong> ：决定将哪个处于挂起状态的进程重新调入内存</p>
+<ul>
+<li>暂时换出外存等待的进程状态为挂起状态（挂起态，suspend）</li>
+<li>挂起态又可以进一步细分为就绪挂起、阻塞挂起两种状态</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1066" height="396" src="/_astro/IMG-20260722152429513.IEKNwoM5_Z2lEk6Q.webp"></p>
+<p>进程的七状态模型</p>
+<p><a id="reference-对换区和文件区"></a></p>
+<h5 id="对换区和文件区">对换区和文件区</h5>
+<p><img alt="image" loading="lazy" decoding="async" width="195" height="300" src="/_astro/IMG-20260722152429557.5_Y8o9K0_Z2aWXsx.webp"></p>
+<ol>
+<li>
+<p>具有对换功能的操作系统中，通常把磁盘空间分为<strong>文件区</strong>和<strong>对换区（swap）</strong> 两部分</p>
+<ol start="2">
+<li>
+<p>文件区主要用于存放文件，主要追求存储空间的利用率，因此对文件区空间的管理采用<strong>离散分配方式</strong></p>
+</li>
+<li>
+<p>对换区空间只占磁盘空间的小部分，被换出的进程数据就存放在对换区</p>
+<ol>
+<li>由于对换的速度直接影响到系统的整体速度，因此对换区空间的管理主要追求换入换出速度，因此通常对换区采用<strong>连续分配方式</strong></li>
+<li>总之，对换区的 I/O 速度比文件区的更快。</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>
+<p>交换通常在许多进程运行且内存吃紧时进行，而系统负荷降低就暂停</p>
+<ol start="5">
+<li>例如：在发现许多进程运行时经常发生缺页，就说明内存紧张，此时可以换出一些进程</li>
+<li>如果缺页率明显下降，就可以暂停换出。</li>
+</ol>
+</li>
+<li>
+<p>可优先换出阻塞进程；可换出优先级低的进程；为了防止优先级低的进程在被调入内存后很快又被换出，有的系统还会考虑进程在内存的驻留时间</p>
+<ol start="8">
+<li>注意：PCB 会常驻内存，不会被换出外存</li>
+</ol>
+</li>
+</ol>
+<p><a id="reference-虚拟内存"></a></p>
+<h3 id="虚拟内存">虚拟内存</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1231" height="573" src="/_astro/IMG-20260722152429583.Cx9mSYTy_Z1AWJEb.webp"></p>
+<p><a id="reference-传统存储管理方式"></a></p>
+<h4 id="传统存储管理方式">传统存储管理方式</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="696" height="329" src="/_astro/IMG-20260722152429614.DbH3zHvE_1Hwv98.webp"></p>
+<ul>
+<li>
+<p>一次性：作业必须<strong>一次性全部装入</strong>内存后才能开始运行。这会造成两个问题：</p>
+<ul>
+<li>作业很大时，不能全部装入内存，导致大作业无法运行</li>
+<li>当大量作业要求运行时，由于内存无法容纳所有作业，因此只有少量作业能运行，导致多道程序并发度下降。</li>
+</ul>
+</li>
+<li>
+<p>驻留性：一旦作业被装入内存，就会<strong>一直驻留</strong>在内存中，直至作业运行结束</p>
+<ul>
+<li>事实上，在一个时间段内，只需要访问作业的一小部分数据即可正常运行，这就导致了内存中会驻留大量的、暂时用不到的数据，浪费了宝贵的内存资源</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-虚拟内存-1"></a></p>
+<h4 id="虚拟内存-1">虚拟内存</h4>
+<ul>
+<li>基于局部性原理，在程序装入时，可以将程序中很快会用到的部分装入内存，<strong>暂时用不到的部分留在外存</strong>，就可以让程序开始执行</li>
+<li>在程序执行过程中，当所访问的信息不在内存时，由操作系统负责<strong>将所需信息从外存调入内存</strong>，然后继续执行程序</li>
+<li>若内存空间不够，由操作系统负责将内存中<strong>暂时用不到的信息换出到外存</strong></li>
+<li>在操作系统的管理下，在用户看来似乎有一个比实际内存大得多的内存，这就是虚拟内存</li>
+</ul>
+<p>操作系统虚拟性的一个体现，实际的物理内存大小没有变，只是在逻辑上扩充。</p>
+<ul>
+<li>最大容量：由计算机的地址结构（CPU 寻址范围）确定的</li>
+<li>实际容量：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>min</mi><mo>⁡</mo><mo stretchy="false">{</mo><mtext>内存和外存容量之和，</mtext><mrow><mi mathvariant="normal">C</mi><mi mathvariant="normal">P</mi><mi mathvariant="normal">U</mi><mtext>寻址范围</mtext><mo stretchy="false">}</mo></mrow></mrow><annotation encoding="application/x-tex">\min{ 内存和外存容量之和，\rm CPU寻址范围 }</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">min</span><span class="mopen">{</span><span class="mord cjk_fallback">内存和外存容量之和，</span><span class="mord"><span class="mord mathrm">CPU</span><span class="mord mathrm cjk_fallback">寻址范围</span><span class="mclose">}</span></span></span></span></span></li>
+</ul>
+<blockquote>
+<p>如：某计算机地址结构为 32 位，按字节编址，内存大小为 512MB，外存大小为 2GB。</p>
+</blockquote>
+<p>则虚拟内存的最大容量为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>32</mn></msup><mi mathvariant="normal">B</mi><mo>=</mo><mn>4</mn><mi mathvariant="normal">G</mi><mi mathvariant="normal">B</mi></mrow><annotation encoding="application/x-tex">\rm 2^{32}B = 4GB</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8141em;"></span><span class="mord"><span class="mord"><span class="mord mathrm">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathrm mtight">32</span></span></span></span></span></span></span></span></span><span class="mord mathrm">B</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mord mathrm">4GB</span></span></span></span></span></p>
+<p>虚拟内存的实际容量 = <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mi>i</mi><mi>n</mi><mo stretchy="false">{</mo><msup><mn>2</mn><mn>32</mn></msup><mi>B</mi><mo separator="true">,</mo><mn>512</mn><mi>M</mi><mi>B</mi><mo>+</mo><mn>2</mn><mi>G</mi><mi>B</mi><mo stretchy="false">}</mo><mo>=</mo><mn>2</mn><mi>G</mi><mi>B</mi><mo>+</mo><mn>512</mn><mi>M</mi><mi>B</mi></mrow><annotation encoding="application/x-tex">min {2^{32}B, 512MB+2GB} = 2GB+512MB</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal">min</span><span class="mopen">{</span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">32</span></span></span></span></span></span></span></span></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">512</span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.0502em;">GB</span><span class="mclose">}</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.0502em;">GB</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord">512</span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span></p>
+<ul>
+<li>多次性：无需在作业运行时一次性全部装入内存，而是允许被分成多次调入内存</li>
+<li>对换性：在作业运行时无需一直常驻内存，而是允许在作业运行过程中，将作业换入、换出</li>
+<li>虚拟性：从逻辑上扩充了内存的容量，使用户看到的内存容量，远大于实际的容量</li>
+</ul>
+<p><a id="reference-虚拟内存的实现"></a></p>
+<h4 id="虚拟内存的实现">虚拟内存的实现</h4>
+<p>虚拟内存技术，允许一个作业分多次调入内存。如果采用连续分配方式，会不方便实现。
+因此，虚拟内存的实现需要建立在离散分配的内存管理方式基础上。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="533" height="166" src="/_astro/IMG-20260722152429651.BPP3MXDp_23QXNE.webp"></p>
+<p><a id="reference-请求分页管理方式"></a></p>
+<h4 id="请求分页管理方式">请求分页管理方式</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1036" height="534" src="/_astro/IMG-20260722152429696.DDcKwYGx_1ucLne.webp"></p>
+<p>请求分页管理方式与基本分页管理方式的主要区别：</p>
+<ol>
+<li>在程序执行过程中，当所访问的信息不在内存时，由操作系统负责将所需信息从外存调入内存，然后继续执行程序。——操作系统要提供请求调页（或请求调段）功能</li>
+<li>若内存空间不够，由操作系统负责将内存中暂时用不到的信息换出到外存。——操作系统要提供页面置换（或段置换）的功能</li>
+</ol>
+<p><a id="reference-页表机制"></a></p>
+<h5 id="页表机制">页表机制</h5>
+<p>请求页表：</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1086" height="335" src="/_astro/IMG-20260722152429742.DCBNl9MB_Za2kO5.webp"></p>
+<p><a id="reference-缺页中断机构"></a></p>
+<h5 id="缺页中断机构">缺页中断机构</h5>
+<ul>
+<li>请求分页系统中，每当要访问的页面<strong>不在内存</strong>时，便产生一个<strong>缺页中断</strong>，然后由操作系统的<strong>缺页中断处理程序</strong>处理中断。</li>
+<li>此时缺页的<strong>进程阻塞</strong>，放入<strong>阻塞队列</strong>，调页完成后再将其唤醒，放回<strong>就绪队列</strong>。如果内存中有空闲块，则为进程分配一个空闲块，将所缺页面装入该块，并修改页表中相应的页表项</li>
+<li>如果内存中没有空闲块，则由页面置换算法选择一个页面淘汰，若该页面在内存期间被修改过，则要将其写回外存。未修改过的页面不用写回外存。</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="999" height="365" src="/_astro/IMG-20260722152429773.B8dsWfez_ZAaG3W.webp"></p>
+<ul>
+<li>缺页中断是因为当前执行的指令想要访问的目标页面未调入内存而产生的，因此属于内中断</li>
+<li>一条指令在执行期间，可能产生多次缺页中断</li>
+</ul>
+<p><a id="reference-地址变换机构"></a></p>
+<h5 id="地址变换机构">地址变换机构</h5>
+<ul>
+<li>在程序执行过程中，当所访问的信息<strong>不在内存</strong>时，由操作系统负责将所需信息从<strong>外存调入内存</strong>，然后继续执行程序。</li>
+<li>若<strong>内存空间不够</strong>，由操作系统负责将内存中暂时用不到的信息<strong>换出到外存</strong>。</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1142" height="629" src="/_astro/IMG-20260722152429850.Y8Symlwf_ZjkF3w.webp"></p>
+<ul>
+<li>只有“写指令”才需要修改“修改位”。并且，一般来说只需修改快表中的数据，只有要将快表项删除时才需要写回内存中的慢表。这样可以减少访存次数</li>
+<li>和普通的中断处理一样，缺页中断处理依然需要保留 CPU 现场。</li>
+<li>需要用某种“页面置换算法”来决定一个换出页面</li>
+<li>换入/换出页面都需要启动慢速的 I/O 操作，可见，如果换入/换出太频繁，会有很大的开销</li>
+<li>页面调入内存后，需要修改慢表，同时也需要将表项复制到快表中</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1876" height="1651" src="/_astro/IMG-20260722152430027.CRpO1GMZ_1O7U7q.webp"></p>
+<p><a id="reference-地址转换"></a></p>
+<h2 id="地址转换">地址转换</h2>
+<p>操作系统需要提供地址转换功能，负责程序的逻辑地址与物理地址的转换</p>
+<ul>
+<li>写程序时应该只需要关注指令、数据的逻辑地址。</li>
+<li>而逻辑地址到物理地址的转换（这个过程称为地址重定位）应该由操作系统负责，这样就保证了程序员写程序时不需要关注物理内存的实际情况</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1048" height="168" src="/_astro/IMG-20260722152430082.T9gvENMW_ZJc2Do.webp"></p>
+<p><a id="reference-存储保护"></a></p>
+<h2 id="存储保护">存储保护</h2>
+<p>操作系统需要提供内存保护功能。保证各进程在各自存储空间内运行，互不干扰</p>
+<p>实现方式：</p>
+<ol>
+<li>
+<p>CPU 中设置一对<strong>上、下限寄存器</strong>，存放进程的上、下限地址。进程的指令要访问某个地址时，CPU 检查是否越界</p>
+</li>
+<li>
+<p>采用<strong>重定位寄存器</strong>（又称<strong>基址寄存器</strong>）和<strong>界地址寄存器</strong>（又称<strong>限长寄存器</strong>）进行越界检查。</p>
+<ol start="3">
+<li>重定位寄存器中存放的是进程的<strong>起始物理地址</strong></li>
+<li>界地址寄存器中存放的是进程的<strong>最大逻辑地址</strong></li>
+</ol>
+</li>
+</ol>
+<p><a id="reference-进程的内存映像"></a></p>
+<h2 id="进程的内存映像">进程的内存映像</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1154" height="622" src="/_astro/IMG-20260722152430128.8pLwpEes_vwV8y.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="1171" height="540" src="/_astro/IMG-20260722152430153.Dxku7B0u_Z1gB2zd.webp"></p>
+<p><a id="reference-二级页表"></a></p>
+<h2 id="二级页表">二级页表</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1042" height="464" src="/_astro/IMG-20260722152430182.D4FMYN0c_29PS8t.webp"></p>
+<p><a id="reference-单级页表存在问题"></a></p>
+<h3 id="单级页表存在问题">单级页表存在问题</h3>
+<ol>
+<li>页表必须连续存放，因此当页表很大时，需要占用很多个连续的页框。</li>
+<li>没有必要让整个页表常驻内存，因为进程在一段时间内可能只需要访问某几个特定的页面</li>
+</ol>
+<p><a id="reference-二级页表-1"></a></p>
+<h3 id="二级页表-1">二级页表</h3>
+<p>页表再分页并离散存储，然后再建立一张页表记录页表各个部分的存放位置，称为<strong>页目录表</strong>，或称外层页表，或称顶层页表</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1082" height="571" src="/_astro/IMG-20260722152430226.RbD4vvc2_Z1FeNIx.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="1159" height="630" src="/_astro/IMG-20260722152430249.BIP8eLxe_rRgrg.webp"></p>
+<p><a id="reference-两级页表的地址转换"></a></p>
+<h4 id="两级页表的地址转换">两级页表的地址转换</h4>
+<ol>
+<li>按照地址结构将逻辑地址拆分成三部分</li>
+<li>从 PCB 中读出页目录表始址，再根据一级页号查页目录表，找到下一级页表在内存中的存放位置</li>
+<li>根据二级页号查二级页表，找到最终想访问的内存块号</li>
+<li>结合页内偏移量得到物理地址</li>
+</ol>
+<p><img alt="image" loading="lazy" decoding="async" width="1120" height="381" src="/_astro/IMG-20260722152430285.Cykp-AIG_1DGWYj.webp"></p>
+<ol>
+<li>若采用多级页表机制，则各级页表的大小不能超过一个页面</li>
+<li>访存次数计算：页目录表 -&gt; 二级页表 -&gt; 目标内存单元，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 级页表需要访问 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 次（无快表情况）</li>
+</ol>
+<p><a id="reference-缺页中断"></a></p>
+<h3 id="缺页中断">缺页中断</h3>
+<ul>
+<li>可以在需要访问页面时才把页面调入内存（虚拟存储技术）。可以在页表项中增加一个标志位，用于表示该页面是否已经调入内存</li>
+<li>若想访问的页面不在内存中，则产生缺页中断（内中断/异常），然后将目标页面从外存调入内存</li>
+</ul>
+<p><a id="reference-页面置换算法"></a></p>
+<h2 id="页面置换算法">页面置换算法</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="953" height="481" src="/_astro/IMG-20260722152430315.D5e5bnPh_1YwlWv.webp"></p>
+<p><a id="reference-最佳置换算法-opt"></a></p>
+<h3 id="最佳置换算法-opt">最佳置换算法 OPT</h3>
+<p>最佳置换算法（OPT，Optimal）：每次选择淘汰的页面将是<strong>以后永不使用</strong>，或者在<strong>最长时间内不再被访问</strong>的页面，这样可以保证最低的缺页率。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1049" height="438" src="/_astro/IMG-20260722152430352.BUkJB860_JtFAu.webp"></p>
+<p>最佳置换算法可以保证最低的缺页率，但实际上，只有在进程执行的过程中才能知道接下来会访问到的是哪个页面。操作系统无法提前预判页面访问序列。因此，最佳置换算法是无法实现的。</p>
+<p><a id="reference-先进先出算法-fifo"></a></p>
+<h3 id="先进先出算法-fifo">先进先出算法 FIFO</h3>
+<p>每次选择淘汰的页面是<strong>最早进入内存</strong>的页面</p>
+<ul>
+<li>调入内存的页面根据调入的先后顺序排成一个队列，需要换出页面时选择队头页面即可</li>
+<li>队列的<strong>最大长度取决于系统为进程分配了多少个内存块</strong></li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1019" height="395" src="/_astro/IMG-20260722152430409.5NQ1iUbM_Z18W21S.webp"></p>
+<p>Belady 异常——当为进程分配的物理块数增大时，缺页次数不减反增的异常现象。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1131" height="282" src="/_astro/IMG-20260722152430440.nhQ7q3lt_Z2u4Cih.webp"></p>
+<p>只有 FIFO 算法会产生 Belady 异常。</p>
+<p>FIFO 算法虽然实现简单，但是该算法与进程实际运行时的规律不适应，因为先进入的页面也有可能最经常被访问。因此，算法性能差</p>
+<p><a id="reference-最近最久未使用置换算法-lru"></a></p>
+<h3 id="最近最久未使用置换算法-lru">最近最久未使用置换算法 LRU</h3>
+<p>每次淘汰的页面是<strong>最近最久未使用</strong>的页面</p>
+<ul>
+<li>赋予每个页面对应的页表项中，用访问字段记录该页面自上次被访问以来所经历的时间 t。当需要淘汰一个页面时，选择现有页面中 t 值最大的，即最近最久未使用的页面</li>
+<li>实现需要专门的硬件支持，虽然算法性能好，但是实现困难，开销大</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1021" height="354" src="/_astro/IMG-20260722152430475.B3S7WDO8_ZTqT0M.webp"></p>
+<p><a id="reference-时钟置换算法-clock最近未用算法-nru"></a></p>
+<h3 id="时钟置换算法-clock最近未用算法-nru">时钟置换算法 CLOCK（最近未用算法 NRU）</h3>
+<p><a id="reference-简单-clock-算法"></a></p>
+<h4 id="简单-clock-算法">简单 Clock 算法</h4>
+<ul>
+<li>
+<p>每个页面设置一个访问位，再将内存中的页面都通过链接指针链接成一个循环队列。</p>
+</li>
+<li>
+<p>当某页被访问时，其<strong>访问位</strong>置 1。</p>
+</li>
+<li>
+<p>当需要淘汰一个页面时，只需检查页的<strong>访问位</strong>。如果是 0，就选择该页换出；如果是 1，则将它置为 0，暂不换出，继续检查下一个页面</p>
+</li>
+<li>
+<p>若第一轮扫描中所有页面都是 1，<strong>则将这些页面的访问位全部置为 0</strong>，再进行第二轮扫描</p>
+<ul>
+<li>第二轮扫描中一定会有访问位为 0 的页面，因此简单的 CLOCK 算法选择一个淘汰页面<strong>最多会经过两轮扫描</strong></li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-改进型-clock-算法"></a></p>
+<h4 id="改进型-clock-算法">改进型 Clock 算法</h4>
+<p>简单的时钟置换算法仅考虑到一个页面最近是否被访问过。事实上，如果被淘汰的页面没有被修改过，就不需要执行 I/O 操作写回外存。只有被淘汰的页面被修改过时，才需要写回外存</p>
+<ul>
+<li>在其他条件都相同时，应优<strong>先淘汰没有修改过</strong>的页面，<strong>避免 I/O 操作</strong></li>
+<li>修改位=0，表示页面没有被修改过；修改位=1，表示页面被修改过</li>
+</ul>
+<p>将所有可能被置换的页面排成一个循环队列：（访问位，修改位）</p>
+<ol>
+<li>第一轮：从当前位置开始扫描到第一个（0, 0）的帧用于替换。本轮扫描<strong>不修改</strong>任何标志位——最近没访问，且没修改的页面</li>
+<li>第二轮：若第一轮扫描失败，则重新扫描，查找第一个（0, 1）的帧用于替换。本轮将<strong>所有扫描过的帧访问位设为 0</strong>——最近没访问，但修改过的页面</li>
+<li>第三轮：若第二轮扫描失败，则重新扫描，查找第一个（0, 0）的帧用于替换。本轮扫描<strong>不修改</strong>任何标志位——最近访问过，但没修改的页面</li>
+<li>第四轮：若第三轮扫描失败，则重新扫描，查找第一个（0, 1）的帧用于替换。——最近访问过，且修改过的页面</li>
+</ol>
+<p>由于第二轮已将所有帧的访问位设为 0，因此经过第三轮、第四轮扫描一定会有一个帧被选中，因此改进型 CLOCK 置换算法选择一个淘汰页面最多会进行四轮扫描</p>
+<p><a id="reference-页面分配策略"></a></p>
+<h2 id="页面分配策略">页面分配策略</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1197" height="566" src="/_astro/IMG-20260722152430505.B39gKyjH_Z2kpCS7.webp"></p>
+<p><a id="reference-驻留集"></a></p>
+<h3 id="驻留集">驻留集</h3>
+<p>驻留集：指请求分页存储管理中<strong>给进程</strong>分配的<strong>物理块</strong>的集合</p>
+<p>在采用了虚拟存储技术的系统中，驻留集大小一般小于进程的总大小。</p>
+<ul>
+<li>
+<p>若驻留集太小，会导致缺页频繁，系统要花大量的时间来处理缺页，实际用于进程推进的时间很少；</p>
+</li>
+<li>
+<p>驻留集太大，又会导致多道程序并发度下降，资源利用率降低。所以应该选择一个合适的驻留集大小</p>
+</li>
+<li>
+<p>固定分配：操作系统为每个进程分配一组固定数目的物理块，在进程运行期间不再改变。即，驻留集大小不变</p>
+</li>
+<li>
+<p>可变分配：先为每个进程分配一定数目的物理块，在进程运行期间，可根据情况做适当的增加或减少。即，驻留集大小可变</p>
+</li>
+<li>
+<p>局部置换：发生缺页时只能选<strong>进程自己的物理块</strong>进行置换。</p>
+</li>
+<li>
+<p>全局置换：可以将<strong>操作系统保留的空闲物理块</strong>分配给缺页进程，也可以将别的进程持有的物理块置换到外存，再分配给缺页进程</p>
+</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="660" height="170" src="/_astro/IMG-20260722152430536.CsekPsTg_H0vaR.webp"></p>
+<p><a id="reference-页面分配置换策略"></a></p>
+<h3 id="页面分配置换策略">页面分配、置换策略</h3>
+<ul>
+<li>可变分配全局置换：只要缺页就给分配新物理块</li>
+<li>可变分配局部置换：要根据发生缺页的频率来动态地增加或减少进程的物理块</li>
+</ul>
+<p><a id="reference-固定分配局部置换"></a></p>
+<h4 id="固定分配局部置换">固定分配局部置换</h4>
+<ul>
+<li>
+<p>系统为每个进程分配一定数量的物理块，在整个运行期间都不改变</p>
+</li>
+<li>
+<p>若进程在运行中发生缺页，则<strong>只能从该进程在内存中的页面</strong>中选出一页换出，然后再调入需要的页面</p>
+</li>
+<li>
+<p>缺点：很难在刚开始就确定应为每个进程分配多少个物理块才算合理</p>
+<ul>
+<li>采用这种策略的系统可以根据进程大小、优先级、或是根据程序员给出的参数来确定为一个进程分配的内存块数</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-可变分配全局置换"></a></p>
+<h4 id="可变分配全局置换">可变分配全局置换</h4>
+<ul>
+<li>刚开始会为每个进程分配一定数量的物理块</li>
+<li>操作系统会保持一个空闲物理块队列。当某进程发生缺页时，从空闲物理块中取出一块分配给该进程；若已无空闲物理块，则可选择一个<strong>未锁定</strong>（系统会锁定一些页面，这些页面中的内容不能置换出外存）的页面换出外存，再将该物理块分配给缺页的进程</li>
+<li>采用这种策略时，<strong>只要某进程发生缺页，都将获得新的物理块</strong>，仅当空闲物理块用完时，系统才选择一个<strong>未锁定</strong>的页面调出</li>
+<li>被选择调出的页可能是系统中任何一个进程中的页，因此这个被选中的进程拥有的物理块会减少，缺页率会增加</li>
+</ul>
+<p><a id="reference-可变分配局部置换"></a></p>
+<h4 id="可变分配局部置换">可变分配局部置换</h4>
+<ul>
+<li>刚开始会为每个进程分配一定数量的物理块</li>
+<li>当某进程发生缺页时，只允许从该进程<strong>自己的物理块</strong>中选出一个进行换出外存</li>
+<li>如果进程在运行中频繁地缺页，系统会为该进程<strong>多分配几个物理块</strong>，直至该进程缺页率趋势适当程度</li>
+<li>反之，如果进程在运行中缺页率特别低，则可适当减少分配给该进程的物理块</li>
+</ul>
+<p><a id="reference-调入页面的时机"></a></p>
+<h3 id="调入页面的时机">调入页面的时机</h3>
+<ol>
+<li>预调页策略：根据局部性原理，一次调入若干个相邻的页面可能比一次调入一个页面更高效。但如果提前调入的页面中大多数都没被访问过，则又是低效的。因此可以<strong>预测不久之后可能访问到的页面</strong>，将它们预先调入内存，但目前预测成功率只有 50% 左右。故这种策略主要用于<strong>进程的首次调入</strong>，由程序员指出应该先调入哪些部分</li>
+<li>请求调页策略：进程在<strong>运行期间</strong>发现缺页时才将所缺页面调入内存。由这种策略调入的页面一定会被访问到，但由于每次只能调入一页，而每次调页都要磁盘 I/O 操作，因此 I/O 开销较大</li>
+</ol>
+<p><a id="reference-从何处调入页面"></a></p>
+<h3 id="从何处调入页面">从何处调入页面</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="584" height="424" src="/_astro/IMG-20260722152430566.Bl85pOUo_ZgSYdN.webp"></p>
+<ol>
+<li>
+<p><strong>系统拥有足够的对换区空间</strong>：页面的调入、调出都是在<strong>内存与对换区</strong>之间进行，这样可以保证页面的调入、调出速度很快。在进程运行前，需将进程相关的数据从文件区复制到对换区</p>
+</li>
+<li>
+<p><strong>系统缺少足够的对换区空间</strong>：凡是<strong>不会被修改的数据都直接从文件区调入</strong>，由于这些页面不会被修改，因此换出时不必写回磁盘，下次需要时再从文件区调入即可。对于可能被修改的部分，换出时需写回<strong>对换区</strong>，下次需要时再从对换区调入</p>
+</li>
+<li>
+<p><strong>UNIX 方式</strong>：运行之前进程有关的数据全部放在<strong>文件区</strong>，故未使用过的页面，都可从文件区调入。若被使用过的页面需要换出，则<strong>写回对换区</strong>，下次需要时从对换区调入</p>
+</li>
+</ol>
+<p><a id="reference-抖动颠簸现象"></a></p>
+<h3 id="抖动颠簸现象">抖动（颠簸）现象</h3>
+<p>刚刚换出的页面马上又要换入内存，刚刚换入的页面马上又要换出外存，这种频繁的页面调度行为称为<strong>抖动</strong>（颠簸）</p>
+<p>产生抖动的主要原因是<strong>进程频繁访问的页面数目高于可用的物理块数</strong>（分配给进程的物理块不够）</p>
+<ul>
+<li>为进程分配的物理块太少，会使进程发生抖动现象。</li>
+<li>为进程分配的物理块太多，又会降低系统整体的并发度，降低某些资源的利用率</li>
+</ul>
+<p><a id="reference-工作集"></a></p>
+<h3 id="工作集">工作集</h3>
+<ul>
+<li>驻留集：指请求分页存储管理中给进程分配的内存块的集合</li>
+<li>工作集：指在某段时间间隔里，<strong>进程实际访问页面</strong>的集合</li>
+</ul>
+<p>工作集大小可能小于窗口尺寸，实际应用中，操作系统可以统计进程的工作集大小，根据工作集大小给进程分配若干内存块。如：窗口尺寸为 5，经过一段时间的监测发现某进程的工作集最大为 3，那么说明该进程有很好的局部性，可以给这个进程分配 3 个以上的内存块即可满足进程的运行需要</p>
+<p>一般来说，<strong>驻留集大小不能小于工作集大小</strong>，否则进程运行过程中将频繁缺页</p>
+<p><a id="reference-面试追问申请内存mmap-与-oom"></a></p>
+<h2 id="面试追问申请内存mmap-与-oom">面试追问：申请内存、mmap 与 OOM</h2>
+<p>用户态分配（如 <code>malloc</code>）通常先从语言运行时/堆的空闲块满足；不足时运行时通过 <code>brk</code> 扩展数据段或 <code>mmap</code> 创建新的虚拟地址区间。<code>mmap</code> 并非每一次小对象分配都会直接调用；大块分配、匿名映射、文件映射和运行时向内核申请 arena 都可能使用它。</p>
+<p>内核处理匿名 <code>mmap</code> 时通常只建立 VMA 和页表层级的映射关系，<strong>不立刻分配每页物理内存</strong>。第一次读写触发缺页异常，内核分配物理页、清零并建立 PTE；文件映射则把页缓存页关联进来。这是按需分页。</p>
+<p>因此进程可申请大于物理内存的虚拟地址；真正持续触碰这些页时会消耗 RAM，内存紧张则回收 page cache、换出匿名页（若有 swap），严重时触发 OOM。地址空间申请成功不等于可承诺全部物理内存；overcommit 策略决定失败发生在申请时还是后续访问时。</p>
+<p><a id="reference-oom-时发生什么谁会被杀"></a></p>
+<h3 id="oom-时发生什么谁会被杀">OOM 时发生什么，谁会被杀</h3>
+<p>内核先做直接回收/后台回收，可能回收文件页、写回脏页、swap；仍无法满足关键分配才调用 OOM killer。它按 <code>oom_score</code>（内存占用、可回收性、<code>oom_score_adj</code>、权限等）挑选“最合适牺牲者”，发送 <code>SIGKILL</code>。触发分配失败的进程与被杀进程可以不同；容器还可能由 cgroup memory OOM 在其 cgroup 内选择受害者。</p>
+<p>释放内存不是 OOM 才做：应用 <code>free</code>/GC 先归还给分配器，分配器可能复用而不立刻还内核；内核可在内存压力下回收可丢弃页，进程退出则内核回收其资源。OOM 是回收不足后的最后手段。</p>
+<p><a id="reference-内存映射文件"></a></p>
+<h2 id="内存映射文件">内存映射文件</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1050" height="533" src="/_astro/IMG-20260722152430603.HfTePR9R_d4FNb.webp"></p>
+<p><a id="reference-传统文件读写方式"></a></p>
+<h3 id="传统文件读写方式">传统文件读写方式</h3>
+<ul>
+<li>open 系统调用——打开文件</li>
+<li>seek 系统调用——将读写指针移到某个位置</li>
+<li>read 系统调用——从读写指针所指位置读入若干数据（从磁盘读入内存）</li>
+<li>write 系统调用——将内存中的指定数据，写回磁盘（根据读写指针确定要写回什么位置）</li>
+</ul>
+<p><a id="reference-内存映射文件读写方式"></a></p>
+<h3 id="内存映射文件读写方式">内存映射文件读写方式</h3>
+<p>内存映射文件（Memory-Mapped Files）：操作系统向上层程序员提供的功能（系统调用）</p>
+<ul>
+<li>方便程序员访问文件数据</li>
+<li>方便多个进程共享同一个文件</li>
+</ul>
+<p><a id="reference-方便访问"></a></p>
+<h4 id="方便访问">方便访问</h4>
+<p>内存映射文件的访问方式：</p>
+<ul>
+<li>open 系统调用——打开文件</li>
+<li>mmap 系统调用——将文件映射到进程的虚拟地址空间，建立映射后，数据还未从磁盘调入内存</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="634" height="434" src="/_astro/IMG-20260722152430642.BM8f4TGa_1i1NGT.webp"></p>
+<ul>
+<li>以访问内存的方式访问文件数据</li>
+<li>文件数据的读入、写出由操作系统自动完成</li>
+<li>进程关闭文件时，操作系统自动将文件被修改的数据写回磁盘</li>
+</ul>
+<p><a id="reference-共享数据"></a></p>
+<h4 id="共享数据">共享数据</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="605" height="418" src="/_astro/IMG-20260722152430669.B9lG-RBw_1alxbS.webp"></p>
+<ul>
+<li>多个进程可以映射同一个文件，实现共享</li>
+<li>在物理内存中，一个文件对应同一份数据，当一个进程修改文件数据时，另一个进程可以马上看到</li>
+</ul>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>内部碎片与外部碎片分别产生于哪里？TLB 未命中和缺页为什么不是同一个事件？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#内存的基本概念">内存的基本概念</a></li><li style="--depth: 1"><a href="#内存">内存</a></li><li style="--depth: 1"><a href="#进程运行的基本原理">进程运行的基本原理</a></li><li style="--depth: 2"><a href="#指令的工作原理">指令的工作原理</a></li><li style="--depth: 2"><a href="#逻辑地址和物理地址">逻辑地址和物理地址</a></li><li style="--depth: 2"><a href="#地址装入方式">地址装入方式</a></li><li style="--depth: 2"><a href="#程序编写到程序运行">程序编写到程序运行</a></li><li style="--depth: 2"><a href="#链接方式">链接方式</a></li><li style="--depth: 0"><a href="#内存管理">内存管理</a></li><li style="--depth: 0"><a href="#内存空间的分配和回收">内存空间的分配和回收</a></li><li style="--depth: 1"><a href="#连续分配管理方式">连续分配管理方式</a></li><li style="--depth: 2"><a href="#单一连续分配">单一连续分配</a></li><li style="--depth: 2"><a href="#固定分区分配">固定分区分配</a></li><li style="--depth: 2"><a href="#动态分区分配">动态分区分配</a></li><li style="--depth: 3"><a href="#动态分区分配算法">动态分区分配算法</a></li><li style="--depth: 4"><a href="#首次适应算法-first-fit">首次适应算法 First Fit</a></li><li style="--depth: 4"><a href="#最佳适应算法-beat-fit">最佳适应算法 Beat Fit</a></li><li style="--depth: 4"><a href="#最坏适应算法-worst-fit">最坏适应算法 Worst Fit</a></li><li style="--depth: 4"><a href="#邻近适应算法-next-fit">邻近适应算法 Next Fit</a></li><li style="--depth: 1"><a href="#基本分页存储管理">基本分页存储管理</a></li><li style="--depth: 2"><a href="#基本概念">基本概念</a></li><li style="--depth: 2"><a href="#页表">页表</a></li><li style="--depth: 3"><a href="#页表项大小">页表项大小</a></li><li style="--depth: 3"><a href="#地址转换功能">地址转换功能</a></li><li style="--depth: 2"><a href="#逻辑地址结构">逻辑地址结构</a></li><li style="--depth: 2"><a href="#基本地址变换机构">基本地址变换机构</a></li><li style="--depth: 2"><a href="#具有快表的地址变换机构">具有快表的地址变换机构</a></li><li style="--depth: 3"><a href="#局部性原理">局部性原理</a></li><li style="--depth: 1"><a href="#基本分段存储管理">基本分段存储管理</a></li><li style="--depth: 2"><a href="#分段">分段</a></li><li style="--depth: 2"><a href="#段表">段表</a></li><li style="--depth: 2"><a href="#地址变换">地址变换</a></li><li style="--depth: 2"><a href="#分页分段对比">分页、分段对比</a></li><li style="--depth: 1"><a href="#段页式管理方式">段页式管理方式</a></li><li style="--depth: 2"><a href="#分页分段优缺点">分页分段优缺点</a></li><li style="--depth: 2"><a href="#段页式管理">段页式管理</a></li><li style="--depth: 2"><a href="#地址结构">地址结构</a></li><li style="--depth: 2"><a href="#段表页表">段表页表</a></li><li style="--depth: 2"><a href="#地址变换-1">地址变换</a></li><li style="--depth: 0"><a href="#内存空间的扩充">内存空间的扩充</a></li><li style="--depth: 1"><a href="#覆盖与交换">覆盖与交换</a></li><li style="--depth: 2"><a href="#覆盖">覆盖</a></li><li style="--depth: 2"><a href="#交换">交换</a></li><li style="--depth: 3"><a href="#对换区和文件区">对换区和文件区</a></li><li style="--depth: 1"><a href="#虚拟内存">虚拟内存</a></li><li style="--depth: 2"><a href="#传统存储管理方式">传统存储管理方式</a></li><li style="--depth: 2"><a href="#虚拟内存-1">虚拟内存</a></li><li style="--depth: 2"><a href="#虚拟内存的实现">虚拟内存的实现</a></li><li style="--depth: 2"><a href="#请求分页管理方式">请求分页管理方式</a></li><li style="--depth: 3"><a href="#页表机制">页表机制</a></li><li style="--depth: 3"><a href="#缺页中断机构">缺页中断机构</a></li><li style="--depth: 3"><a href="#地址变换机构">地址变换机构</a></li><li style="--depth: 0"><a href="#地址转换">地址转换</a></li><li style="--depth: 0"><a href="#存储保护">存储保护</a></li><li style="--depth: 0"><a href="#进程的内存映像">进程的内存映像</a></li><li style="--depth: 0"><a href="#二级页表">二级页表</a></li><li style="--depth: 1"><a href="#单级页表存在问题">单级页表存在问题</a></li><li style="--depth: 1"><a href="#二级页表-1">二级页表</a></li><li style="--depth: 2"><a href="#两级页表的地址转换">两级页表的地址转换</a></li><li style="--depth: 1"><a href="#缺页中断">缺页中断</a></li><li style="--depth: 0"><a href="#页面置换算法">页面置换算法</a></li><li style="--depth: 1"><a href="#最佳置换算法-opt">最佳置换算法 OPT</a></li><li style="--depth: 1"><a href="#先进先出算法-fifo">先进先出算法 FIFO</a></li><li style="--depth: 1"><a href="#最近最久未使用置换算法-lru">最近最久未使用置换算法 LRU</a></li><li style="--depth: 1"><a href="#时钟置换算法-clock最近未用算法-nru">时钟置换算法 CLOCK（最近未用算法 NRU）</a></li><li style="--depth: 2"><a href="#简单-clock-算法">简单 Clock 算法</a></li><li style="--depth: 2"><a href="#改进型-clock-算法">改进型 Clock 算法</a></li><li style="--depth: 0"><a href="#页面分配策略">页面分配策略</a></li><li style="--depth: 1"><a href="#驻留集">驻留集</a></li><li style="--depth: 1"><a href="#页面分配置换策略">页面分配、置换策略</a></li><li style="--depth: 2"><a href="#固定分配局部置换">固定分配局部置换</a></li><li style="--depth: 2"><a href="#可变分配全局置换">可变分配全局置换</a></li><li style="--depth: 2"><a href="#可变分配局部置换">可变分配局部置换</a></li><li style="--depth: 1"><a href="#调入页面的时机">调入页面的时机</a></li><li style="--depth: 1"><a href="#从何处调入页面">从何处调入页面</a></li><li style="--depth: 1"><a href="#抖动颠簸现象">抖动（颠簸）现象</a></li><li style="--depth: 1"><a href="#工作集">工作集</a></li><li style="--depth: 0"><a href="#面试追问申请内存mmap-与-oom">面试追问：申请内存、mmap 与 OOM</a></li><li style="--depth: 1"><a href="#oom-时发生什么谁会被杀">OOM 时发生什么，谁会被杀</a></li><li style="--depth: 0"><a href="#内存映射文件">内存映射文件</a></li><li style="--depth: 1"><a href="#传统文件读写方式">传统文件读写方式</a></li><li style="--depth: 1"><a href="#内存映射文件读写方式">内存映射文件读写方式</a></li><li style="--depth: 2"><a href="#方便访问">方便访问</a></li><li style="--depth: 2"><a href="#共享数据">共享数据</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

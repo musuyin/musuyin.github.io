@@ -1,0 +1,564 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>RISC-V Instruction Set · Musuyin&#39; Home</title><meta name="description" content="本篇以 64 位寄存器和常见 RISC-V 指令为主，沿数据存取、算术与控制流理解 ISA。寄存器约定、字宽和指令扩展应与具体示例的执行模型一起看。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/computer-architecture/riscv-isa/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="RISC-V Instruction Set · Musuyin' Home"><meta property="og:description" content="本篇以 64 位寄存器和常见 RISC-V 指令为主，沿数据存取、算术与控制流理解 ISA。寄存器约定、字宽和指令扩展应与具体示例的执行模型一起看。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/computer-architecture/riscv-isa/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">RISC-V Instruction Set</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-11-26">2025-11-26</time></dd></div><div><dt>字数</dt><dd>3672</dd></div><div><dt>预计阅读</dt><dd>13 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E6%B1%87%E7%BC%96/">#汇编</a><a href="/tags/RISC-V/">#RISC-V</a><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84/">#计算机系统结构</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>RISC-V Instruction Set</h1><time datetime="2025-11-26">2025-11-26</time><p class="tags"><a href="/tags/%E6%B1%87%E7%BC%96/">#汇编</a><a href="/tags/RISC-V/">#RISC-V</a><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84/">#计算机系统结构</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>本篇以 64 位寄存器和常见 RISC-V 指令为主，沿数据存取、算术与控制流理解 ISA。寄存器约定、字宽和指令扩展应与具体示例的执行模型一起看。</p>
+<p><a id="reference-risc-v-instruction-setisa"></a></p>
+<h2 id="risc-v-instruction-setisa">RISC-V Instruction Set(ISA)</h2>
+<p><a id="reference-risc"></a></p>
+<h3 id="risc">RISC</h3>
+<ul>
+<li>Fixed-length instructions</li>
+<li>Load-store architecture: Only load (<code>lw</code>) and store (<code>sw</code>) instructions access memory
+<ul>
+<li>All ALU operations work on registers only.</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-data-store"></a></p>
+<h3 id="data-store">Data Store</h3>
+<p><a id="reference-register-operands"></a></p>
+<h4 id="register-operands">Register Operands</h4>
+<p>RISC-V has a 32 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>×</mo></mrow><annotation encoding="application/x-tex">\times</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord">×</span></span></span></span> 64-bit register file: x0 to x31</p>
+<ul>
+<li>Use for frequently accessed data</li>
+<li>word: 32-bit data</li>
+<li>double word: 64-bit data</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Register(s)</th>
+<th>Purpose</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x0</td>
+<td>the constant value 0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>x1</td>
+<td>return address</td>
+<td>ra</td>
+</tr>
+<tr>
+<td>x2</td>
+<td>stack pointer</td>
+<td>sp</td>
+</tr>
+<tr>
+<td>x3</td>
+<td>global pointer</td>
+<td></td>
+</tr>
+<tr>
+<td>x4</td>
+<td>thread pointer</td>
+<td></td>
+</tr>
+<tr>
+<td>x5-x7</td>
+<td>temporaries</td>
+<td>t0-t2</td>
+</tr>
+<tr>
+<td>x8</td>
+<td>frame pointer</td>
+<td></td>
+</tr>
+<tr>
+<td>x9</td>
+<td>saved registers</td>
+<td></td>
+</tr>
+<tr>
+<td>x10-x11</td>
+<td>function arguments/results</td>
+<td></td>
+</tr>
+<tr>
+<td>x12-x17</td>
+<td>function arguments</td>
+<td></td>
+</tr>
+<tr>
+<td>x18-x27</td>
+<td>saved registers</td>
+<td></td>
+</tr>
+<tr>
+<td>x28-x31</td>
+<td>temporaries</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>x5 – x7, x28 – x31: temporary registers
+<ul>
+<li>Not preserved by the callee</li>
+</ul>
+</li>
+<li>x8 – x9, x18 – x27: saved registers
+<ul>
+<li>If used, the callee saves and restores them</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-memory-operands"></a></p>
+<h4 id="memory-operands">Memory Operands</h4>
+<ul>
+<li>Main memory used for composite data
+<ul>
+<li>Arrays, structures, dynamic data</li>
+</ul>
+</li>
+<li>To apply arithmetic operations
+<ul>
+<li>Load values from memory into registers</li>
+<li>Store result from register to memory</li>
+</ul>
+</li>
+<li>Memory is byte addressed
+<ul>
+<li>Each address identifies an 8-bit byte</li>
+</ul>
+</li>
+<li>RISC-V is Little Endian
+<ul>
+<li>Least-significant byte at least address of a word</li>
+</ul>
+</li>
+<li>RISC-V does not require words to be aligned in memory</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ld x9, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">64</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x22)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">sd x9, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">46</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x22)</span></span></code></pre>
+<p>Compare Registers and Memory:</p>
+<ul>
+<li>Registers are faster to access than memory</li>
+<li>Operating on memory data requires loads and stores</li>
+<li>Compiler must use registers for variables as much as possible</li>
+</ul>
+<p><a id="reference-format-of-instructions"></a></p>
+<h2 id="format-of-instructions">Format of Instructions</h2>
+<p>All RISC-V base instructions are <strong>32 bits long</strong>, encoded in one standard formats.</p>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Purpose</th>
+<th>Key Fields (bit layout, [31:0])</th>
+<th>Immediate Reassembly</th>
+<th>Opcode (hex)</th>
+<th>Opcode (bin)</th>
+<th>Mnemonic Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R-type</strong></td>
+<td>Register-register ALU ops <br>（寄存器-寄存器运算）</td>
+<td><code>[funct7][rs2][rs1][funct3][rd][opcode]</code> <br><code>(7)(5)(5)(3)(5)(7)</code></td>
+<td>(no immediate)</td>
+<td><code>0x33</code></td>
+<td><code>0110011</code></td>
+<td><code>add</code>, <code>sub</code>, <code>and</code>…</td>
+</tr>
+<tr>
+<td><strong>I-type</strong></td>
+<td>Immediate ALU, loads <br>（立即数运算、加载）</td>
+<td><code>[imm[11:0]][rs1][funct3][rd][opcode]</code> <br><code>(12)(5)(3)(5)(7)</code></td>
+<td><code>imm = sign_extend(imm[11:0])</code></td>
+<td><code>0x13</code></td>
+<td><code>0010011</code></td>
+<td><code>addi</code>, <code>ori</code>, <code>lw</code></td>
+</tr>
+<tr>
+<td><strong>S-type</strong></td>
+<td>Store instructions <br>（存储指令）</td>
+<td><code>[imm[11:5]][rs2][rs1][funct3][imm[4:0]][opcode]</code> <br><code>(7)(5)(5)(3)(5)(7)</code></td>
+<td><code>imm = sign_extend(imm[11:5] | imm[4:0])</code></td>
+<td><code>0x23</code></td>
+<td><code>0100011</code></td>
+<td><code>sw</code>, <code>sh</code>, <code>sb</code></td>
+</tr>
+<tr>
+<td><strong>SB-type</strong></td>
+<td>Branches <br>（条件分支）</td>
+<td><code>[imm[12]][imm[10:5]][rs2][rs1][funct3][imm[4:1]][imm[11]][opcode]</code> <br><code>(1)(6)(5)(5)(3)(4)(1)(7)</code></td>
+<td><code>imm = sign_extend(imm[12] | imm[11] | imm[10:5] | imm[4:1] | 0)</code> <br>→ <strong>lowest bit is always 0</strong>（对齐到半字）</td>
+<td><code>0x63</code></td>
+<td><code>1100011</code></td>
+<td><code>beq</code>, <code>bne</code>, <code>blt</code>…</td>
+</tr>
+<tr>
+<td><strong>U-type</strong></td>
+<td>LUI, AUIPC <br>（加载高 20 位）</td>
+<td><code>[imm[31:12]][rd][opcode]</code> <br><code>(20)(5)(7)</code></td>
+<td><code>imm = imm[31:12] &lt;&lt; 12</code></td>
+<td><code>0x37</code> / <code>0x17</code></td>
+<td><code>0110111</code> / <code>0010111</code></td>
+<td><code>lui</code> / <code>auipc</code></td>
+</tr>
+<tr>
+<td><strong>UJ-type</strong></td>
+<td>JAL (jump and link) <br>（无条件跳转并链接）</td>
+<td><code>[imm[20]][imm[10:1]][imm[11]][imm[19:12]][rd][opcode]</code> <br><code>(1)(10)(1)(8)(5)(7)</code></td>
+<td><code>imm = sign_extend(imm[20] | imm[19:12] | imm[11] | imm[10:1] | 0)</code> <br>→ <strong>lowest bit is always 0</strong></td>
+<td><code>0x6F</code></td>
+<td><code>1101111</code></td>
+<td><code>jal</code></td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-r-format"></a></p>
+<h3 id="r-format">R-format</h3>
+<p><img alt="IMG-20260722152303204" loading="lazy" decoding="async" width="663" height="118" src="/_astro/IMG-20260722152303204.BOtShZtY_ZfAkYU.webp"></p>
+<table>
+<thead>
+<tr>
+<th>Fields</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>opcode</td>
+<td>operation code</td>
+</tr>
+<tr>
+<td>rd</td>
+<td>destination register number</td>
+</tr>
+<tr>
+<td>funct3</td>
+<td>3-bit function code (additional opcode)</td>
+</tr>
+<tr>
+<td>rs1</td>
+<td>the first source register number</td>
+</tr>
+<tr>
+<td>rs2</td>
+<td>the second source register number</td>
+</tr>
+<tr>
+<td>funct7</td>
+<td>7-bit function code (addtional opcode)</td>
+</tr>
+</tbody>
+</table>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x9, x20, x21</span></span></code></pre>
+<p><img alt="IMG-20260722152303231" loading="lazy" decoding="async" width="695" height="205" src="/_astro/IMG-20260722152303231.D9VgZJAX_Z1t2Urg.webp"></p>
+<p><a id="reference-i-format"></a></p>
+<h3 id="i-format">I-format</h3>
+<p><img alt="IMG-20260722152303253" loading="lazy" decoding="async" width="605" height="111" src="/_astro/IMG-20260722152303253.D14OEWiD_1tkXce.webp"></p>
+<p>Immediate arithmetic and load instructions</p>
+<table>
+<thead>
+<tr>
+<th>Fields</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rs1</td>
+<td>source or base address register number</td>
+</tr>
+<tr>
+<td>immediate</td>
+<td>constant operand, or offset added to base address 2s-complement, sign extended</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-s-format"></a></p>
+<h3 id="s-format">S-format</h3>
+<p><img alt="IMG-20260722152303279" loading="lazy" decoding="async" width="640" height="130" src="/_astro/IMG-20260722152303279.C6zvTutP_2rw465.webp">
+Different immediate format for store instructions</p>
+<table>
+<thead>
+<tr>
+<th>Fields</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rs1</td>
+<td>base address register number</td>
+</tr>
+<tr>
+<td>rs2</td>
+<td>source operand register number</td>
+</tr>
+<tr>
+<td>immediate</td>
+<td>offset added to base address</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-core-instructions"></a></p>
+<h2 id="core-instructions">Core Instructions</h2>
+<p><a id="reference-arithmetic--logic"></a></p>
+<h3 id="arithmetic--logic">Arithmetic &amp; Logic</h3>
+<p>R-type</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">  x1, x2, x3   </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # x1 = x2 + x3</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">sub</span><span style="color:#24292E;--shiki-dark:#E1E4E8">  x1, x2, x3   </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # x1 = x2 - x3</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">mul</span><span style="color:#24292E;--shiki-dark:#E1E4E8">  x1, x2, x3   </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # x1 = x2 * x3</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">and</span><span style="color:#24292E;--shiki-dark:#E1E4E8">  x1, x2, x3   </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # bitwise AND</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">or</span><span style="color:#24292E;--shiki-dark:#E1E4E8">   x1, x2, x3   </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # bitwise OR</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">slt  x1, x2, x3   </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # set if less than (signed): x1 = (x2 &lt; x3) ? 1 : 0</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">sltu x1, x2, x3   </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # set if less than (unsigned)</span></span></code></pre>
+<ul>
+<li>Uses two source registers (<code>rs1</code>, <code>rs2</code>) and one destination (<code>rd</code>).</li>
+<li><code>funct3</code> / <code>funct7</code> distinguish between <code>add</code> / <code>sub</code>, <code>slt</code> / <code>sltu</code></li>
+</ul>
+<p><a id="reference-immediate-operands"></a></p>
+<h3 id="immediate-operands">Immediate Operands</h3>
+<p>I-type</p>
+<p>Constant data specified in an instruction</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">addi x1, x2, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#6A737D;--shiki-dark:#6A737D">    # x1 = x2 + 10</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">andi x1, x2, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0xF</span><span style="color:#6A737D;--shiki-dark:#6A737D">   # x1 = x2 &amp; 0xF</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ori  x1, x2, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D">     # x1 = x2 | 1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">slli x1, x2, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span><span style="color:#6A737D;--shiki-dark:#6A737D">	   # x1 = x2 &lt;&lt; 3</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">srli x1, x2, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span><span style="color:#6A737D;--shiki-dark:#6A737D">	   # x1 = x2 &gt;&gt; 3</span></span></code></pre>
+<p><a id="reference-memory-access"></a></p>
+<h3 id="memory-access">Memory Access</h3>
+<p><a id="reference-load-word"></a></p>
+<h4 id="load-word">Load Word</h4>
+<p>I-type</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">lw x1, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x2)</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# x1 = Mem[x2 + 8] as int32, load word, need sign extension</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ld x1, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x2)</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# x1 = Mem[x2 + 8] as int64, load double word</span></span></code></pre>
+<p><a id="reference-store-word"></a></p>
+<h4 id="store-word">Store Word</h4>
+<p>S-type</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">sw x1, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x2)</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# Mem[x2 + 8] = x1, load low 32-bit to memory</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">sd x1, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x2)</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# Mem[x2 + 8] = x1</span></span></code></pre>
+<p><strong>Important</strong>: RISC-V uses <strong>base + offset</strong> addressing. No register indirect or scaled indexing in base ISA.</p>
+<p><strong>Load 扩展看符号，Store 原样写内存</strong></p>
+<p><a id="reference-control-flow"></a></p>
+<h3 id="control-flow">Control Flow</h3>
+<p><a id="reference-conditional-branches"></a></p>
+<h4 id="conditional-branches">Conditional Branches</h4>
+<p>SB-type</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">beq  x1, x2, Label  </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # branch if x1 == x2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">bne  x1, x2, Label  </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # branch if x1 != x2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">blt  x1, x2, Label  </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # branch if x1 &lt; x2 (signed)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">bge  x1, x2, Label  </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # branch if x1 &gt;= x2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">bltu x1, x2, Label  </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # unsigned comparison</span></span></code></pre>
+<ul>
+<li>Offset is <strong>PC-relative</strong>, in multiples of 2 bytes (must be even).</li>
+<li>Encoded as a <strong>12-bit signed offset</strong>, shifted left by 1 (so actual range: ±4 KiB).</li>
+</ul>
+<p><a id="reference-unconditional-jumps"></a></p>
+<h4 id="unconditional-jumps">Unconditional Jumps</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">jal  x1, Label</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# jump and link: x1 = PC+4; PC = Label</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">jalr x0, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x1)</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# jump register (often used for return, x1 is ra): PC = x1 + 0</span></span></code></pre>
+<p><a id="reference-recursive"></a></p>
+<h4 id="recursive">Recursive</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">addi </span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, -</span><span style="color:#005CC5;--shiki-dark:#79B8FF">16</span><span style="color:#6A737D;--shiki-dark:#6A737D">    # Allocate 16 bytes on stack</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">sd ra, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)       </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # Save return address at sp + 8</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">sd s0, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)       </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # Save callee-saved register s0 at sp + 0</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ld ra, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)       </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # Restore return address</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ld s0, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)       </span><span style="color:#6A737D;--shiki-dark:#6A737D"> # Restore s0</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">addi </span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">16</span><span style="color:#6A737D;--shiki-dark:#6A737D">     # Deallocate 16 bytes (move sp back up)</span></span></code></pre>
+<ul>
+<li>When your function calls another function (e.g., recursively), the <code>jal</code> instruction overwrites <code>ra</code>.</li>
+<li>So you must <strong>save the original <code>ra</code></strong> before making the call.</li>
+<li>On RV64, pointers/addresses are 8 bytes → needs 8 bytes in memory.</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">long</span><span style="color:#D73A49;--shiki-dark:#F97583"> long</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> fact</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">long</span><span style="color:#D73A49;--shiki-dark:#F97583"> long</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#E36209;--shiki-dark:#FFAB70"> n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (n </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	else</span><span style="color:#D73A49;--shiki-dark:#F97583"> return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> n </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> fact</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(n </span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>To assmebly:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">fact:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	addi </span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">16</span><span style="color:#6A737D;--shiki-dark:#6A737D"> 		# Save return address and n on stack</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	sd x1,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	sd x10,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	addi x5,x10,-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D"> 		# x5 = n - 1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	bge x5,x0,L1 	</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# if n &gt;= 1, go to L1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	addi x10,x0,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D"> 		# Else, set return value to 1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	addi </span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">16</span><span style="color:#6A737D;--shiki-dark:#6A737D"> 		# Pop stack, don’t bother restoring values</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	jalr x0,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x1) 	</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# Return</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">L1:</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> addi x10,x10,-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D"> 	# n = n - 1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	jal x1,fact 	</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# call fact(n-1)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	addi x6,x10,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#6A737D;--shiki-dark:#6A737D"> 		# move result of fact(n - 1) to x6</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	ld x10,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) 	</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# Restore caller’s n</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	ld x1,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) 	</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# Restore caller’s return address</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	addi </span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">sp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">16</span><span style="color:#6A737D;--shiki-dark:#6A737D"> 		# Pop stack</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	mul</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x10,x10,x6 	</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# return n * fact(n-1)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	jalr x0,</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x1) 	</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# return</span></span></code></pre>
+<p>递归时需要手动移动栈顶指针，存储函数返回地址（<code>x1</code>），以及函数的返回值（在这里指定为 <code>x10</code>）</p>
+<p><a id="reference-number-representation"></a></p>
+<h2 id="number-representation">Number Representation</h2>
+<p><a id="reference-twos-complement"></a></p>
+<h3 id="twos-complement">Two’s Complement</h3>
+<ul>
+<li><strong>Unsigned</strong>: Range <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> to <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>n</mi></msup><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">2^n−1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7477em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></li>
+<li><strong>Two’s Complement Signed</strong>（补码有符号整数）: Range <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><msup><mn>2</mn><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">−2^{n−1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8974em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span> to <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">2^{n−1}−1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8974em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></li>
+</ul>
+<p><a id="reference-sign-extension"></a></p>
+<h3 id="sign-extension">Sign Extension</h3>
+<ul>
+<li>When loading a <strong>byte</strong> into a 64-bit register:
+<ul>
+<li><code>lb</code> (load byte): <strong>sign-extends</strong> the byte → preserves signed value</li>
+<li><code>lbu</code> (load byte unsigned): <strong>zero-extends</strong> → treats as unsigned</li>
+</ul>
+</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># x2 = 0xFF</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">lb x1, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x2)</span><span style="color:#6A737D;--shiki-dark:#6A737D"> # x1 = 0xFFFFFFFFFFFFFFFF (= -1)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">lbu x1, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x2)</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# x1 = 0x00000000000000FF (= 255)</span></span></code></pre>
+<p><a id="reference-hexadecimal"></a></p>
+<h3 id="hexadecimal">Hexadecimal</h3>
+<ul>
+<li>Instructions are stored in memory as <strong>32-bit binary words</strong>.</li>
+<li>For readability, we use <strong>hexadecimal</strong>（十六进制）:
+<ul>
+<li>Each hex digit = 4 bits → 8 hex digits per instruction</li>
+<li>Example: <code>0x00128313</code> might decode to <code>addi x6, x5, 1</code></li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-littlebig-endian"></a></p>
+<h3 id="littlebig-endian">Little/Big-Endian</h3>
+<p>Little-Endian:</p>
+<ul>
+<li><strong>Least Significant Byte (LSB)</strong> is stored at the <strong>lowest memory address</strong>.</li>
+<li><strong>Most Significant Byte (MSB)</strong> is stored at the <strong>highest memory address</strong>.</li>
+<li>Used by: <strong>x86, x86-64, RISC-V (by default), ARM (configurable but often little-endian)</strong>.</li>
+</ul>
+<p>Big-Endian:</p>
+<ul>
+<li><strong>Most Significant Byte (MSB)</strong> is stored at the <strong>lowest memory address</strong>.</li>
+<li><strong>Least Significant Byte (LSB)</strong> is stored at the <strong>highest memory address</strong>.</li>
+<li>Used by: <strong>Motorola 68k, SPARC (historically), network protocols (TCP/IP = “network byte order” = big-endian)</strong>.</li>
+</ul>
+<blockquote>
+<p>Show how the value 0xabcdef12 would be arranged in memory of a little-endian  and a big-endian machine. Assume the data are stored starting at address 0 and that  the word size is 4 Bytes.</p>
+</blockquote>
+<p>First, split the value to: AB, CD, EF, 12</p>
+<p>In little-endian, it would be:</p>
+<table>
+<thead>
+<tr>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12</td>
+<td>EF</td>
+<td>CD</td>
+<td>AB</td>
+</tr>
+</tbody>
+</table>
+<p>In big-endian, it would be:</p>
+<table>
+<thead>
+<tr>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AB</td>
+<td>CD</td>
+<td>EF</td>
+<td>12</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-exam"></a></p>
+<h2 id="exam">Exam</h2>
+<blockquote>
+<p>Translate the following C code to RISC-V.  Assume that the variables f , g , h , i , and j are assigned to registers x5, x6, x7, x28, and x29, respectively. Assume that the base address of the arrays A and B are in registers x10 and x11, respectively. Assume that the elements of the arrays A and B are 8-byte words:</p>
+<p><code>B[8] = A[i] + A[j]</code>;</p>
+</blockquote>
+<p>we need:</p>
+<ul>
+<li><code>ld</code>: load double word from arrays A and B. Notes: <code>ld rd, offset(rs1)</code>，offset 必须是 12 位有符号立即数</li>
+<li><code>add</code>: calculate the result.</li>
+<li><code>sd</code>: store double word to array B.</li>
+<li><code>slli</code>: convert index to offset. offset = index <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>×</mo></mrow><annotation encoding="application/x-tex">\times</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord">×</span></span></span></span> 8. Can be replaced by <code>mul</code></li>
+</ul>
+<p>We can use <code>x5</code> - <code>x7</code> / <code>x28</code> - <code>x31</code> to store temporary variables.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># get offset</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">slli x30, x28, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# x30 = x28 &lt;&lt; 3 = x28 * 8</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">slli x31, x29, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# x31 = x29 &lt;&lt; 3 = x29 * 8</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># get address</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x30, x10, x30</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# x30 = x10 + x30 = &amp;A + x30 = &amp;A[i]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x31, x10, x31</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# x31 = &amp;A[j]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># load from arrays</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ld x5, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x30)	</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# x5 = A[i]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ld x6, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x31)	</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# x6 = A[j]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># add</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x7, x5, x6	</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# x7 = x5 + x6</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># store to arrays</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">sd x7, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">64</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x11)	</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# B[8] = x7</span></span></code></pre>
+<blockquote>
+<p>Translate the following RISC-V code to C. Assume that the variables f , g , h , i , and j are assigned to registers x5, x6, x7, x28,  and x29 , respectively. Assume that the base address of the arrays A and B are in  registers x10 and x11 , respectively.</p>
+<p>addi x30, x10, 8 <br>
+addi x31, x10, 0 <br>
+sd x31, 0(x30)<br>
+ld x30, 0(x30)<br>
+add x5,x30, x31</p>
+</blockquote>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">long</span><span style="color:#D73A49;--shiki-dark:#F97583"> long</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x30 </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;</span><span style="color:#E36209;--shiki-dark:#FFAB70">A</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">];</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">long</span><span style="color:#D73A49;--shiki-dark:#F97583"> long</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x31 </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;</span><span style="color:#E36209;--shiki-dark:#FFAB70">A</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">];</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">x31 </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x30);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">x30 </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x30);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">f </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x30 </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x31;</span></span></code></pre>
+<blockquote>
+<p>Find the shortest sequence of RISC-V instructions that extracts bits 16 down to 11  from register x5 and uses the value of this field to replace bits 31 down to 26 in  register x6 without changing the other bits of registers x5 or x6 . (Be sure to test your  code using x5 = 0 and x6 = 0xffffffffffffffff . Doing so may reveal a common  oversight.)</p>
+</blockquote>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">srli a0, x5, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">11</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">andi a0, a0, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0x3f</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">slli a0, a0, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">26</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">li a1, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0x3f</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">slli a1, a1, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">26</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a1, a1</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x6, x6, a1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">or</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x6, x6, a0</span></span></code></pre>
+<blockquote>
+<p>Suppose the program counter (PC) is set to 0x20000000 . </p>
+<p>a) What range of addresses can be reached using the RISC-V jump-and-link ( jal )  instruction? (In other words, what is the set of possible values for the PC after the  jump instruction executes?) </p>
+<p>b)  What range of addresses can be reached using the RISC-V branch if equal ( beq )  instruction? (In other words, what is the set of possible values for the PC after the  branch instruction executes?)</p>
+</blockquote>
+<p><code>jal</code> 使用 20-bit 有符号立即数，跳转范围为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mo>−</mo><msup><mn>2</mn><mn>19</mn></msup><mo separator="true">,</mo><msup><mn>2</mn><mn>19</mn></msup><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[-2^{19},2^{19}-1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">−</span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">19</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">19</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span>，立即数左移 1 位，得</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo stretchy="false">[</mo><mo>−</mo><msup><mn>2</mn><mn>20</mn></msup><mo separator="true">,</mo><msup><mn>2</mn><mn>20</mn></msup><mo>−</mo><mn>2</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[-2^{20},2^{20}-2]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">−</span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">20</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">20</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mclose">]</span></span></span></span></span></div>
+<p><code>beq</code> 使用 12-bit 有符号立即数，跳转范围为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mo>−</mo><msup><mn>2</mn><mn>11</mn></msup><mo separator="true">,</mo><msup><mn>2</mn><mn>11</mn></msup><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[-2^{11}, 2^{11}-1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">−</span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">11</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">11</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span>，立即数左移 1 位，得</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo stretchy="false">[</mo><mo>−</mo><msup><mn>2</mn><mn>12</mn></msup><mo separator="true">,</mo><msup><mn>2</mn><mn>12</mn></msup><mo>−</mo><mn>2</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[-2^{12},2^{12}-2]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.1141em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">−</span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">12</span></span></span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">12</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mclose">]</span></span></span></span></span></div>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>load/store 与寄存器运算的分工是什么？条件分支如何把比较结果变成控制流？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#risc-v-instruction-setisa">RISC-V Instruction Set(ISA)</a></li><li style="--depth: 1"><a href="#risc">RISC</a></li><li style="--depth: 1"><a href="#data-store">Data Store</a></li><li style="--depth: 2"><a href="#register-operands">Register Operands</a></li><li style="--depth: 2"><a href="#memory-operands">Memory Operands</a></li><li style="--depth: 0"><a href="#format-of-instructions">Format of Instructions</a></li><li style="--depth: 1"><a href="#r-format">R-format</a></li><li style="--depth: 1"><a href="#i-format">I-format</a></li><li style="--depth: 1"><a href="#s-format">S-format</a></li><li style="--depth: 0"><a href="#core-instructions">Core Instructions</a></li><li style="--depth: 1"><a href="#arithmetic--logic">Arithmetic &amp; Logic</a></li><li style="--depth: 1"><a href="#immediate-operands">Immediate Operands</a></li><li style="--depth: 1"><a href="#memory-access">Memory Access</a></li><li style="--depth: 2"><a href="#load-word">Load Word</a></li><li style="--depth: 2"><a href="#store-word">Store Word</a></li><li style="--depth: 1"><a href="#control-flow">Control Flow</a></li><li style="--depth: 2"><a href="#conditional-branches">Conditional Branches</a></li><li style="--depth: 2"><a href="#unconditional-jumps">Unconditional Jumps</a></li><li style="--depth: 2"><a href="#recursive">Recursive</a></li><li style="--depth: 0"><a href="#number-representation">Number Representation</a></li><li style="--depth: 1"><a href="#twos-complement">Two’s Complement</a></li><li style="--depth: 1"><a href="#sign-extension">Sign Extension</a></li><li style="--depth: 1"><a href="#hexadecimal">Hexadecimal</a></li><li style="--depth: 1"><a href="#littlebig-endian">Little/Big-Endian</a></li><li style="--depth: 0"><a href="#exam">Exam</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

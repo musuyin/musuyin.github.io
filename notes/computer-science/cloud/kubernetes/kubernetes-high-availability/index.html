@@ -1,0 +1,206 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kubernetes 高可用与发布保护 · Musuyin&#39; Home</title><meta name="description" content="冗余只有在故障域独立、剩余容量足够、流量切换正确时才形成高可用。PDB、拓扑约束、探针与优雅终止保护不同环节，必须通过发布和维护演练组合验证。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-high-availability/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Kubernetes 高可用与发布保护 · Musuyin' Home"><meta property="og:description" content="冗余只有在故障域独立、剩余容量足够、流量切换正确时才形成高可用。PDB、拓扑约束、探针与优雅终止保护不同环节，必须通过发布和维护演练组合验证。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-high-availability/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Kubernetes 高可用与发布保护</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-13">2026-08-13</time></dd></div><div><dt>字数</dt><dd>1704</dd></div><div><dt>预计阅读</dt><dd>6 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/SRE/">#SRE</a><a href="/tags/Availability/">#Availability</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Kubernetes 高可用与发布保护</h1><time datetime="2026-08-13">2026-08-13</time><p class="tags"><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/SRE/">#SRE</a><a href="/tags/Availability/">#Availability</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>冗余只有在故障域独立、剩余容量足够、流量切换正确时才形成高可用。PDB、拓扑约束、探针与优雅终止保护不同环节，必须通过发布和维护演练组合验证。</p>
+<p><a id="reference-学习目标"></a></p>
+<h2 id="学习目标">学习目标</h2>
+<p>学完本章后，应当能够：</p>
+<ul>
+<li>从故障域、容量、发布、维护和依赖角度评估可用性，而不只看副本数。</li>
+<li>正确组合 PDB、Topology Spread、滚动策略、探针与优雅终止。</li>
+<li>解释自愿中断与非自愿中断，并判断 PDB 能保护和不能保护什么。</li>
+<li>安全执行 Node drain、发布回滚与故障演练，并用 SLI 验证结果。</li>
+</ul>
+<blockquote>
+<p>心智模型：高可用是端到端属性。副本只有在彼此独立、能承接流量、容量足够且维护流程安全时，才真正形成冗余。</p>
+</blockquote>
+<p><a id="reference-高可用的边界"></a></p>
+<h2 id="高可用的边界">高可用的边界</h2>
+<p><img alt="IMG-20260817144448923" loading="lazy" decoding="async" width="2055" height="2091" src="/_astro/IMG-20260817144448923.VxlBQTQF_Z4AfwD.webp"></p>
+<blockquote>
+<p>图：一次安全滚动发布从新 Pod 启动、探针验证、SLI 门禁到旧 Pod 优雅终止，以及 PDB、故障域和容量保护的位置。</p>
+</blockquote>
+<p>高可用不是“副本数大于 1”这么简单。应用需要同时承受：</p>
+<ul>
+<li>Pod/容器故障。</li>
+<li>Node、机架或可用区故障。</li>
+<li>滚动发布与配置变更。</li>
+<li>节点维护、升级和自动缩容等自愿中断。</li>
+<li>依赖、存储、网络与控制面故障。</li>
+</ul>
+<p>生产设计应从错误预算和恢复目标出发，明确所需副本、故障域、容量余量、数据一致性和降级策略。</p>
+<p><a id="reference-poddisruptionbudget"></a></p>
+<h2 id="poddisruptionbudget">PodDisruptionBudget</h2>
+<p>PDB 限制通过 Eviction API 发起的<strong>自愿中断</strong>同时影响多少副本，例如 <code>kubectl drain</code> 和部分节点自动缩容。它不能阻止 Node 宕机等非自愿中断，也不能阻止直接删除 Pod/Deployment。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">policy/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">PodDisruptionBudget</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">production</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  minAvailable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  unhealthyPodEvictionPolicy</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">AlwaysAllow</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  selector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    matchLabels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span></code></pre>
+<p>对 3 副本服务，<code>minAvailable: 2</code> 表示 Eviction API 正常情况下只允许同时中断 1 个可用副本。</p>
+<p>重要边界：</p>
+<ul>
+<li>PDB 不控制 Deployment/StatefulSet 自身的滚动更新，发布可用性由工作负载更新策略控制。</li>
+<li>副本数为 1 且 <code>minAvailable: 1</code> 会阻止正常 drain，除非接受中断、先扩容或强制操作。</li>
+<li>PDB selector 必须与工作负载标签一致。</li>
+<li><code>AlwaysAllow</code> 允许 drain 驱逐异常 Pod，避免坏 Pod 永久卡住节点维护。</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pdb</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pdb/api</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> production</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> drain</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --ignore-daemonsets</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --delete-emptydir-data</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --dry-run=server</span></span></code></pre>
+<p><a id="reference-优雅终止"></a></p>
+<h2 id="优雅终止">优雅终止</h2>
+<p>Pod 删除时的典型过程：</p>
+<ol>
+<li>API 对象获得 <code>deletionTimestamp</code>，EndpointSlice 开始反映终止状态。</li>
+<li>kubelet 执行容器的 <code>preStop</code> hook（若配置）。</li>
+<li>kubelet 向容器主进程发送终止信号，通常为 SIGTERM。</li>
+<li>应用停止接收新流量、完成在途请求、刷新数据并退出。</li>
+<li>超过 <code>terminationGracePeriodSeconds</code> 后，剩余进程会被强制终止。</li>
+</ol>
+<p><code>preStop</code> 的执行时间包含在终止宽限期内，因此宽限期必须覆盖 hook 和应用退出时间。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  terminationGracePeriodSeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">60</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">example/api:1.0.0</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    lifecycle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      preStop</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        exec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          command</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/bin/sh"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"-c"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"sleep 10"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    readinessProbe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      httpGet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/readyz</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8080</span></span></code></pre>
+<p>应用侧必须捕获 SIGTERM，并依次执行：Readiness 失败 → 停止接受新连接 → 等待在途请求 → 关闭依赖连接 → 退出。单纯 <code>sleep</code> 只能给外部负载均衡传播留时间，不能代替应用的优雅关闭。</p>
+<p><a id="reference-多副本与故障域分布"></a></p>
+<h2 id="多副本与故障域分布">多副本与故障域分布</h2>
+<p>副本集中在同一 Node 或 Zone 不能抵御对应故障。Topology Spread Constraints 可按 Node 和 Zone 分散 Pod：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  topologySpreadConstraints</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">maxSkew</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    topologyKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">topology.kubernetes.io/zone</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    whenUnsatisfiable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">DoNotSchedule</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    labelSelector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      matchLabels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">maxSkew</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    topologyKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">kubernetes.io/hostname</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    whenUnsatisfiable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ScheduleAnyway</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    labelSelector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      matchLabels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span></code></pre>
+<ul>
+<li>Zone 级 <code>DoNotSchedule</code> 提供硬保护，但可用 Zone 或容量不足时会 Pending。</li>
+<li>Node 级 <code>ScheduleAnyway</code> 作为软分散，可提高资源紧张时的可调度性。</li>
+<li>多可用区部署还必须评估存储拓扑、跨区延迟、流量费用以及云负载均衡健康检查。</li>
+</ul>
+<p><a id="reference-滚动发布保护"></a></p>
+<h2 id="滚动发布保护">滚动发布保护</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  replicas</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">4</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  minReadySeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">30</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  progressDeadlineSeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">600</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  strategy</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">RollingUpdate</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    rollingUpdate</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      maxUnavailable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      maxSurge</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  template</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      terminationGracePeriodSeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">60</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        readinessProbe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          httpGet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/readyz</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8080</span></span></code></pre>
+<p>发布前计算峰值容量：<code>replicas + maxSurge</code> 必须能被集群容纳。<code>maxUnavailable: 0</code> 只保证 Deployment 期望的可用副本策略，不能保护应用免受错误配置、依赖故障或新版本逻辑错误。</p>
+<p>发布门禁至少包含：</p>
+<ul>
+<li>新版本可用副本数和 Readiness。</li>
+<li>请求量、错误率、P95/P99 延迟。</li>
+<li>CPU throttling、内存、OOM、重启和连接池。</li>
+<li>关键业务成功率与依赖错误。</li>
+<li>明确的停止、回滚条件与观察窗口。</li>
+</ul>
+<p><a id="reference-hpa-与滚动发布"></a></p>
+<h2 id="hpa-与滚动发布">HPA 与滚动发布</h2>
+<p>HPA 和 Deployment 同时修改容量时，需要避免控制环互相干扰：</p>
+<ul>
+<li>HPA 管理副本数时，发布清单不应由其他工具频繁重写 <code>.spec.replicas</code>。</li>
+<li><code>minReplicas</code> 至少覆盖故障和发布期间的冗余要求。</li>
+<li>HPA 使用 CPU 利用率时，新 Pod 的 requests 必须合理；启动阶段的 CPU 峰值可能触发过度扩容。</li>
+<li>发布的 <code>maxSurge</code> 加上 HPA 的快速扩容会突然需要大量 Node 容量。</li>
+<li>缩容设置稳定窗口，避免发布后指标波动造成副本抖动。</li>
+<li>readiness 失败的 Pod 不接流量，剩余 Pod 利用率上升又可能触发 HPA；需监控这一反馈链。</li>
+</ul>
+<p><a id="reference-节点维护-runbook"></a></p>
+<h2 id="节点维护-runbook">节点维护 Runbook</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 1. 检查 Node 上工作负载、PDB 和可替代容量</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --field-selector</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> spec.nodeName=</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> wide</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pdb</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nodes</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 2. 停止新 Pod 调度</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> cordon</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 3. 预演并执行 drain</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> drain</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --ignore-daemonsets</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --delete-emptydir-data</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --dry-run=server</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> drain</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --ignore-daemonsets</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --delete-emptydir-data</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --timeout=15m</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 4. 维护完成后恢复调度</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> uncordon</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p><code>--delete-emptydir-data</code> 会删除该 Node 上 Pod 的 <code>emptyDir</code> 数据；使用前必须确认数据是临时的。不要默认使用 <code>--force</code> 或绕过 PDB，除非已确认影响并进入经批准的应急流程。</p>
+<p><a id="reference-高可用验收清单"></a></p>
+<h2 id="高可用验收清单">高可用验收清单</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> 至少两个副本，并确认每个副本可独立提供服务。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 跨 Node/Zone 分散，故障域标签可靠。</li>
+<li class="task-list-item"><input type="checkbox" disabled> Readiness、Startup、Liveness 语义正确。</li>
+<li class="task-list-item"><input type="checkbox" disabled> PDB 与维护策略一致，不阻塞正常运维。</li>
+<li class="task-list-item"><input type="checkbox" disabled> SIGTERM、<code>preStop</code> 和终止宽限期经过压测验证。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 滚动策略与集群峰值容量匹配。</li>
+<li class="task-list-item"><input type="checkbox" disabled> HPA 最小/最大副本、扩缩行为和指标链已验证。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 完成 Pod 删除、Node drain、Zone 故障和回滚演练。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 有状态服务额外验证 quorum、复制、备份与恢复。</li>
+</ul>
+<p><a id="reference-实践与验收"></a></p>
+<h2 id="实践与验收">实践与验收</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> 删除一个 Pod，验证剩余容量、替代速度与用户侧 SLI。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 发送 SIGTERM，记录流量摘除、在途请求完成和进程退出时间。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 预演并执行一次 Node drain，确认 PDB、DaemonSet、<code>emptyDir</code> 和可替代容量。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 发布一个无法 Ready 的版本，验证滚动策略不会让服务低于允许容量并完成回滚。</li>
+</ul>
+<p><a id="reference-官方参考"></a></p>
+<h2 id="官方参考">官方参考</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/disruptions/">Kubernetes：Disruptions 与 PDB</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">Kubernetes：Pod 生命周期</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/">Kubernetes：容器生命周期 Hook</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/">Kubernetes：Topology Spread Constraints</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Kubernetes：Deployment 更新</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>比较 drain、Node 宕机与直接删除工作负载，指出 PDB 分别是否参与保护。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/kubernetes/kubernetes-deployments/">L03-Deployment</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#学习目标">学习目标</a></li><li style="--depth: 0"><a href="#高可用的边界">高可用的边界</a></li><li style="--depth: 0"><a href="#poddisruptionbudget">PodDisruptionBudget</a></li><li style="--depth: 0"><a href="#优雅终止">优雅终止</a></li><li style="--depth: 0"><a href="#多副本与故障域分布">多副本与故障域分布</a></li><li style="--depth: 0"><a href="#滚动发布保护">滚动发布保护</a></li><li style="--depth: 0"><a href="#hpa-与滚动发布">HPA 与滚动发布</a></li><li style="--depth: 0"><a href="#节点维护-runbook">节点维护 Runbook</a></li><li style="--depth: 0"><a href="#高可用验收清单">高可用验收清单</a></li><li style="--depth: 0"><a href="#实践与验收">实践与验收</a></li><li style="--depth: 0"><a href="#官方参考">官方参考</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

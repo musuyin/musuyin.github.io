@@ -1,0 +1,505 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kubernetes Pod · Musuyin&#39; Home</title><meta name="description" content="Pod 是调度和替换的基本单位，控制器负责副本持续存在。故障判断要联合 phase、容器状态、Condition、事件和日志，不能只解释 kubectl 的 STATUS 显示。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-pods/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Kubernetes Pod · Musuyin' Home"><meta property="og:description" content="Pod 是调度和替换的基本单位，控制器负责副本持续存在。故障判断要联合 phase、容器状态、Condition、事件和日志，不能只解释 kubectl 的 STATUS 显示。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-pods/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Kubernetes Pod</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-03-10">2026-03-10</time></dd></div><div><dt>字数</dt><dd>2669</dd></div><div><dt>预计阅读</dt><dd>9 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Kubernetes/">#Kubernetes</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Kubernetes Pod</h1><time datetime="2026-03-10">2026-03-10</time><p class="tags"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Kubernetes/">#Kubernetes</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>Pod 是调度和替换的基本单位，控制器负责副本持续存在。故障判断要联合 phase、容器状态、Condition、事件和日志，不能只解释 kubectl 的 STATUS 显示。</p>
+<p><a id="reference-学习目标"></a></p>
+<h2 id="学习目标">学习目标</h2>
+<p>学完本章后，应当能够：</p>
+<ul>
+<li>解释 Pod 与容器、Node、控制器之间的关系，以及 Pod 为什么是可替换而非可修复的实例。</li>
+<li>区分 Pod phase、容器状态、Condition 和事件，不只凭 <code>STATUS</code> 一列判断故障。</li>
+<li>正确选择 Startup、Readiness 与 Liveness Probe，并理解错误探针可能放大故障。</li>
+<li>根据事件、当前日志、上一次容器日志和退出码定位 Pending、CrashLoopBackOff、OOMKilled 等问题。</li>
+</ul>
+<blockquote>
+<p>Pod 是共享网络与存储命名空间的一组容器，也是 Kubernetes 调度和故障替换的最小单位；真正维持副本的是控制器，而不是 Pod 自己。</p>
+</blockquote>
+<p><a id="reference-概念"></a></p>
+<h2 id="概念">概念</h2>
+<p><img alt="IMG-20260817143937426" loading="lazy" decoding="async" width="1118" height="730" src="/_astro/IMG-20260817143937426.BHJMDJ5g_dEGuK.webp"></p>
+<p><img alt="IMG-20260817143937508" loading="lazy" decoding="async" width="1304" height="1585" src="/_astro/IMG-20260817143937508.YL9NqLCa_XTULt.webp"></p>
+<blockquote>
+<p>图：Pod 从 Pending、Running 到终止状态的主要分支，以及探针、容器重启和控制器替代 Pod 的边界。</p>
+</blockquote>
+<p>Pod 是 Kubernetes 应用的<strong>基本执行单元</strong>。</p>
+<ul>
+<li>它是 Kubernetes 对象模型中可创建和部署的最小、最简单单元。</li>
+<li>Pod 为容器提供运行环境，将应用的不同组成部分（服务器、缓存、API、数据库等）组织在一起。</li>
+<li>同一 Pod 的容器共享<strong>网络命名空间</strong>和<strong>挂载卷</strong>，但默认不共享进程或内存命名空间。</li>
+<li>通常通过 Deployment 等工作负载控制器增加 Pod 副本，以实现水平扩缩容。</li>
+<li>Pod 对象不会被“复活”：Pod 被删除或失效后，控制器可能创建一个具有新 UID、IP 和生命周期的新 Pod 作为替代</li>
+<li>容器异常时，Kubelet 会根据 <code>restartPolicy</code> 在同一个 Pod 内重启容器；Node 故障或 Pod 被驱逐时，Deployment、StatefulSet 等控制器才会在合适的 Node 上创建替代 Pod</li>
+</ul>
+<p><a id="reference-网络"></a></p>
+<h2 id="网络">网络</h2>
+<ul>
+<li>Pod 内的 Container 共享同一个网络命名空间（同一 IP 与端口空间）。</li>
+<li>Pod 内的 Container 使用相同的本地回环网络接口（<code>localhost</code>）。</li>
+<li>同一 Pod 内的 Container 进程必须绑定不同端口。</li>
+<li>不同 Pod 中的 Container 可以复用相同端口。</li>
+</ul>
+<p>Pod 不会跨多个 Node。</p>
+<p><a id="reference-kubectl"></a></p>
+<h2 id="kubectl">kubectl</h2>
+<p><a id="reference-创建"></a></p>
+<h3 id="创建">创建</h3>
+<ol>
+<li><code>kubectl run</code></li>
+<li>使用 YAML 文件执行 <code>kubectl create/apply</code></li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用镜像创建独立 Pod</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> run</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod_name] --image</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">[image_name:image_version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span></code></pre>
+<p>现代版本的 <code>kubectl run</code> 默认创建独立 Pod，不会创建 Deployment。生产工作负载通常使用 Deployment YAML 或 <code>kubectl create deployment</code>。</p>
+<p><a id="reference-暴露端口"></a></p>
+<h3 id="暴露端口">暴露端口</h3>
+<p>默认情况下，Pod 和容器只能在 Kubernetes 集群<strong>内部</strong>访问。</p>
+<p><code>kubectl port-forward</code>：将容器端口临时转发到本地。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> port-forward</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod_name] [external_port:internal_port]</span></span></code></pre>
+<p><a id="reference-删除"></a></p>
+<h3 id="删除">删除</h3>
+<p>删除独立创建的 Pod 后，Pod 不会自动重建：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> delete</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod_name]</span></span></code></pre>
+<p>如果 Pod 由 Deployment、StatefulSet、DaemonSet、Job 等控制器管理，控制器发现实际副本数少于期望值后，会创建一个新的替代 Pod。此时若要停止 Deployment 管理的工作负载，应删除 Deployment 或将副本数缩容为 0：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> delete</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> deployment</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [deployment_name]</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> scale</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> deployment</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [deployment_name] --replicas</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">0</span></span></code></pre>
+<p><a id="reference-pod-健康检查"></a></p>
+<h2 id="pod-健康检查">Pod 健康检查</h2>
+<p>Kubernetes 通过 Probe（探针）判断 Pod 中容器的健康状态。</p>
+<p>Probe 是 kubelet 定期对容器执行的诊断检查。</p>
+<table>
+<thead>
+<tr>
+<th>Probe</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Liveness Probe</strong></td>
+<td>判断容器是否仍然存活；连续失败达到阈值后，Kubelet 终止该容器，并根据 <code>restartPolicy</code> 决定是否重启</td>
+</tr>
+<tr>
+<td><strong>Readiness Probe</strong></td>
+<td>判断容器当前是否可以接收流量；失败时 Pod 会从对应 Service 的 EndpointSlice 中移除，但容器不会因此自动重启</td>
+</tr>
+<tr>
+<td><strong>Startup Probe</strong></td>
+<td>保护启动较慢的容器；在其成功前，Liveness 和 Readiness 检查不会生效</td>
+</tr>
+</tbody>
+</table>
+<p>Pod 级别的 <code>restartPolicy</code> 默认为 <code>Always</code>，作用对象是 Pod 内的容器。容器重启通常发生在原 Pod 内，并不等于删除并重建 Pod。</p>
+<p><a id="reference-检查方式"></a></p>
+<h3 id="检查方式">检查方式</h3>
+<ul>
+<li><code>ExecAction</code>：在容器内执行命令。</li>
+<li><code>TCPSocketAction</code>：对容器 IP 的指定端口进行 TCP 检查。</li>
+<li><code>HTTPGetAction</code>：向容器发送 HTTP GET 请求。</li>
+</ul>
+<p><a id="reference-探针与资源配置示例"></a></p>
+<h3 id="探针与资源配置示例">探针与资源配置示例</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">app</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">example/app:1.0.0</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      requests</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span><span style="color:#22863A;--shiki-dark:#85E89D">cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"250m"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#22863A;--shiki-dark:#85E89D">memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"256Mi"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      limits</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span><span style="color:#22863A;--shiki-dark:#85E89D">cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#22863A;--shiki-dark:#85E89D">memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"512Mi"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    startupProbe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      httpGet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span><span style="color:#22863A;--shiki-dark:#85E89D">path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/healthz</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#22863A;--shiki-dark:#85E89D">port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8080</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      failureThreshold</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">30</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      periodSeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    readinessProbe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      httpGet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span><span style="color:#22863A;--shiki-dark:#85E89D">path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/readyz</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#22863A;--shiki-dark:#85E89D">port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8080</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      periodSeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    livenessProbe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      httpGet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span><span style="color:#22863A;--shiki-dark:#85E89D">path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/healthz</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#22863A;--shiki-dark:#85E89D">port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8080</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      periodSeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span></span></code></pre>
+<ul>
+<li><code>readinessProbe</code> 应反映“能否安全接流”，不要只检查进程存在。</li>
+<li>慢启动应用优先使用 <code>startupProbe</code>，避免 liveness 在初始化期间反复重启容器。</li>
+<li><code>OOMKilled</code>、频繁重启和 CPU throttling 都不能仅靠“调大 limit”处理；需结合应用内存、GC、并发与流量判断。</li>
+</ul>
+<p><a id="reference-crashloopbackoff-排查"></a></p>
+<h4 id="crashloopbackoff-排查"><code>CrashLoopBackOff</code> 排查</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --previous</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> jsonpath='{.status.containerStatuses[*].state}'</span></span></code></pre>
+<p>依次确认退出码、上一次容器日志、环境变量/挂载配置、探针路径及依赖连通性；不要把删除 Pod 当作根因修复。</p>
+<ul>
+<li><code>Success</code>：成功</li>
+<li><code>Failure</code>：失败</li>
+<li><code>Unknown</code>：未知</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Pod</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">my-nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    rel</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">stable</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">my-nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx:alpine</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      requests</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"64Mi"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"250m"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      limits</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"128Mi"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"300m"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    ports</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    - </span><span style="color:#22863A;--shiki-dark:#85E89D">containerPort</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">80</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    livenessProbe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      httpGet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/index.html</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">80</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      initialDelaySeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">15</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      timeoutSeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#6A737D;--shiki-dark:#6A737D"> # Default is 1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      periodSeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#6A737D;--shiki-dark:#6A737D"> # Default is 10</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      failureThreshold</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D"> # Default is 3</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    readinessProbe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      httpGet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/index.html</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">80</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      initialDelaySeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      periodSeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#6A737D;--shiki-dark:#6A737D"> # Default is 10</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      failureThreshold</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D"> # Default is 3</span></span></code></pre>
+<ul>
+<li><code>httpGet</code>：检查 80 端口的 <code>/index.html</code>。</li>
+<li><code>initialDelaySeconds</code>：初始化后等待 15 秒再开始检查。</li>
+<li><code>timeoutSeconds</code>：单次检查 2 秒后超时。</li>
+<li><code>periodSeconds</code>：每 5 秒检查一次。</li>
+<li><code>failureThreshold</code>: 连续失败达到该次数后，当前 Probe 才被判定为失败
+<ul>
+<li>Liveness 失败会触发容器终止与重启流程</li>
+<li>Readiness 失败只会停止接收 Service 流量</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-资源定义"></a></p>
+<h3 id="资源定义">资源定义</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Pod</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">test</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">test</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx:alpine</span></span></code></pre>
+<ul>
+<li><code>apiVersion</code>：Kubernetes API 版本。</li>
+<li><code>kind</code>：Kubernetes 资源类型。</li>
+<li><code>metadata</code>：Pod 的元数据。</li>
+<li><code>spec</code>：Pod 的规格/蓝图。
+<ul>
+<li>包含将在 Pod 中运行的容器信息。</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-创建-1"></a></p>
+<h3 id="创建-1">创建</h3>
+<p>使用 YAML 文件：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [yaml_name.yaml] --dry-run --validate</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">true</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 若 Pod 已存在，该命令会报错</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [yaml_name.yaml]</span></span></code></pre>
+<p><a id="reference-更新"></a></p>
+<h3 id="更新">更新</h3>
+<p>若资源不存在则创建；若存在则按 YAML 将变更应用到 Pod。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> apply</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [yaml_name.yaml]</span></span></code></pre>
+<p>如后续希望使用 <code>kubectl apply</code>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [yaml_name.yaml] --save-config</span></span></code></pre>
+<p><code>--save-config</code> 会将资源配置保存到 annotations 中。</p>
+<p>也可以使用 <code>kubectl edit</code> / <code>kubectl patch</code> 对 Pod 进行原地、非中断式修改。</p>
+<p><a id="reference-删除-1"></a></p>
+<h3 id="删除-1">删除</h3>
+<p>使用创建该 Pod 的 YAML 文件删除它：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> delete</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [yaml_name.yaml]</span></span></code></pre>
+<p><a id="reference-yaml-基础"></a></p>
+<h2 id="yaml-基础">YAML 基础</h2>
+<ul>
+<li>YAML 由映射（map）和列表（list）组成。</li>
+<li>缩进具有语义。</li>
+<li>始终使用空格，不使用 Tab。</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">value</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  key1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">value</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  key2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    subKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">value</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">item1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">item2</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">listMap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">map1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">value</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    map1p</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">value</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">map2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">value</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    map2p</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">value</span></span></code></pre>
+<p><a id="reference-yaml-核心结构"></a></p>
+<h3 id="yaml-核心结构">YAML 核心结构</h3>
+<p>K8s 所有资源（Pod/Deployment/Service 等）的 YAML 配置遵循统一核心结构，分为 4 个基础段：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span><span style="color:#6A737D;--shiki-dark:#6A737D"> # API 版本（必选）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Pod</span><span style="color:#6A737D;--shiki-dark:#6A737D">	   # 资源类型（必选）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:	   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 资源元数据（必选）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">my-nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    rel</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">stable</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:		   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 资源规格（必选，不同资源类型字段不同）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">my-nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx:alpine</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    ports</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    - </span><span style="color:#22863A;--shiki-dark:#85E89D">containerPort</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">80</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {}</span></span></code></pre>
+<p>常用命令：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 基础命令</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nginx.pod.yml</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --save-config</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod-name]</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> apply</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nginx.pod.yml</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> exec</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -it</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod-name] -- sh</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> edit</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nginx.pod.yml</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> delete</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nginx.pod.yml</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 进入容器：</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> exec</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -it</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod-name] -- sh</span></span></code></pre>
+<p><a id="reference-核心通用属性详解"></a></p>
+<h3 id="核心通用属性详解">核心通用属性详解</h3>
+<p><a id="reference-apiversion"></a></p>
+<h4 id="apiversion">apiVersion</h4>
+<p>API 版本</p>
+<table>
+<thead>
+<tr>
+<th>取值示例</th>
+<th>适用资源类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v1</td>
+<td>Pod/Service/Namespace/ConfigMap/Secret</td>
+<td>核心基础资源的稳定版本</td>
+</tr>
+<tr>
+<td>apps/v1</td>
+<td>Deployment/StatefulSet/DaemonSet</td>
+<td>应用工作负载相关资源</td>
+</tr>
+<tr>
+<td>batch/v1</td>
+<td>Job/CronJob</td>
+<td>批处理任务相关资源</td>
+</tr>
+<tr>
+<td>networking.k8s.io/v1</td>
+<td>Ingress/NetworkPolicy</td>
+<td>网络相关资源</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-kind"></a></p>
+<h4 id="kind">kind</h4>
+<p>资源类型</p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>中文名称</th>
+<th>核心作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pod</td>
+<td>最小部署单元</td>
+<td>运行容器的最小载体</td>
+</tr>
+<tr>
+<td>Deployment</td>
+<td>无状态部署</td>
+<td>管理 Pod 副本、自动重启、滚动更新</td>
+</tr>
+<tr>
+<td>Service</td>
+<td>服务发现</td>
+<td>暴露 Pod 网络访问、负载均衡</td>
+</tr>
+<tr>
+<td>Namespace</td>
+<td>命名空间</td>
+<td>资源逻辑隔离</td>
+</tr>
+<tr>
+<td>ConfigMap</td>
+<td>配置映射</td>
+<td>存储非敏感配置数据</td>
+</tr>
+<tr>
+<td>Secret</td>
+<td>密钥</td>
+<td>存储敏感数据（密码/令牌等）</td>
+</tr>
+<tr>
+<td>StatefulSet</td>
+<td>有状态部署</td>
+<td>管理有状态应用（固定网络标识、持久化存储）</td>
+</tr>
+<tr>
+<td>DaemonSet</td>
+<td>守护进程</td>
+<td>集群所有/指定 Node 上运行一个 Pod 副本</td>
+</tr>
+<tr>
+<td>Job</td>
+<td>一次性任务</td>
+<td>执行完成后终止的任务</td>
+</tr>
+<tr>
+<td>CronJob</td>
+<td>定时任务</td>
+<td>按时间规则重复执行 Job</td>
+</tr>
+<tr>
+<td>Ingress</td>
+<td>入口规则</td>
+<td>集群外部访问集群内服务的规则</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-metadata"></a></p>
+<h4 id="metadata">metadata</h4>
+<p>资源元数据</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">string</span><span style="color:#6A737D;--shiki-dark:#6A737D">               # 资源名称（必选，同一命名空间内唯一）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">string</span><span style="color:#6A737D;--shiki-dark:#6A737D">          # 所属命名空间（可选，默认 default）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:                    </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 标签（可选，键值对，用于资源筛选/关联）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    key1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">value1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    key2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">value2</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  annotations</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:               </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 注解（可选，键值对，存储非标识性元数据）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    key1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">value1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  uid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">string</span><span style="color:#6A737D;--shiki-dark:#6A737D">                # 唯一标识（自动生成，无需配置）</span></span></code></pre>
+<ul>
+<li><strong>labels</strong> 核心用途：Service 关联 Pod、Deployment 管理 Pod、资源筛选（<code>kubectl get pods -l key=value</code>）</li>
+<li><strong>annotations</strong> 典型场景：存储资源描述、运维备注、第三方工具配置</li>
+</ul>
+<p><code>metadata</code> 不是容器的运行配置，而是 Kubernetes 用来“识别、查找和管理资源”的信息。它主要被 Kubernetes 控制面、控制器和 <code>kubectl</code> 使用，所以业务代码里通常看不到。</p>
+<p>以 Pod 为例：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">my-nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">demo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  annotations</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    maintainer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">musuyin</span></span></code></pre>
+<p>各字段的作用：</p>
+<ul>
+<li><code>name</code>：资源名称。执行 <code>kubectl get pod my-nginx -n demo</code> 时已经在使用它。</li>
+<li><code>namespace</code>：资源所在的逻辑空间。<code>demo/my-nginx</code> 和 <code>default/my-nginx</code> 是两个不同对象。</li>
+<li><code>labels</code>：可被筛选和关联的标签，是真正参与系统行为的 metadata。</li>
+<li><code>annotations</code>：提供给控制器或工具的附加配置，不能用于 selector。</li>
+<li><code>uid</code>：API Server 自动生成的唯一身份。Pod 删除后即使创建同名 Pod，UID 也不同。</li>
+<li><code>ownerReferences</code>：记录 Pod 由哪个 ReplicaSet 等对象创建，用于级联删除和垃圾回收。</li>
+<li><code>finalizers</code>：要求控制器完成清理后，资源才能真正删除。</li>
+</ul>
+<p>最典型的实际使用是 Service 根据 labels 找 Pod：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Pod</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">my-nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Service</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx-service</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  selector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span></span></code></pre>
+<p>这里的关联关系是：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Pod metadata.labels.app = nginx</span></span>
+<span class="line"><span>                ↓ 匹配</span></span>
+<span class="line"><span>Service spec.selector.app = nginx</span></span>
+<span class="line"><span>                ↓</span></span>
+<span class="line"><span>流量发送给该 Pod</span></span></code></pre>
+<p>Deployment 中则要注意三个不同位置：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span><span style="color:#6A737D;--shiki-dark:#6A737D">                 # 标识 Deployment 自身</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  selector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    matchLabels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span><span style="color:#6A737D;--shiki-dark:#6A737D">              # ReplicaSet 用来匹配 Pod</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  template</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      labels</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        app</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span><span style="color:#6A737D;--shiki-dark:#6A737D">            # 创建出来的 Pod 获得这个标签</span></span></code></pre>
+<ul>
+<li><code>name</code> 和 <code>namespace</code> 被 API、<code>kubectl</code> 隐式使用。</li>
+<li><code>labels</code> 被 Service、Deployment、NetworkPolicy 等资源使用。</li>
+<li><code>annotations</code> 通常由 Ingress、监控、Service Mesh 等控制器读取。</li>
+<li>metadata 默认不会进入容器；若程序需要读取，可以通过 Downward API 注入。</li>
+</ul>
+<p><a id="reference-故障排查-runbook"></a></p>
+<h2 id="故障排查-runbook">故障排查 Runbook</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> wide</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --all-containers</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --all-containers</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --previous</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> jsonpath='{range .status.containerStatuses[*]}{.name}{"\t"}{.state.waiting.reason}{"\t"}{.lastState.terminated.reason}{"\t"}{.lastState.terminated.exitCode}{"\n"}{end}'</span></span></code></pre>
+<p>按阶段缩小范围：</p>
+<ul>
+<li>一直 <code>Pending</code>：先看 Scheduler 事件，再查 requests、taint、亲和性与 PVC。</li>
+<li><code>ImagePullBackOff</code>：核对镜像名、标签或 digest、Registry 网络与拉取凭据。</li>
+<li><code>CrashLoopBackOff</code>：查看 <code>--previous</code> 日志、退出码、命令参数、配置和启动探针。</li>
+<li><code>Running</code> 但未 Ready：检查 Readiness Probe、依赖和应用监听地址。</li>
+<li><code>OOMKilled</code>：确认容器内存峰值与 limit，再修复内存使用或重新评估资源，不要只反复重启。</li>
+</ul>
+<p><a id="reference-实践与验收"></a></p>
+<h2 id="实践与验收">实践与验收</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> 创建一个启动命令必然失败的 Pod，通过上一次日志与退出码找出原因。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 配置错误的 Readiness Probe，验证 Pod 可以 Running 但不会进入 Service 后端。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 配置很小的内存 limit 触发 OOM，记录 <code>lastState.terminated.reason</code>。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 删除由 Deployment 管理的 Pod，观察旧 Pod 消失且新 UID 的 Pod 被创建。</li>
+</ul>
+<p>验收标准：能够区分“容器重启”和“Pod 被替换”，并在不先删除现场的情况下收集事件、日志、状态和资源声明。</p>
+<p><a id="reference-生产基线"></a></p>
+<h2 id="生产基线">生产基线</h2>
+<ul>
+<li>应用由合适的控制器管理，不直接运行孤立 Pod。</li>
+<li>配置 requests，并按风险决定 limits；监控重启、OOM、CPU throttling 与 Pending 时长。</li>
+<li>三类探针只检查各自语义，Liveness 不依赖容易抖动的外部服务。</li>
+<li>支持 SIGTERM 和优雅退出，调试所需权限与工具受控。</li>
+</ul>
+<p><a id="reference-官方参考"></a></p>
+<h2 id="官方参考">官方参考</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/">Kubernetes：Pod</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">Kubernetes：Pod 生命周期</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Kubernetes：配置探针</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>给 Pending、CrashLoopBackOff 和 OOMKilled 分别选择第一份证据；解释 Readiness 与 Liveness 配错可能造成的不同后果。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/kubernetes/kubernetes-deployments/">L03-Deployment</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#学习目标">学习目标</a></li><li style="--depth: 0"><a href="#概念">概念</a></li><li style="--depth: 0"><a href="#网络">网络</a></li><li style="--depth: 0"><a href="#kubectl">kubectl</a></li><li style="--depth: 1"><a href="#创建">创建</a></li><li style="--depth: 1"><a href="#暴露端口">暴露端口</a></li><li style="--depth: 1"><a href="#删除">删除</a></li><li style="--depth: 0"><a href="#pod-健康检查">Pod 健康检查</a></li><li style="--depth: 1"><a href="#检查方式">检查方式</a></li><li style="--depth: 1"><a href="#探针与资源配置示例">探针与资源配置示例</a></li><li style="--depth: 2"><a href="#crashloopbackoff-排查">CrashLoopBackOff 排查</a></li><li style="--depth: 1"><a href="#资源定义">资源定义</a></li><li style="--depth: 1"><a href="#创建-1">创建</a></li><li style="--depth: 1"><a href="#更新">更新</a></li><li style="--depth: 1"><a href="#删除-1">删除</a></li><li style="--depth: 0"><a href="#yaml-基础">YAML 基础</a></li><li style="--depth: 1"><a href="#yaml-核心结构">YAML 核心结构</a></li><li style="--depth: 1"><a href="#核心通用属性详解">核心通用属性详解</a></li><li style="--depth: 2"><a href="#apiversion">apiVersion</a></li><li style="--depth: 2"><a href="#kind">kind</a></li><li style="--depth: 2"><a href="#metadata">metadata</a></li><li style="--depth: 0"><a href="#故障排查-runbook">故障排查 Runbook</a></li><li style="--depth: 0"><a href="#实践与验收">实践与验收</a></li><li style="--depth: 0"><a href="#生产基线">生产基线</a></li><li style="--depth: 0"><a href="#官方参考">官方参考</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

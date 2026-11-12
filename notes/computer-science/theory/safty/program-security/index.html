@@ -1,0 +1,562 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>程序安全 · Musuyin&#39; Home</title><meta name="description" content="程序安全要区分非恶意漏洞与恶意代码，再分析感染、驻留、传播和载荷等阶段。病毒、蠕虫与宏病毒的机制不同，描述实例时应关注触发与传播条件。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/safty/program-security/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="程序安全 · Musuyin' Home"><meta property="og:description" content="程序安全要区分非恶意漏洞与恶意代码，再分析感染、驻留、传播和载荷等阶段。病毒、蠕虫与宏病毒的机制不同，描述实例时应关注触发与传播条件。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/safty/program-security/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">程序安全</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-12-04">2025-12-04</time></dd></div><div><dt>字数</dt><dd>4405</dd></div><div><dt>预计阅读</dt><dd>15 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8/">#信息安全</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>程序安全</h1><time datetime="2025-12-04">2025-12-04</time><p class="tags"><a href="/tags/%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8/">#信息安全</a></p></header><div class="prose"><p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>程序安全要区分非恶意漏洞与恶意代码，再分析感染、驻留、传播和载荷等阶段。病毒、蠕虫与宏病毒的机制不同，描述实例时应关注触发与传播条件。</p>
+<p><a id="reference-非恶意的程序漏洞"></a></p>
+<h2 id="非恶意的程序漏洞">非恶意的程序漏洞</h2>
+<ul>
+<li>缓冲区溢出
+<ul>
+<li>危害：程序崩溃、执行恶意代码、提权等</li>
+</ul>
+</li>
+</ul>
+<p><img alt="IMG-20260722152301303" loading="lazy" decoding="async" width="1045" height="372" src="/_astro/IMG-20260722152301303.CZlr_JCy_xxkcE.webp"></p>
+<ul>
+<li>不完全验证</li>
+<li>检查时刻到使用时刻错误（TOCTTOU）
+<ul>
+<li>在检查某个状态（如文件权限）之后、实际使用之前，该状态被恶意修改。</li>
+<li>解决：原子操作、减少检查与使用间隔、使用安全 API、以最小权限运行程序</li>
+</ul>
+</li>
+<li>未公开的访问点（后门）</li>
+<li>整数溢出错误</li>
+<li>未以空终止符结尾的字符串</li>
+<li>参数长度、类型和数值错误</li>
+<li>竞态条件
+<ul>
+<li>两个进程在相同时间间隔内进行竞争，并且此竞争会影响任务的完整性和正确性</li>
+<li>资源竞争依赖于两个不同进程的执行顺序和时间，从而使得这些错误很难被发现和测试</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-计算机病毒"></a></p>
+<h2 id="计算机病毒">计算机病毒</h2>
+<p><a id="reference-概述"></a></p>
+<h3 id="概述">概述</h3>
+<ul>
+<li>计算机病毒是一些能够<strong>自我复制</strong>的代码段，它能附着在应用程序或系统的其他可执行部分。在宿主程序执行的某些阶段，它能够获得执行控制权。</li>
+<li>广义上讲，计算机病毒可以指所有对系统有干扰或破坏作用的代码。</li>
+<li>计算机病毒分类
+<ul>
+<li>按寄生的方式不同，可分为系统引导型病毒、文件型病毒和复合型病毒三种</li>
+<li>按其破坏、危害程度可分为良性病毒和恶性病毒</li>
+<li>按传染途径可分为驻留内存型病毒和非驻留型病毒</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-潜伏和激活"></a></p>
+<h3 id="潜伏和激活">潜伏和激活</h3>
+<p>大多数病毒在感染后不留下它们存在的外部特征，被感染的程序保持原功能不变，有时可以没有任何感染特征地运行数月，甚至数年，在此期间病毒只是静静地进行自身复制，处于潜伏状态；病毒内部有基于某种算法的激活条件，当满足这一条件时，病毒激活（发作），这时将引起各种明显的系统混乱或破坏。</p>
+<p><a id="reference-传播"></a></p>
+<h3 id="传播">传播</h3>
+<ul>
+<li>被动传播
+<ul>
+<li>通过计算机存储介质、通信网络传播</li>
+</ul>
+</li>
+<li>主动传播
+<ul>
+<li>完全替换宿主</li>
+<li>附着于宿主
+<ul>
+<li>外部附着</li>
+<li>内部插入</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-运行机制"></a></p>
+<h3 id="运行机制">运行机制</h3>
+<p>通常，病毒在刚开始进入计算机的过程中，要进行<strong>自身定位</strong>、<strong>置某些标志的初值</strong>等一系列动作。</p>
+<p>以后，它还要经常判断其传染或表现的条件是否成熟，从而相应地进行传染及表现活动，因此病毒代码可以分成<strong>初始化、控制、传染及表现</strong>四个部分。</p>
+<p><a id="reference-特点"></a></p>
+<h3 id="特点">特点</h3>
+<ul>
+<li>修改载体程序</li>
+<li>驻留内存</li>
+<li>修改中断</li>
+</ul>
+<p><a id="reference-传统计算机病毒惯用特性"></a></p>
+<h3 id="传统计算机病毒惯用特性">传统计算机病毒惯用特性</h3>
+<ul>
+<li>攻击对象趋于混合型，对可执行丈件和系统引导区同时感染；在病毒源码的编程、反跟踪调试、程序加密（加壳）、隐秘性、攻击能力等方面的设计都呈现了许多不同一般的变新</li>
+<li>釆用反动态跟踪技术：为了反动态跟踪，病毒程序中可能会嵌入一些破坏单步中断 intIh 和中断点设置中断 int3h 的中断向量的代码，从而使动态跟踪难以完成。</li>
+<li>降低代码可阅读性
+<ul>
+<li>改写返回地址</li>
+<li>修改程序从中截断执行</li>
+<li>利用 <code>call</code> 代替 <code>jump</code></li>
+</ul>
+</li>
+<li>增强感染的隐秘性
+<ul>
+<li>避开修改中断向量</li>
+<li>维持宿主程序外部特征
+<ul>
+<li>不改变显示的文件长度和修改日期</li>
+<li>系统引导型病毒对引导区进行伪装</li>
+</ul>
+</li>
+<li>不使用明显的感染标志
+<ul>
+<li>病毒不再简单地根据某个标志判断病毒本身是否已经存在，而是经过一系列相关运算来判断某个丈件是否感染</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-恶意代码"></a></p>
+<h2 id="恶意代码">恶意代码</h2>
+<p><a id="reference-经典计算机病毒"></a></p>
+<h3 id="经典计算机病毒">经典计算机病毒</h3>
+<p><a id="reference-yankee-doodle-病毒"></a></p>
+<h4 id="yankee-doodle-病毒">Yankee Doodle 病毒</h4>
+<ul>
+<li><strong>类型</strong>：良性病毒（Benign Virus）</li>
+<li><strong>平台</strong>：DOS 系统（IBM PC 兼容机）</li>
+<li><strong>行为特点</strong>：不破坏数据，仅具干扰性或娱乐性</li>
+<li>感染可执行文件（如  <code>.COM</code>  文件）</li>
+<li>每次运行被感染程序时，会<strong>在后台播放美国民歌《Yankee Doodle》的简单旋律</strong></li>
+<li>不删除文件、不格式化硬盘，仅占用少量系统资源</li>
+</ul>
+<p><a id="reference-brain-病毒"></a></p>
+<h4 id="brain-病毒">Brain 病毒</h4>
+<ul>
+<li><strong>平台</strong>：MS-DOS（通过软盘传播）</li>
+<li><strong>类型</strong>：引导扇区病毒（Boot Sector Virus）</li>
+<li><strong>感染机制</strong>：
+<ul>
+<li>当用户从被感染的软盘启动计算机时，病毒加载到内存</li>
+<li>病毒将原主引导记录（MBR）移到磁盘另一位置，并用自己的代码占据 MBR</li>
+</ul>
+</li>
+<li><strong>驻留内存</strong>：
+<ul>
+<li>病毒常驻内存，监控磁盘读写操作</li>
+<li>当插入干净软盘并访问时，病毒自动复制到新软盘的引导扇区</li>
+</ul>
+</li>
+<li><strong>隐藏自身</strong>：
+<ul>
+<li>使用“stealth”技术：当程序读取原始 MBR 时，病毒返回备份的原始内容，掩盖感染事实</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-计算机蠕虫"></a></p>
+<h3 id="计算机蠕虫">计算机蠕虫</h3>
+<ul>
+<li><strong>自包含</strong>：是一个完整的可执行程序，不需感染其他文件。</li>
+<li><strong>自传播</strong>：能主动扫描网络、利用漏洞或社会工程实现自动扩散。</li>
+<li><strong>网络驱动</strong>：传播依赖网络协议（如 TCP/IP、SMB、HTTP、邮件等）。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>病毒（Virus）</th>
+<th>蠕虫（Worm）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>是否需要宿主</strong></td>
+<td>是（感染文件或引导区）</td>
+<td>否（独立程序）</td>
+</tr>
+<tr>
+<td><strong>传播方式</strong></td>
+<td>用户运行被感染程序</td>
+<td>利用系统漏洞自动传播</td>
+</tr>
+<tr>
+<td><strong>主要目标</strong></td>
+<td>感染本地文件</td>
+<td>快速扩散至网络中其他主机</td>
+</tr>
+<tr>
+<td><strong>典型影响</strong></td>
+<td>破坏文件、显示信息</td>
+<td>消耗带宽、导致 DoS</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-运行机制-1"></a></p>
+<h4 id="运行机制-1">运行机制</h4>
+<p><a id="reference-初始感染infection"></a></p>
+<h5 id="初始感染infection">初始感染（Infection）</h5>
+<ul>
+<li>入口方式：
+<ul>
+<li>利用未打补丁的远程代码执行漏洞（如 EternalBlue）</li>
+<li>通过钓鱼邮件（含恶意链接/脚本）</li>
+<li>暴力破解 SSH/RDP/数据库弱口令</li>
+<li>利用共享文件夹（如 Windows SMB）</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-驻留与隐藏persistence--stealth"></a></p>
+<h5 id="驻留与隐藏persistence--stealth">驻留与隐藏（Persistence &amp; Stealth）</h5>
+<ul>
+<li>写入启动项（<code>HKLM\...\Run</code>）</li>
+<li>注册为系统服务</li>
+<li>使用 rootkit 隐藏进程/文件/网络连接</li>
+<li>关闭安全软件（如杀毒软件、防火墙）</li>
+</ul>
+<p><a id="reference-扫描与传播propagation"></a></p>
+<h5 id="扫描与传播propagation">扫描与传播（Propagation）</h5>
+<ul>
+<li><strong>扫描策略</strong>：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>描述</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>随机扫描</strong></td>
+<td>随机生成 IP 地址尝试</td>
+<td>Code Red</td>
+</tr>
+<tr>
+<td><strong>本地优先扫描</strong></td>
+<td>优先扫描同网段（更快、更隐蔽）</td>
+<td>Conficker</td>
+</tr>
+<tr>
+<td><strong>命中列表（Hitlist）</strong></td>
+<td>预置高价值目标 IP 列表</td>
+<td>Slammer</td>
+</tr>
+<tr>
+<td><strong>拓扑扫描</strong></td>
+<td>从被感染主机获取联系人（如邮件地址簿）</td>
+<td>ILOVEYOU</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>传播协议</strong>：
+<ul>
+<li>SMB（Windows 文件共享）</li>
+<li>RDP/SSH（远程登录）</li>
+<li>HTTP/HTTPS（Web 漏洞）</li>
+<li>SMTP（邮件自动发送）</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-执行载荷payload-delivery"></a></p>
+<h5 id="执行载荷payload-delivery">执行载荷（Payload Delivery）</h5>
+<ul>
+<li>破坏性载荷：格式化硬盘、删除文件</li>
+<li>经济性载荷：窃取银行卡、挖矿程序</li>
+<li>控制性载荷：连接 C&amp;C 服务器，成为僵尸节点</li>
+<li>跳板载荷：作为内网渗透的跳板（横向移动）</li>
+</ul>
+<p><a id="reference-更新与进化advanced-worms"></a></p>
+<h5 id="更新与进化advanced-worms">更新与进化（Advanced Worms）</h5>
+<ul>
+<li>从 C&amp;C 下载新模块</li>
+<li>动态更换 C&amp;C 地址（域名生成算法 DGA）</li>
+<li>根据环境调整行为（沙箱检测规避）</li>
+</ul>
+<p><a id="reference-宏病毒"></a></p>
+<h3 id="宏病毒">宏病毒</h3>
+<p><strong>宏病毒（Macro Virus）</strong> 是一类利用应用程序（尤其是 Microsoft Office）中的<strong>宏（Macro）功能</strong>进行传播和执行恶意代码的病毒。它在 1990 年代中期至 2000 年代初曾大规模爆发，是首个广泛流行的跨平台（Windows/Mac）恶意软件类型之一。</p>
+<p><a id="reference-宏"></a></p>
+<h4 id="宏">宏</h4>
+<ul>
+<li><strong>宏</strong>是一系列<strong>自动化命令或脚本</strong>，用于简化重复性任务。</li>
+<li>在 Microsoft Office（Word、Excel 等）中，宏使用  <strong>VBA（Visual Basic for Applications）</strong>  编写。</li>
+<li>默认情况下，宏可访问文件系统、网络、注册表等系统资源 → <strong>具备强大但危险的能力</strong>。</li>
+</ul>
+<p><a id="reference-工作原理"></a></p>
+<h4 id="工作原理">工作原理</h4>
+<p><a id="reference-感染载体"></a></p>
+<h5 id="感染载体">感染载体</h5>
+<ul>
+<li>主要隐藏在  <strong>Office 文档</strong>中：
+<ul>
+<li>Word：<code>.doc</code>、<code>.dot</code>（模板）</li>
+<li>Excel：<code>.xls</code>、<code>.xlt</code></li>
+<li>后来也出现在 PowerPoint、Access 中</li>
+</ul>
+</li>
+<li>用户打开文档时，若启用宏，病毒即被激活。</li>
+</ul>
+<p><a id="reference-自复制机制"></a></p>
+<h5 id="自复制机制">自复制机制</h5>
+<p>宏病毒通常包含以下核心逻辑：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="vb"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">Sub</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> AutoOpen</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()        ' Word 文档打开时自动执行</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    InfectDocuments   </span><span style="color:#6A737D;--shiki-dark:#6A737D">' 感染其他文档</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Payload           </span><span style="color:#6A737D;--shiki-dark:#6A737D">' 执行恶意载荷</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">End Sub</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">Sub</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> InfectDocuments</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    ' 将自身代码复制到 Normal.dot（全局模板）</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    ' 或复制到当前目录下其他 .doc 文件</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">End Sub</span></span></code></pre>
+<ul>
+<li><strong>关键技巧</strong>：感染  <strong>Normal.dot</strong>（Word 全局模板）<br>
+→ 此后<strong>所有新建/打开的文档都会携带病毒</strong></li>
+</ul>
+<p><a id="reference-传播方式"></a></p>
+<h5 id="传播方式">传播方式</h5>
+<ul>
+<li><strong>本地传播</strong>：感染同一计算机上的其他 Office 文档</li>
+<li><strong>网络传播</strong>：
+<ul>
+<li>通过电子邮件附件发送带毒文档</li>
+<li>共享网络驱动器中的文档被感染</li>
+<li>U 盘自动复制（结合 Autorun.inf）</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-间谍程序"></a></p>
+<h3 id="间谍程序">间谍程序</h3>
+<p><strong>间谍程序（Spyware）</strong> 是一类<strong>秘密安装在用户设备上、未经同意收集敏感信息并回传给攻击者的恶意软件</strong>。其核心目标是<strong>监视、窃取和滥用用户隐私数据</strong>，常用于身份盗窃、金融欺诈、商业间谍或广告牟利。</p>
+<table>
+<thead>
+<tr>
+<th>特征</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>隐蔽性</strong></td>
+<td>静默安装、隐藏进程、伪装成合法程序</td>
+</tr>
+<tr>
+<td><strong>持久性</strong></td>
+<td>开机自启、抵抗卸载、自我修复</td>
+</tr>
+<tr>
+<td><strong>数据窃取</strong></td>
+<td>监控键盘、截屏、窃取文件、记录浏览行为</td>
+</tr>
+<tr>
+<td><strong>远程控制</strong></td>
+<td>可接收指令更新行为或下载新模块</td>
+</tr>
+<tr>
+<td><strong>未经同意</strong></td>
+<td>用户不知情或被欺骗安装</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-木马程序"></a></p>
+<h3 id="木马程序">木马程序</h3>
+<p><strong>木马程序（Trojan Horse，简称 Trojan）</strong> 是一类<strong>伪装成合法软件或文件，诱骗用户主动执行，从而在系统中秘密部署恶意功能的恶意软件</strong>。其名称源自古希腊“特洛伊木马”——外表无害，内藏杀机。</p>
+<p>与病毒、蠕虫不同，<strong>木马不具备自我复制能力</strong>，完全依赖<strong>社会工程学（Social Engineering）</strong> 诱导用户安装。</p>
+<table>
+<thead>
+<tr>
+<th>特征</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>伪装性</strong></td>
+<td>打包成游戏、破解工具、发票、简历、视频等看似无害的文件</td>
+</tr>
+<tr>
+<td><strong>非自传播</strong></td>
+<td>不主动感染其他文件或网络主机（需用户“自愿”运行）</td>
+</tr>
+<tr>
+<td><strong>后门功能</strong></td>
+<td>主要目的是为攻击者提供远程控制、数据窃取或持久驻留</td>
+</tr>
+<tr>
+<td><strong>隐蔽运行</strong></td>
+<td>启动后隐藏窗口、伪装进程名、禁用安全软件</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-运行机制-2"></a></p>
+<h4 id="运行机制-2">运行机制</h4>
+<p><a id="reference-投递delivery"></a></p>
+<h5 id="投递delivery">投递（Delivery）</h5>
+<ul>
+<li>用户被诱骗运行  <code>.exe</code>、<code>.scr</code>、<code>.js</code>、<code>.msi</code>  或 Office 宏</li>
+</ul>
+<p><a id="reference-规避检测evasion"></a></p>
+<h5 id="规避检测evasion">规避检测（Evasion）</h5>
+<ul>
+<li><strong>加壳/混淆</strong>：使用 UPX、VMProtect 等工具加密代码</li>
+<li><strong>无文件技术</strong>：仅在内存运行（如 PowerShell + .NET 反射加载）</li>
+<li><strong>延迟启动</strong>：等待用户关闭杀毒软件后再激活</li>
+</ul>
+<p><a id="reference-持久化persistence"></a></p>
+<h5 id="持久化persistence">持久化（Persistence）</h5>
+<ul>
+<li>写入注册表启动项：<code>HKCU\Software\Microsoft\Windows\CurrentVersion\Run</code></li>
+<li>创建计划任务</li>
+<li>替换系统 DLL（DLL 劫持）</li>
+<li>注册为 Windows 服务</li>
+</ul>
+<p><a id="reference-连接-cccommand-and-control"></a></p>
+<h5 id="连接-cccommand-and-control">连接 C&amp;C（Command and Control）</h5>
+<ul>
+<li>通过 HTTP、HTTPS、DNS、Telegram 等协议回连攻击者服务器</li>
+<li>使用域名生成算法（DGA）或硬编码 IP 避免封禁</li>
+</ul>
+<p><a id="reference-执行恶意功能"></a></p>
+<h5 id="执行恶意功能">执行恶意功能</h5>
+<ul>
+<li>根据 C&amp;C 指令：
+<ul>
+<li>窃取数据</li>
+<li>下载新模块</li>
+<li>发起攻击</li>
+<li>自我销毁（防取证）</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-蠕虫病毒木马"></a></p>
+<h3 id="蠕虫病毒木马">蠕虫、病毒、木马</h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>蠕虫（Worm）</th>
+<th>病毒（Virus）</th>
+<th>木马（Trojan）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>是否需要宿主</strong></td>
+<td>否（独立程序）</td>
+<td>是（依附文件/引导区）</td>
+<td>通常伪装成合法软件</td>
+</tr>
+<tr>
+<td><strong>是否自动传播</strong></td>
+<td>是（主动扫描+利用漏洞）</td>
+<td>否（需用户运行）</td>
+<td>否（依赖诱骗）</td>
+</tr>
+<tr>
+<td><strong>主要目标</strong></td>
+<td>快速扩散、建立僵尸网络</td>
+<td>感染本地系统</td>
+<td>窃取信息、远程控制</td>
+</tr>
+<tr>
+<td><strong>典型载体</strong></td>
+<td>网络漏洞、邮件、共享文件夹</td>
+<td>可执行文件、文档宏</td>
+<td>游戏外挂、破解工具</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-具备功能"></a></p>
+<h4 id="具备功能">具备功能</h4>
+<ul>
+<li>Windows 资源浏览</li>
+<li>远程屏幕显示以及键盘、鼠标控制</li>
+<li>Email 发送功能</li>
+</ul>
+<p><a id="reference-入侵方式"></a></p>
+<h4 id="入侵方式">入侵方式</h4>
+<ul>
+<li>间接入侵
+<ul>
+<li>伪装（软件绑定）</li>
+<li>Email 法</li>
+<li>网页绑定</li>
+</ul>
+</li>
+<li>直接入侵</li>
+</ul>
+<p><a id="reference-ddos"></a></p>
+<h3 id="ddos">DDoS</h3>
+<p>分布式拒绝服务攻击</p>
+<p><a id="reference-攻击过程"></a></p>
+<h4 id="攻击过程">攻击过程</h4>
+<ul>
+<li>构建僵尸网络
+<ul>
+<li>探测扫描大量主机以寻找入侵主机目标。</li>
+<li>入侵有安全漏洞的主机并获得控制权。</li>
+<li>在每台入侵主机中安装攻击程序。</li>
+<li>利用已入侵主机继续进行扫描和入侵。</li>
+</ul>
+</li>
+<li>攻击者向代理端发出攻击指令，成千上万的代理机就会同时向目标发起攻击。</li>
+<li>被攻击的主机由于有太多的请求要处理，因而使用户正常的请求得不到及时处理。</li>
+</ul>
+<p><a id="reference-电子邮件炸弹"></a></p>
+<h3 id="电子邮件炸弹">电子邮件炸弹</h3>
+<p>电子邮件炸弹是最古老的匿名攻击之一，通过一个僵尸网络中的代理机（攻击程序）不断地、大量地向同一地址发送电子邮件，攻击者能够耗尽接受者网络的宽带。</p>
+<p>这种攻击手段不仅会干扰用户的电子邮件系统的正常使用，它还能影响到邮件系统所在的服务器系统的安全，甚至造成整个网络系统全部瘫痪，所以邮件炸弹具有很大危害。</p>
+<p><a id="reference-陷门trapdoor"></a></p>
+<h3 id="陷门trapdoor">陷门（Trapdoor）</h3>
+<p>陷门通常是指进入程序（系统）的秘密入口，它使得知道陷门的人可以不经过通常的安全检查过程而获得访问。程序员为了进行调试和测试程序，往往会设置这样的陷门，当陷门被无所顾忌的程序员用来获得非授权访问时，陷门就变成了威胁。</p>
+<p>对陷门进行操作系统的控制是困难的，最好在程序开发过程中进行控制。</p>
+<p>陷门存在的几种情形：</p>
+<ul>
+<li>开发者在程序完成后忘记去掉陷门</li>
+<li>出于测试或维护的目的刻意保留</li>
+<li>作为隐蔽的访问方式刻意保留</li>
+</ul>
+<p><a id="reference-腊肠攻击salami-攻击"></a></p>
+<h3 id="腊肠攻击salami-攻击">腊肠攻击（Salami 攻击）</h3>
+<p>在信息安全领域，Salami 攻击也称为腊肠攻击，是一种积少成多的攻击。</p>
+<blockquote>
+<p>如：银行计算利息</p>
+</blockquote>
+<p>黑客可以改动计算精度，将利率的小数点靠后面的几位抹掉，将零碎的利息转到自己的账户上，每次扣掉的金额很小，一般很难被发现，有较好的隐蔽性。但客户众多，日积月累往往可以达到可观的数目</p>
+<p><a id="reference-隐蔽通道"></a></p>
+<h3 id="隐蔽通道">隐蔽通道</h3>
+<ul>
+<li>信息隐藏利用数字媒体本身的数据冗余性以及人类感知能力的局限性，借助密码学、混沌理论、编码压缩技术等对信息本身及隐藏位置进行保密。</li>
+<li>使秘密信息嵌入到公开载体中却不为人知，从而以“存在级”的安全级别去完成信息的安全输出，对信息起到有效的保护。</li>
+<li>通常以数字图像、数字视频、数字音频、三维模型作为信息隐藏载体。</li>
+</ul>
+<p><a id="reference-实现方式"></a></p>
+<h4 id="实现方式">实现方式</h4>
+<p><strong>两类实现方法</strong>：</p>
+<ul>
+<li><strong>存储型隐蔽通道</strong>：通过修改<strong>存储资源状态</strong>传递信息。
+<ul>
+<li>文件时间戳（修改为奇/偶表示 0/1）；</li>
+<li>磁盘空间分配（有/无空闲块表示比特）。</li>
+</ul>
+</li>
+<li><strong>时间型隐蔽通道</strong>：通过<strong>事件发生的时间间隔</strong>编码信息。
+<ul>
+<li>网络包发送间隔（短=0，长=1）；</li>
+<li>CPU 占用率波动传递信号。</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-信息隐藏技术"></a></p>
+<h4 id="信息隐藏技术">信息隐藏技术</h4>
+<ul>
+<li>加密技术是实现隐秘通信的重要手段之一，通过对明文（秘密信息）进行加密处理行成密文，把原始信息转换成不可读形式，从而实现秘密通信。</li>
+<li>但“此地无银三百两”的做法也是最容易引起攻击者的注意，吸引攻击者采取多种手段对信息进行破译、篡改和破坏，暴露信息发出或接收的“潜伏者”，造成通信的失败和人员与财产的损失。</li>
+<li>而信息隐藏技术的优势在于，不仅可以应用公用信道，而且可以将明文隐藏到普通的媒体中，使得攻击者难以发现秘密信息的存在。</li>
+<li>使秘密信息“冠冕堂皇”的从攻击者的监视下溜走，从而到真正达隐秘通信的目的。</li>
+</ul>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>病毒与蠕虫的传播依赖有何不同？漏洞与利用该漏洞的恶意程序为什么不是同一概念？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#非恶意的程序漏洞">非恶意的程序漏洞</a></li><li style="--depth: 0"><a href="#计算机病毒">计算机病毒</a></li><li style="--depth: 1"><a href="#概述">概述</a></li><li style="--depth: 1"><a href="#潜伏和激活">潜伏和激活</a></li><li style="--depth: 1"><a href="#传播">传播</a></li><li style="--depth: 1"><a href="#运行机制">运行机制</a></li><li style="--depth: 1"><a href="#特点">特点</a></li><li style="--depth: 1"><a href="#传统计算机病毒惯用特性">传统计算机病毒惯用特性</a></li><li style="--depth: 0"><a href="#恶意代码">恶意代码</a></li><li style="--depth: 1"><a href="#经典计算机病毒">经典计算机病毒</a></li><li style="--depth: 2"><a href="#yankee-doodle-病毒">Yankee Doodle 病毒</a></li><li style="--depth: 2"><a href="#brain-病毒">Brain 病毒</a></li><li style="--depth: 1"><a href="#计算机蠕虫">计算机蠕虫</a></li><li style="--depth: 2"><a href="#运行机制-1">运行机制</a></li><li style="--depth: 3"><a href="#初始感染infection">初始感染（Infection）</a></li><li style="--depth: 3"><a href="#驻留与隐藏persistence--stealth">驻留与隐藏（Persistence &amp; Stealth）</a></li><li style="--depth: 3"><a href="#扫描与传播propagation">扫描与传播（Propagation）</a></li><li style="--depth: 3"><a href="#执行载荷payload-delivery">执行载荷（Payload Delivery）</a></li><li style="--depth: 3"><a href="#更新与进化advanced-worms">更新与进化（Advanced Worms）</a></li><li style="--depth: 1"><a href="#宏病毒">宏病毒</a></li><li style="--depth: 2"><a href="#宏">宏</a></li><li style="--depth: 2"><a href="#工作原理">工作原理</a></li><li style="--depth: 3"><a href="#感染载体">感染载体</a></li><li style="--depth: 3"><a href="#自复制机制">自复制机制</a></li><li style="--depth: 3"><a href="#传播方式">传播方式</a></li><li style="--depth: 1"><a href="#间谍程序">间谍程序</a></li><li style="--depth: 1"><a href="#木马程序">木马程序</a></li><li style="--depth: 2"><a href="#运行机制-2">运行机制</a></li><li style="--depth: 3"><a href="#投递delivery">投递（Delivery）</a></li><li style="--depth: 3"><a href="#规避检测evasion">规避检测（Evasion）</a></li><li style="--depth: 3"><a href="#持久化persistence">持久化（Persistence）</a></li><li style="--depth: 3"><a href="#连接-cccommand-and-control">连接 C&amp;C（Command and Control）</a></li><li style="--depth: 3"><a href="#执行恶意功能">执行恶意功能</a></li><li style="--depth: 1"><a href="#蠕虫病毒木马">蠕虫、病毒、木马</a></li><li style="--depth: 2"><a href="#具备功能">具备功能</a></li><li style="--depth: 2"><a href="#入侵方式">入侵方式</a></li><li style="--depth: 1"><a href="#ddos">DDoS</a></li><li style="--depth: 2"><a href="#攻击过程">攻击过程</a></li><li style="--depth: 1"><a href="#电子邮件炸弹">电子邮件炸弹</a></li><li style="--depth: 1"><a href="#陷门trapdoor">陷门（Trapdoor）</a></li><li style="--depth: 1"><a href="#腊肠攻击salami-攻击">腊肠攻击（Salami 攻击）</a></li><li style="--depth: 1"><a href="#隐蔽通道">隐蔽通道</a></li><li style="--depth: 2"><a href="#实现方式">实现方式</a></li><li style="--depth: 2"><a href="#信息隐藏技术">信息隐藏技术</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

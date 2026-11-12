@@ -1,0 +1,660 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Go 基础数据类型 · Musuyin&#39; Home</title><meta name="description" content="基础类型决定数值范围、比较规则和编码方式。读数值示例时区分溢出与精度损失；读字符串示例时区分字节索引、Unicode 码点与用户看到的字符。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/go/golang/basic-types/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Go 基础数据类型 · Musuyin' Home"><meta property="og:description" content="基础类型决定数值范围、比较规则和编码方式。读数值示例时区分溢出与精度损失；读字符串示例时区分字节索引、Unicode 码点与用户看到的字符。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/go/golang/basic-types/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Go 基础数据类型</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-02-15">2025-02-15</time></dd></div><div><dt>字数</dt><dd>1131</dd></div><div><dt>预计阅读</dt><dd>4 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Go/">#Go</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Go 基础数据类型</h1><time datetime="2025-02-15">2025-02-15</time><p class="tags"><a href="/tags/Go/">#Go</a></p></header><div class="prose"><p>基础类型决定数值范围、比较规则和编码方式。读数值示例时区分溢出与精度损失；读字符串示例时区分字节索引、Unicode 码点与用户看到的字符。</p>
+<p><a id="reference-基础数据类型"></a></p>
+<h2 id="基础数据类型">基础数据类型</h2>
+<p>Go 的基础数据类型分为四类：</p>
+<ol>
+<li><strong>基础类型</strong>：数字、字符串、布尔型</li>
+<li><strong>聚合类型</strong>：数组、结构体</li>
+<li><strong>引用类型</strong>：指针、切片、映射、函数、通道</li>
+<li><strong>接口类型</strong></li>
+</ol>
+<p><a id="reference-整型"></a></p>
+<h2 id="整型">整型</h2>
+<p><a id="reference-整型类型"></a></p>
+<h3 id="整型类型">整型类型</h3>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>说明</th>
+<th>范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int8</code></td>
+<td>8 位有符号</td>
+<td>-128 ~ 127</td>
+</tr>
+<tr>
+<td><code>int16</code></td>
+<td>16 位有符号</td>
+<td>-32768 ~ 32767</td>
+</tr>
+<tr>
+<td><code>int32</code></td>
+<td>32 位有符号</td>
+<td>-2^31 ~ 2^31-1</td>
+</tr>
+<tr>
+<td><code>int64</code></td>
+<td>64 位有符号</td>
+<td>-2^63 ~ 2^63-1</td>
+</tr>
+<tr>
+<td><code>uint8</code></td>
+<td>8 位无符号</td>
+<td>0 ~ 255</td>
+</tr>
+<tr>
+<td><code>uint16</code></td>
+<td>16 位无符号</td>
+<td>0 ~ 65535</td>
+</tr>
+<tr>
+<td><code>uint32</code></td>
+<td>32 位无符号</td>
+<td>0 ~ 2^32-1</td>
+</tr>
+<tr>
+<td><code>uint64</code></td>
+<td>64 位无符号</td>
+<td>0 ~ 2^64-1</td>
+</tr>
+<tr>
+<td><code>int</code></td>
+<td>平台相关（32 或 64 位）</td>
+<td>依平台而定</td>
+</tr>
+<tr>
+<td><code>uint</code></td>
+<td>平台相关（32 或 64 位）</td>
+<td>依平台而定</td>
+</tr>
+<tr>
+<td><code>byte</code></td>
+<td><code>uint8</code> 的别名</td>
+<td>0 ~ 255</td>
+</tr>
+<tr>
+<td><code>rune</code></td>
+<td><code>int32</code> 的别名（Unicode 码点）</td>
+<td>-2^31 ~ 2^31-1</td>
+</tr>
+<tr>
+<td><code>uintptr</code></td>
+<td>指针大小的无符号整型</td>
+<td>依平台而定</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-字面量表示"></a></p>
+<h3 id="字面量表示">字面量表示</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 十进制</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dec </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 42</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 八进制（0 前缀）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> oct </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 052</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 42</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 十六进制（0x 或 0X 前缀）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> hex </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> 0x</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2A</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 42</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> hex2 </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> 0X</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2a</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 42</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 二进制（0b 或 0B 前缀，Go 1.13+）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> bin </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> 0b</span><span style="color:#005CC5;--shiki-dark:#79B8FF">101010</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 42</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 下划线分隔（提高可读性，Go 1.13+）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> million </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1_000_000</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> binary </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> 0b</span><span style="color:#24292E;--shiki-dark:#E1E4E8">_</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1010_1010</span></span></code></pre>
+<p><a id="reference-运算符"></a></p>
+<h3 id="运算符">运算符</h3>
+<p><a id="reference-算术运算符"></a></p>
+<h4 id="算术运算符">算术运算符</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#D73A49;--shiki-dark:#F97583"> -</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#D73A49;--shiki-dark:#F97583"> /</span><span style="color:#D73A49;--shiki-dark:#F97583"> %</span><span style="color:#6A737D;--shiki-dark:#6A737D">        // 加 减 乘 除 取模</span></span></code></pre>
+<ul>
+<li>除法 <code>/</code>：整数相除结果为整数（向零截断）</li>
+<li>取模 <code>%</code>：结果符号与被除数一致</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#D73A49;--shiki-dark:#F97583"> /</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)     </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">5.0</span><span style="color:#D73A49;--shiki-dark:#F97583"> /</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 2.5</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#D73A49;--shiki-dark:#F97583"> %</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)    </span><span style="color:#6A737D;--shiki-dark:#6A737D">// -2（不是 1）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#D73A49;--shiki-dark:#F97583"> %</span><span style="color:#D73A49;--shiki-dark:#F97583"> -</span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)    </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 2（不是 -1）</span></span></code></pre>
+<p><a id="reference-比较运算符"></a></p>
+<h4 id="比较运算符">比较运算符</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#D73A49;--shiki-dark:#F97583"> !=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &gt;</span><span style="color:#D73A49;--shiki-dark:#F97583"> &gt;=</span></span></code></pre>
+<p><a id="reference-位运算符"></a></p>
+<h4 id="位运算符">位运算符</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // 按位与 AND</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">|</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // 按位或 OR</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">^</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // 按位异或 XOR（二元）或按位取反（一元）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">&amp;^</span><span style="color:#6A737D;--shiki-dark:#6A737D">   // 按位清除 AND NOT</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">&lt;&lt;</span><span style="color:#6A737D;--shiki-dark:#6A737D">   // 左移</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">&gt;&gt;</span><span style="color:#6A737D;--shiki-dark:#6A737D">   // 右移</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x </span><span style="color:#D73A49;--shiki-dark:#F97583">uint8</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> 0b</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1100_1010</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> y </span><span style="color:#D73A49;--shiki-dark:#F97583">uint8</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> 0b</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0101_1100</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%08b\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, x</span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">y)   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 01000000 (与)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%08b\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, x</span><span style="color:#D73A49;--shiki-dark:#F97583">|</span><span style="color:#24292E;--shiki-dark:#E1E4E8">y)   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 11011110 (或)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%08b\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, x</span><span style="color:#D73A49;--shiki-dark:#F97583">^</span><span style="color:#24292E;--shiki-dark:#E1E4E8">y)   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 10011110 (异或)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%08b\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">^</span><span style="color:#24292E;--shiki-dark:#E1E4E8">x)    </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 00110101 (取反)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%08b\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, x</span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;^</span><span style="color:#24292E;--shiki-dark:#E1E4E8">y)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 10000010 (清除)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 移位</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%08b\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, x</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 10010100 (左移)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%08b\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, x</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 01100101 (右移)</span></span></code></pre>
+<p><strong>位清除 <code>&amp;^</code> 说明</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">z </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;^</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> y</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 等价于：对于 y 中为 1 的位，将 x 对应位置零</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 01100100 &amp;^ 00111000 = 01000100</span></span></code></pre>
+<p><a id="reference-运算符优先级从高到低"></a></p>
+<h4 id="运算符优先级从高到低">运算符优先级（从高到低）</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>*  /  %  &lt;&lt;  &gt;&gt;  &amp;  &amp;^</span></span>
+<span class="line"><span>+  -  |  ^</span></span>
+<span class="line"><span>==  !=  &lt;  &lt;=  &gt;  &gt;=</span></span>
+<span class="line"><span>&amp;&amp;</span></span>
+<span class="line"><span>||</span></span></code></pre>
+<p><a id="reference-类型转换"></a></p>
+<h3 id="类型转换">类型转换</h3>
+<p>Go 要求<strong>显式类型转换</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 42</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> float64</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(i)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> u </span><span style="color:#D73A49;--shiki-dark:#F97583">uint</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> uint</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(f)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 不同整型间的转换</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i32 </span><span style="color:#D73A49;--shiki-dark:#F97583">int32</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 100</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i64 </span><span style="color:#D73A49;--shiki-dark:#F97583">int64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> int64</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(i32)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 大类型转小类型可能溢出</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x </span><span style="color:#D73A49;--shiki-dark:#F97583">int32</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF">31</span><span style="color:#D73A49;--shiki-dark:#F97583"> -</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> y </span><span style="color:#D73A49;--shiki-dark:#F97583">int8</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> int8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 溢出！y = -1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 浮点转整型：截断小数部分，向零取整</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f1 </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3.99</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i1 </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(f1)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 3</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f2 </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> -</span><span style="color:#005CC5;--shiki-dark:#79B8FF">3.99</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i2 </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(f2)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// -3</span></span></code></pre>
+<p><a id="reference-常用操作"></a></p>
+<h3 id="常用操作">常用操作</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 判断奇偶</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x</span><span style="color:#D73A49;--shiki-dark:#F97583">%</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#D73A49;--shiki-dark:#F97583"> ==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"偶数"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 位操作判断（更快）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x</span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#D73A49;--shiki-dark:#F97583"> ==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"偶数"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 2 的幂次判断</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> isPowerOfTwo</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">x</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (x</span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(x</span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)) </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 统计二进制中 1 的个数</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> countBits</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">x</span><span style="color:#D73A49;--shiki-dark:#F97583"> uint</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    count </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        x </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x </span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 清除最右边的 1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        count</span><span style="color:#D73A49;--shiki-dark:#F97583">++</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> count</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-浮点数"></a></p>
+<h2 id="浮点数">浮点数</h2>
+<p><a id="reference-类型"></a></p>
+<h3 id="类型">类型</h3>
+<ul>
+<li><code>float32</code>：IEEE 754 单精度（约 6 位十进制精度）</li>
+<li><code>float64</code>：IEEE 754 双精度（约 15 位十进制精度）</li>
+</ul>
+<p><strong>推荐使用 <code>float64</code></strong>，因为精度更高，且 <code>math</code> 包的函数都使用 <code>float64</code>。</p>
+<p><a id="reference-字面量"></a></p>
+<h3 id="字面量">字面量</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f1 </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3.14</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f2 </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> .</span><span style="color:#005CC5;--shiki-dark:#79B8FF">25</span><span style="color:#6A737D;--shiki-dark:#6A737D">      // 0.25</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f3 </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2.</span><span style="color:#6A737D;--shiki-dark:#6A737D">       // 2.0</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f4 </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583">e</span><span style="color:#005CC5;--shiki-dark:#79B8FF">9</span><span style="color:#6A737D;--shiki-dark:#6A737D">      // 1000000000</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f5 </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1.5</span><span style="color:#D73A49;--shiki-dark:#F97583">e-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span><span style="color:#6A737D;--shiki-dark:#6A737D">   // 0.0015</span></span></code></pre>
+<p><a id="reference-特殊值"></a></p>
+<h3 id="特殊值">特殊值</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">math</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> inf </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> math.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Inf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 正无穷 +Inf</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> negInf </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> math.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Inf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)        </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 负无穷 -Inf</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> nan </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> math.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NaN</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()             </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 非数 NaN</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 判断</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(math.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">IsInf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(inf, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(math.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">IsNaN</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(nan))     </span><span style="color:#6A737D;--shiki-dark:#6A737D">// true</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// NaN 的特性</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(nan </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> nan)          </span><span style="color:#6A737D;--shiki-dark:#6A737D">// false（NaN 不等于任何值，包括自己）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(nan </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1.0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)           </span><span style="color:#6A737D;--shiki-dark:#6A737D">// false</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(nan </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1.0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)           </span><span style="color:#6A737D;--shiki-dark:#6A737D">// false</span></span></code></pre>
+<p><a id="reference-精度问题"></a></p>
+<h3 id="精度问题">精度问题</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 浮点数不精确</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0.1</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0.2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(f </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0.3</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// false</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(f)         </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 0.30000000000000004</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 比较浮点数应使用误差范围</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> almostEqual</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">a</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">b</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">epsilon</span><span style="color:#D73A49;--shiki-dark:#F97583"> float64</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> math.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Abs</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(a</span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#24292E;--shiki-dark:#E1E4E8">b) </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> epsilon</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">almostEqual</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0.1</span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0.2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0.3</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#D73A49;--shiki-dark:#F97583">e-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">9</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// true</span></span></code></pre>
+<p><a id="reference-格式化输出"></a></p>
+<h3 id="格式化输出">格式化输出</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 123.456789</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%f\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, f)      </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 123.456789（默认 6 位小数）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%.2f\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, f)    </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 123.46（保留 2 位）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%e\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, f)      </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 1.234568e+02（科学计数法）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%g\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, f)      </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 123.457（紧凑格式）</span></span></code></pre>
+<p><a id="reference-复数"></a></p>
+<h2 id="复数">复数</h2>
+<p><a id="reference-类型-1"></a></p>
+<h3 id="类型-1">类型</h3>
+<ul>
+<li><code>complex64</code>：实部和虚部都是 <code>float32</code></li>
+<li><code>complex128</code>：实部和虚部都是 <code>float64</code></li>
+</ul>
+<p><a id="reference-创建和操作"></a></p>
+<h3 id="创建和操作">创建和操作</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 字面量</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c1 </span><span style="color:#D73A49;--shiki-dark:#F97583">complex128</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span><span style="color:#D73A49;--shiki-dark:#F97583">i</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c2 </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 4</span><span style="color:#D73A49;--shiki-dark:#F97583">i</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// complex 函数</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">c3 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> complex</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 1+2i</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 提取实部和虚部</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">real </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> real</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(c1)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 1.0</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">imag </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> imag</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(c1)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 2.0</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 运算</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(c1 </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c2)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// (4+6i)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(c1 </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c2)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// (-5+10i)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 比较</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(c1 </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> complex</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// true</span></span></code></pre>
+<p><a id="reference-布尔型"></a></p>
+<h2 id="布尔型">布尔型</h2>
+<p><a id="reference-类型-2"></a></p>
+<h3 id="类型-2">类型</h3>
+<p><code>bool</code>：只有两个值 <code>true</code> 和 <code>false</code></p>
+<p><a id="reference-逻辑运算"></a></p>
+<h3 id="逻辑运算">逻辑运算</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">&amp;&amp;</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 逻辑与（短路）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">||</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 逻辑或（短路）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">!</span><span style="color:#6A737D;--shiki-dark:#6A737D">   // 逻辑非</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 短路特性</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> expensive</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"expensive called"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> false</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;&amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> expensive</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// expensive 不会被调用</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // ...</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="color:#D73A49;--shiki-dark:#F97583"> ||</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> expensive</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// expensive 不会被调用</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // ...</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-注意事项"></a></p>
+<h3 id="注意事项">注意事项</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 布尔值不能隐式转换为数字</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> b </span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// var i int = b  // 错误！</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 需要显式转换</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> boolToInt</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">b</span><span style="color:#D73A49;--shiki-dark:#F97583"> bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> b {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 数字也不能隐式转换为布尔</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> n </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// if n { }  // 错误！</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 必须显式比较</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> n </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // ...</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-字符串"></a></p>
+<h2 id="字符串">字符串</h2>
+<p><a id="reference-基本概念"></a></p>
+<h3 id="基本概念">基本概念</h3>
+<ul>
+<li>字符串是<strong>不可变的字节序列</strong></li>
+<li>UTF-8 编码</li>
+<li>零值为 <code>""</code>（空字符串）</li>
+<li>可以为空，但不会是 <code>nil</code></li>
+</ul>
+<p><a id="reference-字符串结构"></a></p>
+<h3 id="字符串结构">字符串结构</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 内部结构（不可直接访问）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> stringStruct</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    str </span><span style="color:#6F42C1;--shiki-dark:#B392F0">unsafe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Pointer</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 指向底层字节数组</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    len </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#6A737D;--shiki-dark:#6A737D">            // 长度（字节数）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-字符串字面量"></a></p>
+<h3 id="字符串字面量">字符串字面量</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 解释型字符串（双引号）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s1 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Hello, 世界</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 支持转义字符</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 原始字符串（反引号）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s2 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> `Hello, 世界\n`</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 不转义，所见即所得</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s3 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> `多行</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">字符串</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">支持`</span></span></code></pre>
+<p><strong>转义字符</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">\n   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 换行</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">\r   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 回车</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">\t   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 制表符</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">\</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"   // 双引号</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">\\</span><span style="color:#032F62;--shiki-dark:#9ECBFF">   // 反斜杠</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">\xhh // 十六进制字节</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">\uhhhh   // Unicode 码点（4 位十六进制）</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">\Uhhhhhhhh // Unicode 码点（8 位十六进制）</span></span></code></pre>
+<p><a id="reference-字符串操作"></a></p>
+<h3 id="字符串操作">字符串操作</h3>
+<p><a id="reference-长度和索引"></a></p>
+<h4 id="长度和索引">长度和索引</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Hello, 世界"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 字节长度</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s))  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 13（不是 9！）</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 索引访问（字节）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">])  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 72（'H' 的 ASCII 码）</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 子串（字节范围）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#24292E;--shiki-dark:#E1E4E8">])   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "Hello"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">7</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:])    </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "世界"（可能乱码，取决于位置）</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 字符数量（rune 个数）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(utf8.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">RuneCountInString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s))  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 9</span></span></code></pre>
+<p><a id="reference-拼接"></a></p>
+<h4 id="拼接">拼接</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// + 运算符</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s1 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Hello"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s2 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "World"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s3 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s1 </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ", "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s2  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "Hello, World"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// strings.Join（推荐用于多个字符串）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">parts </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Hello"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"World"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"!"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">result </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(parts, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">" "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "Hello World !"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// fmt.Sprintf（格式化拼接）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">name </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Alice"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">age </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 30</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">msg </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Sprintf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> is </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> years old"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, name, age)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// strings.Builder（高效构建）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> builder </span><span style="color:#6F42C1;--shiki-dark:#B392F0">strings</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Builder</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">; i </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 100</span><span style="color:#24292E;--shiki-dark:#E1E4E8">; i</span><span style="color:#D73A49;--shiki-dark:#F97583">++</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    builder.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">WriteString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Hello "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">result </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> builder.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span></code></pre>
+<p><strong>性能对比</strong>：</p>
+<ul>
+<li><code>+</code> 适合少量拼接</li>
+<li><code>strings.Builder</code> 适合大量拼接（避免多次内存分配）</li>
+</ul>
+<p><a id="reference-比较"></a></p>
+<h4 id="比较">比较</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s1 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "apple"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s2 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "banana"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 字典序比较</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s1 </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s2)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// false</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s1 </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s2)   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s1 </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s2)   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// false</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 忽略大小写比较</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">EqualFold</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Go"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"go"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// true</span></span></code></pre>
+<p><a id="reference-遍历"></a></p>
+<h4 id="遍历">遍历</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Hello, 世界"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 按字节遍历</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">; i </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s); i</span><span style="color:#D73A49;--shiki-dark:#F97583">++</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%c\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, i, s[i])</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 按字符遍历（rune）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i, r </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%c\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, i, r)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 输出：</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 0: H</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 1: e</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 2: l</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 3: l</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 4: o</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 5: ,</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 6:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 7: 世  // 注意：索引是字节位置，不是字符位置</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 10: 界</span></span></code></pre>
+<p><a id="reference-utf-8-编码"></a></p>
+<h3 id="utf-8-编码">UTF-8 编码</h3>
+<p><a id="reference-编码规则"></a></p>
+<h4 id="编码规则">编码规则</h4>
+<ul>
+<li>ASCII 字符：1 字节（0xxxxxxx）</li>
+<li>其他字符：2-4 字节
+<ul>
+<li>2 字节：110xxxxx 10xxxxxx</li>
+<li>3 字节：1110xxxx 10xxxxxx 10xxxxxx</li>
+<li>4 字节：11110xxx 10xxxxxx 10xxxxxx 10xxxxxx</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-rune-类型"></a></p>
+<h4 id="rune-类型">rune 类型</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// rune 是 int32 的别名，表示一个 Unicode 码点</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> r </span><span style="color:#D73A49;--shiki-dark:#F97583">rune</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '</span><span style="color:#005CC5;--shiki-dark:#79B8FF">世</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%c</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> = U+</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%04X</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> = </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, r, r, r)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 世 = U+4E16 = 19990</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 字符字面量</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">c1 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '</span><span style="color:#005CC5;--shiki-dark:#79B8FF">A</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span><span style="color:#6A737D;--shiki-dark:#6A737D">       // rune (int32)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">c2 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span><span style="color:#6A737D;--shiki-dark:#6A737D">      // 换行符</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">c3 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '</span><span style="color:#005CC5;--shiki-dark:#79B8FF">世</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // Unicode</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">c4 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\U00004E16</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span></span></code></pre>
+<p><a id="reference-utf8-包"></a></p>
+<h4 id="utf8-包">utf8 包</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">unicode/utf8</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Hello, 世界"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 字符数量</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">count </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> utf8.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">RuneCountInString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 9</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 解码第一个字符</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">r, size </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> utf8.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">DecodeRuneInString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// r = 'H', size = 1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 判断是否为有效 UTF-8</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">valid </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> utf8.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ValidString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// true</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 编码 rune</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">buf </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> make</span><span style="color:#24292E;--shiki-dark:#E1E4E8">([]</span><span style="color:#D73A49;--shiki-dark:#F97583">byte</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">4</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">n </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> utf8.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">EncodeRune</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(buf, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span><span style="color:#005CC5;--shiki-dark:#79B8FF">世</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// n = 3</span></span></code></pre>
+<p><a id="reference-字符串和字节切片"></a></p>
+<h3 id="字符串和字节切片">字符串和字节切片</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 字符串 -&gt; []byte</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Hello"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">b </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#D73A49;--shiki-dark:#F97583">byte</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 复制数据</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// []byte -&gt; 字符串</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s2 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(b)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 复制数据</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 性能提示：频繁转换开销大，尽量减少</span></span></code></pre>
+<p><a id="reference-strings-包常用函数"></a></p>
+<h3 id="strings-包常用函数">strings 包常用函数</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">strings</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Hello, World! Hello!"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 查找</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Contains</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"World"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)       </span><span style="color:#6A737D;--shiki-dark:#6A737D">// true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Index</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"World"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)          </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 7</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">LastIndex</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Hello"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)      </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 14</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Count</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"l"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)              </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 5</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 前缀/后缀</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">HasPrefix</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Hello"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)      </span><span style="color:#6A737D;--shiki-dark:#6A737D">// true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">HasSuffix</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"!"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)          </span><span style="color:#6A737D;--shiki-dark:#6A737D">// true</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 分割</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">parts </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Split</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"a,b,c"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">","</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// ["a", "b", "c"]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fields </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fields</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"a  b  c"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)    </span><span style="color:#6A737D;--shiki-dark:#6A737D">// ["a", "b", "c"]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 替换</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Replace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Hello"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Hi"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "Hi, World! Hello!"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ReplaceAll</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Hello"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Hi"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "Hi, World! Hi!"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 大小写</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ToUpper</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s)   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "HELLO, WORLD! HELLO!"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ToLower</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s)   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "hello, world! hello!"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 修剪</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Trim</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"  hello  "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">" "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)     </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "hello"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TrimPrefix</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hello"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hel"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "lo"</span></span></code></pre>
+<p><a id="reference-strconv-包"></a></p>
+<h3 id="strconv-包">strconv 包</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">strconv</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 整数 &lt;-&gt; 字符串</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">i, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strconv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Atoi</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"42"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)        </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 42</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strconv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Itoa</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">42</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)               </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "42"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 指定进制</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">i, err </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strconv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ParseInt</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1010"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">64</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 10 (二进制)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strconv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">FormatInt</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">42</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)              </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "101010"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 浮点数 &lt;-&gt; 字符串</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">f, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strconv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ParseFloat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"3.14"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">64</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 3.14</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strconv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">FormatFloat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">3.14</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span><span style="color:#005CC5;--shiki-dark:#79B8FF">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">64</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "3.14"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 布尔 &lt;-&gt; 字符串</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">b, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strconv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ParseBool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"true"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)   </span><span style="color:#6A737D;--shiki-dark:#6A737D">// true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">s </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strconv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">FormatBool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)          </span><span style="color:#6A737D;--shiki-dark:#6A737D">// "true"</span></span></code></pre>
+<p><a id="reference-常量"></a></p>
+<h2 id="常量">常量</h2>
+<p><a id="reference-常量声明"></a></p>
+<h3 id="常量声明">常量声明</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 单个常量</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> Pi</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3.14159</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> MaxSize</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1000</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 批量声明</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    StatusOK</span><span style="color:#D73A49;--shiki-dark:#F97583">    =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 200</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    StatusError</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 500</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 类型化常量</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> TypedPi</span><span style="color:#D73A49;--shiki-dark:#F97583"> float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3.14159</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 省略值（复用上一个）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    a</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    b</span><span style="color:#6A737D;--shiki-dark:#6A737D">      // b = 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    c</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    d</span><span style="color:#6A737D;--shiki-dark:#6A737D">      // d = 2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p><a id="reference-iota-常量生成器"></a></p>
+<h3 id="iota-常量生成器">iota 常量生成器</h3>
+<p><code>iota</code> 是常量计数器，从 0 开始，每行递增 1。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 基本用法</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    Sunday</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> iota</span><span style="color:#6A737D;--shiki-dark:#6A737D">     // 0</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    Monday</span><span style="color:#6A737D;--shiki-dark:#6A737D">            // 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    Tuesday</span><span style="color:#6A737D;--shiki-dark:#6A737D">           // 2</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    Wednesday</span><span style="color:#6A737D;--shiki-dark:#6A737D">         // 3</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    Thursday</span><span style="color:#6A737D;--shiki-dark:#6A737D">          // 4</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    Friday</span><span style="color:#6A737D;--shiki-dark:#6A737D">            // 5</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    Saturday</span><span style="color:#6A737D;--shiki-dark:#6A737D">          // 6</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 跳过值</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    _</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> iota</span><span style="color:#6A737D;--shiki-dark:#6A737D">          // 跳过 0</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    KB</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> iota</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 1024</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    MB</span><span style="color:#6A737D;--shiki-dark:#6A737D">                     // 1048576</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GB</span><span style="color:#6A737D;--shiki-dark:#6A737D">                     // 1073741824</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    TB</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 复杂表达式</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    FlagNone</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> iota</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    FlagRed</span><span style="color:#6A737D;--shiki-dark:#6A737D">               // 2</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    FlagGreen</span><span style="color:#6A737D;--shiki-dark:#6A737D">             // 4</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    FlagBlue</span><span style="color:#6A737D;--shiki-dark:#6A737D">              // 8</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 多个 iota</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    A</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">B</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> iota</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">iota</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 10</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 0, 0</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    C</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">D</span><span style="color:#6A737D;--shiki-dark:#6A737D">                     // 1, 10</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    E</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">F</span><span style="color:#6A737D;--shiki-dark:#6A737D">                     // 2, 20</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p><a id="reference-无类型常量"></a></p>
+<h3 id="无类型常量">无类型常量</h3>
+<p>Go 的常量可以是<strong>无类型的</strong>，这提供了更高的精度和灵活性。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 无类型常量</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> Pi</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3.14159265358979323846264338327950288419716939937510</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 可以直接用于不同类型</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f32 </span><span style="color:#D73A49;--shiki-dark:#F97583">float32</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Pi  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 自动转换为 float32</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f64 </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Pi  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 自动转换为 float64</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c128 </span><span style="color:#D73A49;--shiki-dark:#F97583">complex128</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Pi  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 自动转换为 complex128</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 无类型整数常量可以表示任意大的数</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> Huge</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 100</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 合法！</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// var x int = Huge    // 错误！溢出</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 常量算术（编译时计算）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GiB</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 30</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    TiB</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 40</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    result</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> TiB </span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> GiB  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 1024</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p><a id="reference-常量的类型推断"></a></p>
+<h3 id="常量的类型推断">常量的类型推断</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 常量字面量的默认类型</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    i</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#6A737D;--shiki-dark:#6A737D">       // untyped int</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    f</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0.0</span><span style="color:#6A737D;--shiki-dark:#6A737D">     // untyped float</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    c</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#D73A49;--shiki-dark:#F97583">i</span><span style="color:#6A737D;--shiki-dark:#6A737D">      // untyped complex</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    b</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // untyped bool</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    s</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "text"</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // untyped string</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    r</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '</span><span style="color:#005CC5;--shiki-dark:#79B8FF">A</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span><span style="color:#6A737D;--shiki-dark:#6A737D">     // untyped rune</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 赋值时的隐式转换</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f64 </span><span style="color:#D73A49;--shiki-dark:#F97583">float64</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // int -&gt; float64</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c128 </span><span style="color:#D73A49;--shiki-dark:#F97583">complex128</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3.14</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // float -&gt; complex128</span></span></code></pre>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li><code>len(s)</code> 为什么不等于中文字符数？</li>
+<li>显式类型转换为什么仍可能丢失信息？</li>
+<li>无类型常量与已声明类型的变量有什么区别？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#基础数据类型">基础数据类型</a></li><li style="--depth: 0"><a href="#整型">整型</a></li><li style="--depth: 1"><a href="#整型类型">整型类型</a></li><li style="--depth: 1"><a href="#字面量表示">字面量表示</a></li><li style="--depth: 1"><a href="#运算符">运算符</a></li><li style="--depth: 2"><a href="#算术运算符">算术运算符</a></li><li style="--depth: 2"><a href="#比较运算符">比较运算符</a></li><li style="--depth: 2"><a href="#位运算符">位运算符</a></li><li style="--depth: 2"><a href="#运算符优先级从高到低">运算符优先级（从高到低）</a></li><li style="--depth: 1"><a href="#类型转换">类型转换</a></li><li style="--depth: 1"><a href="#常用操作">常用操作</a></li><li style="--depth: 0"><a href="#浮点数">浮点数</a></li><li style="--depth: 1"><a href="#类型">类型</a></li><li style="--depth: 1"><a href="#字面量">字面量</a></li><li style="--depth: 1"><a href="#特殊值">特殊值</a></li><li style="--depth: 1"><a href="#精度问题">精度问题</a></li><li style="--depth: 1"><a href="#格式化输出">格式化输出</a></li><li style="--depth: 0"><a href="#复数">复数</a></li><li style="--depth: 1"><a href="#类型-1">类型</a></li><li style="--depth: 1"><a href="#创建和操作">创建和操作</a></li><li style="--depth: 0"><a href="#布尔型">布尔型</a></li><li style="--depth: 1"><a href="#类型-2">类型</a></li><li style="--depth: 1"><a href="#逻辑运算">逻辑运算</a></li><li style="--depth: 1"><a href="#注意事项">注意事项</a></li><li style="--depth: 0"><a href="#字符串">字符串</a></li><li style="--depth: 1"><a href="#基本概念">基本概念</a></li><li style="--depth: 1"><a href="#字符串结构">字符串结构</a></li><li style="--depth: 1"><a href="#字符串字面量">字符串字面量</a></li><li style="--depth: 1"><a href="#字符串操作">字符串操作</a></li><li style="--depth: 2"><a href="#长度和索引">长度和索引</a></li><li style="--depth: 2"><a href="#拼接">拼接</a></li><li style="--depth: 2"><a href="#比较">比较</a></li><li style="--depth: 2"><a href="#遍历">遍历</a></li><li style="--depth: 1"><a href="#utf-8-编码">UTF-8 编码</a></li><li style="--depth: 2"><a href="#编码规则">编码规则</a></li><li style="--depth: 2"><a href="#rune-类型">rune 类型</a></li><li style="--depth: 2"><a href="#utf8-包">utf8 包</a></li><li style="--depth: 1"><a href="#字符串和字节切片">字符串和字节切片</a></li><li style="--depth: 1"><a href="#strings-包常用函数">strings 包常用函数</a></li><li style="--depth: 1"><a href="#strconv-包">strconv 包</a></li><li style="--depth: 0"><a href="#常量">常量</a></li><li style="--depth: 1"><a href="#常量声明">常量声明</a></li><li style="--depth: 1"><a href="#iota-常量生成器">iota 常量生成器</a></li><li style="--depth: 1"><a href="#无类型常量">无类型常量</a></li><li style="--depth: 1"><a href="#常量的类型推断">常量的类型推断</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

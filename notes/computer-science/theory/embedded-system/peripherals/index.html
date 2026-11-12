@@ -1,0 +1,710 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>外设 · Musuyin&#39; Home</title><meta name="description" content="外设学习先理解通信方式，再分别查看 GPIO、定时器与各类总线的寄存器及初始化。输入捕获、输出比较和 PWM 都依赖计数器，但触发与输出目标不同。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/embedded-system/peripherals/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="外设 · Musuyin' Home"><meta property="og:description" content="外设学习先理解通信方式，再分别查看 GPIO、定时器与各类总线的寄存器及初始化。输入捕获、输出比较和 PWM 都依赖计数器，但触发与输出目标不同。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/embedded-system/peripherals/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">外设</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-01-09">2026-01-09</time></dd></div><div><dt>字数</dt><dd>12053</dd></div><div><dt>预计阅读</dt><dd>41 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>外设</h1><time datetime="2026-01-09">2026-01-09</time><p class="tags"><a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>外设学习先理解通信方式，再分别查看 GPIO、定时器与各类总线的寄存器及初始化。输入捕获、输出比较和 PWM 都依赖计数器，但触发与输出目标不同。</p>
+<p><a id="reference-通信基础"></a></p>
+<h2 id="通信基础">通信基础</h2>
+<p><a id="reference-通信三要素"></a></p>
+<h3 id="通信三要素">通信三要素</h3>
+<ol>
+<li><strong>电气特性</strong>（电压、电流、阻抗）</li>
+<li><strong>时序协议</strong>（起始位、波特率、时钟相位）</li>
+<li><strong>数据格式</strong>（帧结构、校验位、停止位）</li>
+</ol>
+<p><a id="reference-通信分类"></a></p>
+<h3 id="通信分类">通信分类</h3>
+<table>
+<thead>
+<tr>
+<th>分类维度</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>同步性</td>
+<td>同步通信</td>
+<td>有共享时钟（SPI, I²C）</td>
+</tr>
+<tr>
+<td></td>
+<td>异步通信</td>
+<td>无时钟，靠波特率约定（UART）</td>
+</tr>
+<tr>
+<td>数据线数</td>
+<td>串行</td>
+<td>1 ～ 2 根数据线（节省引脚）</td>
+</tr>
+<tr>
+<td></td>
+<td>并行</td>
+<td>多根数据线（速度快，引脚多）</td>
+</tr>
+<tr>
+<td>方向性</td>
+<td>单工</td>
+<td>单向（如广播）</td>
+</tr>
+<tr>
+<td></td>
+<td>半双工</td>
+<td>双向，但不能同时（如对讲机）</td>
+</tr>
+<tr>
+<td></td>
+<td>全双工</td>
+<td>双向同时（如电话、UART）</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-基础外设"></a></p>
+<h2 id="基础外设">基础外设</h2>
+<p><a id="reference-gpio"></a></p>
+<h3 id="gpio">GPIO</h3>
+<p>GPIO(General Purpose I/O)，通用输入输出端口</p>
+<p><a id="reference-应用"></a></p>
+<h4 id="应用">应用</h4>
+<p>GPIO 基本都是用于芯片与片外器件或设备的交互</p>
+<ul>
+<li>检测数字输入，如键盘或开关信号；</li>
+<li>驱动 LED，蜂鸣器或 LCD 等其他指示器；</li>
+<li>控制片外器件，较高级的使用可以用它们（通过程序）模拟很多器件的时序达到控制相应器件的目的，比如模拟 SPI 和模拟总线等。</li>
+</ul>
+<p><a id="reference-特性"></a></p>
+<h4 id="特性">特性</h4>
+<p>GPIO 是 MCU 与外界交互的重要途径，它具有如下的特性：</p>
+<ul>
+<li>可以独立控制每个 GPIO 口的方向（输入/输出模式）</li>
+<li>可以独立设置每个 GPIO 的输出状态（高/低电平）</li>
+<li>所有 GPIO 口在复位后都有个默认方向（或输入或输出，默认为输入）</li>
+</ul>
+<p><img alt="IMG-20260722152302265" loading="lazy" decoding="async" width="293" height="252" src="/_astro/IMG-20260722152302265.DygTpuoc_ZI8TMM.webp"></p>
+<p><a id="reference-寄存器"></a></p>
+<h4 id="寄存器">寄存器</h4>
+<p>GPIO 口都是<strong>按组规划</strong>，有的芯片是 8 个 GPIO 口一组，有的是 16 个或 32 个为一组。一般每个 GPIO 口都需要做两个寄存器位：</p>
+<ul>
+<li>选择口线方向（输入输出）</li>
+<li>一个数据位（用于设置输出数据和读取输入数据）</li>
+</ul>
+<p>所以一组 GPIO 口至少会有两个寄存器</p>
+<ul>
+<li>GPIOxDIR：控制各个 GPIO 口的方向；</li>
+<li>GPIOxDATA：用于各个 GPIO 口的输入输出数据。</li>
+</ul>
+<p><img alt="IMG-20260722152302289" loading="lazy" decoding="async" width="837" height="439" src="/_astro/IMG-20260722152302289.K9A4UCBI_Z7pfL4.webp"></p>
+<p><a id="reference-io-端口配置"></a></p>
+<h4 id="io-端口配置">IO 端口配置</h4>
+<ul>
+<li>I/O 端口寄存器中的 PINCFGy 寄存器、DIR 寄存器以及 OUT 寄存器用于 I/O 引脚配置。</li>
+<li>引脚可设置为推拉（PUSH-PULL）、开漏（OPENDRAIN）或上（下）拉。</li>
+<li>引脚配置寄存器能够实现引脚的上（下）拉模式配置，因而可以避免引脚方向和引脚值切换带来的中间不确定状态。</li>
+</ul>
+<p>引脚的配置与相应寄存器设置间的关系如下：</p>
+<p><img alt="IMG-20260722152302320" loading="lazy" decoding="async" width="795" height="347" src="/_astro/IMG-20260722152302320.B98gprPG_Zi3xV8.webp"></p>
+<p><a id="reference-初始化配置"></a></p>
+<h4 id="初始化配置">初始化配置</h4>
+<ul>
+<li>GPIO 工作方向：输入、输出</li>
+<li>GPIO 模式：推拉、开漏、上下拉</li>
+<li>GPIO 复用</li>
+<li>GPIO 中断</li>
+</ul>
+<p><a id="reference-通用定时器计数器"></a></p>
+<h3 id="通用定时器计数器">通用定时器/计数器</h3>
+<p><a id="reference-应用-1"></a></p>
+<h4 id="应用-1">应用</h4>
+<p>定时器模块是应用系统中经常用到的重要部分，可以用在如下方面：</p>
+<ul>
+<li>嵌入式操作系统的任务调度</li>
+<li>嵌入式操作的系统的软件时钟需要基于硬件定时器产生定时信号</li>
+<li>通信电路的波特率发生器</li>
+<li>实时时钟电路</li>
+<li>一些智能芯片如 DMA 控制器等</li>
+<li>具有液晶控制器的嵌入式处理器用于液晶的刷新</li>
+<li>处理器监控电路如看门狗等</li>
+<li>A/D 和 D/A 转换等</li>
+<li>集成的动态存储器控制器用于动态存储器的刷新</li>
+</ul>
+<p><a id="reference-基本结构"></a></p>
+<h4 id="基本结构">基本结构</h4>
+<p><img alt="IMG-20260722152302350" loading="lazy" decoding="async" width="803" height="563" src="/_astro/IMG-20260722152302350.BDXUiztx_25Conp.webp"></p>
+<p><a id="reference-工作模式"></a></p>
+<h4 id="工作模式">工作模式</h4>
+<ul>
+<li>单次计数模式：计数器计数到 0 就产生中断并停止计数</li>
+<li>循环计数模式：每次计数器计数到 0 便产生一次中断，随后重新载入初始值计数器的值，继续计数</li>
+</ul>
+<p><a id="reference-特性-1"></a></p>
+<h4 id="特性-1">特性</h4>
+<ul>
+<li>输入捕获</li>
+<li>输出比较</li>
+<li>脉宽调制模式 PWM（Pulse Width Modulation Mode）</li>
+</ul>
+<p><a id="reference-功能"></a></p>
+<h4 id="功能">功能</h4>
+<p><a id="reference-输入捕获"></a></p>
+<h5 id="输入捕获">输入捕获</h5>
+<p>用来捕获管脚的跳变。</p>
+<p>当跳变发生时，一般将当前的定时器中的值装入一个捕获寄存器中，如果用户选择开启中断，那么还将产生一个中断信号</p>
+<p><a id="reference-输出比较"></a></p>
+<h5 id="输出比较">输出比较</h5>
+<p>当定时器中的值与输出比较（匹配）寄存器中的值相等时，可以在输出管脚输出指定的信号。如果用户开启中断，那么也产生一个中断</p>
+<p><a id="reference-初始化配置-1"></a></p>
+<h4 id="初始化配置-1">初始化配置</h4>
+<ul>
+<li>时钟配置：时钟源、时钟频率等</li>
+<li>定时器配置：周期、运行模式、寄存器等</li>
+<li>中断配置</li>
+</ul>
+<p><a id="reference-pwm"></a></p>
+<h3 id="pwm">PWM</h3>
+<p>脉冲宽度调制（PWM），简称<strong>脉宽调制</strong>，是按照一定规律改变脉冲列的脉冲宽度，以调节输出量和波形的一种调制方式。广泛应用于测量，通信，功率控制与变换等许多领域</p>
+<p><a id="reference-原理"></a></p>
+<h4 id="原理">原理</h4>
+<ul>
+<li>冲量相等而形状不同的窄脉冲加在具有惯性的环节上时，其效果基本相同
+<ul>
+<li>冲量指窄脉冲的面积</li>
+<li>效果基本相同，是指环节的输出响应波形基本相同</li>
+<li>低频段非常接近，仅在高频段略有差异</li>
+</ul>
+</li>
+</ul>
+<p>用一系列等幅不等宽的脉冲来代 替一个正弦半波</p>
+<p><img alt="IMG-20260722152302395" loading="lazy" decoding="async" width="247" height="460" src="/_astro/IMG-20260722152302395.Dz9JyMY7_Z1EwH2t.webp"></p>
+<p>SPWM 波形——脉冲宽度按正弦规律变化而和正弦波等效的 PWM 波形</p>
+<p><a id="reference-wdt"></a></p>
+<h3 id="wdt">WDT</h3>
+<p>看门狗定时器（Watchdog Timer）实质上是一个定时器，其主要功能是：</p>
+<ul>
+<li>使微控制器在进入错误状态后的一定时间内复位。当看门狗使能时，如果用户程序没有在周期时间内喂狗（重装），看门狗会产生一个系统复位</li>
+<li>如果系统不需要看门狗功能，可将它当作普通定时器使 用，当到达 WDT 所定的时间后产生中断</li>
+</ul>
+<p><a id="reference-特性-2"></a></p>
+<h4 id="特性-2">特性</h4>
+<ul>
+<li>主体是一个计数器，有的带内部预分频器</li>
+<li>如果没有周期性重装（喂狗）动作，则产生片内复位</li>
+<li>有看门狗和定时器两种模式</li>
+<li>WDT 定时器具有中断功能</li>
+<li>错误或不完整的喂狗时序，将立即引起复位</li>
+</ul>
+<p><a id="reference-原理-1"></a></p>
+<h5 id="原理-1">原理</h5>
+<p>看门狗设置一定的计时时间。看门狗使能后，计数器开始计数。当计时时间到后，则触发系统复位。如果在定时时间到达之前，进行喂狗（计数器重装）动作，就不会引起系统复位</p>
+<p><a id="reference-rtc"></a></p>
+<h3 id="rtc">RTC</h3>
+<p>实时时钟（Real Time Clock）器件是一种能提供<strong>日历/时钟、数据存储</strong>等功能的专用集成电路，常常用作各种计算机系统的时钟信号源和设置参数的存储电路</p>
+<p><a id="reference-原理-2"></a></p>
+<h4 id="原理-2">原理</h4>
+<ul>
+<li>RTC 依靠一个外部的 32.768kHz 的振荡晶体产生周期性的脉冲信号，每一个信号到来时，计数器加 1，这样就完成了它的计时功能</li>
+<li>外部晶振产生的 32.768kHz 的信号，经过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>15</mn></msup></mrow><annotation encoding="application/x-tex">2^{15}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">15</span></span></span></span></span></span></span></span></span></span></span></span> 的时钟分频后，得到一个 1Hz 的信号</li>
+</ul>
+<p><a id="reference-结构"></a></p>
+<h5 id="结构">结构</h5>
+<p><img alt="IMG-20260722152302417" loading="lazy" decoding="async" width="709" height="383" src="/_astro/IMG-20260722152302417.BQP2t9V4_Z1EpCm3.webp"></p>
+<ul>
+<li>闰年发生器：用于产生闰年逻辑</li>
+<li>时钟控制器：用于控制 RTC 的功能</li>
+<li>报警发生器：用于控制产生报警信号</li>
+<li>复位寄存器：用于重置 SEC（秒）和 MIN（分）寄存器</li>
+</ul>
+<p><a id="reference-通信外设"></a></p>
+<h2 id="通信外设">通信外设</h2>
+<p><a id="reference-数字通信系统"></a></p>
+<h3 id="数字通信系统">数字通信系统</h3>
+<p><a id="reference-组成"></a></p>
+<h4 id="组成">组成</h4>
+<ul>
+<li>发送器：处理要发送的信息，将其构造成一定格式的帧</li>
+<li>接收器：接收信息并解析信息</li>
+<li>通信介质：发送器和接收器之间的桥梁，为信息提供物理介质，通常为双绞线、光纤或无线射频</li>
+</ul>
+<p><a id="reference-串行通信和并行通信"></a></p>
+<h4 id="串行通信和并行通信">串行通信和并行通信</h4>
+<ul>
+<li>串行通信：将数据一位一位地由端口送出或接收进来
+<ul>
+<li>串行通信节省传输线，但数据传送效率没有并行通信高</li>
+</ul>
+</li>
+<li>并行通信：数据的各个数据位（一般为 8 位及其整数倍） 在多条数据线上同时被传输
+<ul>
+<li>并行通信的传输速度快、效率高，但抗干扰能力差，且需要的资源多，一般用于短距离、高带宽的大数据量传输</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-同步通信和异步通信"></a></p>
+<h4 id="同步通信和异步通信">同步通信和异步通信</h4>
+<ul>
+<li>同步通信：由<strong>主机提供时钟与数据</strong>，从机使用该时钟接收数据或发送数据，即<strong>通信双方公用时钟源</strong>
+<ul>
+<li>例如： SPI 和 I²C 就属于串行同步通信</li>
+</ul>
+</li>
+<li>异步通信：处理器之间<strong>不使用公共的参考时钟</strong>，通信双方分别有自己的时钟源，但必须使用<strong>相同的波特率</strong>
+<ul>
+<li>例如 UART 就是属于串行异步通信</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-单工半双工和全双工"></a></p>
+<h4 id="单工半双工和全双工">单工、半双工和全双工</h4>
+<ul>
+<li>单工通信：通信双方在任何时刻都只能进行<strong>单向的数据传输</strong>，即一方固定为发送器；另一方固定为接收器</li>
+<li>半双工通信：通信双方可以双向传输信息，但在<strong>同一时刻，信息只能单向传输</strong></li>
+<li>全双工通信：<strong>任何时刻通信</strong>双方都可以同时进行信息收发、实现同时双向信息传输</li>
+</ul>
+<p><a id="reference-异步通信收发器-uart"></a></p>
+<h3 id="异步通信收发器-uart">异步通信收发器 UART</h3>
+<p>串口是嵌入式系统与外界联系的重要手段，主要用于以下两个方面：</p>
+<ul>
+<li>UART 直接和其他的控制器进行数据交换</li>
+<li>UART 和 PC 机通信：由于 PC 机串口是 RS232 电平，所以连接时需要使用 RS232 转换器</li>
+</ul>
+<p><a id="reference-串行外部设备接口-spi"></a></p>
+<h3 id="串行外部设备接口-spi">串行外部设备接口 SPI</h3>
+<p><a id="reference-应用-2"></a></p>
+<h4 id="应用-2">应用</h4>
+<p>SPI 总线系统是一种同步串行外设接口，允许 MCU 与各种外围设备以串行方式进行通信、交换信息</p>
+<ul>
+<li>简单的 TTL 移位寄存器(用作并行输入或输出口)</li>
+<li>LCD 显示驱动器（主要用于静态显示）</li>
+<li>A/D 转换器</li>
+<li>Flash</li>
+<li>RAM</li>
+<li>网络控制器</li>
+<li>MCU</li>
+</ul>
+<p>当 MCU 片内功能或存储器不能满足需要时，可用 SPI 与各种外围器件相连以扩展 I/O 功能</p>
+<p><a id="reference-特性-3"></a></p>
+<h4 id="特性-3">特性</h4>
+<ul>
+<li>SPI 是一种<strong>全双工的同步串行</strong>接口，利用 3 条线完成两个芯片之间的双工高速通信
+<ul>
+<li>两条数据线用于收发数据，一条时钟线用于同步</li>
+</ul>
+</li>
+<li>一个 SPI 总线可以连接多个主机和多个从机
+<ul>
+<li>在同一时刻只允许<strong>一个主机操作总线</strong>，并且同时只能<strong>与一个从机通信</strong></li>
+<li>主机控制数据的传输过程。<strong>串行时钟由主机产生</strong>，当主机发送一字节数据（通过主出从入 <strong>MOSI</strong> 引脚）的同时，从机返回一字节数据（通过主入从出 <strong>MISO</strong> 引脚）</li>
+</ul>
+</li>
+</ul>
+<p>注：挂在总线上的所有设备在初始化时，必须全部将片选为置为高；当再选择某个外设时，再将片选置低</p>
+<p><a id="reference-总线结构"></a></p>
+<h4 id="总线结构">总线结构</h4>
+<p>SPI 总线可在软件的控制下构成各种简单的或复杂的系统：</p>
+<ul>
+<li>1 个主 MCU 和几个从 MCU</li>
+<li>几个从 MCU 相互连接构成多主机系统（分布式系统）</li>
+<li>1 个主 MCU 和 1 个或几个从 I/O 设备</li>
+</ul>
+<p><a id="reference-工作模式-1"></a></p>
+<h4 id="工作模式-1">工作模式</h4>
+<ul>
+<li><strong>MOSI</strong>：Master Out Slave In（主出从入）</li>
+<li><strong>MISO</strong>：Master In Slave Out（主入从出）</li>
+</ul>
+<p>主机模式：</p>
+<ul>
+<li>当器件作为主机时，使用一个 IO 引脚拉低相应从机的选择引脚（SSEL），传输的起始由主机发送数据来启动，时钟（SCK）信号由主机产生。通过 MOSI 发送数据，同时通过 MISO 引脚接收从机发出的数据</li>
+</ul>
+<p>从机模式：</p>
+<ul>
+<li>当器件作为从机时，传输在从机选择引脚（SSEL）被主机拉低后开始，接收主机输出的时钟信号，在读取主机数据的同时通过 MISO 引脚输出数据</li>
+</ul>
+<p><a id="reference-数据传输"></a></p>
+<h4 id="数据传输">数据传输</h4>
+<p>SPI 设备间的数据传输又被称为数据交换，即在通信过程中设备不是仅仅充当“发送者”（Transmitter）或者“接收者”（Receiver） 的身份。在一个 SPI 时钟周期内，通信双方会完成如下操作：</p>
+<ul>
+<li>主机通过 MOSI 线发送 1 位数据，从机通过该线读取这 1 位数据</li>
+<li>从机通过 MISO 线发送 1 位数据，主机通过该线读取这 1 位数据</li>
+</ul>
+<p><a id="reference-数据传输格式"></a></p>
+<h5 id="数据传输格式">数据传输格式</h5>
+<p>通常是高位(MSB)在前，低位(LSB)在后。一些增强型 MCU 中可以通过软件设置高位在前或低位在前</p>
+<ul>
+<li>作主机时，在发送一字节数据的同时接收一字节数据</li>
+<li>SPI 时钟分频值必须大于或等于 8</li>
+</ul>
+<p><a id="reference-传输时序"></a></p>
+<h5 id="传输时序">传输时序</h5>
+<p>概念：</p>
+<ul>
+<li>时钟极性：表示时钟信号在空闲时是高电平还是低电平</li>
+<li>时钟相位：决定数据是在 SCK 的上升沿采样还是在 SCK 的下降沿采样</li>
+</ul>
+<p><img alt="IMG-20260722152302453" loading="lazy" decoding="async" width="844" height="546" src="/_astro/IMG-20260722152302453.CBrpmzhz_Z2vBP3n.webp"></p>
+<p><a id="reference-初始化配置-2"></a></p>
+<h4 id="初始化配置-2">初始化配置</h4>
+<ul>
+<li>时钟配置：时钟源、时钟频率等</li>
+<li>GPIO 配置：CLK、SOMI、SIMO、STE</li>
+<li>SPI 配置：LSB/MSB、相位、极性、3 线/4 线</li>
+<li>中断配置</li>
+</ul>
+<p><a id="reference-ic-总线接口"></a></p>
+<h3 id="ic-总线接口">I²C 总线接口</h3>
+<p>I²C（Inter-Integrated Circuit BUS）芯片间<strong>串行传输总线</strong>，以 2 根连线实现了完善的<strong>全双工同步</strong>数据传送，可以极方便地构成多机系统和外围器件扩展系统。</p>
+<ul>
+<li>I²C 总线采用了器件地址的硬件设置方法，通过软件寻址完全避免了器件的片选线寻址方法，从而使硬件系统具有最简单而灵活的扩展方法</li>
+<li>I²C 接口的标准传输速率为 100Kbit/s，快速传输可达 400Kbit/s，目前还增加了高速模式，最高传输速率可达 3.4Mbit/s</li>
+<li>I²C 用于连接集成电路和功能模块，在它们之间交互数据或控制信息
+<ul>
+<li>很多设备如：键盘和 LED 控制器，以及存储设备 EEPROM 和 FLASH 都配备了 I²C 总线接口</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-特性-4"></a></p>
+<h4 id="特性-4">特性</h4>
+<ul>
+<li>两条数据线，SDA（串行数据线）和 SCL（串行时钟线）</li>
+<li>7 位或 10 位设备寻址模式</li>
+<li>每个连接到总线上的器件地址由芯片内部硬件电路和外部地址同时决定，避免了片选线的线连接方法，并建立简单的主从关系，主器件提供接收和发送所必须的时序</li>
+<li>真正的多主总线，带有竞争监测和仲裁电路，多个主机任意发送而不破坏总线上的数据</li>
+<li>同步时钟允许器件以不同的数据传输率进行通信</li>
+</ul>
+<p><a id="reference-术语"></a></p>
+<h4 id="术语">术语</h4>
+<ul>
+<li>发送器：本次传输中发送数据到总线的器件</li>
+<li>接收器：本次传输中从总线接收数据的器件</li>
+<li>主机：初始化发送、产生时钟信号和终止发送的器件，它可以是发送器或接收器。主机通常是微控制器</li>
+<li>从机：被主机寻址的器件，可以是发送器或接收器</li>
+<li>多主器件：多个主器件可以同时企图控制总线而不破坏总线信息</li>
+</ul>
+<p><a id="reference-电气连接"></a></p>
+<h4 id="电气连接">电气连接</h4>
+<p>I2C 总线是个<strong>多主机总线</strong>，所有主器件都可以发出同步时钟，但由于 SCL 接口的”线与”结构，一旦一个主器件时钟跳变为低电平，将使 SCL 线支持为低电平直至始终到达高电平，因此 SCL 线上时钟低电平时间由各器件中<strong>时钟最长的低电平时间决定</strong>，而<strong>时钟高电平时间则由高电平时间最短的器件决定</strong></p>
+<p><a id="reference-数据形式"></a></p>
+<h4 id="数据形式">数据形式</h4>
+<p>总的数据传送为：主方每发送 8 个 BIT,必须等待从方的一个反馈 ACK</p>
+<p><a id="reference-can-总线"></a></p>
+<h3 id="can-总线">CAN 总线</h3>
+<p>控制局域网络（Control Area Network,CAN）</p>
+<ul>
+<li>各个节点通过 CAN_H 和 CAN_L 两条线实现信号的串行差分传输</li>
+<li>可以在线增减设备</li>
+<li>最多可以容纳 110 个节点</li>
+<li>波特率为 5Kbps ～ 1Mbps，每个节点的波特率保持一致</li>
+<li>采用载波监听多路访问、逐位仲裁的非破坏性总线仲裁技术</li>
+</ul>
+<p><a id="reference-can-协议"></a></p>
+<h4 id="can-协议">CAN 协议</h4>
+<p><a id="reference-usb"></a></p>
+<h3 id="usb">USB</h3>
+<p>通用串行总线（USB）是一种灵活、稳定的通用串行总线，是为了实现整个计算机系统中总线的一致性，双向的、同步传输的并可以热插拔的数据传输总线</p>
+<p><a id="reference-体系结构"></a></p>
+<h4 id="体系结构">体系结构</h4>
+<p>USB 是一种电缆总线，它定义了两种角色：<strong>主机</strong>和<strong>设备</strong>； USB 总线完成在主机和设备之间进行数据传输的功能</p>
+<p>一个 USB 系统被定义为三个部分：</p>
+<ul>
+<li>USB interconnect</li>
+<li>USB Host</li>
+<li>USB Device</li>
+</ul>
+<p><a id="reference-usb-interconnect"></a></p>
+<h5 id="usb-interconnect">USB interconnect</h5>
+<p>定义 USB 设备与主机之间进行的连接和通信的操作，主要包括以下几个方面：</p>
+<ul>
+<li>总线的拓扑结构定义 USB 主机和设备之间的连接方式</li>
+<li>内部层次关系定义 USB 主机和设备的各个层次之间的关系</li>
+<li>数据流模式描述数据在 USB 系统中从发送方到接收方的流动方式</li>
+<li>USB 调度由于 USB 共享带宽，所以需要对多个任务进行调度以满足对同步传输方式的支持</li>
+</ul>
+<p><img alt="IMG-20260722152302476" loading="lazy" decoding="async" width="827" height="348" src="/_astro/IMG-20260722152302476.30aW-J9i_2fxDTQ.webp"></p>
+<p><a id="reference-usb-host"></a></p>
+<h5 id="usb-host">USB Host</h5>
+<p>任何 USB 系统中，只能有一个主机。主机和 USB 总线的接口称为主机控制器。主机控制器由硬件和软件组成。主机通过主机控制器与设备进行通信</p>
+<p>主要功能</p>
+<ul>
+<li>检测 USB 设备的插入和卸载</li>
+<li>管理在主机和设备之间的控制流</li>
+<li>管理在主机和设备之间的数据流</li>
+<li>收集状态和动作信息</li>
+<li>给与之连接的 USB 设备提供电源</li>
+</ul>
+<p><a id="reference-usb-device"></a></p>
+<h5 id="usb-device">USB Device</h5>
+<p>USB 设备被划分为三个层次：</p>
+<ul>
+<li>底层：传送和接收数据包的总线接口</li>
+<li>中间层：处理总线接口与不同端点之间的数据传输</li>
+<li>上层：提供给用户某种功能</li>
+</ul>
+<p>USB 只有两类：</p>
+<ul>
+<li>USB 集线器（USB Hub）：用于提供更多的连接点</li>
+<li>功能设备：可以完成某种具体的功能</li>
+</ul>
+<p><a id="reference-usb-协议"></a></p>
+<h4 id="usb-协议">USB 协议</h4>
+<p>USB 总线有 4 种数据传输方式，分别是控制传输、同步传输、中断传输和批量传输</p>
+<ul>
+<li>控制传输
+<ul>
+<li>可靠的、非周期性的、由 Host 发起的请求或者回应的传输，主要用于主机把命令传给设备及设备把状态返回给主机。</li>
+<li>任何一个 USB 设备都必须支持一个与控制类型相对应的端点 0（默认端点）</li>
+</ul>
+</li>
+<li>同步传输
+<ul>
+<li>在 Host 与 Device 之间的周期性的、连续的、以一个恒定的速率通信，一般用于传送与时间相关的信息。</li>
+<li>这种类型保留了将时间概念包含于数据中的能力，但同步传输方式的发送和接收方都必须保证传输率的匹配，不然会造成数据的丢失</li>
+</ul>
+</li>
+<li>中断传输
+<ul>
+<li>小规模数据的、低速的、固定延迟的传输。</li>
+<li>中断传输常常用在键盘、鼠标和游戏杆上</li>
+</ul>
+</li>
+<li>批量传输
+<ul>
+<li>非周期性的，大包的可靠的传输。</li>
+<li>典型地用于传输那些可以利用任何带宽的数据，而且这些数据当没有可用带宽时，可以容忍等待。所以批量传输方式并不能保证传输的速率，但可保证传输的可靠性，当出现错误的时候会要求发送方重发</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-总线枚举"></a></p>
+<h4 id="总线枚举">总线枚举</h4>
+<p>当 USB 设备接上或从 USB 设备移开的时候，主机启动一个被称作总线枚举(bus enumeration)的进程，来标识并管理设备状态的改变</p>
+<p><a id="reference-模拟外设"></a></p>
+<h2 id="模拟外设">模拟外设</h2>
+<ul>
+<li>能够将模拟量转换为数字量的器件称为模数转换器，简称 A/D 转换器或 ADC</li>
+<li>能够将数字量转换为模拟量的器件称为数模转换器，简称 D/A 转换器或 DAC</li>
+</ul>
+<p>ADC 和 DAC 是沟通模拟电路和数字电路的桥梁，也可称之为两者之间的接口</p>
+<p><a id="reference-adc-模数转换器"></a></p>
+<h3 id="adc-模数转换器">ADC 模数转换器</h3>
+<p>模/数转换电路的作用是将输入连续变化的模拟信号变换为与其成正比的数字量信号输出</p>
+<p><a id="reference-转换过程"></a></p>
+<h4 id="转换过程">转换过程</h4>
+<p>在进行模/数(即 A/D)转换时，通常按取样、保持、量化、编码四个步骤进行</p>
+<ul>
+<li>取样：对模拟信号 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mi>i</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">ui(t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">u</span><span class="mord mathnormal">i</span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span> 进行周期性抽取样值的过程</li>
+</ul>
+<p><img alt="IMG-20260722152302524" loading="lazy" decoding="async" width="796" height="410" src="/_astro/IMG-20260722152302524.Ihcv66So_2ukX94.webp"></p>
+<ul>
+<li>保持：模拟信号经采样后，得到一系列样值脉冲。采样脉冲宽度 τ 一般是很短暂的，在下一个采样脉冲到来之前，应暂时保持所取得的样值脉冲幅度，以便进行转换
+<ul>
+<li>因此，在取样电路之后须加保持电路</li>
+</ul>
+</li>
+<li>量化：将信号的连续取值近似为有限多个离散值的过程
+<ul>
+<li>输入的模拟电压经过取样保持后，得到的是阶梯波</li>
+<li>而该阶梯波仍是一个可以连续取值的模拟量，但 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 位数字量只能表示 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">2^n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6644em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span></span></span></span> 个数值</li>
+<li>因此，用数字量来表示连续变化的模拟量时就有一个类似于四舍五入的近似问题</li>
+</ul>
+</li>
+</ul>
+<p><img alt="IMG-20260722152302571" loading="lazy" decoding="async" width="879" height="292" src="/_astro/IMG-20260722152302571.CiyjueLo_1nxVak.webp"></p>
+<ul>
+<li>编码：将量化后的离散量用相应的二进制码表示的过程
+<ul>
+<li>当 ADC 的模拟输入电压为单极性方式时，编码结果用无符号的二进制数表示</li>
+<li>当 ADC 的模拟输入电压为双极性方式时，编码结果用二进制原码、偏移码或补码表示</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-性能指标"></a></p>
+<h4 id="性能指标">性能指标</h4>
+<p><a id="reference-分辨率"></a></p>
+<h5 id="分辨率">分辨率</h5>
+<p>分辨率是表示数字量变化一个相邻的数码（如从 1 到 2）所需要输入模拟电压的变化量。它定义为转换器的满刻度电压与 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">2^n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6644em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span></span></span></span> 的比值，其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 为 ADC 的位数（有 24 位、12 位、10 位、8 位等 ADC）。</p>
+<p>例如一个 8 位 ADC 模块的分辨率为满刻度电压的 1/256。如果满刻度电压为 5v，那么该 ADC 可分辨 5/256 即约 20mv 的电压变化</p>
+<p><strong>ADC 模块位数越多，数据采集精度就越高</strong></p>
+<p><a id="reference-转换精度"></a></p>
+<h5 id="转换精度">转换精度</h5>
+<p>ADC 模块的转换精度反映了一个实际 ADC 模块在量化上与一个理想 ADC 模块进行模/数转换的差值，可表示成绝对误差或相对误差</p>
+<p><a id="reference-转换时间"></a></p>
+<h5 id="转换时间">转换时间</h5>
+<p>指 ADC 模块完成一次模拟数字转换所需要的时间，转换时间越短越能适应输入信号的变化。转换时间与 ADC 模块的结构和位数有关</p>
+<p><a id="reference-adc-的类型"></a></p>
+<h4 id="adc-的类型">ADC 的类型</h4>
+<p>模数转换电路分为： 直接比较型和间接比较型</p>
+<p><a id="reference-直接比较型"></a></p>
+<h5 id="直接比较型">直接比较型</h5>
+<p>将输入模拟信号直接与标准的参考电压比较，从而得到数字量。属于这种类型常见的有<strong>并行 ADC</strong>和<strong>逐次逼近型 ADC</strong></p>
+<p><a id="reference-逐次逼近型"></a></p>
+<h6 id="逐次逼近型">逐次逼近型</h6>
+<ul>
+<li>逐次逼近型 ADC 是应用非常广泛的模/数转换方法</li>
+<li>它由比较器、D/A 转换器、比较寄存器 SAR、时钟发生器以及控制逻辑电路组成</li>
+<li>将采样输入信号与已知电压不断进行比较，然后转换成二进制数</li>
+</ul>
+<p><img alt="IMG-20260722152302611" loading="lazy" decoding="async" width="410" height="335" src="/_astro/IMG-20260722152302611.CCyk23Tv_Z2wfQcx.webp"></p>
+<ul>
+<li>优点：高速，采样速率可达 1MSPS；与其它 ADC 相比，功耗相当低；在分辨率低于 12 位时，价格较低</li>
+<li>缺点：在高于 14 位分辨率情况下，价格较高；传感器产生的信号在进行模/数转换之前需要进行调理，包括增益级和滤波，这样会明显增加成本</li>
+</ul>
+<p><a id="reference-并行比较型"></a></p>
+<h6 id="并行比较型">并行比较型</h6>
+<ul>
+<li>并行比较 ADC 是现今速度最快的模/数转换器，采样速率在 1GSPS 以上，通常称为 “闪烁式”ADC</li>
+<li>它由电阻分压器、比较器、缓冲器及编码器四部分组成</li>
+<li>这种结构的 ADC 所有位的转换同时完成，其转换时间主要取决于比较器的开关速度、编码器的传输时间延迟等</li>
+</ul>
+<p><img alt="IMG-20260722152302639" loading="lazy" decoding="async" width="434" height="386" src="/_astro/IMG-20260722152302639.B7uFGImK_OTEAa.webp"></p>
+<ul>
+<li>优点：模/数转换速度最高</li>
+<li>缺点：分辨率不高，功耗大，成本高。随着分辨率的提高，需要高密度的模拟设计以实现转换所必需的数量很大的精密分压电阻和比较器电路。输出数字增加一位，精密电阻数量就要增加一倍，比较器也近似增加一倍</li>
+</ul>
+<p><a id="reference-间接比较型"></a></p>
+<h5 id="间接比较型">间接比较型</h5>
+<p>输入模拟量不是直接与参考电压比较，而是将二者变为中间的某种物理量再进行比较，然后将比较所得的结果进行数字编码</p>
+<p><a id="reference-积分型"></a></p>
+<h6 id="积分型">积分型</h6>
+<ul>
+<li>积分型 ADC 的工作分为两个阶段
+<ul>
+<li>第一阶段为采样期</li>
+<li>第二阶段为比较期</li>
+</ul>
+</li>
+<li>通过两次积分和计数器的计数可以得到模拟信号的数字值 D=2nV1/VR
+<ul>
+<li>n 为计数器的位数</li>
+<li>V1 为输入电压在固定时间间隔内的平均值</li>
+</ul>
+</li>
+<li>积分型 ADC 两次积分的时间都是利用同一个时钟发生器和计数器来确定，因此所得到的 D 表达式与时钟频率无关，其转换精度只取决于参考电压 VR</li>
+<li>此外，由于输入端采用了积分器，所以对交流噪声的干扰有很强的抑制能力</li>
+<li>若把积分器定时积分的时间取为工频信号的整数倍，可把由工频噪声引起的误差减小到最小，从而有效地抑制电网的工频干扰</li>
+</ul>
+<p><a id="reference-sigma-delta-型"></a></p>
+<h6 id="σδsigma-deltaςδ-型"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Σ</mi><mo>−</mo><mi mathvariant="normal">Δ</mi></mrow><annotation encoding="application/x-tex">\Sigma-\Delta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord">Σ</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord">Δ</span></span></span></span> 型</h6>
+<ul>
+<li>∑-Δ 转换器又称为过采样转换器，它采用增量编码方式即根据前一量值与后一量值的差值的大小来进行量化编码。</li>
+<li>Σ-Δ 型 ADC 的分辨率高而成本又很低，在既有模拟又有数字的混合信号处理场合优势明显</li>
+</ul>
+<p>过采样：</p>
+<ul>
+<li>理想的经典 N 位采样 ADC 以频率 fs 进行采样，在 DC 至 fs/2 的频段范围内均匀地分布着均方根大小为 q / 12(q =1/ 2N )的量化噪声</li>
+<li>将采样频率提高 k 倍时，即采样频率为 kfs ，均方根量化噪声不变，但它将分布在 DC 至 kfs/2 这个更宽的带宽范围</li>
+<li>这种采样频率远高于输入信号频率的采样技术 称为过采样，这里的 k 称为过采样系数</li>
+</ul>
+<p><a id="reference-初始化配置-3"></a></p>
+<h4 id="初始化配置-3">初始化配置</h4>
+<ul>
+<li>时钟配置：时钟源、时钟频率等</li>
+<li>GPIO 配置：模拟输入引脚、数字输出引脚等</li>
+<li>ADC 配置：ADC 采样模式、位数、触发方式等</li>
+<li>中断配置</li>
+</ul>
+<p><a id="reference-数模转换器-dac"></a></p>
+<h3 id="数模转换器-dac">数模转换器 DAC</h3>
+<p>DAC 是将数字量转换成模拟量输出的设备，DAC 在实际的应用中可以方便地产生规则（梯形波和三角波）或不规则的模拟波形，用来控制一些模拟设备，大多数都应用在音频方面</p>
+<ul>
+<li>D/A 转换器是将输入的二进制数字量转换成模拟量，以电压或电流的形式输出</li>
+<li>D/A 转换器实质上是一个译码器（解码器）。一般常用的线性 D/A 转换器，其输出模拟电压 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>o</mi></msub></mrow><annotation encoding="application/x-tex">u_o</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">o</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 和输入数字量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">D_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.0278em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 之间成正比关系。 UREF 为参考电压</li>
+</ul>
+<p>将输入的每一位二进制代码按其权值大小转换成相应的模拟量，然后将代表各位的模拟量相加，则所得的总模拟量就与数字量成正比，这样便实现了从数字量到模拟量的转换</p>
+<p><a id="reference-基本组成"></a></p>
+<h4 id="基本组成">基本组成</h4>
+<p>D/A 转换器一般由数码缓冲寄存器、模拟电子开关、参考电压、解码网络和求和电路等组成</p>
+<p><img alt="IMG-20260722152302668" loading="lazy" decoding="async" width="890" height="260" src="/_astro/IMG-20260722152302668.DzwSP3pr_1GXr8X.webp"></p>
+<ul>
+<li>数字量以串行或并行方式输入，并存储在数码缓冲寄存器中</li>
+<li>寄存器输出的每位数码驱动对应数位上的电子开关，将在解码网络中获得的相应数位权值送入求和电路</li>
+<li>求和电路将各位权值相加，便得到与数字量对应的模拟量</li>
+</ul>
+<p><a id="reference-类型"></a></p>
+<h4 id="类型">类型</h4>
+<p>目前常见的 D/A 转换器中有：</p>
+<ul>
+<li>权电阻网络 D/A 转换器</li>
+<li>倒 T 形电阻网络 D/A 转换器</li>
+<li>权电流型 D/A 转换器等多种类型</li>
+</ul>
+<p>R-2R 倒 T 形 D/A 转换器是集成 D/A 转换器电路中应用最为广泛的一种</p>
+<p>常用的集成 D/A 转换器一般都是由倒 T 形电阻网络、模拟开关和数据寄存器组成</p>
+<p><a id="reference-基本原理"></a></p>
+<h4 id="基本原理">基本原理</h4>
+<p>对于有权码，先将每位代码按其权的大小转换成相应的模拟量，然后将这些模拟量相加，即可得到与数字量成正比的总模拟量，从而实现了数字/模拟转换</p>
+<p><img alt="IMG-20260722152302694" loading="lazy" decoding="async" width="866" height="274" src="/_astro/IMG-20260722152302694.CQzsMQ09_Zf5Dva.webp"></p>
+<p><a id="reference-技术指标"></a></p>
+<h4 id="技术指标">技术指标</h4>
+<p><a id="reference-转换精度-1"></a></p>
+<h5 id="转换精度-1">转换精度</h5>
+<p>分辨率：D/A 转换器模拟输出电压可能被分离的等级数</p>
+<ul>
+<li>输入数字量位数越多，分辨率越高</li>
+<li>在实际应用中，常用字量的位数表示 D/A 转换器的分辨率</li>
+</ul>
+<p>也可用 D/A 转换器的最小输出电压与最大输出电压之比来表示分辨率，N 位 D/A 转换器的分辨率可表示为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><msup><mn>2</mn><mi>n</mi></msup><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">1/(2^n-1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1/</span><span class="mopen">(</span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span></p>
+<p><a id="reference-转换速度"></a></p>
+<h5 id="转换速度">转换速度</h5>
+<ul>
+<li>建立时间（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mrow><mi>s</mi><mi>e</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">t_{set}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">se</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>）：当输入的数字量发生变化时，输出电压变化到相应稳定电压值所需时间。最短可达 0.1μS</li>
+<li>转换速率（SR）：在大信号工作状态下模拟电压的变化率</li>
+</ul>
+<p><a id="reference-比较器-ac"></a></p>
+<h3 id="比较器-ac">比较器 AC</h3>
+<ul>
+<li>比较器是一个比较两个模拟电压大小并提供一个输出信号作为比较结果的外设，常用于报警器、电源电压监测、过零检测等</li>
+<li>比较器可对正负两个输入端的模拟信号进行比较，并输出一个二进制信号</li>
+</ul>
+<p><a id="reference-原理-3"></a></p>
+<h4 id="原理-3">原理</h4>
+<p><img alt="IMG-20260722152302728" loading="lazy" decoding="async" width="635" height="493" src="/_astro/IMG-20260722152302728.CHTEWXSO_2wpFMj.webp"></p>
+<p><a id="reference-类型-1"></a></p>
+<h4 id="类型-1">类型</h4>
+<ul>
+<li>过零比较器</li>
+<li>设定电平比较器</li>
+<li>滞回比较器</li>
+</ul>
+<p><a id="reference-过零比较器"></a></p>
+<h5 id="过零比较器">过零比较器</h5>
+<p><strong>某一输入端接地</strong>的比较器称为过零比较器，它一般用于电压过零检测</p>
+<p><img alt="IMG-20260722152302756" loading="lazy" decoding="async" width="394" height="177" src="/_astro/IMG-20260722152302756.DxwIUkVQ_A9zqG.webp"></p>
+<ul>
+<li>同相输入方式：当输入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>i</mi></msub><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">u_i&gt;0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6891em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> 时，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>o</mi></msub></mrow><annotation encoding="application/x-tex">u_o</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">o</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 输出高电平，反之则输出低电平</li>
+<li>反相输入方式：当输入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>i</mi></msub><mo>&lt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">u_i&lt;0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6891em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span> 时，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>o</mi></msub></mrow><annotation encoding="application/x-tex">u_o</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">o</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 输出高电平，反之则输出低电平</li>
+</ul>
+<p><a id="reference-设定电平比较器"></a></p>
+<h5 id="设定电平比较器">设定电平比较器</h5>
+<p>比较器的某一输入端为恒定电压 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>U</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">U_R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;">U</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0077em;">R</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></p>
+<p><img alt="IMG-20260722152302784" loading="lazy" decoding="async" width="349" height="201" src="/_astro/IMG-20260722152302784.D9AewufJ_1p5ui8.webp"></p>
+<ul>
+<li>同相输入方式：当输入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>i</mi></msub><mo>&gt;</mo><msub><mi>U</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">u_i&gt; U_R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6891em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;">U</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0077em;">R</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 时，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>o</mi></msub></mrow><annotation encoding="application/x-tex">u_o</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">o</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 输出高电平，反之则输出低电平</li>
+<li>反相输入方式：当输入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>i</mi></msub><mo>&lt;</mo><msub><mi>U</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">u_i&lt; U_R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6891em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.109em;">U</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.109em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0077em;">R</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 时，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>o</mi></msub></mrow><annotation encoding="application/x-tex">u_o</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">o</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 输出高电平，反之则输出低电平</li>
+</ul>
+<p>设定电平比较器结构简单，灵敏度高，但抗干扰能力差</p>
+<p><a id="reference-滞回比较器"></a></p>
+<h5 id="滞回比较器">滞回比较器</h5>
+<p>如果输入信号因干扰在阈值电压附近变化时，输出电压可能在高、低两个电平之间反复地跳变。滞回比较器有抗干扰能力</p>
+<p><img alt="IMG-20260722152302831" loading="lazy" decoding="async" width="876" height="272" src="/_astro/IMG-20260722152302831.C7Ycdz3X_25vU48.webp"></p>
+<ul>
+<li>当 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">u_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 逐渐增大时，输出电压在 UTH1 处由高电平变为低电平</li>
+<li>当 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">u_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 逐渐减小时，输出电压在 UTH2 处由低电平变为高电平</li>
+</ul>
+<p><a id="reference-初始化配置-4"></a></p>
+<h4 id="初始化配置-4">初始化配置</h4>
+<ul>
+<li>时钟配置：时钟源、时钟频率等</li>
+<li>GPIO 配置：模拟输入引脚、数字输出引脚等</li>
+<li>比较器配置：参考电压等</li>
+<li>中断配置</li>
+</ul>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>PWM 的周期和占空比分别由哪些计数参数决定？输入捕获与输出比较的触发来源有何区别？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#通信基础">通信基础</a></li><li style="--depth: 1"><a href="#通信三要素">通信三要素</a></li><li style="--depth: 1"><a href="#通信分类">通信分类</a></li><li style="--depth: 0"><a href="#基础外设">基础外设</a></li><li style="--depth: 1"><a href="#gpio">GPIO</a></li><li style="--depth: 2"><a href="#应用">应用</a></li><li style="--depth: 2"><a href="#特性">特性</a></li><li style="--depth: 2"><a href="#寄存器">寄存器</a></li><li style="--depth: 2"><a href="#io-端口配置">IO 端口配置</a></li><li style="--depth: 2"><a href="#初始化配置">初始化配置</a></li><li style="--depth: 1"><a href="#通用定时器计数器">通用定时器/计数器</a></li><li style="--depth: 2"><a href="#应用-1">应用</a></li><li style="--depth: 2"><a href="#基本结构">基本结构</a></li><li style="--depth: 2"><a href="#工作模式">工作模式</a></li><li style="--depth: 2"><a href="#特性-1">特性</a></li><li style="--depth: 2"><a href="#功能">功能</a></li><li style="--depth: 3"><a href="#输入捕获">输入捕获</a></li><li style="--depth: 3"><a href="#输出比较">输出比较</a></li><li style="--depth: 2"><a href="#初始化配置-1">初始化配置</a></li><li style="--depth: 1"><a href="#pwm">PWM</a></li><li style="--depth: 2"><a href="#原理">原理</a></li><li style="--depth: 1"><a href="#wdt">WDT</a></li><li style="--depth: 2"><a href="#特性-2">特性</a></li><li style="--depth: 3"><a href="#原理-1">原理</a></li><li style="--depth: 1"><a href="#rtc">RTC</a></li><li style="--depth: 2"><a href="#原理-2">原理</a></li><li style="--depth: 3"><a href="#结构">结构</a></li><li style="--depth: 0"><a href="#通信外设">通信外设</a></li><li style="--depth: 1"><a href="#数字通信系统">数字通信系统</a></li><li style="--depth: 2"><a href="#组成">组成</a></li><li style="--depth: 2"><a href="#串行通信和并行通信">串行通信和并行通信</a></li><li style="--depth: 2"><a href="#同步通信和异步通信">同步通信和异步通信</a></li><li style="--depth: 2"><a href="#单工半双工和全双工">单工、半双工和全双工</a></li><li style="--depth: 1"><a href="#异步通信收发器-uart">异步通信收发器 UART</a></li><li style="--depth: 1"><a href="#串行外部设备接口-spi">串行外部设备接口 SPI</a></li><li style="--depth: 2"><a href="#应用-2">应用</a></li><li style="--depth: 2"><a href="#特性-3">特性</a></li><li style="--depth: 2"><a href="#总线结构">总线结构</a></li><li style="--depth: 2"><a href="#工作模式-1">工作模式</a></li><li style="--depth: 2"><a href="#数据传输">数据传输</a></li><li style="--depth: 3"><a href="#数据传输格式">数据传输格式</a></li><li style="--depth: 3"><a href="#传输时序">传输时序</a></li><li style="--depth: 2"><a href="#初始化配置-2">初始化配置</a></li><li style="--depth: 1"><a href="#ic-总线接口">I²C 总线接口</a></li><li style="--depth: 2"><a href="#特性-4">特性</a></li><li style="--depth: 2"><a href="#术语">术语</a></li><li style="--depth: 2"><a href="#电气连接">电气连接</a></li><li style="--depth: 2"><a href="#数据形式">数据形式</a></li><li style="--depth: 1"><a href="#can-总线">CAN 总线</a></li><li style="--depth: 2"><a href="#can-协议">CAN 协议</a></li><li style="--depth: 1"><a href="#usb">USB</a></li><li style="--depth: 2"><a href="#体系结构">体系结构</a></li><li style="--depth: 3"><a href="#usb-interconnect">USB interconnect</a></li><li style="--depth: 3"><a href="#usb-host">USB Host</a></li><li style="--depth: 3"><a href="#usb-device">USB Device</a></li><li style="--depth: 2"><a href="#usb-协议">USB 协议</a></li><li style="--depth: 2"><a href="#总线枚举">总线枚举</a></li><li style="--depth: 0"><a href="#模拟外设">模拟外设</a></li><li style="--depth: 1"><a href="#adc-模数转换器">ADC 模数转换器</a></li><li style="--depth: 2"><a href="#转换过程">转换过程</a></li><li style="--depth: 2"><a href="#性能指标">性能指标</a></li><li style="--depth: 3"><a href="#分辨率">分辨率</a></li><li style="--depth: 3"><a href="#转换精度">转换精度</a></li><li style="--depth: 3"><a href="#转换时间">转换时间</a></li><li style="--depth: 2"><a href="#adc-的类型">ADC 的类型</a></li><li style="--depth: 3"><a href="#直接比较型">直接比较型</a></li><li style="--depth: 4"><a href="#逐次逼近型">逐次逼近型</a></li><li style="--depth: 4"><a href="#并行比较型">并行比较型</a></li><li style="--depth: 3"><a href="#间接比较型">间接比较型</a></li><li style="--depth: 4"><a href="#积分型">积分型</a></li><li style="--depth: 4"><a href="#σδsigma-deltaςδ-型">Σ−Δ\Sigma-\DeltaΣ−Δ 型</a></li><li style="--depth: 2"><a href="#初始化配置-3">初始化配置</a></li><li style="--depth: 1"><a href="#数模转换器-dac">数模转换器 DAC</a></li><li style="--depth: 2"><a href="#基本组成">基本组成</a></li><li style="--depth: 2"><a href="#类型">类型</a></li><li style="--depth: 2"><a href="#基本原理">基本原理</a></li><li style="--depth: 2"><a href="#技术指标">技术指标</a></li><li style="--depth: 3"><a href="#转换精度-1">转换精度</a></li><li style="--depth: 3"><a href="#转换速度">转换速度</a></li><li style="--depth: 1"><a href="#比较器-ac">比较器 AC</a></li><li style="--depth: 2"><a href="#原理-3">原理</a></li><li style="--depth: 2"><a href="#类型-1">类型</a></li><li style="--depth: 3"><a href="#过零比较器">过零比较器</a></li><li style="--depth: 3"><a href="#设定电平比较器">设定电平比较器</a></li><li style="--depth: 3"><a href="#滞回比较器">滞回比较器</a></li><li style="--depth: 2"><a href="#初始化配置-4">初始化配置</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

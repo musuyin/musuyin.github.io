@@ -1,0 +1,829 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>数据统计 · Musuyin&#39; Home</title><meta name="description" content="数据统计先确定指标定义，再按时间范围聚合查询并转换为图表需要的序列。营业额、用户增量、订单完成率和销量排名使用不同的筛选与分母，不能共用含糊的“总数”。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/java/sky-take-out/business-statistics/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="数据统计 · Musuyin' Home"><meta property="og:description" content="数据统计先确定指标定义，再按时间范围聚合查询并转换为图表需要的序列。营业额、用户增量、订单完成率和销量排名使用不同的筛选与分母，不能共用含糊的“总数”。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/java/sky-take-out/business-statistics/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">数据统计</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-06">2026-08-06</time></dd></div><div><dt>字数</dt><dd>2862</dd></div><div><dt>预计阅读</dt><dd>10 分钟</dd></div></dl></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>数据统计</h1><time datetime="2026-08-06">2026-08-06</time></header><div class="prose"><p>数据统计先确定指标定义，再按时间范围聚合查询并转换为图表需要的序列。营业额、用户增量、订单完成率和销量排名使用不同的筛选与分母，不能共用含糊的“总数”。</p>
+<p><a id="reference-课程内容"></a></p>
+<h2 id="课程内容">课程内容</h2>
+<ul>
+<li>Apache ECharts</li>
+<li>营业额统计</li>
+<li>用户统计</li>
+<li>订单统计</li>
+<li>销量排名 Top10</li>
+</ul>
+<p>功能实现：<strong>数据统计</strong></p>
+<p><strong>数据统计效果图：</strong></p>
+<p><img alt="image-20230101152725417" loading="lazy" decoding="async" width="1649" height="792" src="/_astro/IMG-20260722152517221.DmRWQDtR_ZQ1F8h.webp"></p>
+<p><a id="reference-apache-echarts"></a></p>
+<h2 id="apache-echarts">Apache ECharts</h2>
+<p><a id="reference-介绍"></a></p>
+<h3 id="介绍">介绍</h3>
+<p>Apache ECharts 是一款基于 Javascript 的数据可视化图表库，提供直观，生动，可交互，可个性化定制的数据可视化图表。
+官网地址：<a href="https://echarts.apache.org/zh/index.html">https://echarts.apache.org/zh/index.html</a></p>
+<p><img alt="image-20230101153041348" loading="lazy" decoding="async" width="1130" height="540" src="/_astro/IMG-20260722152517264.C84IhDng_Z3nxbU.webp"></p>
+<p><strong>常见效果展示：</strong></p>
+<p>1). 柱形图</p>
+<p><img alt="image-20230101153748714" loading="lazy" decoding="async" width="933" height="587" src="/_astro/IMG-20260722152517303.1rfbzhJ2_HhGnL.webp"></p>
+<p>2). 饼形图</p>
+<p><img alt="image-20230101153230868" loading="lazy" decoding="async" width="943" height="587" src="/_astro/IMG-20260722152517328.XCrED2fu_ZuHa6m.webp"></p>
+<p>3). 折线图</p>
+<p><img alt="image-20230101153824086" loading="lazy" decoding="async" width="968" height="614" src="/_astro/IMG-20260722152517365.paK2KJlK_1RnOMM.webp"></p>
+<p><strong>总结：</strong> 不管是哪种形式的图形，最本质的东西实际上是数据，它其实是对数据的一种可视化展示。</p>
+<p><a id="reference-入门案例"></a></p>
+<h3 id="入门案例">入门案例</h3>
+<p>Apache Echarts 官方提供的快速入门：<a href="https://echarts.apache.org/handbook/zh/get-started/">https://echarts.apache.org/handbook/zh/get-started/</a></p>
+<p><strong>效果展示：</strong></p>
+<p><img alt="image-20230101155524477" loading="lazy" decoding="async" width="896" height="581" src="/_astro/IMG-20260722152517398.ClH40BoH_1hxgnF.webp"></p>
+<p><strong>实现步骤：</strong></p>
+<p>1). 引入 echarts.js 文件(当天资料已提供)</p>
+<p>2). 为 ECharts 准备一个设置宽高的 DOM</p>
+<p>3). 初始化 echarts 实例</p>
+<p>4). 指定图表的配置项和数据</p>
+<p>5). 使用指定的配置项和数据显示图表</p>
+<p><strong>代码开发：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="html"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;!</span><span style="color:#22863A;--shiki-dark:#85E89D">DOCTYPE</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> html</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">html</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">head</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">meta</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> charset</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"utf-8"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> /&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">title</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;ECharts&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">title</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    &lt;!-- 引入刚刚下载的 ECharts 文件 --&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">script</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> src</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"echarts.js"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">script</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">head</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">body</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    &lt;!-- 为 ECharts 准备一个定义了宽高的 DOM --&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">div</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"main"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> style</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"width: 600px;height:400px;"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">div</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">script</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"text/javascript"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      // 基于准备好的dom，初始化echarts实例</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">      var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> myChart </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> echarts.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">init</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(document.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getElementById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'main'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">));</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      // 指定图表的配置项和数据</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">      var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> option </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        title: {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          text: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'ECharts 入门示例'</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        },</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        tooltip: {},</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        legend: {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          data: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'销量'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        },</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        xAxis: {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          data: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'衬衫'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'羊毛衫'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'雪纺衫'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'裤子'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'高跟鞋'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'袜子'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        },</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        yAxis: {},</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        series: [</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            name: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'销量'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            type: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'bar'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            data: [</span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">20</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">36</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">20</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        ]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      };</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      // 使用刚指定的配置项和数据显示图表。</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      myChart.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setOption</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(option);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">script</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">body</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">html</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><strong>测试：</strong> (当天资料中已提供)</p>
+<p><img alt="image-20230101160244104" loading="lazy" decoding="async" width="467" height="114" src="/_astro/IMG-20260722152517432.FFYKai6j_Z28D8m7.webp"></p>
+<p>使用浏览器方式打开即可。</p>
+<p><strong>总结：</strong> 使用 Echarts，重点在于研究当前图表所需的数据格式。通常是需要后端提供符合格式要求的动态数据，然后响应给前端来展示图表。</p>
+<p><a id="reference-营业额统计"></a></p>
+<h2 id="营业额统计">营业额统计</h2>
+<p><a id="reference-需求分析和设计"></a></p>
+<h3 id="需求分析和设计">需求分析和设计</h3>
+<p><a id="reference-产品原型"></a></p>
+<h4 id="产品原型">产品原型</h4>
+<p>营业额统计是基于折现图来展现，并且按照天来展示的。实际上，就是某一个时间范围之内的每一天的营业额。同时，不管光标放在哪个点上，那么它就会把具体的数值展示出来。并且还需要注意日期并不是固定写死的，是由上边时间选择器来决定。比如选择是近 7 天、或者是近 30 日，或者是本周，就会把相应这个时间段之内的每一天日期通过横坐标展示。</p>
+<p><strong>原型图：</strong></p>
+<p><img alt="image-20230101160747433" loading="lazy" decoding="async" width="889" height="508" src="/_astro/IMG-20260722152517555.CVE-rtwd_ZuqDH.webp"></p>
+<p><strong>业务规则：</strong></p>
+<ul>
+<li>营业额指订单状态为已完成的订单金额合计</li>
+<li>基于可视化报表的折线图展示营业额数据，X 轴为日期，Y 轴为营业额</li>
+<li>根据时间选择区间，展示每天的营业额数据</li>
+</ul>
+<p><a id="reference-接口设计"></a></p>
+<h4 id="接口设计">接口设计</h4>
+<p>通过上述原型图，设计出对应的接口。</p>
+<p><img alt="image-20230101160801758" loading="lazy" decoding="async" width="532" height="619" src="/_astro/IMG-20260722152517589.xa49f_KE_2w2rja.webp"></p>
+<p><strong>注意：</strong> 具体返回数据一般由前端来决定，前端展示图表，具体折现图对应数据是什么格式，是有固定的要求的。
+所以说，后端需要去适应前端，它需要什么格式的数据，我们就给它返回什么格式的数据。</p>
+<p><a id="reference-代码开发"></a></p>
+<h3 id="代码开发">代码开发</h3>
+<p><a id="reference-vo-设计"></a></p>
+<h4 id="vo-设计">VO 设计</h4>
+<p><strong>根据接口定义设计对应的 VO：</strong></p>
+<p><img alt="image-20230101164058056" loading="lazy" decoding="async" width="760" height="364" src="/_astro/IMG-20260722152517621.BqR9nMz7_23Hau6.webp"></p>
+<p>在 sky-pojo 模块，TurnoverReportVO.java 已定义</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.AllArgsConstructor;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Builder;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Data;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.NoArgsConstructor;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.io.Serializable;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Data</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Builder</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">NoArgsConstructor</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">AllArgsConstructor</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> TurnoverReportVO</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Serializable</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //日期，以逗号分隔，例如：2022-10-01,2022-10-02,2022-10-03</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String dateList;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //营业额，以逗号分隔，例如：406.0,1520.0,75.0</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String turnoverList;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-controller-层"></a></p>
+<h4 id="controller-层">Controller 层</h4>
+<p><strong>根据接口定义创建 ReportController：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.controller.admin;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.result.Result;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.ReportService;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo.TurnoverReportVO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.swagger.annotations.Api;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.swagger.annotations.ApiOperation;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.extern.slf4j.Slf4j;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.format.annotation.DateTimeFormat;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.GetMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RequestMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RestController;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.time.LocalDate;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * 报表</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RestController</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/admin/report"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Slf4j</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Api</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">tags</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "统计报表相关接口"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ReportController</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ReportService reportService;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 营业额数据统计</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> begin</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> end</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/turnoverStatistics"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"营业额数据统计"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">TurnoverReportVO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">turnoverStatistics</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            @</span><span style="color:#D73A49;--shiki-dark:#F97583">DateTimeFormat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">pattern</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "yyyy-MM-dd"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    LocalDate </span><span style="color:#E36209;--shiki-dark:#FFAB70">begin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            @</span><span style="color:#D73A49;--shiki-dark:#F97583">DateTimeFormat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">pattern</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "yyyy-MM-dd"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    LocalDate </span><span style="color:#E36209;--shiki-dark:#FFAB70">end</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(reportService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getTurnover</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(begin, end));</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-service-层接口"></a></p>
+<h4 id="service-层接口">Service 层接口</h4>
+<p><strong>创建 ReportService 接口，声明 getTurnover 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo.TurnoverReportVO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.time.LocalDate;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> interface</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ReportService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据时间区间统计营业额</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> beginTime</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> endTime</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    TurnoverReportVO </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getTurnover</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDate </span><span style="color:#E36209;--shiki-dark:#FFAB70">beginTime</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, LocalDate </span><span style="color:#E36209;--shiki-dark:#FFAB70">endTime</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-service-层实现类"></a></p>
+<h4 id="service-层实现类">Service 层实现类</h4>
+<p><strong>创建 ReportServiceImpl 实现类，实现 getTurnover 方法:</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.impl;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.Orders;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.mapper.OrderMapper;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.ReportService;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo.TurnoverReportVO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.extern.slf4j.Slf4j;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.commons.lang.StringUtils;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.stereotype.Service;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.time.LocalDate;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.time.LocalDateTime;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.time.LocalTime;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.ArrayList;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.HashMap;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.List;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.Map;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Service</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Slf4j</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ReportServiceImpl</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ReportService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> OrderMapper orderMapper;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据时间区间统计营业额</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> begin</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> end</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> TurnoverReportVO </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getTurnover</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDate </span><span style="color:#E36209;--shiki-dark:#FFAB70">begin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, LocalDate </span><span style="color:#E36209;--shiki-dark:#FFAB70">end</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">LocalDate</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; dateList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ArrayList&lt;&gt;();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        dateList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(begin);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        while</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#D73A49;--shiki-dark:#F97583">!</span><span style="color:#24292E;--shiki-dark:#E1E4E8">begin.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">equals</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(end)){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            begin </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> begin.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">plusDays</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span><span style="color:#6A737D;--shiki-dark:#6A737D">//日期计算，获得指定日期后1天的日期</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            dateList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(begin);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        </span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Double</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; turnoverList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ArrayList&lt;&gt;();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (LocalDate date </span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dateList) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            LocalDateTime beginTime </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LocalDateTime.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">of</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(date, LocalTime.MIN);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            LocalDateTime endTime </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LocalDateTime.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">of</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(date, LocalTime.MAX);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            Map map </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> HashMap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        	map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"status"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Orders.COMPLETED);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        	map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"begin"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,beginTime);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        	map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"end"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, endTime);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            Double turnover </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> orderMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">sumByMap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(map); </span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            turnover </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> turnover </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#D73A49;--shiki-dark:#F97583"> ?</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0.0</span><span style="color:#D73A49;--shiki-dark:#F97583"> :</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> turnover;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            turnoverList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(turnover);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //数据封装</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> TurnoverReportVO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">builder</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">dateList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(StringUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dateList,</span><span style="color:#032F62;--shiki-dark:#9ECBFF">","</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">turnoverList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(StringUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(turnoverList,</span><span style="color:#032F62;--shiki-dark:#9ECBFF">","</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-mapper-层"></a></p>
+<h4 id="mapper-层">Mapper 层</h4>
+<p><strong>在 OrderMapper 接口声明 sumByMap 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据动态条件统计营业额</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> map</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Double </span><span style="color:#6F42C1;--shiki-dark:#B392F0">sumByMap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Map map);</span></span></code></pre>
+<p><strong>在 OrderMapper.xml 文件中编写动态 SQL：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">select</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"sumByMap"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> resultType</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"java.lang.Double"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        select sum(amount) from orders</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">where</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> test</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"status != null"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and status = #{status}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> test</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"begin != null"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and order_time </span><span style="color:#005CC5;--shiki-dark:#79B8FF">&amp;gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">= #{begin}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> test</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"end != null"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and order_time </span><span style="color:#005CC5;--shiki-dark:#79B8FF">&amp;lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">= #{end}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">where</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><a id="reference-功能测试"></a></p>
+<h3 id="功能测试">功能测试</h3>
+<p>可以通过如下方式进行测试：</p>
+<ul>
+<li>接口文档测试</li>
+<li>前后端联调测试</li>
+</ul>
+<p>启动服务器，启动 nginx，直接采用前后端联调测试。</p>
+<p>进入数据统计模块</p>
+<p><strong>1). 查看近 7 日营业额统计</strong></p>
+<p><img alt="image-20230101172807757" loading="lazy" decoding="async" width="1915" height="675" src="/_astro/IMG-20260722152517754.DaxTHDis_ZiImHj.webp"></p>
+<p>进入开发者模式，查看返回数据</p>
+<p><img alt="image-20230101173031357" loading="lazy" decoding="async" width="1887" height="229" src="/_astro/IMG-20260722152517805.CuA7FBvZ_ZY7GMF.webp"></p>
+<p><strong>2). 查看近 30 日营业额统计</strong></p>
+<p><img alt="image-20230101173201667" loading="lazy" decoding="async" width="1918" height="776" src="/_astro/IMG-20260722152517833.C6poMTuf_2cmVz1.webp"></p>
+<p>进入开发者模式，查看返回数据</p>
+<p><img alt="image-20230101173304127" loading="lazy" decoding="async" width="1909" height="232" src="/_astro/IMG-20260722152517870.CpIrlQRo_Z2fDbBK.webp"></p>
+<p>也可通过断点方式启动，查看每步执行情况。</p>
+<p><a id="reference-代码提交"></a></p>
+<h3 id="代码提交">代码提交</h3>
+<p><img alt="image-20230107183427167" loading="lazy" decoding="async" width="1083" height="1003" src="/_astro/IMG-20260722152517987.C8l3g-X1_2ox0Yb.webp"></p>
+<p>后续步骤和其它功能代码提交一致，不再赘述。</p>
+<p><a id="reference-用户统计"></a></p>
+<h2 id="用户统计">用户统计</h2>
+<p><a id="reference-需求分析和设计-1"></a></p>
+<h3 id="需求分析和设计-1">需求分析和设计</h3>
+<p><a id="reference-产品原型-1"></a></p>
+<h4 id="产品原型-1">产品原型</h4>
+<p>所谓用户统计，实际上统计的是用户的数量。通过折线图来展示，上面这根蓝色线代表的是用户总量，下边这根绿色线代表的是新增用户数量，是具体到每一天。所以说用户统计主要统计<strong>两个数据</strong>，一个是<strong>总的用户数量</strong>，另外一个是<strong>新增用户数量</strong>。</p>
+<p><strong>原型图：</strong></p>
+<p><img alt="image-20230102213727736" loading="lazy" decoding="async" width="1020" height="533" src="/_astro/IMG-20260722152518027.DbLCGP4C_Z1wVqHB.webp"></p>
+<p><strong>业务规则：</strong></p>
+<ul>
+<li>基于可视化报表的折线图展示用户数据，X 轴为日期，Y 轴为用户数</li>
+<li>根据时间选择区间，展示每天的用户总量和新增用户量数据</li>
+</ul>
+<p><a id="reference-接口设计-1"></a></p>
+<h4 id="接口设计-1">接口设计</h4>
+<p>根据上述原型图设计接口。</p>
+<p><img alt="image-20230102213809414" loading="lazy" decoding="async" width="477" height="549" src="/_astro/IMG-20260722152518048.pUV8dMV3_1Tbrkv.webp"></p>
+<p><a id="reference-代码开发-1"></a></p>
+<h3 id="代码开发-1">代码开发</h3>
+<p><a id="reference-vo-设计-1"></a></p>
+<h4 id="vo-设计-1">VO 设计</h4>
+<p><strong>根据用户统计接口的返回结果设计 VO：</strong></p>
+<p><img alt="image-20230102211004237" loading="lazy" decoding="async" width="769" height="443" src="/_astro/IMG-20260722152518165.B0Bf2WwL_Z1PDfN1.webp"></p>
+<p>在 sky-pojo 模块，UserReportVO.java 已定义</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.AllArgsConstructor;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Builder;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Data;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.NoArgsConstructor;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.io.Serializable;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Data</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Builder</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">NoArgsConstructor</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">AllArgsConstructor</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserReportVO</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Serializable</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //日期，以逗号分隔，例如：2022-10-01,2022-10-02,2022-10-03</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String dateList;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //用户总量，以逗号分隔，例如：200,210,220</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String totalUserList;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //新增用户，以逗号分隔，例如：20,21,10</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String newUserList;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-controller-层-1"></a></p>
+<h4 id="controller-层-1">Controller 层</h4>
+<p><strong>根据接口定义，在 ReportController 中创建 userStatistics 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 用户数据统计</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> begin</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> end</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/userStatistics"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"用户数据统计"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">UserReportVO</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> userStatistics</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            @</span><span style="color:#D73A49;--shiki-dark:#F97583">DateTimeFormat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">pattern</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "yyyy-MM-dd"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) LocalDate begin,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            @</span><span style="color:#D73A49;--shiki-dark:#F97583">DateTimeFormat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">pattern</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "yyyy-MM-dd"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) LocalDate end){</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(reportService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getUserStatistics</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(begin,end));            </span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-service-层接口-1"></a></p>
+<h4 id="service-层接口-1">Service 层接口</h4>
+<p><strong>在 ReportService 接口中声明 getUserStatistics 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据时间区间统计用户数量</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> begin</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> end</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    UserReportVO </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getUserStatistics</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDate begin, LocalDate end);</span></span></code></pre>
+<p><a id="reference-service-层实现类-1"></a></p>
+<h4 id="service-层实现类-1">Service 层实现类</h4>
+<p><strong>在 ReportServiceImpl 实现类中实现 getUserStatistics 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	@</span><span style="color:#D73A49;--shiki-dark:#F97583">Override</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> UserReportVO </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getUserStatistics</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDate begin, LocalDate end) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">LocalDate</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; dateList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ArrayList&lt;&gt;();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        dateList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(begin);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        while</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#D73A49;--shiki-dark:#F97583">!</span><span style="color:#24292E;--shiki-dark:#E1E4E8">begin.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">equals</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(end)){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            begin </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> begin.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">plusDays</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            dateList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(begin);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Integer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; newUserList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ArrayList&lt;&gt;(); </span><span style="color:#6A737D;--shiki-dark:#6A737D">//新增用户数</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Integer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; totalUserList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ArrayList&lt;&gt;(); </span><span style="color:#6A737D;--shiki-dark:#6A737D">//总用户数</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (LocalDate date </span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dateList) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            LocalDateTime beginTime </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LocalDateTime.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">of</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(date, LocalTime.MIN);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            LocalDateTime endTime </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LocalDateTime.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">of</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(date, LocalTime.MAX);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            //新增用户数量 select count(id) from user where create_time &gt; ? and create_time &lt; ?</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            Integer newUser </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getUserCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(beginTime, endTime);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            //总用户数量 select count(id) from user where  create_time &lt; ?</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            Integer totalUser </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getUserCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, endTime);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            newUserList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(newUser);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            totalUserList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(totalUser);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> UserReportVO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">builder</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">dateList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(StringUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dateList,</span><span style="color:#032F62;--shiki-dark:#9ECBFF">","</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">newUserList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(StringUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(newUserList,</span><span style="color:#032F62;--shiki-dark:#9ECBFF">","</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">totalUserList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(StringUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(totalUserList,</span><span style="color:#032F62;--shiki-dark:#9ECBFF">","</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><strong>在 ReportServiceImpl 实现类中创建私有方法 getUserCount：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据时间区间统计用户数量</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> beginTime</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> endTime</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Integer </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getUserCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDateTime beginTime, LocalDateTime endTime) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Map map </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> HashMap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"begin"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,beginTime);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"end"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, endTime);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> userMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">countByMap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(map);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><a id="reference-mapper-层-1"></a></p>
+<h4 id="mapper-层-1">Mapper 层</h4>
+<p><strong>在 UserMapper 接口中声明 countByMap 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据动态条件统计用户数量</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> map</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Integer </span><span style="color:#6F42C1;--shiki-dark:#B392F0">countByMap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Map map);</span></span></code></pre>
+<p><strong>在 UserMapper.xml 文件中编写动态 SQL：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">select id</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"countByMap"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> resultType</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"java.lang.Integer"</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        select </span><span style="color:#6F42C1;--shiki-dark:#B392F0">count</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(id) from user</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        &lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">where</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            &lt;if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> test</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"begin != null"</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and create_time </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">gt;</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> #{begin}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            &lt;/if&gt;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            &lt;if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> test</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"end != null"</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and create_time </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> #{end}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            &lt;/if&gt;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        &lt;/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">where</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">&lt;/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">select</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p><a id="reference-功能测试-1"></a></p>
+<h3 id="功能测试-1">功能测试</h3>
+<p>可以通过如下方式进行测试：</p>
+<ul>
+<li>接口文档测试</li>
+<li>前后端联调测试</li>
+</ul>
+<p>进入数据统计模块</p>
+<p><strong>1). 查看近 7 日用户统计</strong></p>
+<p><img alt="image-20230107191339668" loading="lazy" decoding="async" width="1903" height="768" src="/_astro/IMG-20260722152518189.BsWPqI9O_EDovI.webp"></p>
+<p>进入开发者模式，查看返回数据</p>
+<p><img alt="image-20230107191532175" loading="lazy" decoding="async" width="1596" height="277" src="/_astro/IMG-20260722152518214.DUJnpToz_Z1J7fRQ.webp"></p>
+<p><strong>2). 查看近 30 日用户统计</strong></p>
+<p><img alt="image-20230107191613369" loading="lazy" decoding="async" width="1895" height="766" src="/_astro/IMG-20260722152518353.kIuIKorV_2mhQGo.webp"></p>
+<p>进入开发者模式，查看返回数据</p>
+<p><img alt="image-20230107191707568" loading="lazy" decoding="async" width="1908" height="265" src="/_astro/IMG-20260722152518394.DHdoh1R-_1EyQft.webp"></p>
+<p>也可通过断点方式启动，查看每步执行情况。</p>
+<p><a id="reference-代码提交-1"></a></p>
+<h3 id="代码提交-1">代码提交</h3>
+<p><img alt="image-20230107191949566" loading="lazy" decoding="async" width="1084" height="1001" src="/_astro/IMG-20260722152518419.DfBcdANX_1IgSY7.webp"></p>
+<p>后续步骤和其它功能代码提交一致，不再赘述。</p>
+<p><a id="reference-订单统计"></a></p>
+<h2 id="订单统计">订单统计</h2>
+<p><a id="reference-需求分析和设计-2"></a></p>
+<h3 id="需求分析和设计-2">需求分析和设计</h3>
+<p><a id="reference-产品原型-2"></a></p>
+<h4 id="产品原型-2">产品原型</h4>
+<p>订单统计通过一个折现图来展现，折线图上有两根线，这根蓝色的线代表的是订单总数，而下边这根绿色的线代表的是有效订单数，指的就是状态是已完成的订单就属于有效订单，分别反映的是每一天的数据。上面还有 3 个数字，分别是订单总数、有效订单、订单完成率，它指的是整个时间区间之内总的数据。</p>
+<p><strong>原型图：</strong></p>
+<p><img alt="image-20230107192859270" loading="lazy" decoding="async" width="803" height="472" src="/_astro/IMG-20260722152518448.zHYR8QVJ_Z1VBy9.webp"></p>
+<p><strong>业务规则：</strong></p>
+<ul>
+<li>有效订单指状态为 “已完成” 的订单</li>
+<li>基于可视化报表的折线图展示订单数据，X 轴为日期，Y 轴为订单数量</li>
+<li>根据时间选择区间，展示每天的订单总数和有效订单数</li>
+<li>展示所选时间区间内的有效订单数、总订单数、订单完成率，订单完成率 = 有效订单数 / 总订单数 * 100%</li>
+</ul>
+<p><a id="reference-接口设计-2"></a></p>
+<h4 id="接口设计-2">接口设计</h4>
+<p>根据上述原型图设计接口。</p>
+<p><img alt="image-20230107192942872" loading="lazy" decoding="async" width="475" height="561" src="/_astro/IMG-20260722152518577.BIOBirlm_Zlaub1.webp"></p>
+<p><a id="reference-代码开发-2"></a></p>
+<h3 id="代码开发-2">代码开发</h3>
+<p><a id="reference-vo-设计-2"></a></p>
+<h4 id="vo-设计-2">VO 设计</h4>
+<p><strong>根据订单统计接口的返回结果设计 VO：</strong></p>
+<p><img alt="image-20230107195325915" loading="lazy" decoding="async" width="773" height="561" src="/_astro/IMG-20260722152518601.BHmiQRXG_O40Nu.webp"></p>
+<p>在 sky-pojo 模块，OrderReportVO.java 已定义</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.AllArgsConstructor;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Builder;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Data;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.NoArgsConstructor;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.io.Serializable;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Data</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Builder</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">NoArgsConstructor</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">AllArgsConstructor</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> OrderReportVO</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Serializable</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //日期，以逗号分隔，例如：2022-10-01,2022-10-02,2022-10-03</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String dateList;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //每日订单数，以逗号分隔，例如：260,210,215</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String orderCountList;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //每日有效订单数，以逗号分隔，例如：20,21,10</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String validOrderCountList;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //订单总数</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Integer totalOrderCount;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //有效订单数</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Integer validOrderCount;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //订单完成率</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Double orderCompletionRate;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-controller-层-2"></a></p>
+<h4 id="controller-层-2">Controller 层</h4>
+<p><strong>在 ReportController 中根据订单统计接口创建 orderStatistics 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 订单数据统计</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> begin</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> end</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/ordersStatistics"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"用户数据统计"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">OrderReportVO</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> orderStatistics</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            @</span><span style="color:#D73A49;--shiki-dark:#F97583">DateTimeFormat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">pattern</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "yyyy-MM-dd"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    LocalDate begin,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            @</span><span style="color:#D73A49;--shiki-dark:#F97583">DateTimeFormat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">pattern</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "yyyy-MM-dd"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    LocalDate end){</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(reportService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getOrderStatistics</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(begin,end));</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><a id="reference-service-层接口-2"></a></p>
+<h4 id="service-层接口-2">Service 层接口</h4>
+<p><strong>在 ReportService 接口中声明 getOrderStatistics 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* 根据时间区间统计订单数量</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> begin</span><span style="color:#6A737D;--shiki-dark:#6A737D"> </span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> end</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span><span style="color:#6A737D;--shiki-dark:#6A737D"> </span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">*/</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">OrderReportVO </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getOrderStatistics</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDate begin, LocalDate end);</span></span></code></pre>
+<p><a id="reference-service-层实现类-2"></a></p>
+<h4 id="service-层实现类-2">Service 层实现类</h4>
+<p><strong>在 ReportServiceImpl 实现类中实现 getOrderStatistics 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* 根据时间区间统计订单数量</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> begin</span><span style="color:#6A737D;--shiki-dark:#6A737D"> </span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> end</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span><span style="color:#6A737D;--shiki-dark:#6A737D"> </span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">*/</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> OrderReportVO </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getOrderStatistics</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDate begin, LocalDate end){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">LocalDate</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; dateList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ArrayList&lt;&gt;();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    dateList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(begin);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    while</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#D73A49;--shiki-dark:#F97583">!</span><span style="color:#24292E;--shiki-dark:#E1E4E8">begin.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">equals</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(end)){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          begin </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> begin.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">plusDays</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          dateList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(begin);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">     }</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //每天订单总数集合</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">     List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Integer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; orderCountList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ArrayList&lt;&gt;();</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //每天有效订单数集合</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Integer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; validOrderCountList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ArrayList&lt;&gt;();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (LocalDate date </span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dateList) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">         LocalDateTime beginTime </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LocalDateTime.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">of</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(date, LocalTime.MIN);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">         LocalDateTime endTime </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LocalDateTime.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">of</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(date, LocalTime.MAX);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">   //查询每天的总订单数 select count(id) from orders where order_time &gt; ? and order_time &lt; ?</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">         Integer orderCount </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getOrderCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(beginTime, endTime, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  //查询每天的有效订单数 select count(id) from orders where order_time &gt; ? and order_time &lt; ? and status = ?</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">         Integer validOrderCount </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getOrderCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(beginTime, endTime, Orders.COMPLETED);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">         orderCountList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(orderCount);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">         validOrderCountList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(validOrderCount);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //时间区间内的总订单数</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Integer totalOrderCount </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> orderCountList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">stream</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">reduce</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Integer</span><span style="color:#D73A49;--shiki-dark:#F97583">::</span><span style="color:#24292E;--shiki-dark:#E1E4E8">sum).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //时间区间内的总有效订单数</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Integer validOrderCount </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> validOrderCountList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">stream</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">reduce</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Integer</span><span style="color:#D73A49;--shiki-dark:#F97583">::</span><span style="color:#24292E;--shiki-dark:#E1E4E8">sum).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //订单完成率</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Double orderCompletionRate </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0.0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(totalOrderCount </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">         orderCompletionRate </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> validOrderCount.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">doubleValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> totalOrderCount;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">     }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> OrderReportVO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">builder</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">dateList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(StringUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dateList, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">","</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">orderCountList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(StringUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(orderCountList, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">","</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">validOrderCountList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(StringUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(validOrderCountList, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">","</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">totalOrderCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(totalOrderCount)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">validOrderCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(validOrderCount)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">orderCompletionRate</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(orderCompletionRate)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>在 ReportServiceImpl 实现类中提供私有方法 getOrderCount：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* 根据时间区间统计指定状态的订单数量</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> beginTime</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> endTime</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> status</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">*/</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Integer </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getOrderCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDateTime beginTime, LocalDateTime endTime, Integer status) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	Map map </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> HashMap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"status"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, status);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"begin"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,beginTime);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"end"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, endTime);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> orderMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">countByMap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(map);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-mapper-层-2"></a></p>
+<h4 id="mapper-层-2">Mapper 层</h4>
+<p><strong>在 OrderMapper 接口中声明 countByMap 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">*根据动态条件统计订单数量</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> map</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">*/</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Integer </span><span style="color:#6F42C1;--shiki-dark:#B392F0">countByMap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Map map);</span></span></code></pre>
+<p><strong>在 OrderMapper.xml 文件中编写动态 SQL：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">select id</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"countByMap"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> resultType</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"java.lang.Integer"</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        select </span><span style="color:#6F42C1;--shiki-dark:#B392F0">count</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(id) from orders</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        &lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">where</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            &lt;if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> test</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"status != null"</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and status </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> #{status}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            &lt;/if&gt;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            &lt;if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> test</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"begin != null"</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and order_time </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">gt;</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> #{begin}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            &lt;/if&gt;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            &lt;if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> test</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"end != null"</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and order_time </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> #{end}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            &lt;/if&gt;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        &lt;/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">where</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">&lt;/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">select</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p><a id="reference-功能测试-2"></a></p>
+<h3 id="功能测试-2">功能测试</h3>
+<p>可以通过如下方式进行测试：</p>
+<ul>
+<li>接口文档测试</li>
+<li>前后端联调</li>
+</ul>
+<p>重启服务，直接采用前后端联调测试。</p>
+<p>进入数据统计模块</p>
+<p><strong>1). 查看近 7 日订单统计</strong></p>
+<p><img alt="image-20230107202854533" loading="lazy" decoding="async" width="1899" height="820" src="/_astro/IMG-20260722152518635.C3qjHj1M_2bSd3w.webp"></p>
+<p>进入开发者模式，查看返回数据</p>
+<p><img alt="image-20230107202953128" loading="lazy" decoding="async" width="1890" height="279" src="/_astro/IMG-20260722152518759.CQmXkkCr_16DcaN.webp"></p>
+<p><strong>2). 查看近 30 日订单统计</strong></p>
+<p><img alt="image-20230107203025165" loading="lazy" decoding="async" width="1893" height="841" src="/_astro/IMG-20260722152518798.Bhy3q6X9_1ew2NS.webp"></p>
+<p>进入开发者模式，查看返回数据</p>
+<p><img alt="image-20230107203127308" loading="lazy" decoding="async" width="1895" height="246" src="/_astro/IMG-20260722152518834.ulAU8Xk0_Z2rpAoT.webp"></p>
+<p>也可通过断点方式启动，查看每步执行情况。</p>
+<p><a id="reference-代码提交-2"></a></p>
+<h3 id="代码提交-2">代码提交</h3>
+<p><img alt="image-20230107203344774" loading="lazy" decoding="async" width="1085" height="1010" src="/_astro/IMG-20260722152518970.Ch3n0UXG_Z1qomqX.webp"></p>
+<p>后续步骤和其它功能代码提交一致，不再赘述。</p>
+<p><a id="reference-销量排名-top10"></a></p>
+<h2 id="销量排名-top10">销量排名 Top10</h2>
+<p><a id="reference-需求分析和设计-3"></a></p>
+<h3 id="需求分析和设计-3">需求分析和设计</h3>
+<p><a id="reference-产品原型-3"></a></p>
+<h4 id="产品原型-3">产品原型</h4>
+<p>所谓销量排名，销量指的是商品销售的数量。项目当中的商品主要包含两类：一个是<strong>套餐</strong>，一个是<strong>菜品</strong>，所以销量排名其实指的就是菜品和套餐销售的数量排名。通过柱形图来展示销量排名，这些销量是按照降序来排列，并且只需要统计销量排名前十的商品。</p>
+<p><strong>原型图：</strong></p>
+<p><img alt="image-20230107203622747" loading="lazy" decoding="async" width="749" height="466" src="/_astro/IMG-20260722152519007.BQ1CR2RC_Z2h3qjH.webp"></p>
+<p><strong>业务规则：</strong></p>
+<ul>
+<li>根据时间选择区间，展示销量前 10 的商品（包括菜品和套餐）</li>
+<li>基于可视化报表的柱状图降序展示商品销量</li>
+<li>此处的销量为商品销售的份数</li>
+</ul>
+<p><a id="reference-接口设计-3"></a></p>
+<h4 id="接口设计-3">接口设计</h4>
+<p>根据上述原型图设计接口。</p>
+<p><img alt="image-20230107203720606" loading="lazy" decoding="async" width="471" height="555" src="/_astro/IMG-20260722152519029.DD3Y9ooo_1FX7ky.webp"></p>
+<p><a id="reference-代码开发-3"></a></p>
+<h3 id="代码开发-3">代码开发</h3>
+<p><a id="reference-vo-设计-3"></a></p>
+<h4 id="vo-设计-3">VO 设计</h4>
+<p><strong>根据销量排名接口的返回结果设计 VO：</strong></p>
+<p><img alt="image-20230107204028895" loading="lazy" decoding="async" width="790" height="418" src="/_astro/IMG-20260722152519056.D_iFge1o_1jBeXO.webp"></p>
+<p>在 sky-pojo 模块，SalesTop10ReportVO.java 已定义</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.AllArgsConstructor;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Builder;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Data;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.NoArgsConstructor;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.io.Serializable;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Data</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Builder</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">NoArgsConstructor</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">AllArgsConstructor</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> SalesTop10ReportVO</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Serializable</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //商品名称列表，以逗号分隔，例如：鱼香肉丝,宫保鸡丁,水煮鱼</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String nameList;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //销量列表，以逗号分隔，例如：260,215,200</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String numberList;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-controller-层-3"></a></p>
+<h4 id="controller-层-3">Controller 层</h4>
+<p><strong>在 ReportController 中根据销量排名接口创建 top10 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* 销量排名统计</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> begin</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> end</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">*/</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/top10"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"销量排名统计"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">SalesTop10ReportVO</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> top10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">DateTimeFormat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">pattern</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "yyyy-MM-dd"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) LocalDate begin,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">DateTimeFormat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">pattern</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "yyyy-MM-dd"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) LocalDate end){</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(reportService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getSalesTop10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(begin,end));</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-service-层接口-3"></a></p>
+<h4 id="service-层接口-3">Service 层接口</h4>
+<p><strong>在 ReportService 接口中声明 getSalesTop10 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* 查询指定时间区间内的销量排名top10 </span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> begin</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> end</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">*/</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SalesTop10ReportVO </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getSalesTop10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDate begin, LocalDate end);</span></span></code></pre>
+<p><a id="reference-service-层实现类-3"></a></p>
+<h4 id="service-层实现类-3">Service 层实现类</h4>
+<p><strong>在 ReportServiceImpl 实现类中实现 getSalesTop10 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 查询指定时间区间内的销量排名top10</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> begin</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> end</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SalesTop10ReportVO </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getSalesTop10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDate begin, LocalDate end){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        LocalDateTime beginTime </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LocalDateTime.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">of</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(begin, LocalTime.MIN);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        LocalDateTime endTime </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LocalDateTime.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">of</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(end, LocalTime.MAX);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">GoodsSalesDTO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; goodsSalesDTOList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> orderMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getSalesTop10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(beginTime, endTime);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String nameList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> StringUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(goodsSalesDTOList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">stream</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(GoodsSalesDTO</span><span style="color:#D73A49;--shiki-dark:#F97583">::</span><span style="color:#24292E;--shiki-dark:#E1E4E8">getName).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">collect</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Collectors.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">toList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()),</span><span style="color:#032F62;--shiki-dark:#9ECBFF">","</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String numberList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> StringUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(goodsSalesDTOList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">stream</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(GoodsSalesDTO</span><span style="color:#D73A49;--shiki-dark:#F97583">::</span><span style="color:#24292E;--shiki-dark:#E1E4E8">getNumber).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">collect</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Collectors.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">toList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()),</span><span style="color:#032F62;--shiki-dark:#9ECBFF">","</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SalesTop10ReportVO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">builder</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">nameList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(nameList)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">numberList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(numberList)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><a id="reference-mapper-层-3"></a></p>
+<h4 id="mapper-层-3">Mapper 层</h4>
+<p><strong>在 OrderMapper 接口中声明 getSalesTop10 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* 查询商品销量排名</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> begin</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">* </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> end</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">*/</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">List</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">GoodsSalesDTO</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getSalesTop10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDateTime begin, LocalDateTime end);</span></span></code></pre>
+<p><strong>在 OrderMapper.xml 文件中编写动态 SQL：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">select</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"getSalesTop10"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> resultType</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"com.sky.dto.GoodsSalesDTO"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        select od.name name,sum(od.number) number from order_detail od ,orders o</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        where od.order_id = o.id</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            and o.status = 5</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> test</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"begin != null"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and order_time </span><span style="color:#005CC5;--shiki-dark:#79B8FF">&amp;gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">= #{begin}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> test</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"end != null"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and order_time </span><span style="color:#005CC5;--shiki-dark:#79B8FF">&amp;lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">= #{end}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        group by name</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        order by number desc</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        limit 0, 10</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><a id="reference-功能测试-3"></a></p>
+<h3 id="功能测试-3">功能测试</h3>
+<p>可以通过如下方式进行测试：</p>
+<ul>
+<li>接口文档测试</li>
+<li>前后端联调</li>
+</ul>
+<p>重启服务，直接采用前后端联调测试。</p>
+<p><strong>查看近 30 日销量排名 Top10 统计</strong></p>
+<p>若查询的某一段时间没有销量数据，则显示不出效果。</p>
+<p><img alt="image-20230107210518821" loading="lazy" decoding="async" width="1892" height="741" src="/_astro/IMG-20260722152519185.CWMdUR1y_2oz4y0.webp"></p>
+<p>进入开发者模式，查看返回数据</p>
+<p><img alt="image-20230107210711326" loading="lazy" decoding="async" width="1415" height="279" src="/_astro/IMG-20260722152519212.DuFrpYYm_ZeT47m.webp"></p>
+<p>也可通过断点方式启动，查看每步执行情况。</p>
+<p><a id="reference-代码提交-3"></a></p>
+<h3 id="代码提交-3">代码提交</h3>
+<p><img alt="image-20230107210835115" loading="lazy" decoding="async" width="1076" height="1004" src="/_astro/IMG-20260722152519251.B0YnrcG3_P5FvJ.webp"></p>
+<p>后续步骤和其它功能代码提交一致，不再赘述。</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>有效订单与全部订单各如何定义？</li>
+<li>区间内没有记录的日期怎样补齐图表序列？</li>
+<li>完成率分母为零应如何表示？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#课程内容">课程内容</a></li><li style="--depth: 0"><a href="#apache-echarts">Apache ECharts</a></li><li style="--depth: 1"><a href="#介绍">介绍</a></li><li style="--depth: 1"><a href="#入门案例">入门案例</a></li><li style="--depth: 0"><a href="#营业额统计">营业额统计</a></li><li style="--depth: 1"><a href="#需求分析和设计">需求分析和设计</a></li><li style="--depth: 2"><a href="#产品原型">产品原型</a></li><li style="--depth: 2"><a href="#接口设计">接口设计</a></li><li style="--depth: 1"><a href="#代码开发">代码开发</a></li><li style="--depth: 2"><a href="#vo-设计">VO 设计</a></li><li style="--depth: 2"><a href="#controller-层">Controller 层</a></li><li style="--depth: 2"><a href="#service-层接口">Service 层接口</a></li><li style="--depth: 2"><a href="#service-层实现类">Service 层实现类</a></li><li style="--depth: 2"><a href="#mapper-层">Mapper 层</a></li><li style="--depth: 1"><a href="#功能测试">功能测试</a></li><li style="--depth: 1"><a href="#代码提交">代码提交</a></li><li style="--depth: 0"><a href="#用户统计">用户统计</a></li><li style="--depth: 1"><a href="#需求分析和设计-1">需求分析和设计</a></li><li style="--depth: 2"><a href="#产品原型-1">产品原型</a></li><li style="--depth: 2"><a href="#接口设计-1">接口设计</a></li><li style="--depth: 1"><a href="#代码开发-1">代码开发</a></li><li style="--depth: 2"><a href="#vo-设计-1">VO 设计</a></li><li style="--depth: 2"><a href="#controller-层-1">Controller 层</a></li><li style="--depth: 2"><a href="#service-层接口-1">Service 层接口</a></li><li style="--depth: 2"><a href="#service-层实现类-1">Service 层实现类</a></li><li style="--depth: 2"><a href="#mapper-层-1">Mapper 层</a></li><li style="--depth: 1"><a href="#功能测试-1">功能测试</a></li><li style="--depth: 1"><a href="#代码提交-1">代码提交</a></li><li style="--depth: 0"><a href="#订单统计">订单统计</a></li><li style="--depth: 1"><a href="#需求分析和设计-2">需求分析和设计</a></li><li style="--depth: 2"><a href="#产品原型-2">产品原型</a></li><li style="--depth: 2"><a href="#接口设计-2">接口设计</a></li><li style="--depth: 1"><a href="#代码开发-2">代码开发</a></li><li style="--depth: 2"><a href="#vo-设计-2">VO 设计</a></li><li style="--depth: 2"><a href="#controller-层-2">Controller 层</a></li><li style="--depth: 2"><a href="#service-层接口-2">Service 层接口</a></li><li style="--depth: 2"><a href="#service-层实现类-2">Service 层实现类</a></li><li style="--depth: 2"><a href="#mapper-层-2">Mapper 层</a></li><li style="--depth: 1"><a href="#功能测试-2">功能测试</a></li><li style="--depth: 1"><a href="#代码提交-2">代码提交</a></li><li style="--depth: 0"><a href="#销量排名-top10">销量排名 Top10</a></li><li style="--depth: 1"><a href="#需求分析和设计-3">需求分析和设计</a></li><li style="--depth: 2"><a href="#产品原型-3">产品原型</a></li><li style="--depth: 2"><a href="#接口设计-3">接口设计</a></li><li style="--depth: 1"><a href="#代码开发-3">代码开发</a></li><li style="--depth: 2"><a href="#vo-设计-3">VO 设计</a></li><li style="--depth: 2"><a href="#controller-层-3">Controller 层</a></li><li style="--depth: 2"><a href="#service-层接口-3">Service 层接口</a></li><li style="--depth: 2"><a href="#service-层实现类-3">Service 层实现类</a></li><li style="--depth: 2"><a href="#mapper-层-3">Mapper 层</a></li><li style="--depth: 1"><a href="#功能测试-3">功能测试</a></li><li style="--depth: 1"><a href="#代码提交-3">代码提交</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

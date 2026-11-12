@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DBaaS setup-account 多云基础设施实践 · Musuyin&#39; Home</title><meta name="description" content="这个案例展示多云基础设施的职责拆分：模块表达可复用资源，Landscape 组织具体环境，CI/CD 产生受审阅的变更。它与集群内 Helm 应用发布处在不同管理层。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/practice/setup-account-case-study/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="DBaaS setup-account 多云基础设施实践 · Musuyin' Home"><meta property="og:description" content="这个案例展示多云基础设施的职责拆分：模块表达可复用资源，Landscape 组织具体环境，CI/CD 产生受审阅的变更。它与集群内 Helm 应用发布处在不同管理层。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/practice/setup-account-case-study/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">DBaaS setup-account 多云基础设施实践</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-12">2026-08-12</time></dd></div><div><dt>字数</dt><dd>934</dd></div><div><dt>预计阅读</dt><dd>4 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Terraform/">#Terraform</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>DBaaS setup-account 多云基础设施实践</h1><time datetime="2026-08-12">2026-08-12</time><p class="tags"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Terraform/">#Terraform</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>这个案例展示多云基础设施的职责拆分：模块表达可复用资源，Landscape 组织具体环境，CI/CD 产生受审阅的变更。它与集群内 Helm 应用发布处在不同管理层。</p>
+<p>这是 SAP 内部真实使用 Terraform 管理多云账号的项目，是上述所有概念在生产环境的完整体现。</p>
+<p><a id="reference-仓库整体职责"></a></p>
+<h2 id="仓库整体职责">仓库整体职责</h2>
+<p><code>setup-account</code> 负责<strong>为 SAP HANA Cloud（DBaaS）在各云上创建和维护基础设施账号</strong>——包括网络（VPC/子网/防火墙）、IAM 权限、密钥管理（Vault）、DNS（Route53）、容器仓库（ECR）等，但<strong>不</strong>管理 K8s 集群内的应用（那是 Helm 的职责）。</p>
+<p><a id="reference-目录结构体现-terraform-module-模式"></a></p>
+<h2 id="目录结构体现-terraform-module-模式">目录结构——体现 Terraform Module 模式</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>setup-account/</span></span>
+<span class="line"><span>├── _modules/                  # 可复用 Terraform Module（按云厂商分类）</span></span>
+<span class="line"><span>│   ├── Aws/                   # AWS 专用模块</span></span>
+<span class="line"><span>│   │   ├── hana/              # HANA Cloud 相关资源</span></span>
+<span class="line"><span>│   │   ├── csi/               # CSI（Cloud Service Infrastructure）</span></span>
+<span class="line"><span>│   │   └── _create_aws_key/   # IAM Key 创建模块</span></span>
+<span class="line"><span>│   ├── Azure/                 # Azure 专用模块</span></span>
+<span class="line"><span>│   ├── Gcp/                   # GCP 专用模块</span></span>
+<span class="line"><span>│   └── AliCloud/              # 阿里云模块</span></span>
+<span class="line"><span>│</span></span>
+<span class="line"><span>├── HanaCloud/                 # 具体 Landscape 配置（调用 _modules）</span></span>
+<span class="line"><span>│   ├── Aws/</span></span>
+<span class="line"><span>│   │   ├── Landscapes/        # 每个具体的 AWS 环境（如 hc-ap11、hc-eu10）</span></span>
+<span class="line"><span>│   │   ├── Vault/             # HashiCorp Vault 配置</span></span>
+<span class="line"><span>│   │   ├── Route53/           # DNS 配置</span></span>
+<span class="line"><span>│   │   └── ECR/               # 容器镜像仓库</span></span>
+<span class="line"><span>│   ├── Azure/</span></span>
+<span class="line"><span>│   ├── Gcp/</span></span>
+<span class="line"><span>│   └── AliCloud/</span></span>
+<span class="line"><span>│</span></span>
+<span class="line"><span>├── stencils/                  # Landscape 元数据（账号/凭证/后端配置的单一来源）</span></span>
+<span class="line"><span>│   ├── cca-dev-aws.yaml       # AWS dev 环境的 stencil</span></span>
+<span class="line"><span>│   ├── azure/</span></span>
+<span class="line"><span>│   │   ├── hc-eu20.yaml       # Azure 欧洲生产环境 stencil</span></span>
+<span class="line"><span>│   │   └── ...</span></span>
+<span class="line"><span>│   └── ...</span></span>
+<span class="line"><span>│</span></span>
+<span class="line"><span>├── scripts/                   # 运维脚本（初始化 IAM Key / Service Principal / Vault 密钥）</span></span>
+<span class="line"><span>├── Jenkinsfile                # CI/CD Pipeline（PR → plan，merge → apply）</span></span>
+<span class="line"><span>└── cfg/                       # 全局配置</span></span></code></pre>
+<p><strong>核心设计</strong>：<code>_modules/</code> 是可复用模板（类比 Helm Chart），<code>HanaCloud/Aws/Landscapes/hc-ap11/</code> 是具体的 Values（类比 values-prod.yaml），调用模块并传入该 Landscape 的参数。</p>
+<p><a id="reference-stencillandscape-的元数据单一来源"></a></p>
+<h2 id="stencillandscape-的元数据单一来源">Stencil：Landscape 的元数据单一来源</h2>
+<p><strong>Stencil 是什么？</strong></p>
+<p><code>stencils/</code> 下的每个 YAML 文件描述的是<strong>一个 Landscape 的身份信息</strong>，不是 Terraform HCL，也不是 Helm values——它是比 Terraform 更底层的一层：告诉所有工具“这个环境长什么样”。</p>
+<p>以 <code>stencils/cca-dev-aws.yaml</code> 为例：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">aws</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">region</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">eu-central-1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">stage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">dev</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">area</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">hc</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">vault</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  instance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">dev</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  project</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">hc-dev</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  secrets_vault_storage_path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">cca/aws/dev</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">accounts</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  cca</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    profile</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">cca-dev</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'895633207865'</span><span style="color:#6A737D;--shiki-dark:#6A737D">           # AWS 账号 ID</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    credentials</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      vault</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">cca/aws/dev/automator</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 凭证在 Vault 中的路径</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">terraform</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  project_path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">HanaCloud/Aws/CCA/cca-dev</span><span style="color:#6A737D;--shiki-dark:#6A737D">   # 对应的 Terraform 项目目录</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  backend</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    account</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">cca</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">s3</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    params</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      bucket</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">terraform-state.895633207865.eu-central-1</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # Terraform State 存储位置</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">terraform.tfstate</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      region</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">eu-central-1</span></span></code></pre>
+<p>Azure 的 stencil（如 <code>stencils/azure/hc-eu20.yaml</code>）更复杂，还包含：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">account</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  orchestration</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    subscription_id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">eebe3b6f-...</span><span style="color:#6A737D;--shiki-dark:#6A737D">   # 各子账号的 Azure Subscription ID</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  hana</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    subscription_id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ea6a9e60-...</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  sgw0 ~ sgw26</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:                    </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 每个 SGW 子账号</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    subscription_id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">service_account</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  gardener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:                        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># Gardener 专用 Service Principal</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    account</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      hana</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        app_id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">64448613-...</span><span style="color:#6A737D;--shiki-dark:#6A737D">       # 各账号下的 Azure App ID</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  automator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    ...</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  deployment</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    ...</span></span></code></pre>
+<p><strong>Stencil 解决的核心问题：</strong></p>
+<p>同一个 Landscape 的账号信息会被多个工具引用——Terraform 需要知道用哪个账号、State 存哪里；<code>scripts/</code> 里的 Python 脚本需要知道要创建哪些 Service Principal 并把密钥存到 Vault 的哪个路径。如果每个工具各自维护一份，很容易不一致。</p>
+<p>Stencil 把这些信息集中在一个 YAML 里，充当<strong>所有工具的共同配置来源</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>stencil.yaml（单一来源）</span></span>
+<span class="line"><span>    │</span></span>
+<span class="line"><span>    ├──→ Terraform Pipeline（读取 project_path、backend config）</span></span>
+<span class="line"><span>    │        → 知道去哪个账号、State 存哪</span></span>
+<span class="line"><span>    │</span></span>
+<span class="line"><span>    ├──→ scripts/create_azure_key.py（读取 account、service_account）</span></span>
+<span class="line"><span>    │        → 知道要为哪些账号创建 App Registration，密钥存 Vault 哪条路径</span></span>
+<span class="line"><span>    │</span></span>
+<span class="line"><span>    └──→ scripts/create_aws_key.py（读取 accounts.cca.id）</span></span>
+<span class="line"><span>             → 知道要在哪个 AWS 账号下创建 IAM Key</span></span></code></pre>
+<p><strong>与 Terraform Module 的关系：</strong></p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>文件</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>元数据层</td>
+<td><code>stencils/azure/hc-eu20.yaml</code></td>
+<td>账号 ID、Vault 路径、State 后端</td>
+</tr>
+<tr>
+<td>配置层</td>
+<td><code>HanaCloud/Aws/Landscapes/hc-ap11/</code></td>
+<td>Terraform HCL，调用 Module，传参数</td>
+</tr>
+<tr>
+<td>模块层</td>
+<td><code>_modules/Aws/hana/</code></td>
+<td>可复用 Terraform Module</td>
+</tr>
+</tbody>
+</table>
+<p>Stencil 不参与 <code>terraform apply</code> 的渲染过程，但它是整个 Pipeline 启动前的<strong>准备工作</strong>的数据来源——凭证初始化、State 位置配置，都先从 stencil 读取。</p>
+<p><a id="reference-cicd-流程gitops-思想的体现"></a></p>
+<h2 id="cicd-流程gitops-思想的体现">CI/CD 流程——GitOps 思想的体现</h2>
+<p>Jenkinsfile 实现了一套<strong>智能 Pipeline</strong>，完整体现了 Terraform 的生产实践：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>开发者提 PR</span></span>
+<span class="line"><span>    │</span></span>
+<span class="line"><span>    ▼</span></span>
+<span class="line"><span>Jenkins 自动检测变更文件</span></span>
+<span class="line"><span>（只对受影响的 Landscape 运行，不跑全量）</span></span>
+<span class="line"><span>    │</span></span>
+<span class="line"><span>    ▼</span></span>
+<span class="line"><span>PR 阶段：terraform plan（预览，不执行）</span></span>
+<span class="line"><span>→ 结果作为 Comment 发回 PR</span></span>
+<span class="line"><span>    │</span></span>
+<span class="line"><span>    ▼</span></span>
+<span class="line"><span>Code Review + 合并到 master</span></span>
+<span class="line"><span>    │</span></span>
+<span class="line"><span>    ▼</span></span>
+<span class="line"><span>master Pipeline：terraform apply（真正执行变更）</span></span>
+<span class="line"><span>→ 最多 20 个 Landscape 并行执行</span></span>
+<span class="line"><span>→ 结果上传 Sirius（合规审计）</span></span>
+<span class="line"><span>→ 失败发 Slack 告警</span></span></code></pre>
+<p><strong>智能 Pipeline 选择机制</strong>：不是每次 PR 都跑所有 Landscape（那样太慢）。Jenkins 分析变更文件路径，只触发受影响的 Lane（hc / di / monitor / cca 等）和具体 Landscape，大幅缩短 CI 时间。</p>
+<p><a id="reference-多云--多环境的层次结构"></a></p>
+<h2 id="多云--多环境的层次结构">多云 + 多环境的层次结构</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>HanaCloud/Aws/Landscapes/</span></span>
+<span class="line"><span>├── hc-ap11/    # AWS 亚太（日本）生产环境</span></span>
+<span class="line"><span>├── hc-eu10/    # AWS 欧洲生产环境</span></span>
+<span class="line"><span>├── hc-us10/    # AWS 美国生产环境</span></span>
+<span class="line"><span>└── hc-dev/     # 开发/测试环境</span></span></code></pre>
+<p>每个 Landscape 目录下是调用 <code>_modules</code> 的 Terraform 配置，传入该环境的具体参数（region、账号、网络 CIDR、资源规格等）。同一套模块代码，通过不同参数部署到 10+ 个云环境，零代码重复。</p>
+<p><a id="reference-与其他工具的分工在此项目中"></a></p>
+<h2 id="与其他工具的分工在此项目中">与其他工具的分工（在此项目中）</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>setup-account（Terraform）</span></span>
+<span class="line"><span>    管：AWS/Azure/GCP 账号级基础设施</span></span>
+<span class="line"><span>    → VPC、子网、IAM Role、Security Group</span></span>
+<span class="line"><span>    → Vault（密钥管理）、Route53（DNS）、ECR（镜像仓库）</span></span>
+<span class="line"><span>    → 为 Gardener 创建 Shoot 提供云账号凭证</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Gardener（另一套系统）</span></span>
+<span class="line"><span>    管：在上述账号内创建/维护 K8s 集群（Shoot）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Helm（再上一层）</span></span>
+<span class="line"><span>    管：往 K8s 集群内部署 HANA Cloud 的服务</span></span></code></pre>
+<p>这三层正好对应了 Cloud Native 的完整基础设施栈：账号/网络层 → 集群层 → 应用层。</p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>沿一项账号变更追踪元数据、模块、计划与流水线；指出 Terraform、Vault、DNS 和 Helm 各自管理什么。案例中的内部结构是记录快照，未在本轮连接系统验证。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/component/terraform/">Terraform</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#仓库整体职责">仓库整体职责</a></li><li style="--depth: 0"><a href="#目录结构体现-terraform-module-模式">目录结构——体现 Terraform Module 模式</a></li><li style="--depth: 0"><a href="#stencillandscape-的元数据单一来源">Stencil：Landscape 的元数据单一来源</a></li><li style="--depth: 0"><a href="#cicd-流程gitops-思想的体现">CI/CD 流程——GitOps 思想的体现</a></li><li style="--depth: 0"><a href="#多云--多环境的层次结构">多云 + 多环境的层次结构</a></li><li style="--depth: 0"><a href="#与其他工具的分工在此项目中">与其他工具的分工（在此项目中）</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

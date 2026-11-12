@@ -1,0 +1,381 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Sentinel · Musuyin&#39; Home</title><meta name="description" content="Sentinel 先把调用定义为资源，再为资源设置流量、熔断、热点参数或系统规则。复习时要分清规则拒绝、业务异常与降级结果；控制台展示规则不等于规则已经可靠持久化。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/java/springcloud/sentinel/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Sentinel · Musuyin' Home"><meta property="og:description" content="Sentinel 先把调用定义为资源，再为资源设置流量、熔断、热点参数或系统规则。复习时要分清规则拒绝、业务异常与降级结果；控制台展示规则不等于规则已经可靠持久化。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/java/springcloud/sentinel/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Sentinel</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-10-05">2025-10-05</time></dd></div><div><dt>字数</dt><dd>2322</dd></div><div><dt>预计阅读</dt><dd>8 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%90%8E%E7%AB%AF/">#后端</a><a href="/tags/Java/">#Java</a><a href="/tags/SpringCloud/">#SpringCloud</a><a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">#微服务</a><a href="/tags/Sentinel/">#Sentinel</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Sentinel</h1><time datetime="2025-10-05">2025-10-05</time><p class="tags"><a href="/tags/%E5%90%8E%E7%AB%AF/">#后端</a><a href="/tags/Java/">#Java</a><a href="/tags/SpringCloud/">#SpringCloud</a><a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">#微服务</a><a href="/tags/Sentinel/">#Sentinel</a></p></header><div class="prose"><p>Sentinel 先把调用定义为资源，再为资源设置流量、熔断、热点参数或系统规则。复习时要分清规则拒绝、业务异常与降级结果；控制台展示规则不等于规则已经可靠持久化。</p>
+<p><a id="reference-概述"></a></p>
+<h2 id="概述">概述</h2>
+<p><a id="reference-应用场景"></a></p>
+<h3 id="应用场景">应用场景</h3>
+<p>Sentinel 通过流量控制、流量路由、熔断降级等多个维度保护服务的稳定性</p>
+<p><a id="reference-架构原理"></a></p>
+<h3 id="架构原理">架构原理</h3>
+<p>通过定义规则，存储规则，推送规则来实现保护资源</p>
+<p><img alt="" loading="lazy" decoding="async" width="1632" height="915" src="/_astro/IMG-20260722152533913.CpO8N-IU_nMJhU.webp"></p>
+<ul>
+<li>定义资源
+<ul>
+<li>主流框架自动适配，所有的 Web 接口均为资源</li>
+<li>编程式（不常用）</li>
+<li>声明式：<code>@SentinelResource</code></li>
+</ul>
+</li>
+<li>定义规则
+<ul>
+<li>流量控制 FlowRule</li>
+<li>熔断降级 DegradeRule</li>
+<li>系统保护 SystemRule</li>
+<li>来源访问控制 AuthorityRule</li>
+<li>热点参数 ParamFlowRule</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-工作原理"></a></p>
+<h3 id="工作原理">工作原理</h3>
+<p><img alt="" loading="lazy" decoding="async" width="1512" height="1143" src="/_astro/IMG-20260722152533943.y8l_XKHA_1knQCX.webp"></p>
+<p><a id="reference-整合使用"></a></p>
+<h3 id="整合使用">整合使用</h3>
+<p><a id="reference-控制台启动"></a></p>
+<h4 id="控制台启动">控制台启动</h4>
+<p>Sentinel 控制台包含如下功能:</p>
+<ul>
+<li><strong>查看机器列表以及健康情况</strong>：收集 Sentinel 客户端发送的心跳包，用于判断机器是否在线。</li>
+<li><strong>监控 (单机和集群聚合)</strong>：通过 Sentinel 客户端暴露的监控 API，定期拉取并且聚合应用监控信息，最终可以实现秒级的实时监控。</li>
+<li><strong>规则管理和推送</strong>：统一管理推送规则。</li>
+<li><strong>鉴权</strong>：生产环境中鉴权非常重要。这里每个开发者需要根据自己的实际情况进行定制。</li>
+</ul>
+<p>从 <a href="https://github.com/alibaba/Sentinel/releases">release</a> 获取 jar 包</p>
+<p>启动：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">java</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -Dserver.port=8080</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -Dcsp.sentinel.dashboard.server=localhost:8080</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -Dproject.name=sentinel-dashboard</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -jar</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> sentinel-dashboard.jar</span></span></code></pre>
+<p>默认用户名和密码都是  <code>sentinel</code></p>
+<p><a id="reference-客户端接入"></a></p>
+<h4 id="客户端接入">客户端接入</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  cloud</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    sentinel</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 饥汉式启动</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      eager</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      transport</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        dashboard</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">localhost:8080</span></span></code></pre>
+<p><a id="reference-定义资源"></a></p>
+<h3 id="定义资源">定义资源</h3>
+<p><a id="reference-声明式"></a></p>
+<h4 id="声明式">声明式</h4>
+<p>将 <code>createOrder</code> 定义为<strong>资源</strong>，sentinel 就会对其进行监控</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> OrderServiceImpl</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> OrderService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">SentinelResource</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">value</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "createOrder"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Override</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Order </span><span style="color:#6F42C1;--shiki-dark:#B392F0">createOrder</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long </span><span style="color:#E36209;--shiki-dark:#FFAB70">userId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Long </span><span style="color:#E36209;--shiki-dark:#FFAB70">productId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><img alt="" loading="lazy" decoding="async" width="1563" height="453" src="/_astro/IMG-20260722152533968._Yp-49rj_Z1y6bGq.webp"></p>
+<p>这样就能得到一个请求的完整流程中需要用到什么资源，就能进行规则的设置了</p>
+<p><a id="reference-异常处理"></a></p>
+<h2 id="异常处理">异常处理</h2>
+<p>违背了规则之后，会根据资源类型的不同，进行不同的处理</p>
+<p><img alt="" loading="lazy" decoding="async" width="1474" height="784" src="/_astro/IMG-20260722152534096.bK0nNFip_xyVQN.webp"></p>
+<p><a id="reference-web-接口异常处理"></a></p>
+<h3 id="web-接口异常处理">Web 接口异常处理</h3>
+<p><a id="reference-默认处理"></a></p>
+<h4 id="默认处理">默认处理</h4>
+<p>默认 BlockExceptionHandler，返回 429</p>
+<p><a id="reference-自定义"></a></p>
+<h4 id="自定义">自定义</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Component</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> MyBlockExceptionHandler</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> BlockExceptionHandler</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#D73A49;--shiki-dark:#F97583"> final</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ObjectMapper mapper </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ObjectMapper</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Override</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(HttpServletRequest </span><span style="color:#E36209;--shiki-dark:#FFAB70">httpServletRequest</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, HttpServletResponse </span><span style="color:#E36209;--shiki-dark:#FFAB70">httpServletResponse</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, String </span><span style="color:#E36209;--shiki-dark:#FFAB70">s</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, BlockException </span><span style="color:#E36209;--shiki-dark:#FFAB70">e</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">throws</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Exception {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 获取一个通信管道</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        PrintWriter writer </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> httpServletResponse.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getWriter</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        httpServletResponse.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setContentType</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"application/json;charset=UTF-8"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 构造错误类型</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        R error </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> R.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "被 Sentinel 限制了！原因："</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> e.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(), e);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 转成字符串形式的json</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String json </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> mapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">writeValueAsString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(error);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 通过管道返回</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        writer.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">write</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(json);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        writer.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">flush</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        writer.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">close</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>效果</p>
+<p><img alt="" loading="lazy" decoding="async" width="401" height="210" src="/_astro/IMG-20260722152534122.DMvTOYnF_2ekh2t.webp"></p>
+<p>注意这个是对 Web 接口进行的配置，使用 dashboard 添加规则时，要注意添加的资源应该是路径</p>
+<p><a id="reference-sentinelresource-异常处理"></a></p>
+<h3 id="sentinelresource-异常处理"><code>@SentinelResource</code> 异常处理</h3>
+<p><code>@SentinelResource</code> 多用于保护非 controller 层方法，比如 service</p>
+<p>在 <code>@SentinelResource</code> 上指定 <code>blockHandler</code> 参数或者 <code>fallback</code> / <code>defaultFallback</code> 参数</p>
+<ul>
+<li>会先查询 <code>blockHandler</code> 是否有指定处理方法，若有则执行</li>
+<li>若无则查询 <code>fallback</code></li>
+<li>如果这三个参数都没有指定，异常就会继续向上抛出</li>
+</ul>
+<p><a id="reference-全局异常处理"></a></p>
+<h4 id="全局异常处理">全局异常处理</h4>
+<p>使用全局异常处理器，即使没有指定参数，也可以接收到最后向上抛出的异常</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// @ResponseBody</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// @ControllerAdvice</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 以上两个注解合并为下面这个注解</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RestControllerAdvice</span><span style="color:#6A737D;--shiki-dark:#6A737D">   // 全局异常处理器</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> GlobalExceptionHandler</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ExceptionHandler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Throwable.class)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String </span><span style="color:#6F42C1;--shiki-dark:#B392F0">error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Throwable </span><span style="color:#E36209;--shiki-dark:#FFAB70">ex</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ex.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-局部异常处理"></a></p>
+<h4 id="局部异常处理">局部异常处理</h4>
+<p>通过在注解上指定参数，可以针对每个资源进行异常处理</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">SentinelResource</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">value</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "createOrder"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">blockHandler</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "createOrderFallback"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Override</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Order </span><span style="color:#6F42C1;--shiki-dark:#B392F0">createOrder</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long userId, Long productId) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Order order </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Order</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setUserId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(userId);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setNickName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Musuyin"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setAddress</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Home"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 需要远程调用来获取</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 使用feign client进行远程调用</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Product product </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> productFeignClient.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getProductNameById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(productId);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // Product product = getProductFromRemote(productId);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setTotalAmount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(product.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getPrice</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">multiply</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> BigDecimal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(product.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getNum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">())));</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setProductList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Arrays.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">asList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(product));</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> order;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 兜底回调</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Order </span><span style="color:#6F42C1;--shiki-dark:#B392F0">createOrderFallback</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long userId, Long productId, BlockException ex) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Order order </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Order</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setUserId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0L</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setNickName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Unknown"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setAddress</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setTotalAmount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(BigDecimal.ZERO);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setProductList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> order;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>正常执行，则只会执行上面的方法，如果出现错误，则执行下面的方法</p>
+<p><img alt="" loading="lazy" decoding="async" width="225" height="175" src="/_astro/IMG-20260722152534161.C_gh63KH_Gtyb1.webp"></p>
+<p><a id="reference-openfeign-调用异常处理"></a></p>
+<h3 id="openfeign-调用异常处理">OpenFeign 调用异常处理</h3>
+<p>使用全局异常捕获（同上 <code>GlobalExceptionHandler</code>），或者局部异常处理</p>
+<p><a id="reference-开启熔断"></a></p>
+<h4 id="开启熔断">开启熔断</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  cloud</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    openfeign</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      client</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        config</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          service-product</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            logger-level</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">full</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            connect-timeout</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3000</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            read-timeout</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">5000</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            request-interceptors</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">              - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">com.github.musuyin.order.interceptor.XTokenRequestInterceptor</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">feign</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  sentinel</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    enabled</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span></code></pre>
+<p><a id="reference-加入回调实现"></a></p>
+<h4 id="加入回调实现">加入回调实现</h4>
+<p>注意要加入容器</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Component</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ProductFeignClientFallback</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ProductFeignClient</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Override</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Product </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getProductNameById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long </span><span style="color:#E36209;--shiki-dark:#FFAB70">id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"远程调用失败-执行兜底回调"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Product product </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Product</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        product.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(id);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> product;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-关联回调函数"></a></p>
+<h4 id="关联回调函数">关联回调函数</h4>
+<p>用 fallback 指定兜底回调</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// feign客户端标志, value填写要发送目的地服务名</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">FeignClient</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">value</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "service-product"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">fallback</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ProductFeignClientFallback.class)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> interface</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ProductFeignClient</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // RequestMapping, 在controller上表示接收路径, 在feignClient上表示发送路径</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/product/{id}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Product </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getProductNameById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">PathVariable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) Long </span><span style="color:#E36209;--shiki-dark:#FFAB70">id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-sphu-异常处理"></a></p>
+<h3 id="sphu-异常处理">SphU 异常处理</h3>
+<p>硬编码处理</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">try</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    SphU.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">entry</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"resourceName"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">} </span><span style="color:#D73A49;--shiki-dark:#F97583">catch</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (BlockException </span><span style="color:#E36209;--shiki-dark:#FFAB70">e</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    throw</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> RuntimeException</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(e);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-流量控制规则"></a></p>
+<h2 id="流量控制规则">流量控制规则</h2>
+<p>都是在创建规则时指定，不需要编码</p>
+<p><a id="reference-阈值类型"></a></p>
+<h3 id="阈值类型">阈值类型</h3>
+<ul>
+<li>QPS：统计每秒请求数（一般使用 QPS）</li>
+<li>并发线程数：统计并发线程数</li>
+</ul>
+<p>集群模式：</p>
+<ul>
+<li>单机均摊：每个机器单独计算</li>
+<li>总体阈值：所有机器共享额度</li>
+</ul>
+<p><a id="reference-流控模式"></a></p>
+<h3 id="流控模式">流控模式</h3>
+<p>调用关系包括调用方、被调用方；一个方法也可能调用其他方法，会形成一个调用链路的层次关系</p>
+<p><a id="reference-直接"></a></p>
+<h4 id="直接">直接</h4>
+<p>默认，只对一个资源进行控制</p>
+<p><img alt="" loading="lazy" decoding="async" width="362" height="106" src="/_astro/IMG-20260722152534190.DSgo1FWB_swc2H.webp"></p>
+<p><a id="reference-关联"></a></p>
+<h4 id="关联">关联</h4>
+<p>当系统里出现资源竞争的时候，使用关联策略进行限制</p>
+<p><img alt="" loading="lazy" decoding="async" width="486" height="282" src="/_astro/IMG-20260722152534216.D_GZ8G95_1HDwWV.webp"></p>
+<p>需要分离上下文，关闭上下文统一</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  cloud</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    sentinel</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      web-context-unify</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span></span></code></pre>
+<p><a id="reference-链路"></a></p>
+<h4 id="链路">链路</h4>
+<p>两个请求访问一个资源，但只限制其中一个请求</p>
+<p><img alt="" loading="lazy" decoding="async" width="586" height="177" src="/_astro/IMG-20260722152534269.Cdt0lH55_Zii49v.webp"></p>
+<p><a id="reference-流控效果"></a></p>
+<h3 id="流控效果">流控效果</h3>
+<p><a id="reference-快速失败"></a></p>
+<h4 id="快速失败">快速失败</h4>
+<p>如果超出阈值，则直接执行错误规则。只有快速失败支持上面的流控模式</p>
+<p><img alt="" loading="lazy" decoding="async" width="560" height="136" src="/_astro/IMG-20260722152534290.DW8wVAB2_Z1hxekJ.webp"></p>
+<p><a id="reference-warm-up"></a></p>
+<h4 id="warm-up">Warm Up</h4>
+<p>慢慢将每秒的请求阈值达到峰值</p>
+<p><img alt="" loading="lazy" decoding="async" width="572" height="177" src="/_astro/IMG-20260722152534325.DHq5zZWg_Z2ix4tW.webp"></p>
+<p>先从低点启动，在 <code>Period</code> 中逐渐提升处理数量，最后达到 <code>QPS</code>，保持稳定。每秒多余的请求会被丢弃</p>
+<p><a id="reference-匀速排队"></a></p>
+<h4 id="匀速排队">匀速排队</h4>
+<p>多余的请求会排队，如果超出 <code>timeout</code>，则会丢弃</p>
+<p><img alt="" loading="lazy" decoding="async" width="565" height="176" src="/_astro/IMG-20260722152534354.DuWb0cRM_8mwQ2.webp"></p>
+<p><a id="reference-熔断降级规则"></a></p>
+<h2 id="熔断降级规则">熔断降级规则</h2>
+<ul>
+<li>切断不稳定调用</li>
+<li>快速返回，不积压</li>
+<li>避免雪崩效应</li>
+</ul>
+<p>熔断降级用于保护自身，在客户端（调用端）配置</p>
+<p><img alt="" loading="lazy" decoding="async" width="1343" height="688" src="/_astro/IMG-20260722152534378.DZ8HWqo2_2svWyw.webp"></p>
+<ul>
+<li>断路器处于关闭状态，则发送请求</li>
+<li>如果请求状态满足了异常状态阈值，则将断路器切换为打开状态</li>
+<li>如果断路器处于打开状态，则不会发送请求</li>
+<li>等待熔断时长到达之后，断路器会切换为半开状态</li>
+<li>在半开状态下，只会放行一个请求，成功则切换为关闭状态，否则切换为打开状态，接着再处理后续的请求</li>
+</ul>
+<p><img alt="" loading="lazy" decoding="async" width="1091" height="566" src="/_astro/IMG-20260722152534424.dnLZmnSg_Z2qmX48.webp"></p>
+<ul>
+<li>无熔断规则：是 OpenFeign 发生错误、超时，才会执行 fallback，每次都还会发送请求</li>
+<li>有熔断规则：绕过 OpenFeign，直接执行 fallback，不会再发送请求了</li>
+</ul>
+<p><a id="reference-慢调用比例"></a></p>
+<h3 id="慢调用比例">慢调用比例</h3>
+<p>如：统计时长 5 秒，比例阈值 70% 的请求在最大 RT（最大反应时间）1 秒以上，则触发熔断降级。</p>
+<ul>
+<li>熔断时长：断开时间，时间到了则会发一个请求试探，有用则通，没用则再继续熔断。</li>
+<li>最小请求数：指统计时长内最少发的请求数量。</li>
+<li>RT：response time</li>
+</ul>
+<p>由于是在远程调用处设置了熔断策略，所以熔断之后走 openFeign 的 fallback 处理</p>
+<p>发生熔断后直接回调，不发远程请求</p>
+<p><img alt="" loading="lazy" decoding="async" width="1046" height="419" src="/_astro/IMG-20260722152534454.CuHyyvPr_7JJJ3.webp"></p>
+<p><a id="reference-异常比例"></a></p>
+<h3 id="异常比例">异常比例</h3>
+<p>统计时长内发生异常的比例达到比例阈值（慢调用比例是根据响应时间，异常比例是看调用是否发生异常）</p>
+<p>发生熔断后直接回调，不发远程请求</p>
+<p><img alt="" loading="lazy" decoding="async" width="1040" height="436" src="/_astro/IMG-20260722152534482.DkYrgvzc_1jPn46.webp"></p>
+<p><a id="reference-异常数"></a></p>
+<h3 id="异常数">异常数</h3>
+<p>统计时长内发生异常的数量达到设置的异常数，则发生熔断</p>
+<p><img alt="" loading="lazy" decoding="async" width="1031" height="425" src="/_astro/IMG-20260722152534505.BzdRY6ku_27C6WU.webp"></p>
+<p><a id="reference-热点参数规则"></a></p>
+<h2 id="热点参数规则">热点参数规则</h2>
+<p>流控规则只能对某一路径（资源）进行控制，热点参数规则可以对更细节的参数进行控制，如：</p>
+<ul>
+<li>参数数量</li>
+<li>参数满足条件</li>
+</ul>
+<p>需求：</p>
+<ul>
+<li>用户秒杀 QPS 不超过 1（userId 限制）</li>
+<li>vip 用户不限制 QPS</li>
+<li>下架商品，不允许访问</li>
+</ul>
+<p><a id="reference-环境搭建"></a></p>
+<h3 id="环境搭建">环境搭建</h3>
+<p>Sentinel 的热点参数仅适配 Dubbo，对于 Spring 则需要自定义埋点，指定新的资源名并传入希望的参数</p>
+<p>自定义埋点的资源名和其他资源名不可重复</p>
+<p><a id="reference-热点参数限流"></a></p>
+<h3 id="热点参数限流">热点参数限流</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/seckill"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">SentinelResource</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">value</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "seckill-order"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">fallback</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "seckillFallback"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 自定义埋点</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 默认值也算有值，相当于所有用户都会使用默认值被同一个userId限制</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// public Order seckill(@RequestParam(value = "userId",defaultValue = "888") Long userId,</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">//                         @RequestParam(value = "productId",defaultValue = "1000") Long productId)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Order </span><span style="color:#6F42C1;--shiki-dark:#B392F0">seckill</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestParam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">value</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "userId"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">required</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> false</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) Long userId,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                     @</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestParam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">value</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "productId"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">required</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> false</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) Long productId) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Order order </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> orderService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">createOrder</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(userId, productId);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long.MAX_VALUE);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> order;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// BlockException 改为 Throwable，从而能捕获所有的异常，都通过fallback回调</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Order </span><span style="color:#6F42C1;--shiki-dark:#B392F0">seckillFallback</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long userId, Long productId, Throwable exception) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"seckillFallback..."</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Order order </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Order</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(productId);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setUserId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(userId);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setAddress</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"seckillFallback异常信息"</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> exception.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getClass</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> order;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>默认情况下使用 <code>fallback</code>，发生限流时不会调用，需要换为 <code>blockHandler</code>，但是 <code>blockHandler</code> 不能处理业务异常，使用 <code>fallback</code> 覆盖面更广，所以将回调函数的 <code>BlockException</code> 改为 <code>Throwable</code>，使得 <code>fallback</code> 也能处理限流异常</p>
+<blockquote>
+<p>需求 1：通过 <code>userId</code> 限制每个用户的 QPS 为 1</p>
+</blockquote>
+<p><img alt="" loading="lazy" decoding="async" width="1096" height="406" src="/_astro/IMG-20260722152534527.BzD9E0_4_Z1Eq33K.webp"></p>
+<ul>
+<li>参数索引即控制参数的位置，<code>0</code> 即为 <code>userId</code></li>
+<li>携带了 <code>userId</code> 参数就会被流控，不携带不会被流控（<code>required</code>）</li>
+</ul>
+<blockquote>
+<p>需求 2：设置 VIP 用户不受流控</p>
+</blockquote>
+<p>添加参数例外项即可</p>
+<p><img alt="" loading="lazy" decoding="async" width="1148" height="923" src="/_astro/IMG-20260722152534555.M9U-Tjrs_Z10ufNP.webp"></p>
+<blockquote>
+<p>需求 3：下架商品不允许访问</p>
+</blockquote>
+<p>即其他商品可被正常访问，添加例外项限流下架商品</p>
+<p><img alt="" loading="lazy" decoding="async" width="1119" height="942" src="/_astro/IMG-20260722152534579.BSXUFdB5_Z2706bw.webp"></p>
+<p><a id="reference-授权规则"></a></p>
+<h2 id="授权规则">授权规则</h2>
+<p>设置白名单或黑名单，只有指定服务才能访问</p>
+<p><a id="reference-系统规则"></a></p>
+<h2 id="系统规则">系统规则</h2>
+<p>对于整个系统的保护规则，但是精度难以控制，很少用</p>
+<p><a id="reference-规则持久化"></a></p>
+<h2 id="规则持久化">规则持久化</h2>
+<p>Sentinel 只把规则存储在内存，无法持久化。可以使用 Nacos 进行配置和持久化</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>blockHandler 与 fallback 分别针对什么？</li>
+<li>QPS 限流与慢调用熔断观察的指标有什么不同？</li>
+<li>应用重启后，规则由哪里恢复？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#概述">概述</a></li><li style="--depth: 1"><a href="#应用场景">应用场景</a></li><li style="--depth: 1"><a href="#架构原理">架构原理</a></li><li style="--depth: 1"><a href="#工作原理">工作原理</a></li><li style="--depth: 1"><a href="#整合使用">整合使用</a></li><li style="--depth: 2"><a href="#控制台启动">控制台启动</a></li><li style="--depth: 2"><a href="#客户端接入">客户端接入</a></li><li style="--depth: 1"><a href="#定义资源">定义资源</a></li><li style="--depth: 2"><a href="#声明式">声明式</a></li><li style="--depth: 0"><a href="#异常处理">异常处理</a></li><li style="--depth: 1"><a href="#web-接口异常处理">Web 接口异常处理</a></li><li style="--depth: 2"><a href="#默认处理">默认处理</a></li><li style="--depth: 2"><a href="#自定义">自定义</a></li><li style="--depth: 1"><a href="#sentinelresource-异常处理">@SentinelResource 异常处理</a></li><li style="--depth: 2"><a href="#全局异常处理">全局异常处理</a></li><li style="--depth: 2"><a href="#局部异常处理">局部异常处理</a></li><li style="--depth: 1"><a href="#openfeign-调用异常处理">OpenFeign 调用异常处理</a></li><li style="--depth: 2"><a href="#开启熔断">开启熔断</a></li><li style="--depth: 2"><a href="#加入回调实现">加入回调实现</a></li><li style="--depth: 2"><a href="#关联回调函数">关联回调函数</a></li><li style="--depth: 1"><a href="#sphu-异常处理">SphU 异常处理</a></li><li style="--depth: 0"><a href="#流量控制规则">流量控制规则</a></li><li style="--depth: 1"><a href="#阈值类型">阈值类型</a></li><li style="--depth: 1"><a href="#流控模式">流控模式</a></li><li style="--depth: 2"><a href="#直接">直接</a></li><li style="--depth: 2"><a href="#关联">关联</a></li><li style="--depth: 2"><a href="#链路">链路</a></li><li style="--depth: 1"><a href="#流控效果">流控效果</a></li><li style="--depth: 2"><a href="#快速失败">快速失败</a></li><li style="--depth: 2"><a href="#warm-up">Warm Up</a></li><li style="--depth: 2"><a href="#匀速排队">匀速排队</a></li><li style="--depth: 0"><a href="#熔断降级规则">熔断降级规则</a></li><li style="--depth: 1"><a href="#慢调用比例">慢调用比例</a></li><li style="--depth: 1"><a href="#异常比例">异常比例</a></li><li style="--depth: 1"><a href="#异常数">异常数</a></li><li style="--depth: 0"><a href="#热点参数规则">热点参数规则</a></li><li style="--depth: 1"><a href="#环境搭建">环境搭建</a></li><li style="--depth: 1"><a href="#热点参数限流">热点参数限流</a></li><li style="--depth: 0"><a href="#授权规则">授权规则</a></li><li style="--depth: 0"><a href="#系统规则">系统规则</a></li><li style="--depth: 0"><a href="#规则持久化">规则持久化</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

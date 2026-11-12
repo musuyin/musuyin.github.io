@@ -1,0 +1,884 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Python 面向对象使用 · Musuyin&#39; Home</title><meta name="description" content="从实例与类的关系开始，再比较继承、方法绑定与装饰器。classmethod 绑定类，staticmethod 不接收隐式实例，property 把访问封装为计算，Enum 则表达有限且可比较的成员集合。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/tool/python/python-object-oriented-programming/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Python 面向对象使用 · Musuyin' Home"><meta property="og:description" content="从实例与类的关系开始，再比较继承、方法绑定与装饰器。classmethod 绑定类，staticmethod 不接收隐式实例，property 把访问封装为计算，Enum 则表达有限且可比较的成员集合。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/tool/python/python-object-oriented-programming/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Python 面向对象使用</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-09-29">2025-09-29</time></dd></div><div><dt>字数</dt><dd>2033</dd></div><div><dt>预计阅读</dt><dd>7 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Python/">#Python</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Python 面向对象使用</h1><time datetime="2025-09-29">2025-09-29</time><p class="tags"><a href="/tags/Python/">#Python</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>从实例与类的关系开始，再比较继承、方法绑定与装饰器。classmethod 绑定类，staticmethod 不接收隐式实例，property 把访问封装为计算，Enum 则表达有限且可比较的成员集合。</p>
+<p><a id="reference-类"></a></p>
+<h2 id="类">类</h2>
+<p><a id="reference-声明"></a></p>
+<h3 id="声明">声明</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ClassName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	a </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 10</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __init__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> show</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span></code></pre>
+<p>方法必须有 self​ 形参传入</p>
+<p><a id="reference-self"></a></p>
+<h3 id="self">self</h3>
+<p>self = this</p>
+<p><a id="reference-使用"></a></p>
+<h3 id="使用">使用</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Employee</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    age </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __init__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, age):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.age </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> age</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> show</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.age)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">emp1 </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Employee(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">18</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">emp1.show()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">del</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> emp1.age  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 设置为对应属性的默认值</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">emp1.show()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">hasattr</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(emp1, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'age'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)    </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 如果存在 'age' 属性返回 True。</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">getattr</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(emp1, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'age'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)    </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 返回 'age' 属性的值</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">setattr</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(emp1, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'age'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 添加属性 'age' 值为 8</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">delattr</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(emp1, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'age'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)    </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 删除属性 'age'</span></span></code></pre>
+<p><a id="reference-内置类属性"></a></p>
+<h3 id="内置类属性">内置类属性</h3>
+<ul>
+<li><strong>dict</strong> : 类的属性（包含一个字典，由类的数据属性组成）</li>
+<li><strong>doc</strong> :类的文档字符串</li>
+<li><strong>name</strong>: 类名</li>
+<li><strong>module</strong>: 类定义所在的模块（类的全名是’<strong>main</strong>.className’，如果类位于一个导入模块 mymod 中，那么 className.<strong>module</strong> 等于 mymod）</li>
+<li><strong>bases</strong> : 类的所有父类构成元素（包含了一个由所有父类组成的元组）</li>
+<li><strong>del</strong>: 析构函数</li>
+</ul>
+<p><a id="reference-继承"></a></p>
+<h3 id="继承">继承</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Person</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    age </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Employee</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Person</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    salary </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0.0</span></span></code></pre>
+<ol>
+<li>如果在子类中需要父类的构造方法就需要显式的调用父类的构造方法，或者不重写父类的构造方法。详细说明可查看： <a href="https://www.runoob.com/w3cnote/python-extends-init.html">python 子类继承父类构造函数说明</a>。</li>
+<li>在调用基类的方法时，需要加上父类的类名前缀，且需要带上 self 参数变量。区别在于类中调用普通函数时并不需要带上 self 参数</li>
+<li>Python 总是首先查找对应类型的方法，如果它不能在派生类中找到对应的方法，它才开始到父类中逐个查找。（先在本类中查找调用的方法，找不到才去父类中找）。</li>
+</ol>
+<p>如果在继承元组中列了一个以上的类，那么它就被称作“多重继承” 。</p>
+<p><a id="reference-继承检测"></a></p>
+<h4 id="继承检测">继承检测</h4>
+<ul>
+<li>​issubclass()​ - 布尔函数判断一个类是另一个类的子类或者子孙类，语法：issubclass(sub,sup)</li>
+<li>​isinstance(obj, Class)​ 布尔函数如果 obj 是 Class 类的实例对象或者是一个 Class 子类的实例对象则返回 true。</li>
+</ul>
+<p><a id="reference-方法重写"></a></p>
+<h3 id="方法重写">方法重写</h3>
+<p>没有注解，直接 def 同名函数即可覆盖
+下表列出了一些通用的功能，你可以在自己的类重写：</p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>方法, 描述 &amp; 简单的调用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>init</strong> ( self [,args…] ) <br>构造函数 <br>简单的调用方法: obj = className(args)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>del</strong>( self ) <br>析构方法, 删除一个对象 <br>简单的调用方法 : del obj</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>repr</strong>( self ) <br>转化为供解释器读取的形式 <br>简单的调用方法 : repr(obj)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>str</strong>( self ) <br>用于将值转化为适于人阅读的形式 <br>简单的调用方法 : str(obj)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>cmp</strong> ( self, x ) <br>对象比较 <br>简单的调用方法 : cmp(obj, x)</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-运算符重载"></a></p>
+<h3 id="运算符重载">运算符重载</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Vector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __init__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, a, b):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.a </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.b </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> b</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __str__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Vector (</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF">)"</span><span style="color:#D73A49;--shiki-dark:#F97583"> %</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.a, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.b)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __add__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, other):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Vector(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.a </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> other.a, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.b </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> other.b)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">v1 </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Vector(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">v2 </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Vector(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(v1 </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> v2)</span></span></code></pre>
+<p><a id="reference-私有属性和方法"></a></p>
+<h3 id="私有属性和方法">私有属性和方法</h3>
+<p>添加__​ 即设置变量或方法为 private</p>
+<p><a id="reference-python-装饰器decorator和-enum-详解"></a></p>
+<h2 id="python-装饰器decorator和-enum-详解">Python 装饰器（Decorator）和 Enum 详解</h2>
+<p><a id="reference-auto-函数的作用"></a></p>
+<h3 id="auto-函数的作用">auto() 函数的作用</h3>
+<p><a id="reference-基本概念"></a></p>
+<h4 id="基本概念">基本概念</h4>
+<p><code>auto()</code> 是 Python <code>enum</code> 模块提供的一个函数，用于<strong>自动生成枚举成员的值</strong>。</p>
+<p><a id="reference-没有-auto-的情况"></a></p>
+<h4 id="没有-auto-的情况">没有 auto() 的情况</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> enum </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Enum</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ❌ 传统方式：手动指定值</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AZURE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GCP</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    CCLOUD</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 4</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GDC</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 5</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    ALICLOUD</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 6</span></span></code></pre>
+<p><strong>问题</strong>：</p>
+<ul>
+<li>需要手动维护数字</li>
+<li>添加新成员时容易出错</li>
+<li>数字本身没有实际意义</li>
+</ul>
+<p><a id="reference-使用-auto-的情况"></a></p>
+<h4 id="使用-auto-的情况">使用 auto() 的情况</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> enum </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Enum, auto</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 使用 auto()：自动生成值</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 自动赋值为 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AZURE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()      </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 自动赋值为 2</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GCP</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 自动赋值为 3</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    CCLOUD</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()     </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 自动赋值为 4</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GDC</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 自动赋值为 5</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    ALICLOUD</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 自动赋值为 6</span></span></code></pre>
+<p><a id="reference-auto-的工作原理"></a></p>
+<h4 id="auto-的工作原理">auto() 的工作原理</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> enum </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Enum, auto</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 内部: AWS.value = 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AZURE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()      </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 内部: AZURE.value = 2</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GCP</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 内部: GCP.value = 3</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 验证值</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Hyperscaler.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">AWS</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.value)     </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 输出: 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Hyperscaler.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">AZURE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.value)   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 输出: 2</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Hyperscaler.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">GCP</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.value)     </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 输出: 3</span></span></code></pre>
+<p><a id="reference-auto-的默认规则"></a></p>
+<h4 id="auto-的默认规则">auto() 的默认规则</h4>
+<ol>
+<li><strong>从 1 开始</strong>：第一个 <code>auto()</code> 默认生成 1</li>
+<li><strong>递增</strong>：后续每个 <code>auto()</code> 在前一个值基础上 +1</li>
+<li><strong>混合使用</strong>：可以和手动赋值混用</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Status</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    PENDING</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()     </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    APPROVED</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 10</span><span style="color:#6A737D;--shiki-dark:#6A737D">        # 手动指定 10</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    REJECTED</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()    </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 11 (在 10 基础上 +1)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    COMPLETED</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 12</span></span></code></pre>
+<p><a id="reference-为什么使用-auto"></a></p>
+<h4 id="为什么使用-auto">为什么使用 auto()？</h4>
+<p><strong>在 context.py 中的使用场景</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@unique</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AZURE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GCP</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    CCLOUD</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GDC</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    ALICLOUD</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span></code></pre>
+<p><strong>原因</strong>：</p>
+<ol>
+<li>✅ <strong>枚举值本身不重要</strong>：我们只关心 <code>Hyperscaler.AWS</code>，不关心它的值是 1 还是 100</li>
+<li>✅ <strong>易于维护</strong>：添加新云平台时只需 <code>NEWCLOUD = auto()</code></li>
+<li>✅ <strong>避免错误</strong>：不会因为手动编号重复而出错</li>
+<li>✅ <strong>代码清晰</strong>：表明这些值只是标识符，没有数值意义</li>
+</ol>
+<p><a id="reference-实际使用示例"></a></p>
+<h4 id="实际使用示例">实际使用示例</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># context.py 中的使用</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AZURE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GCP</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用时我们关心的是枚举成员本身</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">hyperscaler </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Hyperscaler.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">AWS</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 比较</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> hyperscaler </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Hyperscaler.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">AWS</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"This is AWS"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 这样比较</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 我们不关心值</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(hyperscaler.value)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 1 (但我们不关心这个数字)</span></span></code></pre>
+<p><a id="reference-unique-装饰器"></a></p>
+<h3 id="unique-装饰器">@unique 装饰器</h3>
+<p><a id="reference-基本概念-1"></a></p>
+<h4 id="基本概念-1">基本概念</h4>
+<p><code>@unique</code> 是一个<strong>类装饰器</strong>，用于确保枚举类中<strong>所有成员的值都是唯一的</strong>。</p>
+<p><a id="reference-没有-unique-的情况"></a></p>
+<h4 id="没有-unique-的情况">没有 @unique 的情况</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> enum </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Enum</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ❌ 没有 @unique：可以有重复值</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Color</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    RED</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GREEN</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    BLUE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#6A737D;--shiki-dark:#6A737D">      # ⚠️ 和 RED 值相同，会成为 RED 的别名</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Color.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">RED</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># Color.RED</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Color.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">BLUE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># Color.RED (BLUE 是 RED 的别名！)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Color.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">RED</span><span style="color:#D73A49;--shiki-dark:#F97583"> ==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Color.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">BLUE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># True (意外！)</span></span></code></pre>
+<p><a id="reference-使用-unique-的情况"></a></p>
+<h4 id="使用-unique-的情况">使用 @unique 的情况</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> enum </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Enum, unique</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 使用 @unique：强制值唯一</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@unique</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Color</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    RED</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GREEN</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    BLUE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#6A737D;--shiki-dark:#6A737D">      # ❌ ValueError: duplicate values found in &lt;enum 'Color'&gt;: BLUE -&gt; RED</span></span></code></pre>
+<p><a id="reference-在-contextpy-中的应用"></a></p>
+<h4 id="在-contextpy-中的应用">在 context.py 中的应用</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@unique</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AZURE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()      </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 2</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GCP</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 3</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    CCLOUD</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()     </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 4</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GDC</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 5</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    ALICLOUD</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 6</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # DUPLICATE = auto() # 如果不小心添加重复，@unique 会报错</span></span></code></pre>
+<p><strong>作用</strong>：</p>
+<ol>
+<li>✅ <strong>防止手误</strong>：确保每个云平台都是唯一的</li>
+<li>✅ <strong>早期发现错误</strong>：在定义时就报错，而不是运行时</li>
+<li>✅ <strong>代码意图明确</strong>：告诉读者“这些值必须唯一”</li>
+</ol>
+<p><a id="reference-实战示例unique-的价值"></a></p>
+<h4 id="实战示例unique-的价值">实战示例：@unique 的价值</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 假设我们手动指定值（不使用 auto）</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@unique</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AZURE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GCP</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    CCLOUD</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # ❌ ValueError: duplicate values found: CCLOUD -&gt; AWS</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # @unique 立即捕获这个错误！</span></span></code></pre>
+<p><strong>如果没有 @unique</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    CCLOUD</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 不报错，但 CCLOUD 变成了 AWS 的别名</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 运行时会有意外行为</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> hyperscaler </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Hyperscaler.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">AWS</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"AWS"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 即使 hyperscaler 是 CCLOUD，也会打印 "AWS"！</span></span></code></pre>
+<p><a id="reference-classmethod-装饰器"></a></p>
+<h3 id="classmethod-装饰器">@classmethod 装饰器</h3>
+<p><a id="reference-基本概念-2"></a></p>
+<h4 id="基本概念-2">基本概念</h4>
+<p><code>@classmethod</code> 是一个<strong>方法装饰器</strong>，将方法变成<strong>类方法</strong>。</p>
+<p><a id="reference-三种方法类型对比"></a></p>
+<h4 id="三种方法类型对比">三种方法类型对比</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Example</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    class_variable </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "I'm a class variable"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 1. 实例方法（Instance Method）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> instance_method</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, value):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """第一个参数是 self，代表实例本身"""</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.value </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> value</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Instance: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.value</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 2. 类方法（Class Method）</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">classmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> class_method</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cls, value):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """第一个参数是 cls，代表类本身"""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Class: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{cls</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.class_variable</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">, Value: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">value</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 3. 静态方法（Static Method）</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">staticmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> static_method</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(value):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """没有 self 或 cls，就是普通函数"""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Static: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">value</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">obj </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Example()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 实例方法：需要实例调用</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">obj.instance_method(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"test"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Example.instance_method(obj, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"test"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 等价写法</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 类方法：可以通过类或实例调用</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Example.class_method(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"test"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 推荐</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">obj.class_method(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"test"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)      </span><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 也可以</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 静态方法：可以通过类或实例调用</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Example.static_method(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"test"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 推荐</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">obj.static_method(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"test"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)      </span><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 也可以</span></span></code></pre>
+<p><a id="reference-在-contextpy-中的应用-1"></a></p>
+<h4 id="在-contextpy-中的应用-1">在 context.py 中的应用</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@unique</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AZURE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GCP</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">classmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> by_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cls, name):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        根据字符串名称获取枚举成员</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        参数:</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            cls: 类本身 (Hyperscaler)</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            name: 字符串名称，如 "aws", "Azure", "GCP"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        返回:</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            枚举成员，如 Hyperscaler.AWS</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> cls</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[name.upper()]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # cls 就是 Hyperscaler 类</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # cls[name.upper()] 等价于 Hyperscaler["AWS"]</span></span></code></pre>
+<p><a id="reference-为什么使用-classmethod"></a></p>
+<h4 id="为什么使用-classmethod">为什么使用 @classmethod？</h4>
+<p><strong>场景 1：工厂方法（Factory Method）</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># context.py 中的实际使用</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __init__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, data</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.data </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> data </span><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> data </span><span style="color:#D73A49;--shiki-dark:#F97583">else</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">._load_stencil()</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 使用 Enum.by_name 类方法</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.hyperscaler </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Hyperscaler.by_name(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.data[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'hyperscaler'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">])</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        #                  ^^^^^^^^^^^^^^^^^^^^</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        #                  这是一个类方法调用</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># stencil 文件中 hyperscaler: "aws"</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 通过 by_name 类方法转换为 Hyperscaler.AWS 枚举</span></span></code></pre>
+<p><strong>如果没有 @classmethod，需要这样写</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ❌ 没有类方法的笨拙写法</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">hyperscaler_str </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.data[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'hyperscaler'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># "aws"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> hyperscaler_str.upper() </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "AWS"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.hyperscaler </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Hyperscaler.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">AWS</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">elif</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> hyperscaler_str.upper() </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "AZURE"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.hyperscaler </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Hyperscaler.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">AZURE</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">elif</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> hyperscaler_str.upper() </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "GCP"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.hyperscaler </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Hyperscaler.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">GCP</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ... 每次添加新云平台都要加一个 elif</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 使用类方法的优雅写法</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.hyperscaler </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Hyperscaler.by_name(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.data[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'hyperscaler'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">])</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 一行搞定，自动支持所有枚举成员</span></span></code></pre>
+<p><a id="reference-classmethod-的关键特点"></a></p>
+<h4 id="classmethod-的关键特点">@classmethod 的关键特点</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@unique</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Stage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    DEV</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    CANARY</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    PROD</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">classmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> by_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cls, name):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        cls 参数的魔法：</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        - cls 不是字符串 "Stage"</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        - cls 是实际的类对象 Stage</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        - 可以用 cls 做任何类能做的事</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> cls</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[name.upper()]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # cls[...] 等价于 Stage[...]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 这是 Python Enum 的内置字典访问语法</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用示例</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">stage </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Stage.by_name(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dev"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)     </span><span style="color:#6A737D;--shiki-dark:#6A737D"># Stage.DEV</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">stage </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Stage.by_name(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"canary"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># Stage.CANARY</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">stage </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Stage.by_name(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"PROD"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)    </span><span style="color:#6A737D;--shiki-dark:#6A737D"># Stage.PROD</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 原理</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Stage[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"DEV"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]     </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 直接访问：Stage.DEV</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Stage[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"CANARY"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 直接访问：Stage.CANARY</span></span></code></pre>
+<p><a id="reference-实战示例classmethod-vs-普通函数"></a></p>
+<h4 id="实战示例classmethod-vs-普通函数">实战示例：@classmethod vs 普通函数</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ❌ 如果不用 @classmethod，需要写成函数</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get_stage_by_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(name):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Stage[name.upper()]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用时：</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">stage </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> get_stage_by_name(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dev"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 使用 @classmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Stage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    DEV</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">classmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> by_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cls, name):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> cls</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[name.upper()]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用时：</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">stage </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Stage.by_name(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dev"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 优点：</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 1. 方法和类绑定，逻辑内聚</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 2. 命名空间清晰 (Stage.by_name)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 3. 继承时子类自动获得</span></span></code></pre>
+<p><a id="reference-staticmethod-装饰器"></a></p>
+<h3 id="staticmethod-装饰器">@staticmethod 装饰器</h3>
+<p><a id="reference-基本概念-3"></a></p>
+<h4 id="基本概念-3">基本概念</h4>
+<p><code>@staticmethod</code> 将方法变成<strong>静态方法</strong>，不需要 <code>self</code> 或 <code>cls</code> 参数。</p>
+<p><a id="reference-在-contextpy-中的应用-2"></a></p>
+<h4 id="在-contextpy-中的应用-2">在 context.py 中的应用</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 实例方法</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 静态方法</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">staticmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get_value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(data: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">object</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, default</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """python</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        通过点号路径访问嵌套字典</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        这是一个工具函数，不需要访问实例或类</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context.get_nested(data, name.split(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'.'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">), default)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">staticmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get_nested</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(data: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">object</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, keys: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, default</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """递归访问嵌套字典"""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(keys) </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> keys[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> data:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context.get_nested(data[keys[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]], keys[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:])</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(keys) </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> keys[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> data:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> data[keys[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> default</span></span></code></pre>
+<p><a id="reference-为什么使用-staticmethod"></a></p>
+<h4 id="为什么使用-staticmethod">为什么使用 @staticmethod？</h4>
+<p><strong>原因 1：工具函数，不需要实例数据</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># get_value 是一个纯函数，不依赖实例状态</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">data </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "terraform"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "backend"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"s3"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 调用时不需要创建 Context 实例</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">value </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context.get_value(data, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"terraform.backend.type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 输出: "s3"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 也可以通过实例调用（但不推荐）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">context </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"test"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">value </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> context.get_value(data, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"terraform.backend.type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p><strong>原因 2：命名空间组织</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ❌ 如果不用 @staticmethod，需要写成模块级函数</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># utils.py</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get_nested_value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(data, keys, default</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    ...</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># context.py</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> utils </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> get_nested_value</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, default</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> get_nested_value(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.data, name.split(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'.'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">), default)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 使用 @staticmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">staticmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get_nested</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(data, keys, default</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        ...</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, default</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 方法和类绑定，逻辑内聚</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context.get_nested(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.data, name.split(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'.'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">), default)</span></span></code></pre>
+<p><a id="reference-classmethod-vs-staticmethod"></a></p>
+<h4 id="classmethod-vs-staticmethod">@classmethod vs @staticmethod</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Example</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    class_variable </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "I'm a class variable"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">classmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> class_method</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cls, value):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        需要访问类本身时使用</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        - 工厂方法</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        - 需要访问类变量</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        - 需要返回类的实例</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> cls</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(value)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 可以创建实例</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">staticmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> static_method</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(value):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        不需要访问类或实例时使用</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        - 纯工具函数</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        - 只是逻辑上属于这个类</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        - 命名空间组织</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> value.upper()  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 纯函数</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用场景示例</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">classmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> by_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cls, name):</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # ✅ 需要 cls 来访问枚举成员</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> cls</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[name.upper()]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 假设有一个验证函数</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">staticmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> is_valid_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(name):</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # ✅ 不需要 cls，只是验证字符串</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name.upper() </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"AWS"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"AZURE"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"GCP"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span></code></pre>
+<p><a id="reference-property-装饰器"></a></p>
+<h3 id="property-装饰器">@property 装饰器</h3>
+<p><a id="reference-基本概念-4"></a></p>
+<h4 id="基本概念-4">基本概念</h4>
+<p><code>@property</code> 将方法变成<strong>属性</strong>，可以像访问属性一样调用方法。</p>
+<p><a id="reference-在-contextpy-中的应用-3"></a></p>
+<h4 id="在-contextpy-中的应用-3">在 context.py 中的应用</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __init__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, data</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.data </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> data</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">property</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> landscape_type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        Derive LandscapeType from the stencil name prefix.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        使用 @property 后，可以像属性一样访问</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        prefix_map </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "hc-"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: LandscapeType.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">HANACLOUD</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "vault-"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: LandscapeType.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">VAULT</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "di-"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: LandscapeType.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">DI</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> prefix, landscape_type </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> prefix_map.items():</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name.startswith(prefix):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> landscape_type</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        raise</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> ValueError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Cannot determine LandscapeType for '</span><span style="color:#005CC5;--shiki-dark:#79B8FF">{self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">context </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hc-ap10"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 使用 @property：像属性一样访问（不需要括号）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">landscape_type </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> context.landscape_type</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 等价于: landscape_type = context.landscape_type()，但更优雅</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ❌ 如果不用 @property，需要这样调用</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># landscape_type = context.landscape_type()  # 需要括号</span></span></code></pre>
+<p><a id="reference-为什么使用-property"></a></p>
+<h4 id="为什么使用-property">为什么使用 @property？</h4>
+<p><strong>原因 1：计算属性（Computed Property）</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __init__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">property</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> landscape_type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        每次访问时动态计算，不存储</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name.startswith(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hc-"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LandscapeType.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">HANACLOUD</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        elif</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name.startswith(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"di-"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LandscapeType.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">DI</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # ...</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 优点：</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 1. 不需要存储 landscape_type，节省内存</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 2. 总是返回最新计算结果</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 3. 使用时像普通属性</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">context </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hc-ap10"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(context.landscape_type)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># LandscapeType.HANACLOUD</span></span></code></pre>
+<p><strong>原因 2：封装计算逻辑</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ❌ 没有 @property：外部需要知道计算逻辑</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __init__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">context </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hc-ap10"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 调用者需要知道如何判断</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> context.name.startswith(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hc-"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    landscape_type </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LandscapeType.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">HANACLOUD</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 使用 @property：封装计算逻辑</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">property</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> landscape_type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 计算逻辑封装在类内部</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name.startswith(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hc-"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LandscapeType.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">HANACLOUD</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">context </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hc-ap10"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">landscape_type </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> context.landscape_type  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 简洁清晰</span></span></code></pre>
+<p><a id="reference-property-的-gettersetter-模式"></a></p>
+<h4 id="property-的-gettersetter-模式">@property 的 Getter/Setter 模式</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __init__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">._name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 私有属性</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">property</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """Getter：读取属性"""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">._name</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @name.setter</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, value):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """Setter：设置属性时的验证"""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> value:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            raise</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> ValueError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Name cannot be empty"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">._name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> value</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @name.deleter</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """Deleter：删除属性时的处理"""</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Deleting name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">._name</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        del</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">._name</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">context </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"test"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Getter</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(context.name)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># "test"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Setter</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">context.name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "new-name"</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 调用 setter，会验证</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Deleter</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">del</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> context.name  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 调用 deleter</span></span></code></pre>
+<p><a id="reference-其他常见装饰器"></a></p>
+<h3 id="其他常见装饰器">其他常见装饰器</h3>
+<p><a id="reference-dataclass-python-37"></a></p>
+<h4 id="dataclass-python-37">@dataclass (Python 3.7+)</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dataclasses </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dataclass</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ❌ 传统方式：手动写 __init__</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Point</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __init__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, x: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, y: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.x </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.y </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> y</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __repr__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Point(x=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">{self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.x</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">, y=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">{self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.y</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">)"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ✅ 使用 @dataclass：自动生成</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@dataclass</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Point</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    x: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">int</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    y: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">int</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 自动生成 __init__, __repr__, __eq__ 等方法</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">point </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Point(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">20</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(point)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># Point(x=10, y=20)</span></span></code></pre>
+<p><a id="reference-abstractmethod"></a></p>
+<h4 id="abstractmethod">@abstractmethod</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> abc </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> ABC</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, abstractmethod</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Account</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">ABC</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    """抽象基类"""</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @abstractmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> login</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, vault_client):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """抽象方法：子类必须实现"""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        pass</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @abstractmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> logout</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """抽象方法：子类必须实现"""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        pass</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> AccountAws</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Account</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> login</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, vault_client):</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # ✅ 必须实现</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"AWS login"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> logout</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # ✅ 必须实现</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"AWS logout"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># ❌ 如果不实现抽象方法，实例化时会报错</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> AccountBroken</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Account</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    pass</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># TypeError: Can't instantiate abstract class AccountBroken</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># account = AccountBroken()</span></span></code></pre>
+<p><a id="reference-functoolslru_cache缓存装饰器"></a></p>
+<h4 id="functoolslru_cache缓存装饰器">@functools.lru_cache（缓存装饰器）</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> functools </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lru_cache</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @lru_cache</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">maxsize</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">128</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">staticmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get_value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(data, name, default</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        缓存函数结果，相同输入直接返回缓存</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Computing for </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">name</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context.get_nested(data, name.split(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'.'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">), default)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 第一次调用</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Context.get_value(data, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"terraform.backend"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 打印 "Computing..."</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 第二次调用：直接返回缓存，不打印</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Context.get_value(data, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"terraform.backend"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 直接返回</span></span></code></pre>
+<p><a id="reference-实战示例"></a></p>
+<h3 id="实战示例">实战示例</h3>
+<p><a id="reference-完整示例contextpy-中的模式"></a></p>
+<h4 id="完整示例contextpy-中的模式">完整示例：context.py 中的模式</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> enum </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Enum, auto, unique</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 1. @unique + auto()：定义枚举</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@unique</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 自动赋值 1</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AZURE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()      </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 自动赋值 2</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    GCP</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 自动赋值 3</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 2. @classmethod：类方法</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">classmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> by_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cls, name):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """根据字符串获取枚举成员"""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> cls</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[name.upper()]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 3. @staticmethod：静态方法</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __init__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">staticmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get_value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(data: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, default</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """通过点号路径访问嵌套字典（工具函数）"""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context.get_nested(data, name.split(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'.'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">), default)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">staticmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get_nested</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(data: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, keys: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, default</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """递归访问嵌套字典"""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(keys) </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> keys[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> data:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context.get_nested(data[keys[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]], keys[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:])</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(keys) </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> keys[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> data:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> data[keys[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> default</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 4. @property：属性</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    @</span><span style="color:#005CC5;--shiki-dark:#79B8FF">property</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> landscape_type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        """计算属性：根据名称判断类型"""</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name.startswith(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hc-"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "HANACLOUD"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        elif</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name.startswith(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"di-"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "DI"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "UNKNOWN"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用示例</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 1. 枚举</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">hyperscaler </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Hyperscaler.by_name(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"aws"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># Hyperscaler.AWS</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(hyperscaler.value)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 2. 静态方法</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">data </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"terraform"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"backend"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"s3"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}}}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">backend_type </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context.get_value(data, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"terraform.backend.type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(backend_type)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># "s3"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 3. 属性</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">context </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hc-ap10"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(context.landscape_type)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># "HANACLOUD"</span></span></code></pre>
+<p><a id="reference-总结"></a></p>
+<h3 id="总结">总结</h3>
+<p><a id="reference-快速参考表"></a></p>
+<h4 id="快速参考表">快速参考表</h4>
+<table>
+<thead>
+<tr>
+<th>装饰器</th>
+<th>作用</th>
+<th>第一个参数</th>
+<th>调用方式</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>无</code></td>
+<td>实例方法</td>
+<td><code>self</code></td>
+<td><code>obj.method()</code></td>
+<td>需要访问实例数据</td>
+</tr>
+<tr>
+<td><code>@classmethod</code></td>
+<td>类方法</td>
+<td><code>cls</code></td>
+<td><code>Class.method()</code></td>
+<td>工厂方法、需要访问类</td>
+</tr>
+<tr>
+<td><code>@staticmethod</code></td>
+<td>静态方法</td>
+<td>无</td>
+<td><code>Class.method()</code></td>
+<td>工具函数、不需要访问实例或类</td>
+</tr>
+<tr>
+<td><code>@property</code></td>
+<td>属性</td>
+<td><code>self</code></td>
+<td><code>obj.property</code> (无括号)</td>
+<td>计算属性、封装访问</td>
+</tr>
+<tr>
+<td><code>@unique</code></td>
+<td>类装饰器</td>
+<td>-</td>
+<td>-</td>
+<td>枚举值唯一性检查</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-contextpy-中的应用总结"></a></p>
+<h4 id="contextpy-中的应用总结">context.py 中的应用总结</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># auto(): 自动生成枚举值</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 值为 1，但我们不关心具体数字</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># @unique: 确保枚举值唯一</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@unique</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Hyperscaler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Enum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AWS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    AZURE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auto()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># @classmethod: 工厂方法，从字符串创建枚举</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@</span><span style="color:#005CC5;--shiki-dark:#79B8FF">classmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> by_name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cls, name):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> cls</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[name.upper()]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># @staticmethod: 工具函数，访问嵌套字典</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@</span><span style="color:#005CC5;--shiki-dark:#79B8FF">staticmethod</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get_value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(data, name, default</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Context.get_nested(data, name.split(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'.'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">), default)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># @property: 计算属性，动态判断类型</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@</span><span style="color:#005CC5;--shiki-dark:#79B8FF">property</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> landscape_type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.name.startswith(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hc-"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LandscapeType.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">HANACLOUD</span></span></code></pre>
+<p><a id="reference-记忆技巧"></a></p>
+<h4 id="记忆技巧">记忆技巧</h4>
+<ul>
+<li><strong><code>auto()</code></strong>：auto = automatic（自动），自动生成枚举值</li>
+<li><strong><code>@unique</code></strong>：unique = 唯一，确保枚举值唯一</li>
+<li><strong><code>@classmethod</code></strong>：第一个参数是 <strong>cls</strong>（class）</li>
+<li><strong><code>@staticmethod</code></strong>：<strong>static</strong> = 静态，不需要实例或类</li>
+<li><strong><code>@property</code></strong>：<strong>property</strong> = 属性，像属性一样访问</li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>为 context.py 的每种装饰器指出调用者、隐式参数与返回结果。区分枚举成员、名称和值，说明 unique 与 auto 各解决什么问题。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/tool/python/python-async/">async</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/tool/">开发工具学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#类">类</a></li><li style="--depth: 1"><a href="#声明">声明</a></li><li style="--depth: 1"><a href="#self">self</a></li><li style="--depth: 1"><a href="#使用">使用</a></li><li style="--depth: 1"><a href="#内置类属性">内置类属性</a></li><li style="--depth: 1"><a href="#继承">继承</a></li><li style="--depth: 2"><a href="#继承检测">继承检测</a></li><li style="--depth: 1"><a href="#方法重写">方法重写</a></li><li style="--depth: 1"><a href="#运算符重载">运算符重载</a></li><li style="--depth: 1"><a href="#私有属性和方法">私有属性和方法</a></li><li style="--depth: 0"><a href="#python-装饰器decorator和-enum-详解">Python 装饰器（Decorator）和 Enum 详解</a></li><li style="--depth: 1"><a href="#auto-函数的作用">auto() 函数的作用</a></li><li style="--depth: 2"><a href="#基本概念">基本概念</a></li><li style="--depth: 2"><a href="#没有-auto-的情况">没有 auto() 的情况</a></li><li style="--depth: 2"><a href="#使用-auto-的情况">使用 auto() 的情况</a></li><li style="--depth: 2"><a href="#auto-的工作原理">auto() 的工作原理</a></li><li style="--depth: 2"><a href="#auto-的默认规则">auto() 的默认规则</a></li><li style="--depth: 2"><a href="#为什么使用-auto">为什么使用 auto()？</a></li><li style="--depth: 2"><a href="#实际使用示例">实际使用示例</a></li><li style="--depth: 1"><a href="#unique-装饰器">@unique 装饰器</a></li><li style="--depth: 2"><a href="#基本概念-1">基本概念</a></li><li style="--depth: 2"><a href="#没有-unique-的情况">没有 @unique 的情况</a></li><li style="--depth: 2"><a href="#使用-unique-的情况">使用 @unique 的情况</a></li><li style="--depth: 2"><a href="#在-contextpy-中的应用">在 context.py 中的应用</a></li><li style="--depth: 2"><a href="#实战示例unique-的价值">实战示例：@unique 的价值</a></li><li style="--depth: 1"><a href="#classmethod-装饰器">@classmethod 装饰器</a></li><li style="--depth: 2"><a href="#基本概念-2">基本概念</a></li><li style="--depth: 2"><a href="#三种方法类型对比">三种方法类型对比</a></li><li style="--depth: 2"><a href="#在-contextpy-中的应用-1">在 context.py 中的应用</a></li><li style="--depth: 2"><a href="#为什么使用-classmethod">为什么使用 @classmethod？</a></li><li style="--depth: 2"><a href="#classmethod-的关键特点">@classmethod 的关键特点</a></li><li style="--depth: 2"><a href="#实战示例classmethod-vs-普通函数">实战示例：@classmethod vs 普通函数</a></li><li style="--depth: 1"><a href="#staticmethod-装饰器">@staticmethod 装饰器</a></li><li style="--depth: 2"><a href="#基本概念-3">基本概念</a></li><li style="--depth: 2"><a href="#在-contextpy-中的应用-2">在 context.py 中的应用</a></li><li style="--depth: 2"><a href="#为什么使用-staticmethod">为什么使用 @staticmethod？</a></li><li style="--depth: 2"><a href="#classmethod-vs-staticmethod">@classmethod vs @staticmethod</a></li><li style="--depth: 1"><a href="#property-装饰器">@property 装饰器</a></li><li style="--depth: 2"><a href="#基本概念-4">基本概念</a></li><li style="--depth: 2"><a href="#在-contextpy-中的应用-3">在 context.py 中的应用</a></li><li style="--depth: 2"><a href="#为什么使用-property">为什么使用 @property？</a></li><li style="--depth: 2"><a href="#property-的-gettersetter-模式">@property 的 Getter/Setter 模式</a></li><li style="--depth: 1"><a href="#其他常见装饰器">其他常见装饰器</a></li><li style="--depth: 2"><a href="#dataclass-python-37">@dataclass (Python 3.7+)</a></li><li style="--depth: 2"><a href="#abstractmethod">@abstractmethod</a></li><li style="--depth: 2"><a href="#functoolslru_cache缓存装饰器">@functools.lru_cache（缓存装饰器）</a></li><li style="--depth: 1"><a href="#实战示例">实战示例</a></li><li style="--depth: 2"><a href="#完整示例contextpy-中的模式">完整示例：context.py 中的模式</a></li><li style="--depth: 1"><a href="#总结">总结</a></li><li style="--depth: 2"><a href="#快速参考表">快速参考表</a></li><li style="--depth: 2"><a href="#contextpy-中的应用总结">context.py 中的应用总结</a></li><li style="--depth: 2"><a href="#记忆技巧">记忆技巧</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

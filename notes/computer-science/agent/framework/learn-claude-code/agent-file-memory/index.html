@@ -1,0 +1,358 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Memory · Musuyin&#39; Home</title><meta name="description" content="持久记忆与压缩摘要承担不同生命周期：摘要维持当前任务，文件与索引保存跨会话知识。读取选择、提取写入与低频整理共同决定记忆是否有用。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/agent-file-memory/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Memory · Musuyin' Home"><meta property="og:description" content="持久记忆与压缩摘要承担不同生命周期：摘要维持当前任务，文件与索引保存跨会话知识。读取选择、提取写入与低频整理共同决定记忆是否有用。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/agent-file-memory/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Memory</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-07-21">2026-07-21</time></dd></div><div><dt>字数</dt><dd>2745</dd></div><div><dt>预计阅读</dt><dd>10 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Memory</h1><time datetime="2026-07-21">2026-07-21</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>持久记忆与压缩摘要承担不同生命周期：摘要维持当前任务，文件与索引保存跨会话知识。读取选择、提取写入与低频整理共同决定记忆是否有用。</p>
+<p><a id="reference-memory--压缩会丢细节要有一层不丢的"></a></p>
+<h2 id="memory--压缩会丢细节要有一层不丢的">Memory — 压缩会丢细节，要有一层不丢的</h2>
+<blockquote>
+<p><em>“压缩会丢细节，要有一层不丢的”</em> — 文件仓库 + 索引 + 按需加载，跨压缩、跨会话。</p>
+<p><strong>Harness 层</strong>：记忆——跨压缩、跨会话的知识积累。</p>
+</blockquote>
+<p><a id="reference-问题"></a></p>
+<h3 id="问题">问题</h3>
+<p>S08 的 autoCompact 会把当前目标、剩余工作、用户约束写进摘要，但细节会丢失：“用 tab 缩进不要用空格”可能被简化成“用户有代码风格偏好”。而且新开一个会话，连摘要也没了。</p>
+<p>LLM 没有持久状态，所有信息都在上下文窗口里。上下文满了要压缩，压缩就有损。需要一层不参与压缩、跨会话保留的存储。</p>
+<p><a id="reference-解决方案"></a></p>
+<h3 id="解决方案">解决方案</h3>
+<p><img alt="IMG-20260928133931318" loading="lazy" decoding="async" width="760" height="430" src="/_astro/IMG-20260928133931318.BZG7fGyD_Z1W29As.svg"></p>
+<p>s08 的压缩管线保留，聚焦记忆。存储选文件系统：<code>.memory/</code> 目录下，每个记忆一个 <code>.md</code> 文件，带 YAML frontmatter（<code>name</code> / <code>description</code> / <code>type</code>）。文件多了需要索引：<code>MEMORY.md</code> 一行一个链接，注入 SYSTEM。</p>
+<p>关键设计：索引常驻 SYSTEM prompt（可被 prompt cache 缓存），文件内容按需注入到当前 user turn（按 filename/description 匹配当前对话，不破坏 cache）。写入由每轮结束后的提取器完成：用户显式说“记住”或表达稳定偏好时，提取器会保存为记忆。文件积累多了，定期整理去重。</p>
+<p>四类记忆，各有用途：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>回答什么</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>user</td>
+<td>你是谁</td>
+<td>“用 tab 不用空格”</td>
+</tr>
+<tr>
+<td>feedback</td>
+<td>怎么做事</td>
+<td>“别 mock 数据库”</td>
+</tr>
+<tr>
+<td>project</td>
+<td>正在发生什么</td>
+<td>“auth 重写是合规驱动”</td>
+</tr>
+<tr>
+<td>reference</td>
+<td>东西在哪找</td>
+<td>“pipeline bug 在 Linear INGEST”</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-工作原理"></a></p>
+<h3 id="工作原理">工作原理</h3>
+<p><img alt="IMG-20260928133931452" loading="lazy" decoding="async" width="720" height="380" src="/_astro/IMG-20260928133931452.wzIyWHtD_PhznG.svg"></p>
+<p><a id="reference-存储markdown-文件--索引"></a></p>
+<h4 id="存储markdown-文件--索引">存储：Markdown 文件 + 索引</h4>
+<p>每个记忆是一个 <code>.md</code> 文件，YAML frontmatter 记录元数据：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="markdown"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">---</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">user-preference-tabs</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">description</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">User prefers tabs for indentation</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">user</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">---</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">User prefers using tabs, not spaces, for indentation.</span></span>
+<span class="line"><span style="color:#24292E;--shiki-light-font-weight:bold;--shiki-dark:#E1E4E8;--shiki-dark-font-weight:bold">**Why:**</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Consistency with existing codebase conventions.</span></span>
+<span class="line"><span style="color:#24292E;--shiki-light-font-weight:bold;--shiki-dark:#E1E4E8;--shiki-dark-font-weight:bold">**How to apply:**</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Always use tabs when writing or editing files.</span></span></code></pre>
+<p><code>MEMORY.md</code> 是索引，一行一个链接：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="markdown"><code><span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">-</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [</span><span style="color:#032F62;--shiki-light-text-decoration:underline;--shiki-dark:#DBEDFF;--shiki-dark-text-decoration:underline">user-preference-tabs</span><span style="color:#24292E;--shiki-dark:#E1E4E8">](</span><span style="color:#24292E;--shiki-light-text-decoration:underline;--shiki-dark:#E1E4E8;--shiki-dark-text-decoration:underline">user-preference-tabs.md</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) — User prefers tabs for indentation</span></span></code></pre>
+<p>写入新记忆时自动重建索引：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> write_memory_file</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(name, mem_type, description, body):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    slug </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name.lower().replace(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">" "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"-"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    filepath </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> MEMORY_DIR</span><span style="color:#D73A49;--shiki-dark:#F97583"> /</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">slug</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">.md"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    filepath.write_text(</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"---</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">name</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">description: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">description</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">type: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">mem_type</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">---</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n\n{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">body</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    _rebuild_index()</span></span></code></pre>
+<p><a id="reference-加载两条路径"></a></p>
+<h4 id="加载两条路径">加载：两条路径</h4>
+<p><strong>路径一：索引常驻 SYSTEM。</strong> <code>build_system()</code> 在每次用户请求开始时读取 <code>MEMORY.md</code>，把记忆清单注入。记忆提取和整理只在本轮结束时触发，因此同一轮用户请求中不需要重复重建 SYSTEM。</p>
+<p><strong>路径二：相关记忆按需注入。</strong> 每次用户请求开始时，<code>load_memories()</code> 把最近对话和记忆目录（name + description）一起发给 LLM 做一次轻量 side-query，选出相关的文件名，再读文件内容临时注入到当前 user turn。最多 5 条，控制开销。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> select_relevant_memories</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages, max_items</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    files </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list_memory_files()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> files:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # Build catalog: "0: user-preference-tabs — User prefers tabs..."</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    catalog </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.join(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">i</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">f[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'name'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> — </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">f[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'description'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#D73A49;--shiki-dark:#F97583"> for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i, f </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> enumerate</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(files))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    response </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> client.messages.create(</span><span style="color:#E36209;--shiki-dark:#FFAB70">model</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">MODEL</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">messages</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Select relevant memory indices. Return JSON array.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                   f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Recent conversation:</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">recent</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}\n\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">Memory catalog:</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">catalog</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}],</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        max_tokens</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">200</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    text </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> extract_text(response.content).strip()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    indices </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> json.loads(re.search(</span><span style="color:#D73A49;--shiki-dark:#F97583">r</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span><span style="color:#22863A;--shiki-light-font-weight:bold;--shiki-dark:#85E89D;--shiki-dark-font-weight:bold">\[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">.</span><span style="color:#D73A49;--shiki-dark:#F97583">*?</span><span style="color:#22863A;--shiki-light-font-weight:bold;--shiki-dark:#85E89D;--shiki-dark-font-weight:bold">\]</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, text).group())</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [files[i][</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"filename"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> indices </span><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(files)]</span></span></code></pre>
+<p>如果 side-query 失败（API 错误、JSON 解析失败），降级到关键词匹配 name + description。</p>
+<p><a id="reference-写入每轮结束后提取"></a></p>
+<h4 id="写入每轮结束后提取">写入：每轮结束后提取</h4>
+<p>用户不会每次都说“记住这个”。偏好通常散落在正常对话中：“用 tab 比空格好”、“以后都用单引号”。</p>
+<p><code>extract_memories()</code> 在每轮结束时运行，条件是模型停止且没有 tool_use（说明对话告一段落）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># In agent_loop:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.stop_reason </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "tool_use"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    extract_memories(pre_compress)   </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 从压缩前快照提取新记忆</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    consolidate_memories()       </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 检查是否需要整理</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span></span></code></pre>
+<p>提取前先检查已有记忆，避免重复。提取 prompt 要求 LLM 返回 <code>{name, type, description, body}</code> 的 JSON 数组，只有确实有新信息时才写文件。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> extract_memories</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    dialogue </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> format_recent_messages(messages[</span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:])</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    existing </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.join(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"- </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">m[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'name'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">m[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'description'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#D73A49;--shiki-dark:#F97583"> for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> m </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list_memory_files())</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    prompt </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "Extract user preferences, constraints, or project facts.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "Return JSON array: [{name, type, description, body}].</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "If nothing new or already covered, return [].</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Existing memories:</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">existing</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}\n\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">Dialogue:</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">dialogue[:</span><span style="color:#005CC5;--shiki-dark:#79B8FF">4000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # ... parse response, write files ...</span></span></code></pre>
+<p><a id="reference-整理低频合并去重"></a></p>
+<h4 id="整理低频合并去重">整理：低频合并去重</h4>
+<p>记忆文件会积累。<code>consolidate_memories()</code> 在文件数达到阈值（默认 10）时触发，让 LLM 去重、合并矛盾、淘汰过时记忆：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">CONSOLIDATE_THRESHOLD</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 10</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> consolidate_memories</span><span style="color:#24292E;--shiki-dark:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    files </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list_memory_files()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(files) </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> CONSOLIDATE_THRESHOLD</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 太少，不值得整理</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # Send all memories to LLM, get back deduplicated list</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # Replace all files with consolidated results</span></span></code></pre>
+<p>CC 把这个过程叫 Dream，实际有四层门控：时间间隔、扫描节流、会话数、文件锁。教学版简化为文件数阈值。</p>
+<p><a id="reference-memory-适合保存什么"></a></p>
+<h4 id="memory-适合保存什么">Memory 适合保存什么</h4>
+<p>Memory 保存跨会话仍然有用的信息：用户偏好、反复出现的反馈、项目背景、常用入口和排查线索。它关注“以后还会用到什么”，并通过索引 + 按需加载把这些信息带回当前对话。</p>
+<p><em>session memory</em> 关注同一会话内的连续性：compact 之后，当前会话还需要保留哪些上下文。两者配合使用：Memory 管长期知识，session memory 管当前会话的压缩续接。</p>
+<p><a id="reference-相对-s08-的变更"></a></p>
+<h3 id="相对-s08-的变更">相对 S08 的变更</h3>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s08)</th>
+<th>之后 (s09)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>记忆能力</td>
+<td>无（压缩后偏好随摘要退化）</td>
+<td>存储 + 加载 + 提取 + 整理</td>
+</tr>
+<tr>
+<td>新函数</td>
+<td>—</td>
+<td>write_memory_file, select_relevant_memories, load_memories, extract_memories, consolidate_memories</td>
+</tr>
+<tr>
+<td>存储</td>
+<td>—</td>
+<td>.memory/MEMORY.md 索引 + .memory/*.md 文件</td>
+</tr>
+<tr>
+<td>工具</td>
+<td>bash, read, write, edit, glob, todo_write, task, load_skill, compact (9)</td>
+<td>bash, read_file, write_file, edit_file, glob, task (6)</td>
+</tr>
+<tr>
+<td>循环</td>
+<td>每轮只做压缩</td>
+<td>每轮注入记忆 + 压缩 + 每轮结束后提取 + 定期整理</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-试一下"></a></p>
+<h3 id="试一下">试一下</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> learn-claude-code</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">python</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> s09_memory/code.py</span></span></code></pre>
+<p>试试这些 prompt（分多轮输入，观察记忆的累积和加载）：</p>
+<ol>
+<li><code>I prefer using tabs for indentation, not spaces. Remember that.</code></li>
+<li><code>Create a Python file called test.py</code>（观察 Agent 是否用了 tab）</li>
+<li><code>What did I tell you about my preferences?</code>（观察 Agent 是否记得）</li>
+<li><code>I also prefer single quotes over double quotes for strings.</code></li>
+</ol>
+<p>观察重点：每轮结束后是否出现 <code>[Memory: extracted N new memories]</code>？<code>.memory/</code> 目录下是否生成了 <code>.md</code> 文件？<code>MEMORY.md</code> 索引是否更新？新一轮对话时 Agent 是否自动加载了之前的记忆？</p>
+<p><a id="reference-接下来"></a></p>
+<h3 id="接下来">接下来</h3>
+<p>记忆、压缩、工具都已就绪。但 system prompt 还是硬编码的一大段字符串。加了新工具要手动加描述，换了项目要重写整个 prompt。prompt 应该运行时组装。</p>
+<p>S10 System Prompt → 分段 + 运行时组装。不同项目、不同工具，拼出不同的 prompt。</p>
+<p><a id="reference-claude-code"></a></p>
+<h2 id="claude-code">Claude Code</h2>
+<blockquote>
+<p>以下基于 CC 源码 <code>src/</code> 下 <code>memdir/</code>、<code>services/</code>、<code>utils/</code>、<code>query/</code> 的分析，行号已对照核实。</p>
+</blockquote>
+<p><a id="reference-源码路径"></a></p>
+<h3 id="源码路径">源码路径</h3>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>行数</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>memdir/memdir.ts</code></td>
+<td>507</td>
+<td>核心：MEMORY.md 定义（<code>34-38</code>）、记忆行为指令区分 memory/plan/tasks（<code>199-266</code>）、<code>loadMemoryPrompt()</code> 三条路径（<code>419-490</code>）</td>
+</tr>
+<tr>
+<td><code>memdir/findRelevantMemories.ts</code></td>
+<td>141</td>
+<td>Sonnet side-query 选记忆（<code>18-24</code> 系统提示、<code>97-122</code> 调用逻辑）</td>
+</tr>
+<tr>
+<td><code>memdir/memoryTypes.ts</code></td>
+<td>271</td>
+<td>类型定义，frontmatter 字段</td>
+</tr>
+<tr>
+<td><code>memdir/memoryScan.ts</code></td>
+<td>—</td>
+<td>扫描 .md 文件，排除 MEMORY.md，读 frontmatter，最多 200 个，按 mtime 降序（<code>35-94</code>）</td>
+</tr>
+<tr>
+<td><code>services/extractMemories/extractMemories.ts</code></td>
+<td>615</td>
+<td>forked agent 提取记忆，受限权限，<code>skipTranscript: true</code>，<code>maxTurns: 5</code>（<code>371-427</code>）</td>
+</tr>
+<tr>
+<td><code>services/autoDream/autoDream.ts</code></td>
+<td>324</td>
+<td>Dream 整理，四层门控（<code>63-66</code> 默认值、<code>130-190</code> 门控、<code>224-233</code> forked agent）</td>
+</tr>
+<tr>
+<td><code>services/SessionMemory/sessionMemory.ts</code></td>
+<td>495</td>
+<td>会话级记忆管理</td>
+</tr>
+<tr>
+<td><code>services/compact/sessionMemoryCompact.ts</code></td>
+<td>—</td>
+<td>session memory 轻量摘要，阈值 10K/5/40K（<code>56-61</code>）</td>
+</tr>
+<tr>
+<td><code>utils/attachments.ts</code></td>
+<td>—</td>
+<td>注入预算：200 行 / 4096 字节每文件，60KB 每 session（<code>269-288</code>）；按 query 找相关 memory（<code>2196-2241</code>）</td>
+</tr>
+<tr>
+<td><code>query.ts</code></td>
+<td>—</td>
+<td>memory prefetch 每轮启动（<code>301-304</code>），非阻塞收集（<code>1592-1614</code>）</td>
+</tr>
+<tr>
+<td><code>query/stopHooks.ts</code></td>
+<td>—</td>
+<td>stop hook fire-and-forget 触发提取和 Dream（<code>141-155</code>）</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-记忆选择llm-选不是-embedding"></a></p>
+<h4 id="记忆选择llm-选不是-embedding">记忆选择：LLM 选，不是 embedding</h4>
+<p>CC 用 <strong>Sonnet 本身来选</strong>（<code>findRelevantMemories.ts</code>），不是 embedding 向量相似度：</p>
+<ol>
+<li><code>memoryScan.ts</code> 扫描 <code>.memory/</code> 下所有 <code>.md</code> 文件（排除 MEMORY.md），最多 200 个，按 mtime 降序</li>
+<li>把 <code>name</code> + <code>description</code> 列成清单</li>
+<li>发给 Sonnet side-query：“根据名称和描述选出真正有用的记忆（最多 5 个）。不确定就不要选。”</li>
+<li>Sonnet 返回 <code>{ selected_memories: ["file1.md", ...] }</code></li>
+<li>选中文件读取完整内容（每文件 ≤ 200 行 / 4096 字节），注入上下文。单 session 总预算 60KB</li>
+</ol>
+<p>每轮用户 turn 开始时，<code>query.ts:301-304</code> 启动 memory prefetch（异步）；工具执行后 <code>1592-1614</code> 非阻塞收集结果，不卡主流程。</p>
+<p><a id="reference-提取时机stop-hook不是-autocompact-后"></a></p>
+<h4 id="提取时机stop-hook不是-autocompact-后">提取时机：stop hook，不是 autoCompact 后</h4>
+<p>触发位置（<code>stopHooks.ts:141-155</code>）：在 <code>handleStopHooks()</code> 中，fire-and-forget 触发提取和 Dream。教学版把提取放在 <code>stop_reason != "tool_use"</code> 分支里，方向一致。</p>
+<p>CC 的提取通过 forked agent 执行（<code>extractMemories.ts:371-427</code>）：受限权限、<code>skipTranscript: true</code>、<code>maxTurns: 5</code>。还有重叠保护：如果主 Agent 已经写入了记忆文件，跳过提取。</p>
+<p><a id="reference-记忆文件格式"></a></p>
+<h4 id="记忆文件格式">记忆文件格式</h4>
+<p>CC 用 Markdown + YAML frontmatter，和教学版一致。四种类型：<code>user</code>、<code>feedback</code>、<code>project</code>、<code>reference</code>。</p>
+<p><code>memdir.ts:34-38</code> 定义索引约束：<code>MEMORY.md</code> 最多 200 行 / 25KB。<code>memdir.ts:199-266</code> 构建记忆行为指令，明确区分 memory、plan、tasks。存储位置：<code>~/.claude/projects/&lt;sanitized-git-root&gt;/memory/</code>。</p>
+<p><a id="reference-dream四层门控"></a></p>
+<h4 id="dream四层门控">Dream：四层门控</h4>
+<p>不是“空闲时触发”或“数量够了就合并”，而是四层门控（<code>autoDream.ts</code>，默认值 <code>63-66</code>，门控逻辑 <code>130-190</code>）：</p>
+<ol>
+<li><strong>时间门控</strong>：距上次合并 ≥ 24 小时</li>
+<li><strong>扫描节流</strong>：避免频繁扫描文件系统</li>
+<li><strong>会话门控</strong>：自上次合并以来修改了 ≥ 5 个会话 transcript</li>
+<li><strong>锁门控</strong>：没有其他进程正在合并（<code>.consolidate-lock</code> 文件）</li>
+</ol>
+<p>合并本身通过 forked agent 执行（<code>224-233</code>）：定位 → 收集近期信号 → 合并写文件 → 剪枝更新索引。锁文件 mtime 就是 lastConsolidatedAt。崩溃恢复：1 小时后锁自动过期。</p>
+<p><a id="reference-user-memory-vs-session-memory"></a></p>
+<h4 id="user-memory-vs-session-memory">User Memory vs Session Memory</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>User Memory</th>
+<th>Session Memory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>持久性</td>
+<td>跨会话</td>
+<td>单会话</td>
+</tr>
+<tr>
+<td>存储</td>
+<td><code>memory/</code> 下多个 .md 文件</td>
+<td><code>session-memory/&lt;id&gt;/memory.md</code></td>
+</tr>
+<tr>
+<td>加载到</td>
+<td>system prompt</td>
+<td>compact 摘要</td>
+</tr>
+<tr>
+<td>用途</td>
+<td>跨会话的知识积累</td>
+<td>跨 compact 的上下文连续性</td>
+</tr>
+</tbody>
+</table>
+<p>sessionMemoryCompact（s08 中提到的机制）正是使用了 Session Memory：autoCompact 前先读 session memory 文件，如果内容足够（≥ 10K token、≥ 5 条文本消息、≤ 40K token，<code>sessionMemoryCompact.ts:56-61</code>），就用它做摘要，不调 LLM。</p>
+<p><a id="reference-真实实现比教学版复杂的地方"></a></p>
+<h4 id="真实实现比教学版复杂的地方">真实实现比教学版复杂的地方</h4>
+<ul>
+<li><strong>Feature flags</strong>：记忆相关功能有多层 feature gate 控制</li>
+<li><strong>Team memory</strong>：团队共享记忆，<code>loadMemoryPrompt()</code> 有专门路径（教学版未涉及）</li>
+<li><strong>KAIROS</strong>：时机感知的记忆提取策略，<code>loadMemoryPrompt()</code> 中 daily-log 模式</li>
+<li><strong>Prompt cache</strong>：记忆注入需要考虑 prompt cache 的 TTL，避免每次都重写 system prompt 的大段内容</li>
+<li><strong>文件锁</strong>：多进程并发时的锁机制</li>
+<li><strong>Memory prefetch</strong>：异步预取，不阻塞主流程</li>
+</ul>
+<p><a id="reference-教学版的简化是刻意的"></a></p>
+<h4 id="教学版的简化是刻意的">教学版的简化是刻意的</h4>
+<ul>
+<li>LLM side-query → LLM side-query + 关键词降级：教学版保留了 LLM 选择，加了降级路径</li>
+<li>记忆 JSON → Markdown + frontmatter：教学版与 CC 一致</li>
+<li>stop hook 触发 → <code>stop_reason != "tool_use"</code> 分支：方向一致</li>
+<li>四层门控 → 文件数阈值：教学版没有 transcript 系统和多会话概念</li>
+<li>forked agent + 受限权限 → 直接调用：教学版没有子进程隔离</li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>分别列出该写入长期记忆和只留在当前会话的信息；解释提取时机与检索方式为什么要按具体实现核对。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续理解相关机制：<a href="/notes/computer-science/agent/framework/learn-claude-code/system-prompt-assembly/">S10-System Prompt</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#memory--压缩会丢细节要有一层不丢的">Memory — 压缩会丢细节，要有一层不丢的</a></li><li style="--depth: 1"><a href="#问题">问题</a></li><li style="--depth: 1"><a href="#解决方案">解决方案</a></li><li style="--depth: 1"><a href="#工作原理">工作原理</a></li><li style="--depth: 2"><a href="#存储markdown-文件--索引">存储：Markdown 文件 + 索引</a></li><li style="--depth: 2"><a href="#加载两条路径">加载：两条路径</a></li><li style="--depth: 2"><a href="#写入每轮结束后提取">写入：每轮结束后提取</a></li><li style="--depth: 2"><a href="#整理低频合并去重">整理：低频合并去重</a></li><li style="--depth: 2"><a href="#memory-适合保存什么">Memory 适合保存什么</a></li><li style="--depth: 1"><a href="#相对-s08-的变更">相对 S08 的变更</a></li><li style="--depth: 1"><a href="#试一下">试一下</a></li><li style="--depth: 1"><a href="#接下来">接下来</a></li><li style="--depth: 0"><a href="#claude-code">Claude Code</a></li><li style="--depth: 1"><a href="#源码路径">源码路径</a></li><li style="--depth: 2"><a href="#记忆选择llm-选不是-embedding">记忆选择：LLM 选，不是 embedding</a></li><li style="--depth: 2"><a href="#提取时机stop-hook不是-autocompact-后">提取时机：stop hook，不是 autoCompact 后</a></li><li style="--depth: 2"><a href="#记忆文件格式">记忆文件格式</a></li><li style="--depth: 2"><a href="#dream四层门控">Dream：四层门控</a></li><li style="--depth: 2"><a href="#user-memory-vs-session-memory">User Memory vs Session Memory</a></li><li style="--depth: 2"><a href="#真实实现比教学版复杂的地方">真实实现比教学版复杂的地方</a></li><li style="--depth: 2"><a href="#教学版的简化是刻意的">教学版的简化是刻意的</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

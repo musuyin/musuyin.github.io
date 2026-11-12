@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>内存回收 · Musuyin&#39; Home</title><meta name="description" content="垃圾回收通过可达性判断哪些对象仍需保留。理解三色模型之后，再看并发写入为什么需要屏障、哪些阶段需要 STW，以及分配速率、存活堆和 GC CPU 成本之间的取舍。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/go/golang/garbage-collection/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="内存回收 · Musuyin' Home"><meta property="og:description" content="垃圾回收通过可达性判断哪些对象仍需保留。理解三色模型之后，再看并发写入为什么需要屏障、哪些阶段需要 STW，以及分配速率、存活堆和 GC CPU 成本之间的取舍。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/go/golang/garbage-collection/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">内存回收</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-23">2026-08-23</time></dd></div><div><dt>字数</dt><dd>3158</dd></div><div><dt>预计阅读</dt><dd>11 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Go/">#Go</a><a href="/tags/%E5%B9%B6%E5%8F%91/">#并发</a><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>内存回收</h1><time datetime="2026-08-23">2026-08-23</time><p class="tags"><a href="/tags/Go/">#Go</a><a href="/tags/%E5%B9%B6%E5%8F%91/">#并发</a><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a></p></header><div class="prose"><p>垃圾回收通过可达性判断哪些对象仍需保留。理解三色模型之后，再看并发写入为什么需要屏障、哪些阶段需要 STW，以及分配速率、存活堆和 GC CPU 成本之间的取舍。</p>
+<p>调优依据可对照 <a href="https://go.dev/doc/gc-guide">Go GC 指南</a>；后文运行时细节应结合目标 Go 版本理解。</p>
+<p><a id="reference-常见-gc-实现回收方式"></a></p>
+<h2 id="常见-gc-实现回收方式">常见 GC 实现回收方式</h2>
+<p>所有的 GC 算法其存在形式可以归结为追踪（Tracing）GC 和引用计数（Reference Counting）这两种形式的混合运用。</p>
+<ul>
+<li>标记清扫：从根对象出发，将确定存活的对象进行标记，并清扫可以回收的对象。</li>
+<li>标记整理：为了解决内存碎片问题而提出，在标记过程中，将对象尽可能整理到一块连续的内存上。</li>
+<li>增量式：将标记与清扫的过程分批执行，每次执行很小的部分，从而增量的推进垃圾回收，达到近似实时、几乎无停顿的目的。</li>
+<li>增量整理：在增量式的基础上，增加对对象的整理过程。</li>
+<li>分代式：将对象根据存活时间的长短进行分类，存活时间小于某个值的为年轻代，存活时间大于某个值的为老年代，永远不会参与回收的对象为永久代。并根据分代假设（如果一个对象存活时间不长则倾向于被回收，如果一个对象已经存活很长时间则倾向于存活更长时间）对对象进行回收。</li>
+<li>引用计数：根据对象自身的引用计数来回收，当引用计数归零时立即回收。</li>
+</ul>
+<p><a id="reference-go-的-gc"></a></p>
+<h2 id="go-的-gc">Go 的 GC</h2>
+<p>三色标记清扫算法：</p>
+<ul>
+<li>无分代：对象没有代际之分</li>
+<li>不整理：回收过程中不对对象进行移动与整理</li>
+<li>并发：与用户代码并发执行</li>
+</ul>
+<p><a id="reference-三色标记清扫算法"></a></p>
+<h3 id="三色标记清扫算法">三色标记清扫算法</h3>
+<p><a id="reference-三色"></a></p>
+<h4 id="三色">三色</h4>
+<ul>
+<li><strong>白色</strong>：未被访问的对象，垃圾回收结束后白色对象会被清理</li>
+<li><strong>灰色</strong>：已被访问但其引用对象还未完全扫描的对象，是待处理队列</li>
+<li><strong>黑色</strong>：已被访问且其所有引用对象都已扫描完成的对象，确认存活</li>
+</ul>
+<p><a id="reference-标记流程"></a></p>
+<h4 id="标记流程">标记流程</h4>
+<ul>
+<li>GC 开始时所有对象都是白色，从 GC Root（全局变量、栈变量等）开始将直接可达对象标记为灰色。</li>
+<li>不断从灰色队列中取出对象，扫描其引用的对象：
+<ul>
+<li>如果引用对象是白色就标记为灰色，当前对象所有引用扫描完成后标记为黑色。</li>
+</ul>
+</li>
+<li>重复这个过程直到灰色队列为空。</li>
+</ul>
+<p><img alt="IMG-20260831131300844" loading="lazy" decoding="async" width="1536" height="1024" src="/_astro/IMG-20260831131300844.Dka_Ndim_s0Wfr.webp"></p>
+<p>当垃圾回收开始时，只有白色对象。随着标记过程开始进行时，灰色对象开始出现（着色），这时候波面便开始扩大。当一个对象的所有子节点均完成扫描时，会被着色为黑色。</p>
+<p>当整个堆遍历完成时，只剩下黑色和白色对象，这时的黑色对象为可达对象，即存活；而白色对象为不可达对象，即死亡。</p>
+<p>这个过程可以视为以灰色对象为波面，将黑色对象和白色对象分离，使波面不断向前推进，直到所有可达的灰色对象都变为黑色对象为止的过程。</p>
+<p><a id="reference-根对象"></a></p>
+<h3 id="根对象">根对象</h3>
+<p>根对象在垃圾回收的术语中又叫做根集合，它是垃圾回收器在标记过程时最先检查的对象</p>
+<ul>
+<li><strong>全局变量</strong>：程序在编译期就能确定的那些存在于程序整个生命周期的变量。</li>
+<li><strong>执行栈</strong>：每个 goroutine 都包含自己的执行栈，这些执行栈上包含栈上的变量及指向分配的堆内存区块的指针。</li>
+<li><strong>寄存器</strong>：寄存器的值可能表示一个指针，参与计算的这些指针可能指向某些赋值器分配的堆内存区块。</li>
+</ul>
+<p><a id="reference-stw"></a></p>
+<h3 id="stw">STW</h3>
+<p><code>STW</code>  是  <code>Stop the World</code>  的缩写，通常意义上指的是用户代码被完全停止运行，<code>STW</code>  越长，对用户代码造成的影响（例如延迟）就越大，早期 Go 对垃圾回收器的实现中  <code>STW</code>  长达几百毫秒，对时间敏感的实时通信等应用程序会造成巨大的影响。</p>
+<p><a id="reference-并发标记清除"></a></p>
+<h3 id="并发标记清除">并发标记清除</h3>
+<p><a id="reference-难点"></a></p>
+<h4 id="难点">难点</h4>
+<p>并发标记清除法的核心难点在于如何保证在用户程序并发修改对象引用时，垃圾回收器仍能正确识别存活对象。</p>
+<p><strong>主要难点</strong>：</p>
+<ul>
+<li><strong>对象消失问题</strong>：在标记过程中，如果用户程序删除了从黑色对象到白色对象的引用，同时从灰色对象到该白色对象的引用也被删除，这个白色对象就会被错误回收，但它实际上还是可达的</li>
+<li><strong>新对象处理</strong>：标记期间新分配的对象如何着色？如果标记为白色可能被误回收，标记为黑色可能造成浮动垃圾</li>
+</ul>
+<p><a id="reference-解决"></a></p>
+<h4 id="解决">解决</h4>
+<p><strong>写屏障技术</strong>和<strong>三色不变性维护</strong></p>
+<ul>
+<li><strong>混合写屏障</strong>策略，在指针赋值时执行额外逻辑：新建引用时将目标对象着为灰色，删除引用时将被删对象标为灰色，这样确保关键对象不会丢失在标记过程中。</li>
+<li><strong>弱三色不变性</strong>：允许黑色对象指向白色对象，但必须保证该白色对象有一条从灰色对象出发可达的路径（即被某个灰色对象“保护”着，不会被错误地当作垃圾回收）。
+<ul>
+<li>栈操作因为频繁且开销敏感，没有采用写屏障技术，而是做了特殊处理：标记开始和结束时分别扫描栈，中间过程不加写屏障。</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-写屏障"></a></p>
+<h4 id="写屏障">写屏障</h4>
+<p>写屏障的本质是在编译器在指针赋值操作中插入的额外很短的指令，当执行 <code>*slot = ptr</code> 这样的指针赋值时，写屏障会在赋值前后执行特定逻辑来标记相关对象，防止并发标记过程中对象被错误回收。</p>
+<ul>
+<li><strong>Dijkstra 插入写屏障</strong>在建立新引用时将目标对象标为灰色，但删除引用时无保护</li>
+<li><strong>Yuasa 删除写屏障</strong>在删除引用时将原对象标为灰色，但新建引用时无保护。</li>
+</ul>
+<p>两者各有局限性</p>
+<p><a id="reference-混合写屏障"></a></p>
+<h4 id="混合写屏障">混合写屏障</h4>
+<ul>
+<li>在指针写入  <code>*slot = ptr</code>  时，<strong>同时</strong>把被覆盖的旧对象  <code>*slot</code>  和新指向的对象  <code>ptr</code>  都置为灰色。</li>
+<li>同时为了优化性能，还规定 GC 标记阶段<strong>栈</strong>上所有<strong>新对象默认标记为黑色</strong>，这样 GC 就不需要再次 STW 重新扫描栈了
+<ul>
+<li>因为栈本身被看作黑色，它指向的对象自然被视为可达的</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-gc-流程"></a></p>
+<h3 id="gc-流程">GC 流程</h3>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>说明</th>
+<th>赋值器状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SweepTermination</td>
+<td>清扫终止阶段，为下一个阶段的并发标记做准备工作，启动写屏障</td>
+<td>STW</td>
+</tr>
+<tr>
+<td>Mark</td>
+<td>扫描标记阶段，与赋值器并发执行，写屏障开启</td>
+<td>并发</td>
+</tr>
+<tr>
+<td>MarkTermination</td>
+<td>标记终止阶段，保证一个周期内标记任务完成，停止写屏障</td>
+<td>STW</td>
+</tr>
+<tr>
+<td>GCoff</td>
+<td>内存清扫阶段，将需要回收的内存归还到堆中，写屏障关闭</td>
+<td>并发</td>
+</tr>
+<tr>
+<td>GCoff</td>
+<td>内存归还阶段，将过多的内存归还给操作系统，写屏障关闭</td>
+<td>并发</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="IMG-20260831131300886" loading="lazy" decoding="async" width="1254" height="1254" src="/_astro/IMG-20260831131300886.B45O0OA3_2ozIpO.webp"></p>
+<p><a id="reference-gc-触发时机"></a></p>
+<h3 id="gc-触发时机">GC 触发时机</h3>
+<ul>
+<li><strong>主动触发</strong>，通过调用 <code>runtime.GC()</code> 来触发 GC，此调用阻塞式地等待当前 GC 运行完毕</li>
+<li><strong>被动触发</strong>，分为两种方式：
+<ul>
+<li>go 后台有一系统监控线程，当<strong>超过两分钟</strong>没有产生任何 GC 时，强制触发 GC。</li>
+<li>内存使用<strong>增长一定比例</strong>时有可能会触发，每次内存分配时检查当前内存分配量是否已达到阈值（环境变量 GOGC）：默认 100%，即当内存扩大一倍时启用 GC
+<ul>
+<li>可以通过 <code>debug.SetGCPercent(500)</code> 来修改步调，这里表示，如果当前堆大小超过了上次标记的堆大小的 500%，就会触发</li>
+<li>第一次 GC 的触发的临界值是 4MB</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-gc-关注指标"></a></p>
+<h3 id="gc-关注指标">GC 关注指标</h3>
+<ul>
+<li>CPU 利用率：回收算法会在多大程度上拖慢程序？
+<ul>
+<li>有时候，这个是通过回收占用的 CPU 时间与其它 CPU 时间的百分比来描述的。</li>
+</ul>
+</li>
+<li>GC 停顿时间：回收器会造成多长时间的停顿？
+<ul>
+<li>目前的 GC 中需要考虑 STW 和 Mark Assist 两个部分可能造成的停顿。</li>
+</ul>
+</li>
+<li>GC 停顿频率：回收器造成的停顿频率是怎样的？
+<ul>
+<li>目前的 GC 中需要考虑 STW 和 Mark Assist 两个部分可能造成的停顿。</li>
+</ul>
+</li>
+<li>GC 可扩展性：当堆内存变大时，垃圾回收器的性能如何？
+<ul>
+<li>但大部分的程序可能并不一定关心这个问题。</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-gc-和内存泄漏"></a></p>
+<h3 id="gc-和内存泄漏">GC 和内存泄漏</h3>
+<p>有 GC 机制的话，内存泄漏其实是预期的能很快被释放的内存其生命期意外地被延长，导致预计能够立即回收的内存而长时间得不到回收。</p>
+<p>Go 中主要有以下两种：</p>
+<ol>
+<li>内存被根对象引用而没有得到迅速释放，比如某个局部变量被赋值到了一个全局变量 map 中</li>
+<li>goroutine 泄漏，一些不当的使用，导致 goroutine 不能正常退出，也会造成内存泄漏</li>
+</ol>
+<p><a id="reference-gc-调优"></a></p>
+<h3 id="gc-调优">GC 调优</h3>
+<ol>
+<li>合理化内存分配的速度、提高赋值器的 CPU 利用率</li>
+<li>降低并复用已经申请的内存，比如使用 <code>sync.pool</code> 复用经常需要创建的重复对象</li>
+<li>调整 GOGC ，可以适量将 GOGC 的值设置得更大，让 GC 触发的时间变得更晚，从而减少其触发频率，进而增加用户代码对机器的使用率</li>
+</ol>
+<p><a id="reference-gc-观察"></a></p>
+<h3 id="gc-观察">GC 观察</h3>
+<p><a id="reference-godebuggctrace1"></a></p>
+<h4 id="godebuggctrace1"><code>GODEBUG=gctrace=1</code> </h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> build</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> main</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> GODEBUG=gctrace=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./main</span></span></code></pre>
+<p><a id="reference-go-tool-trace"></a></p>
+<h4 id="go-tool-trace"><code>go tool trace</code></h4>
+<p><code>go tool trace</code>  的主要功能是将统计而来的信息以一种可视化的方式展示给用户。要使用此工具，可以通过调用 trace API：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">	"</span><span style="color:#6F42C1;--shiki-dark:#B392F0">os</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">	"</span><span style="color:#6F42C1;--shiki-dark:#B392F0">runtime/trace</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	f, _ </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> os.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Create</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"trace.out"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	defer</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> f.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Close</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	trace.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Start</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(f)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	defer</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> trace.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Stop</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>并通过</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> tool</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> trace</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> trace.out</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">2019/12/30</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 15:50:33</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> Parsing</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> trace...</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">2019/12/30</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 15:50:38</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> Splitting</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> trace...</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">2019/12/30</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 15:50:45</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> Opening</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> browser.</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> Trace</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> viewer</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> is</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> listening</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> on</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> http://127.0.0.1:51839</span></span></code></pre>
+<p>来启动可视化界面</p>
+<p><a id="reference-debugreadgcstats"></a></p>
+<h4 id="debugreadgcstats"><code>debug.ReadGCStats</code></h4>
+<p>可以通过代码的方式来直接实现对感兴趣指标的监控</p>
+<p><a id="reference-面试追问go-gc-与写屏障"></a></p>
+<h3 id="面试追问go-gc-与写屏障">面试追问：Go GC 与写屏障</h3>
+<p>Go 使用并发三色标记清扫（非分代、非压缩）。白色是候选垃圾，灰色是已发现但未扫描，黑色是已扫描；标记开始有 STW 初始化，随后 GC 与用户代码并发标记，最后短暂 STW 完成标记终止，再异步清扫。达到由 GOGC/内存上限决定的触发条件会开启新一轮。</p>
+<p>并发标记中，写屏障维护“不变式”：不允许黑对象直接指向白对象而使其漏标。Go 采用混合写屏障，写指针时会把旧值/新值按规则置灰；栈扫描、STW 和屏障共同保证安全。</p>
+<p>不是每一次“变量赋值”都执行屏障：仅在 GC 标记期间、且是可能改变堆对象引用关系的指针写入处插入；写栈指针、非指针字段、编译器可证明安全的赋值会被省略。屏障通常是几条内联指令和缓冲入队，常态下由开关快速跳过，所以成本远小于一次系统调用，但在高指针写入/高分配业务中仍可从 pprof 和 GC 指标观察到。</p>
+<p><a id="reference-runtimereadmemstats"></a></p>
+<h4 id="runtimereadmemstats"><code>runtime.ReadMemStats</code></h4>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>可达但业务已经不再需要的数据，GC 能否自动识别？</li>
+<li>写屏障如何帮助并发标记避免漏标？</li>
+<li>增大 GOGC 通常会如何影响内存与回收频率？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#常见-gc-实现回收方式">常见 GC 实现回收方式</a></li><li style="--depth: 0"><a href="#go-的-gc">Go 的 GC</a></li><li style="--depth: 1"><a href="#三色标记清扫算法">三色标记清扫算法</a></li><li style="--depth: 2"><a href="#三色">三色</a></li><li style="--depth: 2"><a href="#标记流程">标记流程</a></li><li style="--depth: 1"><a href="#根对象">根对象</a></li><li style="--depth: 1"><a href="#stw">STW</a></li><li style="--depth: 1"><a href="#并发标记清除">并发标记清除</a></li><li style="--depth: 2"><a href="#难点">难点</a></li><li style="--depth: 2"><a href="#解决">解决</a></li><li style="--depth: 2"><a href="#写屏障">写屏障</a></li><li style="--depth: 2"><a href="#混合写屏障">混合写屏障</a></li><li style="--depth: 1"><a href="#gc-流程">GC 流程</a></li><li style="--depth: 1"><a href="#gc-触发时机">GC 触发时机</a></li><li style="--depth: 1"><a href="#gc-关注指标">GC 关注指标</a></li><li style="--depth: 1"><a href="#gc-和内存泄漏">GC 和内存泄漏</a></li><li style="--depth: 1"><a href="#gc-调优">GC 调优</a></li><li style="--depth: 1"><a href="#gc-观察">GC 观察</a></li><li style="--depth: 2"><a href="#godebuggctrace1">GODEBUG=gctrace=1 </a></li><li style="--depth: 2"><a href="#go-tool-trace">go tool trace</a></li><li style="--depth: 2"><a href="#debugreadgcstats">debug.ReadGCStats</a></li><li style="--depth: 1"><a href="#面试追问go-gc-与写屏障">面试追问：Go GC 与写屏障</a></li><li style="--depth: 2"><a href="#runtimereadmemstats">runtime.ReadMemStats</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

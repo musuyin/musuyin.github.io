@@ -1,0 +1,391 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Git基础使用 · Musuyin&#39; Home</title><meta name="description" content="Git 通过工作区、暂存区和提交记录管理变更，再用分支与远程引用协作。操作前先定位当前分支和未提交改动，尤其区分恢复文件、撤销提交和改写历史。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/tool/git/git-basics/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Git基础使用 · Musuyin' Home"><meta property="og:description" content="Git 通过工作区、暂存区和提交记录管理变更，再用分支与远程引用协作。操作前先定位当前分支和未提交改动，尤其区分恢复文件、撤销提交和改写历史。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/tool/git/git-basics/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Git基础使用</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-11-26">2025-11-26</time></dd></div><div><dt>字数</dt><dd>2225</dd></div><div><dt>预计阅读</dt><dd>8 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Git/">#Git</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Git基础使用</h1><time datetime="2025-11-26">2025-11-26</time><p class="tags"><a href="/tags/Git/">#Git</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>Git 通过工作区、暂存区和提交记录管理变更，再用分支与远程引用协作。操作前先定位当前分支和未提交改动，尤其区分恢复文件、撤销提交和改写历史。</p>
+<p><a id="reference-常见场景"></a></p>
+<h2 id="常见场景">常见场景</h2>
+<table>
+<thead>
+<tr>
+<th>关键词</th>
+<th>含义</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>​ <code>init</code> ​</td>
+<td>初始化项目或功能</td>
+<td>​<code>init: 初始化博客项目结构</code>​</td>
+</tr>
+<tr>
+<td>​<code>feat</code></td>
+<td>新功能、新文章</td>
+<td>​<code>feat: 添加 RSS 订阅功能</code>​</td>
+</tr>
+<tr>
+<td>​<code>fix</code></td>
+<td>修复 Bug 或问题</td>
+<td>​<code>fix: 修复首页分页无法点击的问题</code>​</td>
+</tr>
+<tr>
+<td>​<code>docs</code>​</td>
+<td>修改文档、文章内容</td>
+<td>​<code>docs: 更新 README 添加部署步骤说明</code>​</td>
+</tr>
+<tr>
+<td>​<code>style</code></td>
+<td>样式调整，无逻辑更改</td>
+<td>​<code>style: 调整代码块字体大小和行间距</code>​</td>
+</tr>
+<tr>
+<td>​<code>refactor</code></td>
+<td>代码重构，无新增或修复功能</td>
+<td>​<code>refactor: 重构导航栏逻辑，优化加载速度</code>​</td>
+</tr>
+<tr>
+<td>​<code>chore</code></td>
+<td>杂项，如构建配置、依赖更新等</td>
+<td>​<code>chore: 更新依赖版本和构建脚本</code>​</td>
+</tr>
+<tr>
+<td>​<code>perf</code>​</td>
+<td>性能优化</td>
+<td>​<code>perf: 提升首页渲染性能</code>​</td>
+</tr>
+<tr>
+<td>​<code>test</code>​</td>
+<td>添加或修改测试</td>
+<td>​<code>test: 添加文章分页功能的单元测试</code>​</td>
+</tr>
+<tr>
+<td>​<code>build</code></td>
+<td>构建系统修改、打包相关</td>
+<td>​<code>build: 修改构建配置为 GitHub Pages 支持路径</code>​</td>
+</tr>
+<tr>
+<td>​<code>ci</code>​</td>
+<td>持续集成相关（如 GitHub Actions）</td>
+<td>​<code>ci: 新增自动部署脚本</code>​</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-常用指令linux-指令"></a></p>
+<h2 id="常用指令linux-指令">常用指令（Linux 指令）</h2>
+<p><a id="reference-鼠标操作"></a></p>
+<h3 id="鼠标操作">鼠标操作</h3>
+<ul>
+<li>双击复制</li>
+<li>滚轮黏贴</li>
+</ul>
+<p><a id="reference-自带命令"></a></p>
+<h3 id="自带命令">自带命令</h3>
+<ul>
+<li>​<code>ls -al</code>​ 查看当前目录</li>
+<li>​<code>cat</code>​ 查看文件内容</li>
+<li>​<code>touch</code>​ 创建文件</li>
+<li>​<code>vi</code>​ vi 编辑器</li>
+<li>​<code>clear</code>​ 清屏</li>
+</ul>
+<p><a id="reference-自定义命令"></a></p>
+<h3 id="自定义命令">自定义命令</h3>
+<ul>
+<li>​<code>git-log</code>​ 用于输出 git 提交日志
+<ul>
+<li>​<code>git log --pretty=oneline --abbrev-commit --all --graph</code>​</li>
+</ul>
+</li>
+<li>​<code>ll</code>​ 用于输出当前目录所有文件及基本信息
+<ul>
+<li>​<code>alias ll='ls -al'</code>​</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-配置"></a></p>
+<h2 id="配置">配置</h2>
+<p><a id="reference-工具"></a></p>
+<h3 id="工具">工具</h3>
+<p>Git GUI：图形界面工具
+Git Bash：命令行工具(Linux)</p>
+<p><a id="reference-用户配置"></a></p>
+<h3 id="用户配置">用户配置</h3>
+<ul>
+<li>设置用户信息
+<ul>
+<li>​ <code>git config --global user.name "musuyin"</code></li>
+<li><code>git config --global user.email "musuyin@qq.com"</code> ​</li>
+</ul>
+</li>
+<li>查看用户信息
+<ul>
+<li><code>git config --global user.name</code></li>
+<li><code>git config --global user.email</code> ​</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-别名配置"></a></p>
+<h3 id="别名配置">别名配置</h3>
+<ul>
+<li>打开用户目录，创建 <code>.bashrc</code> ​ 文件
+<ul>
+<li>若不允许创建 <code>.</code> ​ 开头的文件，可在 gitBash 中执行 <code>touch ~/.bashrc</code> ​</li>
+</ul>
+</li>
+<li>在 <code>.bashrc</code> ​ 文件中加入配置指令</li>
+<li>在 gitBash 中执行 <code>source -/.bashrc</code> ​</li>
+</ul>
+<p><a id="reference-乱码问题"></a></p>
+<h3 id="乱码问题">乱码问题</h3>
+<ul>
+<li>在 gitBash 中执行：<code>git config -global core.quotepath false</code> ​</li>
+<li>在 <code>${git_home}/etc/bash.bashrc</code> 文件加入下面两行（<code>git_home</code> 表示 git 的安装路径）</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>export LANG="zh_CN.UTF-8"</span></span>
+<span class="line"><span>export LC_ALL="zh_CN.UTF-8"</span></span></code></pre>
+<p><a id="reference-本地仓库"></a></p>
+<h3 id="本地仓库">本地仓库</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1060" height="486" src="/_astro/IMG-20261012221502037.BlWLlsUb_2s9d3D.webp"></p>
+<p><a id="reference-管理指令"></a></p>
+<h2 id="管理指令">管理指令</h2>
+<p><a id="reference-基本指令"></a></p>
+<h3 id="基本指令">基本指令</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="993" height="483" src="/_astro/IMG-20261012221502108.D7oZTggM_Z1dsWTC.webp"></p>
+<p><a id="reference-查看修改状态"></a></p>
+<h4 id="查看修改状态">查看修改状态</h4>
+<p>​<code>git status</code>​</p>
+<p><a id="reference-从工作区加入暂存区"></a></p>
+<h4 id="从工作区加入暂存区">从工作区加入暂存区</h4>
+<p>​<code>git add</code>​ add 后加文件名，可以直接使用<code>.</code>​（通配符）来添加所有的文件</p>
+<p><a id="reference-添加文件至忽略列表"></a></p>
+<h5 id="添加文件至忽略列表">添加文件至忽略列表</h5>
+<p>如果有文件不希望 git 上传</p>
+<ul>
+<li>创建一个 <code>.gitignore</code> ​，在其中输入不希望上传的文件名</li>
+</ul>
+<p><a id="reference-从暂存区上传到仓库"></a></p>
+<h4 id="从暂存区上传到仓库">从暂存区上传到仓库</h4>
+<p>​<code>git commit -m "注释"</code>​</p>
+<p><a id="reference-查看提交日志"></a></p>
+<h4 id="查看提交日志">查看提交日志</h4>
+<p>​ <code>git log [option]</code> ​ 都已经包含在配置好的 <code>git-log</code> ​ 中</p>
+<p><code>[option]</code>:</p>
+<ul>
+<li><code>--all</code> 显示所有分支</li>
+<li><code>--pretty=oneline</code> 将提交信息显示为一行</li>
+<li><code>--abbrev-commit</code> 使得输出的 commit 更短</li>
+<li><code>--graph</code> 以图的形式展现</li>
+</ul>
+<p>完整形式：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> log</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --pretty=oneline</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --abbrev-commit</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --all</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --graph</span></span></code></pre>
+<p><a id="reference-版本回退"></a></p>
+<h4 id="版本回退">版本回退</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> reset</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --hard</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> commitID</span></span></code></pre>
+<p><a id="reference-查看已经删除的记录"></a></p>
+<h5 id="查看已经删除的记录">查看已经删除的记录</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> reflog</span></span></code></pre>
+<p><a id="reference-合并提交"></a></p>
+<h3 id="合并提交">合并提交</h3>
+<p>通常用于代码提交前的清理，常用命令是 <code>rebase -i</code> ​：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rebase</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -i</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> HEAD~N</span></span></code></pre>
+<p>将最近 N 次提交合并。会进入编辑器，看到类似：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">pick</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 123abc</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> commit</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> message</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">pick</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 456def</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> commit</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> message</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">pick</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 789ghi</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> commit</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> message</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span></span></code></pre>
+<p>你可以把要合并的提交改为 <code>squash</code>​ 或 <code>s</code>​：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">pick</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 123abc</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> commit</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> message</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">squash</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 456def</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> commit</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> message</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">squash</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 789ghi</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> commit</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> message</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span></span></code></pre>
+<p>然后保存，根据提示合并 commit message 即可。</p>
+<p><a id="reference-分支"></a></p>
+<h3 id="分支">分支</h3>
+<p>将工作从主线上分离来进行重大 Bug 修改，避免对主线造成影响</p>
+<p><a id="reference-查看本地分支"></a></p>
+<h4 id="查看本地分支">查看本地分支</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> branch​</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> branch</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -a</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# 查看所有分支</span></span></code></pre>
+<p><a id="reference-创建本地分支"></a></p>
+<h4 id="创建本地分支">创建本地分支</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> branch</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">branch_nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p><a id="reference-切换分支"></a></p>
+<h4 id="切换分支">切换分支</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> checkout</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">branch_nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# 切换分支</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> checkout</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -b</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">branch_nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6A737D;--shiki-dark:#6A737D"> # 创建（若不存在）并切换</span></span></code></pre>
+<ul>
+<li>每次只能在一个分支上进行操作</li>
+<li><code>HEAD</code> 指向当前的分支</li>
+<li>通过 gitBash 面板创建出的文件会根据分支而展现，但右键创建的文件会一直存在</li>
+</ul>
+<p><a id="reference-合并分支"></a></p>
+<h4 id="合并分支">合并分支</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> merge</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">branch_nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<ul>
+<li>一个分支上的提交可以合并到另一个分支上</li>
+<li>但是被合并的分支还会存在，需要手动删除</li>
+<li>一般是先切换到 master 上，再进行 <code>merge</code></li>
+</ul>
+<p><a id="reference-删除分支"></a></p>
+<h4 id="删除分支">删除分支</h4>
+<p>不能删除当前分支，只能删除其他分支</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> branch</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">branch_nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# 经过检查后删除</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> branch</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -D</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">branch_nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6A737D;--shiki-dark:#6A737D">	# 不做检查强制删除</span></span></code></pre>
+<p><a id="reference-解决冲突"></a></p>
+<h4 id="解决冲突">解决冲突</h4>
+<p>在两个分支上对文件的修改可能会存在冲突，例如同时修改了同一个文件的同一行，这时候需要手动解决冲突</p>
+<ul>
+<li>处理文件中冲突的地方</li>
+<li>将解决完冲突的文件加入暂存区</li>
+<li>提交到仓库</li>
+</ul>
+<p><a id="reference-使用原则"></a></p>
+<h4 id="使用原则">使用原则</h4>
+<ul>
+<li>
+<p><code>master</code> / <code>main</code> 生产分支，线上分支，作为线上运行的应用对应的分支</p>
+</li>
+<li>
+<p><code>develop</code> 开发分支，作为主要的开发分支。从 <code>master</code> / <code>main</code> 中创建，开发完成后合并到主分支中</p>
+</li>
+<li>
+<p><code>feature/xxx</code> 从 <code>develop</code> 中创建，一般是同期并行开发但不同期上线。开发完成后合并到 <code>develop</code></p>
+</li>
+<li>
+<p><code>hotfix/xxx</code> 从 <code>master</code> 派生的分支，一般作为线上 bug 修复使用。修复后合并到 <code>master</code> / <code>test</code> / <code>develop</code> 分支上</p>
+<p><img alt="image" loading="lazy" decoding="async" width="922" height="580" src="/_astro/IMG-20261012221502154.BriM9OA8_Z1RG4AE.webp"></p>
+</li>
+</ul>
+<p><a id="reference-远程仓库"></a></p>
+<h3 id="远程仓库">远程仓库</h3>
+<p><a id="reference-创建远程仓库"></a></p>
+<h4 id="创建远程仓库">创建远程仓库</h4>
+<p>在 github 中：</p>
+<ol>
+<li>create new…</li>
+<li>create new repository</li>
+</ol>
+<p><a id="reference-配置-ssh-公钥"></a></p>
+<h4 id="配置-ssh-公钥">配置 SSH 公钥</h4>
+<ol>
+<li>
+<p>​<code>ssh-keygen -t rsa</code>​ 不断回车。如果公钥已存在则会覆盖</p>
+</li>
+<li>
+<p>Github 设置帐户供公钥</p>
+<ol start="3">
+<li>获取公钥 <code>cat ~/.ssh/id_rsa.pub</code> ​</li>
+<li>添加到账户设置中</li>
+<li>验证配置是否成功 <code>ssh -T git@github.com</code> ​</li>
+</ol>
+</li>
+</ol>
+<p><a id="reference-本地仓库关联远程仓库"></a></p>
+<h4 id="本地仓库关联远程仓库">本地仓库关联远程仓库</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> remote</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> add</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> origin</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">git_ur</span><span style="color:#24292E;--shiki-dark:#E1E4E8">l</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<ul>
+<li>origin 是远程仓库名称（一般都取这个名字），因为有可能一个本地仓库关联多个远程仓库（比较少见）</li>
+</ul>
+<p><a id="reference-查看远程仓库"></a></p>
+<h4 id="查看远程仓库">查看远程仓库</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> remote</span></span></code></pre>
+<p><a id="reference-本地代码同步远程仓库"></a></p>
+<h4 id="本地代码同步远程仓库">本地代码同步远程仓库</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> push</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> origin</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">local_branch:remote_branc</span><span style="color:#24292E;--shiki-dark:#E1E4E8">h</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p><img alt="image" loading="lazy" decoding="async" width="934" height="574" src="/_astro/IMG-20261012221502209.BSvQ0qOa_Z1L35iJ.webp"></p>
+<ul>
+<li>使用 <code>--set-upstream</code> ​ 绑定关系后，可以直接输入 <code>git push</code> ​，省略了远端名和分支名</li>
+<li><code>git branch -vv</code>​ 查看本地和远程分支的对应关系</li>
+</ul>
+<p><a id="reference-从远程仓库克隆"></a></p>
+<h4 id="从远程仓库克隆">从远程仓库克隆</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> clone</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">repo_ur</span><span style="color:#24292E;--shiki-dark:#E1E4E8">l</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [dir]</span></span></code></pre>
+<ul>
+<li>如果已经有一个远程仓库，可以直接克隆到本地。会将所有内容下载，使用频率并不频繁
+<ul>
+<li>本地目录可以省略，会自动生成</li>
+<li>可以在另外的本地文件夹创建</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-从远程仓库抓取和拉取"></a></p>
+<h4 id="从远程仓库抓取和拉取">从远程仓库抓取和拉取</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> fetch</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [remote_name] [branch_name]</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pull</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [remote_name] [branch_name]</span></span></code></pre>
+<ul>
+<li>抓取：<code>git fetch [remote name] [branch name]</code> ​
+<ul>
+<li>将远端仓库里的更新抓取到本地，不会进行合并；如果不指定名称则会抓取所有分支</li>
+</ul>
+</li>
+<li>拉取：<code>git pull [remote name] [branch name]</code> ​
+<ul>
+<li>将远端仓库的修改拉到本地并进行自动合并，相当于 pull = fetch + merge</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-解决远端冲突"></a></p>
+<h4 id="解决远端冲突">解决远端冲突</h4>
+<ul>
+<li>修改了同一个文件的同一行，需要手动进行修改</li>
+<li>在 <code>push</code> 之前，先进行一次 <code>pull</code>，进行冲突解决</li>
+</ul>
+<p><a id="reference-查看远程连接"></a></p>
+<h4 id="查看远程连接">查看远程连接</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> remote</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -v​</span></span></code></pre>
+<p><a id="reference-解除仓库关联"></a></p>
+<h4 id="解除仓库关联">解除仓库关联</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">git</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> remote</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> remove</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">remote_nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p><a id="reference-idea-操作-git"></a></p>
+<h2 id="idea-操作-git">IDEA 操作 Git</h2>
+<p><a id="reference-指令"></a></p>
+<h3 id="指令">指令</h3>
+<p><a id="reference-创建仓库"></a></p>
+<h4 id="创建仓库">创建仓库</h4>
+<ul>
+<li>VCS</li>
+<li>Import into Version Control</li>
+<li>Create Git Repository</li>
+<li>Choose Project</li>
+</ul>
+<p><a id="reference-提交代码"></a></p>
+<h4 id="提交代码">提交代码</h4>
+<ul>
+<li>pull</li>
+<li>输入 SSH</li>
+</ul>
+<p><a id="reference-查看"></a></p>
+<h4 id="查看">查看</h4>
+<p>Log</p>
+<p><a id="reference-克隆"></a></p>
+<h4 id="克隆">克隆</h4>
+<ul>
+<li>VCS</li>
+<li>Checkout from Version Control</li>
+<li>Git</li>
+<li>Input URL</li>
+</ul>
+<p><a id="reference-创建分支"></a></p>
+<h4 id="创建分支">创建分支</h4>
+<p>右键创建 new branch
+可以在各个点创建分支</p>
+<p><a id="reference-冲突解决"></a></p>
+<h4 id="冲突解决">冲突解决</h4>
+<p>解决好冲突之后必须 add 一下</p>
+<p><a id="reference-tip"></a></p>
+<h2 id="tip">TIP</h2>
+<p>切换分支前必须要上传</p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>解释 add、commit、fetch、pull 和 push 各改变什么状态；出现冲突时怎样确认保留了双方需要的修改？</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/tool/git/git-workflow/">Git 工作流</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/tool/">开发工具学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#常见场景">常见场景</a></li><li style="--depth: 0"><a href="#常用指令linux-指令">常用指令（Linux 指令）</a></li><li style="--depth: 1"><a href="#鼠标操作">鼠标操作</a></li><li style="--depth: 1"><a href="#自带命令">自带命令</a></li><li style="--depth: 1"><a href="#自定义命令">自定义命令</a></li><li style="--depth: 0"><a href="#配置">配置</a></li><li style="--depth: 1"><a href="#工具">工具</a></li><li style="--depth: 1"><a href="#用户配置">用户配置</a></li><li style="--depth: 1"><a href="#别名配置">别名配置</a></li><li style="--depth: 1"><a href="#乱码问题">乱码问题</a></li><li style="--depth: 1"><a href="#本地仓库">本地仓库</a></li><li style="--depth: 0"><a href="#管理指令">管理指令</a></li><li style="--depth: 1"><a href="#基本指令">基本指令</a></li><li style="--depth: 2"><a href="#查看修改状态">查看修改状态</a></li><li style="--depth: 2"><a href="#从工作区加入暂存区">从工作区加入暂存区</a></li><li style="--depth: 3"><a href="#添加文件至忽略列表">添加文件至忽略列表</a></li><li style="--depth: 2"><a href="#从暂存区上传到仓库">从暂存区上传到仓库</a></li><li style="--depth: 2"><a href="#查看提交日志">查看提交日志</a></li><li style="--depth: 2"><a href="#版本回退">版本回退</a></li><li style="--depth: 3"><a href="#查看已经删除的记录">查看已经删除的记录</a></li><li style="--depth: 1"><a href="#合并提交">合并提交</a></li><li style="--depth: 1"><a href="#分支">分支</a></li><li style="--depth: 2"><a href="#查看本地分支">查看本地分支</a></li><li style="--depth: 2"><a href="#创建本地分支">创建本地分支</a></li><li style="--depth: 2"><a href="#切换分支">切换分支</a></li><li style="--depth: 2"><a href="#合并分支">合并分支</a></li><li style="--depth: 2"><a href="#删除分支">删除分支</a></li><li style="--depth: 2"><a href="#解决冲突">解决冲突</a></li><li style="--depth: 2"><a href="#使用原则">使用原则</a></li><li style="--depth: 1"><a href="#远程仓库">远程仓库</a></li><li style="--depth: 2"><a href="#创建远程仓库">创建远程仓库</a></li><li style="--depth: 2"><a href="#配置-ssh-公钥">配置 SSH 公钥</a></li><li style="--depth: 2"><a href="#本地仓库关联远程仓库">本地仓库关联远程仓库</a></li><li style="--depth: 2"><a href="#查看远程仓库">查看远程仓库</a></li><li style="--depth: 2"><a href="#本地代码同步远程仓库">本地代码同步远程仓库</a></li><li style="--depth: 2"><a href="#从远程仓库克隆">从远程仓库克隆</a></li><li style="--depth: 2"><a href="#从远程仓库抓取和拉取">从远程仓库抓取和拉取</a></li><li style="--depth: 2"><a href="#解决远端冲突">解决远端冲突</a></li><li style="--depth: 2"><a href="#查看远程连接">查看远程连接</a></li><li style="--depth: 2"><a href="#解除仓库关联">解除仓库关联</a></li><li style="--depth: 0"><a href="#idea-操作-git">IDEA 操作 Git</a></li><li style="--depth: 1"><a href="#指令">指令</a></li><li style="--depth: 2"><a href="#创建仓库">创建仓库</a></li><li style="--depth: 2"><a href="#提交代码">提交代码</a></li><li style="--depth: 2"><a href="#查看">查看</a></li><li style="--depth: 2"><a href="#克隆">克隆</a></li><li style="--depth: 2"><a href="#创建分支">创建分支</a></li><li style="--depth: 2"><a href="#冲突解决">冲突解决</a></li><li style="--depth: 0"><a href="#tip">TIP</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

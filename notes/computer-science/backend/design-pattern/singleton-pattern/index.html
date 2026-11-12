@@ -1,0 +1,317 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>单例模式（Singleton Pattern） · Musuyin&#39; Home</title><meta name="description" content="单例约束的是实例数量，线程安全还包括安全发布与实例内部状态的并发访问。比较 Java 实现时，先看初始化时机，再看发布保障，最后看序列化、反射和测试隔离。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/design-pattern/singleton-pattern/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="单例模式（Singleton Pattern） · Musuyin' Home"><meta property="og:description" content="单例约束的是实例数量，线程安全还包括安全发布与实例内部状态的并发访问。比较 Java 实现时，先看初始化时机，再看发布保障，最后看序列化、反射和测试隔离。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/design-pattern/singleton-pattern/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">单例模式（Singleton Pattern）</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-24">2026-08-24</time></dd></div><div><dt>字数</dt><dd>1148</dd></div><div><dt>预计阅读</dt><dd>4 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">#设计模式</a><a href="/tags/%E5%88%9B%E5%BB%BA%E5%9E%8B/">#创建型</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>单例模式（Singleton Pattern）</h1><time datetime="2026-08-24">2026-08-24</time><p class="tags"><a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">#设计模式</a><a href="/tags/%E5%88%9B%E5%BB%BA%E5%9E%8B/">#创建型</a></p></header><div class="prose"><p>单例约束的是实例数量，线程安全还包括安全发布与实例内部状态的并发访问。比较 Java 实现时，先看初始化时机，再看发布保障，最后看序列化、反射和测试隔离。</p>
+<p><a id="reference-定义"></a></p>
+<h2 id="定义">定义</h2>
+<p><strong>单例模式</strong>确保一个类只有一个实例，并提供一个全局访问点来获取该实例。</p>
+<p><a id="reference-问题场景"></a></p>
+<h2 id="问题场景">问题场景</h2>
+<p>某些对象在系统中应该只存在一份，例如：</p>
+<ul>
+<li><strong>配置管理器</strong>：应用配置应该只加载一次</li>
+<li><strong>日志系统</strong>：所有日志应该写入同一个文件/流</li>
+<li><strong>数据库连接池</strong>：连接复用，避免重复建立连接</li>
+<li><strong>缓存管理器</strong>：全局唯一的缓存实例</li>
+</ul>
+<p>如果不做控制，多个地方各自创建实例会导致资源浪费、数据不一致等问题。</p>
+<p><a id="reference-实现方式"></a></p>
+<h2 id="实现方式">实现方式</h2>
+<p><a id="reference-饿汉式eager-initialization"></a></p>
+<h3 id="饿汉式eager-initialization">饿汉式（Eager Initialization）</h3>
+<p>类加载时立即创建实例。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 类加载时就创建实例</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> final</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Singleton instance </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 私有构造器</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 全局访问点</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Singleton </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getInstance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> instance;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>线程安全，无需额外同步</li>
+<li>实现简单</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>无法延迟初始化</li>
+<li>如果实例创建成本高但不一定用到，会浪费资源</li>
+</ul>
+<p><a id="reference-懒汉式lazy-initialization"></a></p>
+<h3 id="懒汉式lazy-initialization">懒汉式（Lazy Initialization）</h3>
+<p>第一次使用时才创建实例。</p>
+<p><a id="reference-非线程安全版本"></a></p>
+<h4 id="非线程安全版本">非线程安全版本</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Singleton instance;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Singleton </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getInstance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (instance </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            instance </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 线程不安全！</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> instance;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>问题</strong>：多线程环境下可能创建多个实例。</p>
+<p><a id="reference-线程安全版本---synchronized"></a></p>
+<h4 id="线程安全版本---synchronized">线程安全版本 - synchronized</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Singleton instance;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> synchronized</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Singleton </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getInstance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (instance </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            instance </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> instance;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>缺点</strong>：每次调用都经过同步；实际开销需结合调用频率和 JVM 优化测量。</p>
+<p><a id="reference-双重检查锁定double-checked-locking"></a></p>
+<h3 id="双重检查锁定double-checked-locking">双重检查锁定（Double-Checked Locking）</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> volatile</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Singleton instance;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Singleton </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getInstance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (instance </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {                    </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 第一次检查，无锁</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            synchronized</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (Singleton.class) {       </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 加锁</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (instance </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {            </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 第二次检查</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    instance </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> instance;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>延迟初始化</li>
+<li>大多数情况下无锁，性能好</li>
+<li>线程安全</li>
+</ul>
+<p><strong>关键点</strong>：</p>
+<ul>
+<li>第一次检查减少同步开销</li>
+<li><code>volatile</code> 关键字确保内存可见性，防止指令重排</li>
+</ul>
+<p><a id="reference-静态内部类bill-pugh-singleton"></a></p>
+<h3 id="静态内部类bill-pugh-singleton">静态内部类（Bill Pugh Singleton）</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> SingletonHolder</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        static</span><span style="color:#D73A49;--shiki-dark:#F97583"> final</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Singleton instance </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Singleton </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getInstance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SingletonHolder.instance;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>延迟初始化（只在调用 <code>getInstance()</code> 时加载内部类）</li>
+<li>利用 ClassLoader 机制保证线程安全</li>
+<li>实现简洁，无需显式同步</li>
+</ul>
+<p>静态内部类依赖类初始化的同步保障，可参考 <a href="https://docs.oracle.com/javase/specs/jls/se21/html/jls-12.html#jls-12.4.2">JLS 类初始化过程</a>。是否采用还取决于初始化参数、生命周期及测试需求。</p>
+<p><a id="reference-枚举enum"></a></p>
+<h3 id="枚举enum">枚举（Enum）</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> enum</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    INSTANCE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> doSomething</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 业务逻辑</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 使用</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Singleton.INSTANCE.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">doSomething</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span></code></pre>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>线程安全</li>
+<li>天然防止反序列化创建新实例</li>
+<li>防止反射破坏单例</li>
+<li>代码最简洁</li>
+</ul>
+<p><strong>限制</strong>：</p>
+<ul>
+<li>枚举也是单例的实现方式，但不能像普通类那样继承其他类</li>
+<li>需要参数化初始化或复杂生命周期时应另行设计</li>
+</ul>
+<p><a id="reference-单例的破坏与防护"></a></p>
+<h2 id="单例的破坏与防护">单例的破坏与防护</h2>
+<p><a id="reference-反射破坏"></a></p>
+<h3 id="反射破坏">反射破坏</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 破坏</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Constructor&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">?</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; constructor </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Singleton.class.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getDeclaredConstructor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">constructor.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setAccessible</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Singleton instance2 </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (Singleton) constructor.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">newInstance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span></code></pre>
+<p><strong>有限防护</strong>：构造器中检查实例可以拦截部分重复创建，但对首次构造顺序等情形并非普遍可靠</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">private</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Singleton</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (instance </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        throw</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> RuntimeException</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"单例已存在"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-序列化破坏"></a></p>
+<h3 id="序列化破坏">序列化破坏</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 破坏</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ObjectInputStream.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">readObject</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() 会创建新实例</span></span></code></pre>
+<p><strong>防护</strong>：实现 <code>readResolve()</code> 方法</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Object </span><span style="color:#6F42C1;--shiki-dark:#B392F0">readResolve</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getInstance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-对比总结"></a></p>
+<h2 id="对比总结">对比总结</h2>
+<table>
+<thead>
+<tr>
+<th>实现方式</th>
+<th>线程安全</th>
+<th>延迟加载</th>
+<th>性能</th>
+<th>代码复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>饿汉式</td>
+<td>✅</td>
+<td>❌</td>
+<td>最优</td>
+<td>简单</td>
+</tr>
+<tr>
+<td>懒汉式（synchronized）</td>
+<td>✅</td>
+<td>✅</td>
+<td>一般</td>
+<td>简单</td>
+</tr>
+<tr>
+<td>双重检查锁定</td>
+<td>✅</td>
+<td>✅</td>
+<td>很好</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>静态内部类</td>
+<td>✅</td>
+<td>✅</td>
+<td>很好</td>
+<td>简单</td>
+</tr>
+<tr>
+<td>枚举</td>
+<td>✅</td>
+<td>❌</td>
+<td>最优</td>
+<td>简单</td>
+</tr>
+</tbody>
+</table>
+<p><strong>推荐方案</strong>：</p>
+<ul>
+<li><strong>Java</strong>：枚举 &gt; 静态内部类 &gt; 饿汉式</li>
+<li><strong>其他语言</strong>：根据语言特性选择</li>
+</ul>
+<p><a id="reference-实际应用"></a></p>
+<h2 id="实际应用">实际应用</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 日志系统</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Logger</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> volatile</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Logger instance;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> PrintWriter writer;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Logger</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        try</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            writer </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> PrintWriter</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"app.log"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        } </span><span style="color:#D73A49;--shiki-dark:#F97583">catch</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (IOException </span><span style="color:#E36209;--shiki-dark:#FFAB70">e</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            e.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">printStackTrace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Logger </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getInstance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (instance </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            synchronized</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (Logger.class) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (instance </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    instance </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Logger</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> instance;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> log</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String </span><span style="color:#E36209;--shiki-dark:#FFAB70">message</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        writer.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(message);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        writer.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">flush</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 使用</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Logger.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getInstance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">log</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Application started"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Logger.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getInstance</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">log</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"User logged in"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span></code></pre>
+<p><a id="reference-注意事项"></a></p>
+<h2 id="注意事项">注意事项</h2>
+<p>⚠️ <strong>单例的缺陷</strong>：</p>
+<ol>
+<li><strong>难以测试</strong>：全局状态难以在测试中隔离</li>
+<li><strong>隐藏依赖</strong>：不清楚类依赖了单例</li>
+<li><strong>线程安全复杂</strong>：多线程环境需谨慎</li>
+<li><strong>频繁应用会导致高耦合</strong>：应审慎使用</li>
+</ol>
+<p>💡 <strong>现代替代方案</strong>：</p>
+<ul>
+<li>依赖注入（Dependency Injection）框架</li>
+<li>工厂模式 + 工厂管理单一实例</li>
+</ul>
+<p><a id="reference-对比其他模式"></a></p>
+<h2 id="对比其他模式">对比其他模式</h2>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>目的</th>
+<th>区别</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单例</td>
+<td>确保一个实例</td>
+<td>全局唯一</td>
+</tr>
+<tr>
+<td>工厂</td>
+<td>解耦创建逻辑</td>
+<td>可创建多个实例</td>
+</tr>
+<tr>
+<td>对象池</td>
+<td>复用对象</td>
+<td>多个实例，重复利用</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>双重检查锁为何同时需要第二次检查与 <code>volatile</code>？</li>
+<li>静态内部类的线程安全来自什么初始化规则？</li>
+<li>单例实例中的可变字段为什么仍可能出现数据竞争？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#定义">定义</a></li><li style="--depth: 0"><a href="#问题场景">问题场景</a></li><li style="--depth: 0"><a href="#实现方式">实现方式</a></li><li style="--depth: 1"><a href="#饿汉式eager-initialization">饿汉式（Eager Initialization）</a></li><li style="--depth: 1"><a href="#懒汉式lazy-initialization">懒汉式（Lazy Initialization）</a></li><li style="--depth: 2"><a href="#非线程安全版本">非线程安全版本</a></li><li style="--depth: 2"><a href="#线程安全版本---synchronized">线程安全版本 - synchronized</a></li><li style="--depth: 1"><a href="#双重检查锁定double-checked-locking">双重检查锁定（Double-Checked Locking）</a></li><li style="--depth: 1"><a href="#静态内部类bill-pugh-singleton">静态内部类（Bill Pugh Singleton）</a></li><li style="--depth: 1"><a href="#枚举enum">枚举（Enum）</a></li><li style="--depth: 0"><a href="#单例的破坏与防护">单例的破坏与防护</a></li><li style="--depth: 1"><a href="#反射破坏">反射破坏</a></li><li style="--depth: 1"><a href="#序列化破坏">序列化破坏</a></li><li style="--depth: 0"><a href="#对比总结">对比总结</a></li><li style="--depth: 0"><a href="#实际应用">实际应用</a></li><li style="--depth: 0"><a href="#注意事项">注意事项</a></li><li style="--depth: 0"><a href="#对比其他模式">对比其他模式</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kubernetes 概览 · Musuyin&#39; Home</title><meta name="description" content="Kubernetes 以 API 对象连接多个控制循环。提交配置只是写入期望状态，真正的资源创建、调度与启动由不同组件异步推进，排障时要找停在哪一步。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-overview/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Kubernetes 概览 · Musuyin' Home"><meta property="og:description" content="Kubernetes 以 API 对象连接多个控制循环。提交配置只是写入期望状态，真正的资源创建、调度与启动由不同组件异步推进，排障时要找停在哪一步。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-overview/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Kubernetes 概览</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-03-10">2026-03-10</time></dd></div><div><dt>字数</dt><dd>1985</dd></div><div><dt>预计阅读</dt><dd>7 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Kubernetes/">#Kubernetes</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Kubernetes 概览</h1><time datetime="2026-03-10">2026-03-10</time><p class="tags"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Kubernetes/">#Kubernetes</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>Kubernetes 以 API 对象连接多个控制循环。提交配置只是写入期望状态，真正的资源创建、调度与启动由不同组件异步推进，排障时要找停在哪一步。</p>
+<p><a id="reference-学习目标"></a></p>
+<h2 id="学习目标">学习目标</h2>
+<p>学完本章后，应当能够：</p>
+<ul>
+<li>用“声明期望状态 → 控制器持续协调 → 系统逐步收敛”解释 Kubernetes 的工作方式。</li>
+<li>说清 API Server、etcd、Scheduler、Controller Manager、Kubelet 与容器运行时的职责边界。</li>
+<li>使用 <code>kubectl</code> 查看资源、事件和日志，并判断故障更可能位于应用、Node 还是控制面。</li>
+<li>理解本地单节点环境与生产高可用集群的差异，不把实验结论直接套用到生产。</li>
+</ul>
+<blockquote>
+<p>Kubernetes 不是远程执行命令的工具，而是一组围绕 API 对象运行的控制循环。用户声明“想要什么”，各组件协作把“现在是什么”逐步变成期望状态。</p>
+</blockquote>
+<p><a id="reference-特性"></a></p>
+<h2 id="特性">特性</h2>
+<p><img alt="IMG-20260817143934349" loading="lazy" decoding="async" width="1912" height="772" src="/_astro/IMG-20260817143934349.CN8YWYNa_1rGf5o.webp"></p>
+<p>Kubernetes 是一个开源系统，用于自动化部署、扩缩容和管理容器化应用。</p>
+<p>Kubernetes 提供了一个可弹性运行分布式系统的框架</p>
+<ul>
+<li>服务发现与负载均衡（Service Discovery / Load Balancing）</li>
+<li>存储编排（Storage Orchestration）</li>
+<li>自动发布与回滚（Rollouts / Rollbacks）</li>
+<li>自愈（Self-healing）</li>
+<li>Secret 与配置管理</li>
+<li>水平扩缩容（Horizontal Scaling）</li>
+</ul>
+<p><a id="reference-基础架构"></a></p>
+<h2 id="基础架构">基础架构</h2>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>Kubernetes Cluster</mtext><mo>=</mo><mi>N</mi><mtext> Control Plane Nodes</mtext><mo>+</mo><mi>M</mi><mtext> Worker Nodes</mtext><mspace width="1em"/><mo stretchy="false">(</mo><mi>N</mi><mo separator="true">,</mo><mi>M</mi><mo>≥</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Kubernetes Cluster} = N\ \text{Control Plane Nodes} + M\ \text{Worker Nodes} \quad (N,M\geq1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord text"><span class="mord">Kubernetes Cluster</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace"> </span><span class="mord text"><span class="mord">Control Plane Nodes</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mspace"> </span><span class="mord text"><span class="mord">Worker Nodes</span></span><span class="mspace" style="margin-right:1em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span></p>
+<p><img alt="IMG-20260817143934438" loading="lazy" decoding="async" width="2497" height="1133" src="/_astro/IMG-20260817143934438.CquLSkfe_ZC3pjV.webp"></p>
+<blockquote>
+<p>图：从期望状态提交到控制面 Reconcile，再到 Worker Node 执行的完整控制链路。</p>
+</blockquote>
+<p>现代 Kubernetes 更推荐使用 <strong>Control Plane（控制面）</strong>，而不是 Master。生产环境通常部署 3 个或更多奇数个控制面节点，以保证 etcd 和控制面的高可用。</p>
+<p><img alt="IMG-20260817143934507" loading="lazy" decoding="async" width="1568" height="912" src="/_astro/IMG-20260817143934507.CwsNZWlC_Z2nlev9.webp"></p>
+<p><a id="reference-pod-与容器"></a></p>
+<h3 id="pod-与容器">Pod 与容器</h3>
+<p><img alt="IMG-20260817143934556" loading="lazy" decoding="async" width="1876" height="548" src="/_astro/IMG-20260817143934556.DbxO5bIQ_Y0pxD.webp"></p>
+<ul>
+<li>一个 Pod 中可有多个 Container</li>
+<li>一个 Node 中也可有多个 Pod</li>
+</ul>
+<p><a id="reference-核心构成"></a></p>
+<h3 id="核心构成">核心构成</h3>
+<p><img alt="IMG-20260817143934580" loading="lazy" decoding="async" width="1144" height="481" src="/_astro/IMG-20260817143934580.B-89WxFG_1uG37F.webp"></p>
+<ul>
+<li>Service：为 Pod 提供稳定访问入口和服务发现。</li>
+<li>Deployment：声明式管理无状态应用的部署与发布。</li>
+</ul>
+<p><a id="reference-使用-kubectl-与集群交互"></a></p>
+<h3 id="使用-kubectl-与集群交互">使用 <code>kubectl</code> 与集群交互</h3>
+<p><img alt="IMG-20260817143934619" loading="lazy" decoding="async" width="1872" height="910" src="/_astro/IMG-20260817143934619.CbKQSyy7_Z1Lg80.webp"></p>
+<ul>
+<li><em>etcd</em>: Kubernetes 的<strong>一致性键值存储</strong>，持久化集群 API 对象和控制面状态，是集群事实数据的主要存储位置</li>
+<li><em>API Server</em>: 控制面的统一入口，负责 API 请求的认证、鉴权、准入校验与持久化；<code>kubectl</code>、控制器、Scheduler 和 Kubelet 都通过它读写集群状态</li>
+<li><em>Controller Manager</em>: 运行 Deployment、ReplicaSet、Node 等控制器，持续比较期望状态与实际状态，并通过 Reconcile 控制循环推动系统收敛</li>
+<li><em>Scheduler</em>: 监听尚未绑定 Node 的 Pod，经过过滤和评分后选择合适的 Node；它只负责调度决策，不负责启动容器</li>
+</ul>
+<p><code>kubectl</code> 并不是把命令逐级转发给 Controller Manager。它向 API Server 提交期望状态，随后各控制面组件通过监听 API 对象异步协作。</p>
+<p><img alt="IMG-20260817143934646" loading="lazy" decoding="async" width="1882" height="885" src="/_astro/IMG-20260817143934646.DHDyJxYE_Z4KSVp.webp"></p>
+<p><a id="reference-节点node"></a></p>
+<h3 id="节点node">节点（Node）</h3>
+<p><img alt="IMG-20260817143934690" loading="lazy" decoding="async" width="2012" height="882" src="/_astro/IMG-20260817143934690.DMWRK-BK_1sWgSE.webp"></p>
+<ul>
+<li><em>Kubelet</em>: 每个 Node 上的<strong>节点代理</strong>，向 API Server <strong>注册 Node</strong>，并根据 PodSpec 调用容器运行时管理 Pod 中的容器</li>
+<li><em>Container Runtime</em>: 通过 CRI 运行和管理容器，例如 containerd、CRI-O</li>
+<li><em>CNI/IPAM</em>: 为 Pod 配置网络接口、路由并分配 Pod IP；具体能力由所使用的 CNI 插件提供</li>
+<li><em>Kube-Proxy</em>: 监听 Service 和 EndpointSlice，在 Node 上维护转发规则，实现 Service ClusterIP/NodePort 到后端 Pod 的四层转发；它不负责分配 Pod IP</li>
+</ul>
+<p><a id="reference-使用场景"></a></p>
+<h2 id="使用场景">使用场景</h2>
+<ul>
+<li>在本地模拟生产环境</li>
+<li>从 Docker Compose 迁移到 Kubernetes</li>
+<li>创建端到端测试环境</li>
+<li>验证应用能否正确扩缩容</li>
+<li>验证 Secret 与配置是否正确生效</li>
+<li>构建性能测试场景</li>
+<li>构建工作负载场景（CI/CD 等）</li>
+<li>学习如何使用发布策略</li>
+<li>协助 DevOps 创建资源并排查问题</li>
+</ul>
+<p><a id="reference-部署方式"></a></p>
+<h2 id="部署方式">部署方式</h2>
+<ol>
+<li>minikube</li>
+<li>Docker Desktop</li>
+<li>kubeadm</li>
+<li>kind</li>
+</ol>
+<p><a id="reference-kubectl"></a></p>
+<h2 id="kubectl">kubectl</h2>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kubectl version</code></td>
+<td>查看版本</td>
+</tr>
+<tr>
+<td><code>kubectl cluster-info</code></td>
+<td>查看集群信息</td>
+</tr>
+<tr>
+<td><code>kubectl get all</code></td>
+<td>获取 Pod、Deployment、Service 等资源信息</td>
+</tr>
+<tr>
+<td><code>kubectl get pods</code></td>
+<td>仅获取 Pod 信息</td>
+</tr>
+<tr>
+<td><code>kubectl run [pod-name] --image=[image-name]</code></td>
+<td>创建独立 Pod</td>
+</tr>
+<tr>
+<td><code>kubectl port-forward [pod] [ports]</code></td>
+<td>将本地端口转发到 Pod</td>
+</tr>
+<tr>
+<td><code>kubectl expose</code></td>
+<td>为 Deployment/Pod 暴露端口</td>
+</tr>
+<tr>
+<td><code>kubectl create [resource]</code></td>
+<td>创建资源</td>
+</tr>
+<tr>
+<td><code>kubectl apply [resource]</code></td>
+<td>创建或修改资源</td>
+</tr>
+</tbody>
+</table>
+<p>可以为 <code>kubectl</code> 设置别名</p>
+<p>Windows:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">Set-Alias</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -Name</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> k</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -Value</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> kubectl</span></span></code></pre>
+<p>Mac/Linux</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">alias</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> k</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"kubectl"</span></span></code></pre>
+<p><a id="reference-web-ui-dashboardmac"></a></p>
+<h3 id="web-ui-dashboardmac">Web UI Dashboard（Mac）</h3>
+<p><a href="https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/">旧版原生 Dashboard</a> 已经弃用，现使用 <a href="https://headlamp.dev/">Headlamp</a></p>
+<p>安装后即可直接查看本地运行的集群。</p>
+<p><a id="reference-故障排查"></a></p>
+<h2 id="故障排查">故障排查</h2>
+<p><a id="reference-日志"></a></p>
+<h3 id="日志">日志</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 查看 Pod 中容器的日志</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod_name]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 查看 Pod 内指定容器的日志</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod_name] -c [container_name]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 查看上一次运行的容器日志</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod_name]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 持续输出 Pod 日志</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod_name]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 持续观察资源变化</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod_name] --watch</span></span></code></pre>
+<p><a id="reference-查看资源详情"></a></p>
+<h3 id="查看资源详情">查看资源详情</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 查看 Pod 详情</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod_name]</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 以 YAML 格式查看 Pod</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod_name] -o yaml</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 以 YAML 格式查看 Deployment</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> deployment</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [deployment_name] -o yaml</span></span></code></pre>
+<p><a id="reference-进入容器-shell"></a></p>
+<h3 id="进入容器-shell">进入容器 Shell</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> exec</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -it</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [pod-name] -- sh</span></span></code></pre>
+<p><a id="reference-集群级故障的首轮判断"></a></p>
+<h3 id="集群级故障的首轮判断">集群级故障的首轮判断</h3>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>首先检查</th>
+<th>常见方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>多个命名空间的 Pod 同时异常</td>
+<td>API Server、Node 状态、<code>kubectl get events -A</code></td>
+<td>控制面、网络、节点池或镜像仓库</td>
+</tr>
+<tr>
+<td>新 Pod 长期 Pending</td>
+<td><code>kubectl describe pod</code>、节点可分配资源与 taint</td>
+<td>资源不足、污点容忍、PVC 未绑定、调度约束</td>
+</tr>
+<tr>
+<td>单节点 Pod 集中异常</td>
+<td><code>kubectl describe node</code>、节点条件和 kubelet 日志</td>
+<td>DiskPressure、MemoryPressure、网络或运行时异常</td>
+</tr>
+</tbody>
+</table>
+<p>排障时先确认影响面和近期变更，避免直接重启节点；恢复后再保存事件、日志和时间线用于复盘。</p>
+<p><a id="reference-实践与验收"></a></p>
+<h2 id="实践与验收">实践与验收</h2>
+<ol>
+<li>使用 kind、minikube 或 Docker Desktop 准备一个练习集群。</li>
+<li>执行下列命令，分别找到控制面组件、Node 和普通工作负载：</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> cluster-info</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nodes</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> wide</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pods</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> wide</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> events</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --sort-by=.lastTimestamp</span></span></code></pre>
+<ol start="3">
+<li>创建一个 nginx Pod，观察从对象创建到获得 Pod IP 的过程，再删除它。</li>
+<li>验收时应能回答：Scheduler 为何不启动容器、Kubelet 为何不决定副本数、etcd 故障为何会影响整个控制面。</li>
+</ol>
+<p>生产操作前还应确认当前 context，防止误操作集群：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> config</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> current-context</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> config</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get-contexts</span></span></code></pre>
+<p><a id="reference-官方参考"></a></p>
+<h2 id="官方参考">官方参考</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/overview/components/">Kubernetes：组件概览</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/">Kubernetes：对象与声明式管理</a></li>
+<li><a href="https://kubernetes.io/docs/reference/kubectl/">kubectl 命令参考</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>从 apply 到 Pod 接流量依次说出参与组件，区分 API Server 成功响应和应用可用。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/kubernetes/kubernetes-pods/">L02-Pod</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#学习目标">学习目标</a></li><li style="--depth: 0"><a href="#特性">特性</a></li><li style="--depth: 0"><a href="#基础架构">基础架构</a></li><li style="--depth: 1"><a href="#pod-与容器">Pod 与容器</a></li><li style="--depth: 1"><a href="#核心构成">核心构成</a></li><li style="--depth: 1"><a href="#使用-kubectl-与集群交互">使用 kubectl 与集群交互</a></li><li style="--depth: 1"><a href="#节点node">节点（Node）</a></li><li style="--depth: 0"><a href="#使用场景">使用场景</a></li><li style="--depth: 0"><a href="#部署方式">部署方式</a></li><li style="--depth: 0"><a href="#kubectl">kubectl</a></li><li style="--depth: 1"><a href="#web-ui-dashboardmac">Web UI Dashboard（Mac）</a></li><li style="--depth: 0"><a href="#故障排查">故障排查</a></li><li style="--depth: 1"><a href="#日志">日志</a></li><li style="--depth: 1"><a href="#查看资源详情">查看资源详情</a></li><li style="--depth: 1"><a href="#进入容器-shell">进入容器 Shell</a></li><li style="--depth: 1"><a href="#集群级故障的首轮判断">集群级故障的首轮判断</a></li><li style="--depth: 0"><a href="#实践与验收">实践与验收</a></li><li style="--depth: 0"><a href="#官方参考">官方参考</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

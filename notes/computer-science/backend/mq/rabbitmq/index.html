@@ -1,0 +1,739 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>RabbitMQ · Musuyin&#39; Home</title><meta name="description" content="RabbitMQ 从同步/异步的业务差异进入，再学习 Exchange、Queue、Binding、Consumer 的路由模型。Spring AMQP 简化收发之后，仍需明确 Confirm、持久化、ACK、重试与幂等各保护哪个故障窗口。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/mq/rabbitmq/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="RabbitMQ · Musuyin' Home"><meta property="og:description" content="RabbitMQ 从同步/异步的业务差异进入，再学习 Exchange、Queue、Binding、Consumer 的路由模型。Spring AMQP 简化收发之后，仍需明确 Confirm、持久化、ACK、重试与幂等各保护哪个故障窗口。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/mq/rabbitmq/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">RabbitMQ</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-10-12">2025-10-12</time></dd></div><div><dt>字数</dt><dd>3700</dd></div><div><dt>预计阅读</dt><dd>13 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%90%8E%E7%AB%AF/">#后端</a><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a><a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">#消息队列</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>RabbitMQ</h1><time datetime="2025-10-12">2025-10-12</time><p class="tags"><a href="/tags/%E5%90%8E%E7%AB%AF/">#后端</a><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a><a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a><a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">#消息队列</a></p></header><div class="prose"><p>RabbitMQ 从同步/异步的业务差异进入，再学习 Exchange、Queue、Binding、Consumer 的路由模型。Spring AMQP 简化收发之后，仍需明确 Confirm、持久化、ACK、重试与幂等各保护哪个故障窗口。</p>
+<p><strong>版本边界</strong>：原稿 Lazy Queue 参数与镜像队列章节属于历史版本资料。现代 classic queue 已不再支持 lazy 模式设置，见 <a href="https://www.rabbitmq.com/docs/lazy-queues">RabbitMQ 历史说明</a>。高可用队列按目标版本评估 quorum queue。</p>
+<p><a id="reference-同步异步通信"></a></p>
+<h2 id="同步异步通信">同步/异步通信</h2>
+<p><a id="reference-同步通信"></a></p>
+<h3 id="同步通信">同步通信</h3>
+<p>同步通讯是指发送方在发送消息后，会等待接收方的回应，直到收到回应后才会继续执行后续操作</p>
+<ul>
+<li>阻塞：发送方在等待回应期间会被阻塞，无法进行其他操作</li>
+<li>顺序执行：消息的处理是按照发送和接收的顺序进行的，确保了消息的时序性</li>
+<li>实时反馈：发送方可以立即得到接收方的回应，适用于需要立即确认的场景</li>
+<li>占用资源：由于需要等待，可能会造成资源的浪费，如线程阻塞</li>
+</ul>
+<p><a id="reference-异步通信"></a></p>
+<h3 id="异步通信">异步通信</h3>
+<p>异步通讯是指发送方在发送消息后，不需要等待接收方的立即回应，就可以继续执行其他操作。接收方在处理完消息后，可能会在未来的某个时间点给出回应</p>
+<ul>
+<li>非阻塞：发送方在发送消息后可以立即继续其他工作，不会因为等待回应而被阻塞</li>
+<li>解耦：发送方和接收方在时间上解耦，可以独立处理各自的任务</li>
+<li>灵活：异步通讯可以处理更复杂的通信模式，如消息队列、事件驱动等</li>
+<li>资源利用率高：更高效地利用资源，因为不需要等待，可以提高系统的吞吐量</li>
+</ul>
+<p><a id="reference-mq-技术选型"></a></p>
+<h2 id="mq-技术选型">MQ 技术选型</h2>
+<p><a id="reference-为什么选用消息队列"></a></p>
+<h3 id="为什么选用消息队列">为什么选用消息队列</h3>
+<blockquote>
+<p>同步调用</p>
+</blockquote>
+<ul>
+<li>时效性强，下一步操作依赖于上一步操作</li>
+</ul>
+<p>但是</p>
+<ul>
+<li>业务耦合，扩展性差，不符合<strong>开闭原则</strong></li>
+<li>性能差</li>
+<li>级联失败：一个模块的故障导致整个服务的故障</li>
+</ul>
+<blockquote>
+<p>异步调用</p>
+</blockquote>
+<p>异步调用基于消息通知，一般包含三个角色消息</p>
+<ol>
+<li>发送者：投递消息的人</li>
+<li>消息代理：管理、暂存、转发消息的人</li>
+<li>消息接收者：接收和处理消息的人</li>
+</ol>
+<p>优点：</p>
+<ul>
+<li>接触耦合，拓展性强</li>
+<li>无需等待，性能好</li>
+<li>故障隔离</li>
+<li>削峰填谷</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>不能得到调用结果</li>
+<li>不能确定下游业务执行是否成功</li>
+<li>业务安全依赖于消息代理（Broker）的可靠性</li>
+</ul>
+<p><a id="reference-消息队列对比"></a></p>
+<h3 id="消息队列对比">消息队列对比</h3>
+<p><img alt="" loading="lazy" decoding="async" width="1581" height="626" src="/_astro/IMG-20260907155626836.CfjYlvQY_Z1odNxX.webp"></p>
+<p>Kafka 适用于日志记录</p>
+<p><a id="reference-rabbitmq-客户端"></a></p>
+<h2 id="rabbitmq-客户端">RabbitMQ 客户端</h2>
+<p><a id="reference-docker"></a></p>
+<h3 id="docker">Docker</h3>
+<p><a id="reference-安装"></a></p>
+<h4 id="安装">安装</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">docker</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pull</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rabbitmq</span></span></code></pre>
+<p><a id="reference-启动"></a></p>
+<h4 id="启动">启动</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">docker</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> run</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF"> -e</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> RABBITMQ_DEFAULT_USER=musuyin</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF"> -e</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> RABBITMQ_DEFAULT_PASS=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">123456</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF"> -v</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rabbitmq-plugins:/plugins</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF"> --name</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rabbitmq</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF"> --hostname</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rabbitmq</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 15672:15672</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 5672:5672</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF"> rabbitmq:latest</span></span></code></pre>
+<p>指令说明：</p>
+<ul>
+<li><code>docker run</code>：基本的 Docker 命令，用于启动一个新的容器实例</li>
+<li><code>-e RABBITMQ_DEFAULT_USER=musuyin</code>：设置 RabbitMQ 服务的默认用户名</li>
+<li><code>-e RABBITMQ_DEFAULT_PASS=123456</code>：设置 RabbitMQ 服务的默认密码</li>
+<li><code>-v rabbitmq-plugins:/plugins</code>：将一个名为 rabbitmq-plugins 的卷映射到容器的/plugins 目录，用于存放 RabbitMQ 的插件。这里的 rabbitmq-plugins 是一个卷的名称，而不是宿主机的路径</li>
+<li><code>--name rabbitmq</code>：指定容器的名称为 rabbitmq</li>
+<li><code>--hostname rabbitmq</code>：设置容器的主机名为 rabbitmq</li>
+<li><code>-p 15672:15672</code>：将宿主机的端口 15672 映射到容器的端口 15672，这是 RabbitMQ 管理界面的默认端口</li>
+<li><code>-p 5672:5672</code>：将宿主机的端口 5672 映射到容器的端口 5672，这是 RabbitMQ 用于 AMQP 协议通信的默认端口</li>
+<li><code>-d</code>：在后台运行容器（守护进程）</li>
+<li><code>rabbitmq:latest</code>：使用最新的 RabbitMQ 官方镜像来创建容器</li>
+</ul>
+<p><a id="reference-访问管理界面"></a></p>
+<h3 id="访问管理界面">访问管理界面</h3>
+<p>访问管理界面端口，注意需要使用 http 请求访问，一定要显示加上路径</p>
+<p><img alt="" loading="lazy" decoding="async" width="1861" height="781" src="/_astro/IMG-20260907155626878.CzuYtGd6_Z1krcqr.webp"></p>
+<p><a id="reference-整体框架"></a></p>
+<h3 id="整体框架">整体框架</h3>
+<ul>
+<li>Publisher：消息发送者</li>
+<li>Consumer：消息的消费者</li>
+<li>Queue：消息队列，存储消息</li>
+<li>Exchange：交换机，负责路由消息</li>
+<li>VirtualHost：虚拟主机，用于数据隔离</li>
+</ul>
+<p><img alt="" loading="lazy" decoding="async" width="1240" height="546" src="/_astro/IMG-20260907155626919.9mGvNiy9_Z1LRYPJ.webp"></p>
+<p><a id="reference-基本使用"></a></p>
+<h3 id="基本使用">基本使用</h3>
+<p><a id="reference-创建队列"></a></p>
+<h4 id="创建队列">创建队列</h4>
+<p><img alt="" loading="lazy" decoding="async" width="1031" height="605" src="/_astro/IMG-20260907155626940.CzX02wLF_Z14BGKL.webp"></p>
+<p>消费者（Java 代码）绑定队列进行消费</p>
+<p><a id="reference-发送消息"></a></p>
+<h4 id="发送消息">发送消息</h4>
+<p>可以使用客户端直接发送测试消息给交换机，交换机会将消息转发给队列。但是交换机创建时没有绑定队列，这样发送之后消息就会直接丢失</p>
+<p><img alt="" loading="lazy" decoding="async" width="1001" height="663" src="/_astro/IMG-20260907155626968.B12L_g3N_2wumnu.webp"></p>
+<p><a id="reference-交换机队列绑定"></a></p>
+<h4 id="交换机队列绑定">交换机&amp;队列绑定</h4>
+<p>在交换机处绑定：</p>
+<p><img alt="" loading="lazy" decoding="async" width="901" height="463" src="/_astro/IMG-20260907155627006.DJzijdfl_2veUTO.webp"></p>
+<p>在队列处绑定：</p>
+<p><img alt="" loading="lazy" decoding="async" width="816" height="471" src="/_astro/IMG-20260907155627032.DmZ4TyOh_ZnPXaU.webp"></p>
+<p>绑定后向交换机发送消息，交换机就会转发到绑定的队列，队列就可以获取到消息了，可以使用 Get Message 查看消息，但不会进行消费</p>
+<p><img alt="" loading="lazy" decoding="async" width="893" height="635" src="/_astro/IMG-20260907155627061.D5FUosHM_ZI0XoO.webp"></p>
+<p><a id="reference-数据隔离"></a></p>
+<h3 id="数据隔离">数据隔离</h3>
+<p><a id="reference-虚拟主机"></a></p>
+<h4 id="虚拟主机">虚拟主机</h4>
+<p>使用虚拟主机分隔不同服务的数据</p>
+<ul>
+<li>为一个项目创建一个账号</li>
+<li>为账号创建虚拟主机</li>
+</ul>
+<p>这样就能为每个项目区分消息队列了</p>
+<p><a id="reference-切换虚拟主机查看视图"></a></p>
+<h4 id="切换虚拟主机查看视图">切换虚拟主机查看视图</h4>
+<p><img alt="" loading="lazy" decoding="async" width="256" height="138" src="/_astro/IMG-20260907155627086.C70-x3Zw_Z1gon5b.webp"></p>
+<p><a id="reference-添加用户"></a></p>
+<h4 id="添加用户">添加用户</h4>
+<p>先添加用户</p>
+<p><img alt="" loading="lazy" decoding="async" width="1859" height="661" src="/_astro/IMG-20260907155627114.DCGFMIfB_1oG4Pv.webp"></p>
+<p>切换登录账号后，可以看到没有访问权限</p>
+<p><img alt="" loading="lazy" decoding="async" width="949" height="276" src="/_astro/IMG-20260907155627146.CWBFWIG4_ZIQonC.webp"></p>
+<p>为用户添加权限</p>
+<p><img alt="" loading="lazy" decoding="async" width="1850" height="532" src="/_astro/IMG-20260907155627172.BEowEXJG_EQwpd.webp"></p>
+<p><a id="reference-添加虚拟主机"></a></p>
+<h4 id="添加虚拟主机">添加虚拟主机</h4>
+<p>添加虚拟主机</p>
+<p><img alt="" loading="lazy" decoding="async" width="1861" height="571" src="/_astro/IMG-20260907155627222.CDz6HXvp_18wW8b.webp"></p>
+<p>此时两个虚拟主机是隔离的</p>
+<p><img alt="" loading="lazy" decoding="async" width="554" height="510" src="/_astro/IMG-20260907155627247.Bs5fizsJ_Z1DaVy3.webp"></p>
+<p><a id="reference-java-客户端-spring-amqp"></a></p>
+<h2 id="java-客户端-spring-amqp">Java 客户端-Spring AMQP</h2>
+<p>Spring 在基础的 Java 客户端使用上进行了封装</p>
+<p><img alt="" loading="lazy" decoding="async" width="1580" height="461" src="/_astro/IMG-20260907155627296.Db9F3lPq_Z2btXOc.webp"></p>
+<p>Spring AMQP 核心组件：</p>
+<ul>
+<li><code>RabbitTemplate</code>：用于发送消息</li>
+<li><code>@RabbitListener</code>：用于监听队列消费消息</li>
+<li><code>AmqpAdmin</code>：用于声明队列、交换机、绑定关系</li>
+</ul>
+<p>依赖引入：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-amqp&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p>配置文件：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  rabbitmq</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    host</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">localhost</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">5672</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    virtual-host</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    username</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">musuyin</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    password</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">123456</span></span></code></pre>
+<p><a id="reference-基本使用-1"></a></p>
+<h3 id="基本使用-1">基本使用</h3>
+<p><a id="reference-发送消息-1"></a></p>
+<h4 id="发送消息-1">发送消息</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> RabbitTemplate rabbitTemplate;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 发送到指定队列（通过默认交换机）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">rabbitTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">convertAndSend</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"queue.name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Hello RabbitMQ"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 发送到指定交换机和路由键</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">rabbitTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">convertAndSend</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"exchange.name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"routing.key"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Hello RabbitMQ"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span></code></pre>
+<p><a id="reference-接收消息"></a></p>
+<h4 id="接收消息">接收消息</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "queue.name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String message) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"收到消息: "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> message);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>监听方法参数也可以使用 <code>Message</code> 类型获取原始消息：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "queue.name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Message message) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    byte</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[] body </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> message.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getBody</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    MessageProperties props </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> message.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getMessageProperties</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-workqueue"></a></p>
+<h3 id="workqueue">WorkQueue</h3>
+<p>WorkQueue（工作队列）模式：多个消费者共同消费同一个队列，实现任务的负载均衡。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Publisher → Queue → Consumer1</span></span>
+<span class="line"><span>                 → Consumer2</span></span>
+<span class="line"><span>                 → Consumer3</span></span></code></pre>
+<p><strong>默认行为（轮询）</strong>：消息会均匀分配给每个消费者，不考虑消费者的处理能力。</p>
+<p><strong>问题</strong>：消费能力强的消费者处理完后会空闲等待，能力弱的消费者积压大量消息。</p>
+<p><strong>解决：能者多劳</strong></p>
+<p>通过配置 <code>prefetch</code> 限制每次预取的消息数量，消费者处理完一条才会取下一条：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  rabbitmq</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    listener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      simple</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        prefetch</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 每次只预取1条消息</span></span></code></pre>
+<p>设置后，RabbitMQ 会根据消费者的实际消费速度分配消息，处理快的消费者自然会获取更多消息。</p>
+<p><a id="reference-fanout-交换机"></a></p>
+<h3 id="fanout-交换机">Fanout 交换机</h3>
+<p>Fanout（扇出）交换机：将消息广播给所有绑定的队列，忽略路由键。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Publisher → FanoutExchange → Queue1 → Consumer1</span></span>
+<span class="line"><span>                           → Queue2 → Consumer2</span></span>
+<span class="line"><span>                           → Queue3 → Consumer3</span></span></code></pre>
+<p><strong>适用场景</strong>：消息需要被多个服务同时处理，如订单成功后同时通知库存服务、积分服务、通知服务。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 发送消息到 Fanout 交换机（路由键传空字符串，会被忽略）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">rabbitTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">convertAndSend</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"fanout.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"广播消息"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 消费者1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "fanout.queue1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleMessage1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String message) { ... }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 消费者2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "fanout.queue2"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleMessage2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String message) { ... }</span></span></code></pre>
+<p><a id="reference-direct-交换机"></a></p>
+<h3 id="direct-交换机">Direct 交换机</h3>
+<p>Direct 交换机：根据消息的路由键（Routing Key）将消息路由到完全匹配的队列。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Publisher → DirectExchange → (routingKey=red)   → Queue1 → Consumer1</span></span>
+<span class="line"><span>                           → (routingKey=blue)  → Queue2 → Consumer2</span></span>
+<span class="line"><span>                           → (routingKey=green) → Queue1 → Consumer1（多重绑定）</span></span></code></pre>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>一个队列可以绑定多个路由键</li>
+<li>同一路由键可以绑定多个队列（此时与 Fanout 行为相同）</li>
+<li>精确匹配，不支持通配符</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 发送红色消息</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">rabbitTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">convertAndSend</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"direct.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"red"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"红色消息"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 发送蓝色消息</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">rabbitTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">convertAndSend</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"direct.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"blue"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"蓝色消息"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "direct.queue1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleQueue1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String message) { ... }  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 收到 red 和 green</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "direct.queue2"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleQueue2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String message) { ... }  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 收到 blue 和 green</span></span></code></pre>
+<p><a id="reference-topic-交换机"></a></p>
+<h3 id="topic-交换机">Topic 交换机</h3>
+<p>Topic 交换机：支持通配符的路由键匹配，是功能最强大的交换机类型。</p>
+<p><strong>通配符规则</strong>：</p>
+<ul>
+<li><code>*</code>：匹配一个单词（单词之间用 <code>.</code> 分隔）</li>
+<li><code>#</code>：匹配零个或多个单词</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>RoutingKey: china.weather   → 匹配 china.*、#.weather、china.#、#</span></span>
+<span class="line"><span>RoutingKey: china.news.hot  → 匹配 china.#、#.hot、#，不匹配 china.*</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Publisher → TopicExchange → (china.#)     → Queue1 → Consumer1（中国所有话题）</span></span>
+<span class="line"><span>                          → (#.weather)   → Queue2 → Consumer2（所有天气话题）</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 发布中国天气消息</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">rabbitTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">convertAndSend</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"topic.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"china.weather"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"今日晴天"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 发布中国新闻消息</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">rabbitTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">convertAndSend</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"topic.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"china.news"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"重大新闻"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "topic.queue1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 绑定 china.# </span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleChina</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String message) { ... }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "topic.queue2"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 绑定 #.weather</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleWeather</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String message) { ... }</span></span></code></pre>
+<p><strong>三种交换机对比</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>交换机类型</th>
+<th>路由规则</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fanout</td>
+<td>广播所有队列</td>
+<td>日志广播、事件通知</td>
+</tr>
+<tr>
+<td>Direct</td>
+<td>精确匹配路由键</td>
+<td>按类型分发任务</td>
+</tr>
+<tr>
+<td>Topic</td>
+<td>通配符匹配路由键</td>
+<td>多维度灵活路由</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-声明队列和交换机"></a></p>
+<h3 id="声明队列和交换机">声明队列和交换机</h3>
+<p>Spring AMQP 提供两种方式声明队列和交换机：</p>
+<p><a id="reference-方式一bean-声明代码配置"></a></p>
+<h4 id="方式一bean-声明代码配置">方式一：Bean 声明（代码配置）</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Configuration</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> RabbitMQConfig</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 声明 Fanout 交换机</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> FanoutExchange </span><span style="color:#6F42C1;--shiki-dark:#B392F0">fanoutExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> FanoutExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"fanout.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 声明队列</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Queue </span><span style="color:#6F42C1;--shiki-dark:#B392F0">fanoutQueue1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Queue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"fanout.queue1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Queue </span><span style="color:#6F42C1;--shiki-dark:#B392F0">fanoutQueue2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Queue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"fanout.queue2"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 绑定队列到交换机</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Binding </span><span style="color:#6F42C1;--shiki-dark:#B392F0">bindingQueue1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(FanoutExchange </span><span style="color:#E36209;--shiki-dark:#FFAB70">fanoutExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Queue </span><span style="color:#E36209;--shiki-dark:#FFAB70">fanoutQueue1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> BindingBuilder.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">bind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(fanoutQueue1).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">to</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(fanoutExchange);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Binding </span><span style="color:#6F42C1;--shiki-dark:#B392F0">bindingQueue2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(FanoutExchange </span><span style="color:#E36209;--shiki-dark:#FFAB70">fanoutExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Queue </span><span style="color:#E36209;--shiki-dark:#FFAB70">fanoutQueue2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> BindingBuilder.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">bind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(fanoutQueue2).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">to</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(fanoutExchange);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // Direct 交换机绑定示例</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> DirectExchange </span><span style="color:#6F42C1;--shiki-dark:#B392F0">directExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> DirectExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"direct.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Binding </span><span style="color:#6F42C1;--shiki-dark:#B392F0">directBinding</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(DirectExchange </span><span style="color:#E36209;--shiki-dark:#FFAB70">directExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Queue </span><span style="color:#E36209;--shiki-dark:#FFAB70">fanoutQueue1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> BindingBuilder.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">bind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(fanoutQueue1).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">to</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(directExchange).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">with</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"red"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-方式二注解声明更简洁"></a></p>
+<h4 id="方式二注解声明更简洁">方式二：注解声明（更简洁）</h4>
+<p>直接在 <code>@RabbitListener</code> 中用 <code>@QueueBinding</code> 声明队列、交换机和绑定关系，无需额外配置类：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">bindings</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @</span><span style="color:#D73A49;--shiki-dark:#F97583">QueueBinding</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    value</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @</span><span style="color:#D73A49;--shiki-dark:#F97583">Queue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">name</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "direct.queue1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">),</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    exchange</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @</span><span style="color:#D73A49;--shiki-dark:#F97583">Exchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">name</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "direct.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">type</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ExchangeTypes.DIRECT),</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    key</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"red"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"blue"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleDirectQueue1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String message) { ... }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">bindings</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @</span><span style="color:#D73A49;--shiki-dark:#F97583">QueueBinding</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    value</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @</span><span style="color:#D73A49;--shiki-dark:#F97583">Queue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">name</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "topic.queue1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">),</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    exchange</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @</span><span style="color:#D73A49;--shiki-dark:#F97583">Exchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">name</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "topic.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">type</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ExchangeTypes.TOPIC),</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    key</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "china.#"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleTopicQueue1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String message) { ... }</span></span></code></pre>
+<p><a id="reference-消息转换器"></a></p>
+<h3 id="消息转换器">消息转换器</h3>
+<p>Spring AMQP 默认使用 JDK 序列化发送对象，可读性差且安全性低，推荐替换为 JSON 序列化。</p>
+<p><strong>引入 Jackson 依赖</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;com.fasterxml.jackson.core&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;jackson-databind&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><strong>配置消息转换器</strong>（发送方和接收方都需要配置）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> MessageConverter </span><span style="color:#6F42C1;--shiki-dark:#B392F0">messageConverter</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Jackson2JsonMessageConverter converter </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Jackson2JsonMessageConverter</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    converter.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setCreateMessageIds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">); </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 为消息生成唯一 ID，方便幂等性处理</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> converter;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>配置后，发送 Java 对象时会自动序列化为 JSON，接收时自动反序列化：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 发送 Java 对象</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">rabbitTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">convertAndSend</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"key"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> User</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Alice"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">25</span><span style="color:#24292E;--shiki-dark:#E1E4E8">));</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 接收时直接指定类型</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "queue.name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(User user) { ... }</span></span></code></pre>
+<p><a id="reference-可靠性机制"></a></p>
+<h2 id="可靠性机制">可靠性机制</h2>
+<p>消息从发送到消费的完整链路：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Publisher → [生产者确认] → RabbitMQ Broker → [消息持久化] → Queue → [消费者确认] → Consumer</span></span></code></pre>
+<p><a id="reference-生产者可靠性"></a></p>
+<h3 id="生产者可靠性">生产者可靠性</h3>
+<p><a id="reference-生产者重连"></a></p>
+<h4 id="生产者重连">生产者重连</h4>
+<p>网络抖动时连接可能失败，Spring AMQP 支持自动重连：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  rabbitmq</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    connection-timeout</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">1s</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    template</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      retry</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        enabled</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        initial-interval</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">1000ms</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 首次重试等待</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        multiplier</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D">             # 等待时长倍数（1 表示等待时长不变）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        max-attempts</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span><span style="color:#6A737D;--shiki-dark:#6A737D">           # 最大重试次数</span></span></code></pre>
+<blockquote>
+<p>注意：这是阻塞式重试，会阻塞当前线程，生产环境慎用。</p>
+</blockquote>
+<p><a id="reference-生产者确认publisher-confirms"></a></p>
+<h4 id="生产者确认publisher-confirms">生产者确认（Publisher Confirms）</h4>
+<p>确认消息是否成功到达 RabbitMQ Broker，分两种情况：</p>
+<ul>
+<li><strong>ConfirmCallback</strong>：消息到达交换机时触发（成功或失败都会触发）</li>
+<li><strong>ReturnCallback</strong>：消息从交换机路由到队列失败时触发</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  rabbitmq</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    publisher-confirm-type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">correlated</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 异步确认（推荐）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    publisher-returns</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#6A737D;--shiki-dark:#6A737D">             # 开启 Return 回调</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    template</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      mandatory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#6A737D;--shiki-dark:#6A737D">                   # 消息路由失败时返回给生产者</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> RabbitTemplate rabbitTemplate;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">PostConstruct</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> init</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 设置 Return 回调（全局，每个 RabbitTemplate 只能设置一个）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    rabbitTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setReturnsCallback</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(returned </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"消息路由失败，exchange={}, routingKey={}, message={}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            returned.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(), returned.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getRoutingKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(), returned.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    });</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> sendMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String exchange, String key, Object msg) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 使用 CorrelationData 关联 Confirm 回调</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    CorrelationData cd </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> CorrelationData</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(UUID.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">randomUUID</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">toString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    cd.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getFuture</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">addCallback</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        confirm </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (confirm.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">isAck</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">info</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"消息到达交换机成功，id={}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, cd.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            } </span><span style="color:#D73A49;--shiki-dark:#F97583">else</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"消息到达交换机失败，id={}，原因={}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, cd.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(), confirm.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getReason</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        },</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        ex </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"消息发送异常"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, ex)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    );</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    rabbitTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">convertAndSend</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(exchange, key, msg, cd);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<blockquote>
+<p>生产者确认会带来额外性能开销，仅在业务对消息可靠性要求极高时开启。</p>
+</blockquote>
+<p><a id="reference-消息持久化"></a></p>
+<h3 id="消息持久化">消息持久化</h3>
+<p>RabbitMQ 默认将消息存储在内存中，重启后会丢失。持久化分三层：</p>
+<p><strong>交换机持久化</strong>：<code>durable = true</code>（Spring AMQP 默认就是持久化）</p>
+<p><strong>队列持久化</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Queue </span><span style="color:#6F42C1;--shiki-dark:#B392F0">durableQueue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> QueueBuilder.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">durable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"my.queue"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 持久化队列</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>消息持久化</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Message message </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> MessageBuilder</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">withBody</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"持久化消息"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getBytes</span><span style="color:#24292E;--shiki-dark:#E1E4E8">())</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setDeliveryMode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(MessageDeliveryMode.PERSISTENT)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 持久化投递模式</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">rabbitTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">send</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"key"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, message);</span></span></code></pre>
+<p>使用 <code>RabbitTemplate.convertAndSend()</code> 配合 JSON 转换器时，默认即为持久化消息。</p>
+<p><a id="reference-lazy-queue惰性队列"></a></p>
+<h4 id="lazy-queue惰性队列">Lazy Queue（惰性队列）</h4>
+<p>RabbitMQ 3.6+ 引入，消息直接写入磁盘而非内存，内存占用极低：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Queue </span><span style="color:#6F42C1;--shiki-dark:#B392F0">lazyQueue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> QueueBuilder.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">durable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"lazy.queue"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">lazy</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 开启惰性模式</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>优点</strong>：内存占用低，可存储海量消息，重启不丢失<br>
+<strong>缺点</strong>：消费速度略低于内存队列</p>
+<blockquote>
+<p>RabbitMQ 3.12+ 所有持久化队列默认采用惰性模式。</p>
+</blockquote>
+<p><a id="reference-消费者可靠性"></a></p>
+<h3 id="消费者可靠性">消费者可靠性</h3>
+<p><a id="reference-消费者确认机制acknowledge"></a></p>
+<h4 id="消费者确认机制acknowledge">消费者确认机制（Acknowledge）</h4>
+<p>消费者处理消息后需要向 RabbitMQ 发送确认，RabbitMQ 才会删除该消息。</p>
+<p>三种确认模式：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>配置值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>自动确认</td>
+<td><code>none</code></td>
+<td>消息投递给消费者就立即确认（不安全）</td>
+</tr>
+<tr>
+<td>手动确认</td>
+<td><code>manual</code></td>
+<td>代码中显式调用 ack/nack</td>
+</tr>
+<tr>
+<td>自动确认（推荐）</td>
+<td><code>auto</code></td>
+<td>Spring 根据监听方法是否抛出异常自动确认或拒绝</td>
+</tr>
+</tbody>
+</table>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  rabbitmq</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    listener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      simple</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        acknowledge-mode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">auto</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 推荐使用 auto</span></span></code></pre>
+<p><code>auto</code> 模式下的行为：</p>
+<ul>
+<li>方法正常执行完毕 → 自动 ack，消息从队列删除</li>
+<li>方法抛出 <code>AmqpRejectAndDontRequeueException</code> → nack，消息<strong>不重新入队</strong>，直接丢弃（或进死信队列）</li>
+<li>方法抛出其他异常 → nack，消息<strong>重新入队</strong>，会被再次消费</li>
+</ul>
+<p><a id="reference-失败重试"></a></p>
+<h4 id="失败重试">失败重试</h4>
+<p>默认情况下消费失败会无限重新入队，导致消息风暴。建议开启本地重试：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  rabbitmq</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    listener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      simple</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        acknowledge-mode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">auto</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        retry</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          enabled</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          initial-interval</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">1000ms</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          multiplier</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#6A737D;--shiki-dark:#6A737D">      # 等待时长倍增（指数退避）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          max-attempts</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span><span style="color:#6A737D;--shiki-dark:#6A737D">    # 最大重试3次</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          stateless</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#6A737D;--shiki-dark:#6A737D">    # 无状态重试（不涉及事务时使用）</span></span></code></pre>
+<p>重试耗尽后，消息的处理策略由 <code>MessageRecoverer</code> 决定：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>类名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>丢弃（默认）</td>
+<td><code>RejectAndDontRequeueRecoverer</code></td>
+<td>直接丢弃消息</td>
+</tr>
+<tr>
+<td>重新入队</td>
+<td><code>ImmediateRequeueMessageRecoverer</code></td>
+<td>重新入队（慎用）</td>
+</tr>
+<tr>
+<td>投递到死信</td>
+<td><code>RepublishMessageRecoverer</code></td>
+<td>投递到指定的死信交换机（推荐）</td>
+</tr>
+</tbody>
+</table>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> MessageRecoverer </span><span style="color:#6F42C1;--shiki-dark:#B392F0">republishMessageRecoverer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(RabbitTemplate rabbitTemplate) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 重试耗尽后投递到 error.direct 交换机，路由键为 error</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> RepublishMessageRecoverer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(rabbitTemplate, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"error.direct"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"error"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-业务幂等性"></a></p>
+<h4 id="业务幂等性">业务幂等性</h4>
+<p>RabbitMQ 的 at-least-once 语义意味着消息可能被重复消费，业务层需保证幂等。</p>
+<p><strong>方案一：唯一消息 ID</strong></p>
+<p>配置消息转换器生成唯一 ID（前文已配置 <code>setCreateMessageIds(true)</code>），消费时记录已处理的消息 ID：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "queue.name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Message message) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    String messageId </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> message.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getMessageProperties</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getMessageId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 判断 messageId 是否已处理（Redis SET NX 或数据库唯一索引）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#6F42C1;--shiki-dark:#B392F0">isProcessed</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messageId)) </span><span style="color:#D73A49;--shiki-dark:#F97583">return</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 业务处理</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    process</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(message);</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    markProcessed</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messageId);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>方案二：业务唯一标识</strong></p>
+<p>更常用，直接用业务字段（如订单 ID）做幂等判断，无需依赖消息 ID：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "order.queue"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleOrder</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(OrderDTO order) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 查询订单状态，已处理则跳过</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Order existing </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> orderService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(order.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (existing </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> existing.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getStatus</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> OrderStatus.INIT) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    orderService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">process</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(order);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-延迟队列"></a></p>
+<h2 id="延迟队列">延迟队列</h2>
+<p>延迟队列用于处理需要延时触发的场景，如：订单超时未支付自动取消、定时提醒。</p>
+<p>RabbitMQ 本身不直接支持延迟队列，有两种实现方式。</p>
+<p><a id="reference-死信队列实现延迟"></a></p>
+<h3 id="死信队列实现延迟">死信队列实现延迟</h3>
+<p><strong>死信（Dead Letter）</strong>：消息在以下情况会成为死信：</p>
+<ol>
+<li>消费者 nack 且不重新入队</li>
+<li>消息过期（TTL 到期）</li>
+<li>队列达到最大长度</li>
+</ol>
+<p>死信会被投递到<strong>死信交换机（DLX）</strong>，通过这个机制可以实现延迟：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Publisher → 普通队列(TTL=30min, DLX=dlx.exchange) → 消息过期 → 死信交换机 → 死信队列 → Consumer</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Queue </span><span style="color:#6F42C1;--shiki-dark:#B392F0">normalQueue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> QueueBuilder.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">durable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"normal.queue"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ttl</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">30</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 60</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)               </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 消息存活30分钟</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">deadLetterExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dlx.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 指定死信交换机</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">deadLetterRoutingKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dlx.key"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)    </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 死信路由键</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> DirectExchange </span><span style="color:#6F42C1;--shiki-dark:#B392F0">dlxExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> DirectExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dlx.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Queue </span><span style="color:#6F42C1;--shiki-dark:#B392F0">dlxQueue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Queue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dlx.queue"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Binding </span><span style="color:#6F42C1;--shiki-dark:#B392F0">dlxBinding</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> BindingBuilder.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">bind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">dlxQueue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">to</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">dlxExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">with</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dlx.key"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>消费者监听死信队列处理超时消息：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "dlx.queue"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleExpiredOrder</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(OrderDTO order) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 处理30分钟未支付的订单</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    orderService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">cancelIfUnpaid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(order);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>缺点</strong>：TTL 固定，无法为每条消息设置不同的延迟时间；且队列头部消息未过期时，后面已过期的消息不会立刻进入死信（队列头阻塞）。</p>
+<p><a id="reference-delayexchange-插件"></a></p>
+<h3 id="delayexchange-插件">DelayExchange 插件</h3>
+<p>官方提供的 <code>rabbitmq_delayed_message_exchange</code> 插件，支持为每条消息设置独立的延迟时间。</p>
+<p><strong>安装插件</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 进入容器</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">docker</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> exec</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -it</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rabbitmq</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> bash</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 启用插件</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">rabbitmq-plugins</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> enable</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rabbitmq_delayed_message_exchange</span></span></code></pre>
+<p><strong>声明延迟交换机</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> DirectExchange </span><span style="color:#6F42C1;--shiki-dark:#B392F0">delayExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ExchangeBuilder.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">directExchange</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"delay.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">delayed</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()       </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 声明为延迟交换机</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">durable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>发送延迟消息</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> sendDelayMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Object msg, </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> delayMs) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    rabbitTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">convertAndSend</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"delay.exchange"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"delay.key"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, msg, message </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        message.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getMessageProperties</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setDelay</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(delayMs);  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 设置延迟时间（毫秒）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> message;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    });</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 30分钟后触发</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">sendDelayMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(order, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">30</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 60</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RabbitListener</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">queues</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "delay.queue"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handleDelayMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(OrderDTO order) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    orderService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">cancelIfUnpaid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(order);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>两种方案对比</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>死信队列</td>
+<td>原生支持，无需插件</td>
+<td>队列头阻塞，延迟不精确</td>
+</tr>
+<tr>
+<td>DelayExchange 插件</td>
+<td>精确延迟，每条消息独立控制</td>
+<td>需要安装插件，延迟消息存储在内存</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-集群与高可用"></a></p>
+<h2 id="集群与高可用">集群与高可用</h2>
+<p><a id="reference-普通集群"></a></p>
+<h3 id="普通集群">普通集群</h3>
+<p>多个 RabbitMQ 节点组成集群，队列的数据只存在于某一个节点，其他节点只存储元数据（交换机、队列定义）。</p>
+<ul>
+<li>优点：提高并发性能</li>
+<li>缺点：队列所在节点宕机，该队列不可用</li>
+</ul>
+<p><a id="reference-镜像集群mirroring"></a></p>
+<h3 id="镜像集群mirroring">镜像集群（Mirroring）</h3>
+<p>队列在多个节点之间同步，任意节点宕机不影响服务（RabbitMQ 3.x 推荐方案）。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 设置镜像策略，将所有队列在所有节点同步</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">rabbitmqctl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> set_policy</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ha-all</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "^"</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '{"ha-mode":"all"}'</span></span></code></pre>
+<p><a id="reference-quorum-queue仲裁队列"></a></p>
+<h3 id="quorum-queue仲裁队列">Quorum Queue（仲裁队列）</h3>
+<p>RabbitMQ 3.8+ 推荐，基于 Raft 协议，比镜像队列更可靠、更简单。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Queue </span><span style="color:#6F42C1;--shiki-dark:#B392F0">quorumQueue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> QueueBuilder.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">durable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"quorum.queue"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">quorum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 声明为仲裁队列</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>Quorum Queue 特性</strong>：</p>
+<ul>
+<li>基于多数派投票，保证强一致性</li>
+<li>自动处理节点故障和数据同步</li>
+<li>不支持非持久化消息（天然持久化）</li>
+</ul>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>fanout、direct 与 topic 分别怎样选择队列？</li>
+<li>生产者确认和消费者确认为什么必须分开理解？</li>
+<li>多消费者、重投与并发处理怎样影响完成顺序？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#同步异步通信">同步/异步通信</a></li><li style="--depth: 1"><a href="#同步通信">同步通信</a></li><li style="--depth: 1"><a href="#异步通信">异步通信</a></li><li style="--depth: 0"><a href="#mq-技术选型">MQ 技术选型</a></li><li style="--depth: 1"><a href="#为什么选用消息队列">为什么选用消息队列</a></li><li style="--depth: 1"><a href="#消息队列对比">消息队列对比</a></li><li style="--depth: 0"><a href="#rabbitmq-客户端">RabbitMQ 客户端</a></li><li style="--depth: 1"><a href="#docker">Docker</a></li><li style="--depth: 2"><a href="#安装">安装</a></li><li style="--depth: 2"><a href="#启动">启动</a></li><li style="--depth: 1"><a href="#访问管理界面">访问管理界面</a></li><li style="--depth: 1"><a href="#整体框架">整体框架</a></li><li style="--depth: 1"><a href="#基本使用">基本使用</a></li><li style="--depth: 2"><a href="#创建队列">创建队列</a></li><li style="--depth: 2"><a href="#发送消息">发送消息</a></li><li style="--depth: 2"><a href="#交换机队列绑定">交换机&amp;队列绑定</a></li><li style="--depth: 1"><a href="#数据隔离">数据隔离</a></li><li style="--depth: 2"><a href="#虚拟主机">虚拟主机</a></li><li style="--depth: 2"><a href="#切换虚拟主机查看视图">切换虚拟主机查看视图</a></li><li style="--depth: 2"><a href="#添加用户">添加用户</a></li><li style="--depth: 2"><a href="#添加虚拟主机">添加虚拟主机</a></li><li style="--depth: 0"><a href="#java-客户端-spring-amqp">Java 客户端-Spring AMQP</a></li><li style="--depth: 1"><a href="#基本使用-1">基本使用</a></li><li style="--depth: 2"><a href="#发送消息-1">发送消息</a></li><li style="--depth: 2"><a href="#接收消息">接收消息</a></li><li style="--depth: 1"><a href="#workqueue">WorkQueue</a></li><li style="--depth: 1"><a href="#fanout-交换机">Fanout 交换机</a></li><li style="--depth: 1"><a href="#direct-交换机">Direct 交换机</a></li><li style="--depth: 1"><a href="#topic-交换机">Topic 交换机</a></li><li style="--depth: 1"><a href="#声明队列和交换机">声明队列和交换机</a></li><li style="--depth: 2"><a href="#方式一bean-声明代码配置">方式一：Bean 声明（代码配置）</a></li><li style="--depth: 2"><a href="#方式二注解声明更简洁">方式二：注解声明（更简洁）</a></li><li style="--depth: 1"><a href="#消息转换器">消息转换器</a></li><li style="--depth: 0"><a href="#可靠性机制">可靠性机制</a></li><li style="--depth: 1"><a href="#生产者可靠性">生产者可靠性</a></li><li style="--depth: 2"><a href="#生产者重连">生产者重连</a></li><li style="--depth: 2"><a href="#生产者确认publisher-confirms">生产者确认（Publisher Confirms）</a></li><li style="--depth: 1"><a href="#消息持久化">消息持久化</a></li><li style="--depth: 2"><a href="#lazy-queue惰性队列">Lazy Queue（惰性队列）</a></li><li style="--depth: 1"><a href="#消费者可靠性">消费者可靠性</a></li><li style="--depth: 2"><a href="#消费者确认机制acknowledge">消费者确认机制（Acknowledge）</a></li><li style="--depth: 2"><a href="#失败重试">失败重试</a></li><li style="--depth: 2"><a href="#业务幂等性">业务幂等性</a></li><li style="--depth: 0"><a href="#延迟队列">延迟队列</a></li><li style="--depth: 1"><a href="#死信队列实现延迟">死信队列实现延迟</a></li><li style="--depth: 1"><a href="#delayexchange-插件">DelayExchange 插件</a></li><li style="--depth: 0"><a href="#集群与高可用">集群与高可用</a></li><li style="--depth: 1"><a href="#普通集群">普通集群</a></li><li style="--depth: 1"><a href="#镜像集群mirroring">镜像集群（Mirroring）</a></li><li style="--depth: 1"><a href="#quorum-queue仲裁队列">Quorum Queue（仲裁队列）</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

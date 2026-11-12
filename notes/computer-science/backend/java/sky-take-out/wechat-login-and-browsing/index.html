@@ -1,0 +1,1181 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>微信登录、商品浏览 · Musuyin&#39; Home</title><meta name="description" content="微信登录把临时凭证交换为平台用户标识，再由业务系统签发自己的登录态。商品浏览随后按分类查询菜品和套餐；管理端与用户端都要明确各自的鉴权入口。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/java/sky-take-out/wechat-login-and-browsing/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="微信登录、商品浏览 · Musuyin' Home"><meta property="og:description" content="微信登录把临时凭证交换为平台用户标识，再由业务系统签发自己的登录态。商品浏览随后按分类查询菜品和套餐；管理端与用户端都要明确各自的鉴权入口。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/java/sky-take-out/wechat-login-and-browsing/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">微信登录、商品浏览</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-06">2026-08-06</time></dd></div><div><dt>字数</dt><dd>4442</dd></div><div><dt>预计阅读</dt><dd>15 分钟</dd></div></dl></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>微信登录、商品浏览</h1><time datetime="2026-08-06">2026-08-06</time></header><div class="prose"><p>微信登录把临时凭证交换为平台用户标识，再由业务系统签发自己的登录态。商品浏览随后按分类查询菜品和套餐；管理端与用户端都要明确各自的鉴权入口。</p>
+<p><a id="reference-课程内容"></a></p>
+<h2 id="课程内容">课程内容</h2>
+<ul>
+<li>HttpClient</li>
+<li>微信小程序开发</li>
+<li>微信登录</li>
+<li>导入商品浏览功能代码</li>
+</ul>
+<p>功能实现：<strong>微信登录</strong>、<strong>商品浏览</strong></p>
+<p><strong>微信登录效果图：</strong></p>
+<p><img alt="image-20221203184545847" loading="lazy" decoding="async" width="434" height="763" src="/_astro/IMG-20260722152511807.DfbQ7I1K_1GXXhP.webp"></p>
+<p><strong>商品浏览效果图：</strong></p>
+<p><img alt="image-20221203184623026" loading="lazy" decoding="async" width="431" height="763" src="/_astro/IMG-20260722152511924.B6AwiA0l_1xCbFy.webp"></p>
+<p><a id="reference-httpclient"></a></p>
+<h2 id="httpclient">HttpClient</h2>
+<p><a id="reference-介绍"></a></p>
+<h3 id="介绍">介绍</h3>
+<p>HttpClient 是 Apache Jakarta Common 下的子项目，可以用来提供高效的、最新的、功能丰富的支持 HTTP 协议的客户端编程工具包，并且它支持 HTTP 协议最新的版本和建议。</p>
+<p><img alt="image-20221203185003231" loading="lazy" decoding="async" width="1196" height="288" src="/_astro/IMG-20260722152511958.C1P0P-iH_RnCIl.webp"></p>
+<p><strong>HttpClient 作用：</strong></p>
+<ul>
+<li>发送 HTTP 请求</li>
+<li>接收响应数据</li>
+</ul>
+<p><img alt="image-20221203185149985" loading="lazy" decoding="async" width="134" height="226" src="/_astro/IMG-20260722152511987.DWrSrtJy_Z1afEOk.webp"></p>
+<p>为什么要在 Java 程序中发送 Http 请求？有哪些应用场景呢？</p>
+<p><strong>HttpClient 应用场景：</strong></p>
+<p>当我们在使用扫描支付、查看地图、获取验证码、查看天气等功能时</p>
+<p><img alt="image-20221203185536013" loading="lazy" decoding="async" width="353" height="259" src="/_astro/IMG-20260722152512124.BVCefhlc_Z2oKXGJ.webp"></p>
+<p>其实，应用程序本身并未实现这些功能，都是在应用程序里访问提供这些功能的服务，访问这些服务需要发送 HTTP 请求，并且接收响应数据，可通过 HttpClient 来实现。</p>
+<p><img alt="image-20221203185427462" loading="lazy" decoding="async" width="1159" height="588" src="/_astro/IMG-20260722152512151.BxvLvQil_ZmyQgj.webp"></p>
+<p><strong>HttpClient 的 maven 坐标：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.apache.httpcomponents&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;httpclient&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;4.5.13&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><strong>HttpClient 的核心 API：</strong></p>
+<ul>
+<li>HttpClient：Http 客户端对象类型，使用该类型对象可发起 Http 请求。</li>
+<li>HttpClients：可认为是构建器，可创建 HttpClient 对象。</li>
+<li>CloseableHttpClient：实现类，实现了 HttpClient 接口。</li>
+<li>HttpGet：Get 方式请求类型。</li>
+<li>HttpPost：Post 方式请求类型。</li>
+</ul>
+<p><strong>HttpClient 发送请求步骤：</strong></p>
+<ul>
+<li>创建 HttpClient 对象</li>
+<li>创建 Http 请求对象</li>
+<li>调用 HttpClient 的 execute 方法发送请求</li>
+</ul>
+<p><a id="reference-入门案例"></a></p>
+<h3 id="入门案例">入门案例</h3>
+<p>对 HttpClient 编程工具包有了一定了解后，那么，我们使用 HttpClient 在 Java 程序当中来构造 Http 的请求，并且把请求发送出去，接下来，就通过入门案例分别发送 <strong>GET 请求</strong>和 <strong>POST 请求</strong>，具体来学习一下它的使用方法。</p>
+<p><a id="reference-get-方式请求"></a></p>
+<h4 id="get-方式请求">GET 方式请求</h4>
+<p>正常来说，首先，应该导入 HttpClient 相关的坐标，但在项目中，就算不导入，也可以使用相关的 API。</p>
+<p>因为在项目中已经引入了 aliyun-sdk-oss 坐标：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;com.aliyun.oss&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;aliyun-sdk-oss&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p>上述依赖的底层已经包含了 HttpClient 相关依赖。</p>
+<p><img alt="image-20221203194852825" loading="lazy" decoding="async" width="712" height="707" src="/_astro/IMG-20260722152512183.DFO0Vzhw_1ABuiQ.webp"></p>
+<p>故选择导入或者不导入均可。</p>
+<p>进入到 sky-server 模块，编写测试代码，发送 GET 请求。</p>
+<p><strong>实现步骤：</strong></p>
+<ol>
+<li>创建 HttpClient 对象</li>
+<li>创建 Http 请求对象</li>
+<li>发送请求，接受响应结果</li>
+<li>解析结果</li>
+<li>关闭资源</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.test;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.http.HttpEntity;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.http.client.methods.CloseableHttpResponse;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.http.client.methods.HttpGet;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.http.impl.client.CloseableHttpClient;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.http.impl.client.HttpClients;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.http.util.EntityUtils;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.junit.jupiter.api.Test;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.test.context.SpringBootTest;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">SpringBootTest</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> HttpClientTest</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 测试通过httpclient发送GET方式的请求</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Test</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> testGET</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">throws</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Exception{</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //创建httpclient对象</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        CloseableHttpClient httpClient </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> HttpClients.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">createDefault</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //创建请求对象</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        HttpGet httpGet </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> HttpGet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://localhost:8080/user/shop/status"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //发送请求，接受响应结果</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        CloseableHttpResponse response </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> httpClient.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">execute</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(httpGet);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //获取服务端返回的状态码</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> statusCode </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getStatusLine</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getStatusCode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"服务端返回的状态码为："</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> statusCode);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        HttpEntity entity </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getEntity</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String body </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> EntityUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">toString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(entity);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"服务端返回的数据为："</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> body);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //关闭资源</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        response.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">close</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        httpClient.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">close</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>在访问 <a href="http://localhost:8080/user/shop/status">http://localhost:8080/user/shop/status</a> 请求时，需要提前启动项目。</p>
+<p><strong>测试结果：</strong></p>
+<p><img alt="image-20221203195917572" loading="lazy" decoding="async" width="1059" height="448" src="/_astro/IMG-20260722152512213.DZES6wIO_27TmdC.webp"></p>
+<p><a id="reference-post-方式请求"></a></p>
+<h4 id="post-方式请求">POST 方式请求</h4>
+<p>在 HttpClientTest 中添加 POST 方式请求方法，相比 GET 请求来说，POST 请求若携带参数需要封装请求体对象，并将该对象设置在请求对象中。</p>
+<p><strong>实现步骤：</strong></p>
+<ol>
+<li>创建 HttpClient 对象</li>
+<li>创建请求对象</li>
+<li>发送请求，接收响应结果</li>
+<li>解析响应结果</li>
+<li>关闭资源</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 测试通过httpclient发送POST方式的请求</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Test</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> testPOST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() throws Exception{</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 创建httpclient对象</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        CloseableHttpClient httpClient </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> HttpClients.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">createDefault</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //创建请求对象</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        HttpPost httpPost </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> HttpPost</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://localhost:8080/admin/employee/login"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        JSONObject jsonObject </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> JSONObject</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        jsonObject.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"username"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"admin"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        jsonObject.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"password"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"123456"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        StringEntity entity </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> StringEntity</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(jsonObject.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">toString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //指定请求编码方式</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        entity.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setContentEncoding</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"utf-8"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //数据格式</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        entity.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setContentType</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"application/json"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        httpPost.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setEntity</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(entity);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //发送请求</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        CloseableHttpResponse response </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> httpClient.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">execute</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(httpPost);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //解析返回结果</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> statusCode </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getStatusLine</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getStatusCode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"响应码为："</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> statusCode);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        HttpEntity entity1 </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getEntity</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String body </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> EntityUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">toString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(entity1);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"响应数据为："</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> body);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //关闭资源</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        response.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">close</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        httpClient.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">close</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><strong>测试结果：</strong></p>
+<p><img alt="image-20221203201023925" loading="lazy" decoding="async" width="1728" height="372" src="/_astro/IMG-20260722152512331.R8GXxctt_22tmi6.webp"></p>
+<p><a id="reference-微信小程序开发"></a></p>
+<h2 id="微信小程序开发">微信小程序开发</h2>
+<p><a id="reference-介绍-1"></a></p>
+<h3 id="介绍-1">介绍</h3>
+<p>小程序是一种新的开放能力，开发者可以快速地开发一个小程序。可以在微信内被便捷地获取和传播，同时具有出色的使用体验。</p>
+<p><img alt="image-20221203204712437" loading="lazy" decoding="async" width="536" height="538" src="/_astro/IMG-20260722152512367.CHGl_nu0_Z2npVJ.webp"></p>
+<p><strong>官方网址：</strong> <a href="https://mp.weixin.qq.com/cgi-bin/wx?token=&amp;lang=zh_CN">https://mp.weixin.qq.com/cgi-bin/wx?token=&amp;lang=zh_CN</a></p>
+<p><img alt="image-20221203205305487" loading="lazy" decoding="async" width="1891" height="838" src="/_astro/IMG-20260722152512402.DMjDFJeT_ZgW9DY.webp"></p>
+<p>小程序主要运行微信内部，可通过上述网站来整体了解微信小程序的开发。</p>
+<p><strong>首先，</strong> 在进行小程序开发时，需要先去注册一个小程序，在注册的时候，它实际上又分成了不同的注册的主体。我们可以以个人的身份来注册一个小程序，当然，也可以以企业政府、媒体或者其他组织的方式来注册小程序。那么，不同的主体注册小程序，最终开放的权限也是不一样的。比如以个人身份来注册小程序，是无法开通支付权限的。若要提供支付功能，必须是企业、政府或者其它组织等。所以，不同的主体注册小程序后，可开发的功能是不一样的。</p>
+<p><img alt="image-20221203210640473" loading="lazy" decoding="async" width="1208" height="351" src="/_astro/IMG-20260722152512525.m8v8WxxQ_ZAMEU9.webp"></p>
+<p><strong>然后，</strong> 微信小程序我们提供的一些开发的支持，实际上微信的官方是提供了一系列的工具来帮助开发者快速的接入
+并且完成小程序的开发，提供了完善的开发文档，并且专门提供了一个开发者工具，还提供了相应的设计指南，同时也提供了一些小程序体验 DEMO，可以快速的体验小程序实现的功能。</p>
+<p><img alt="image-20221203211226920" loading="lazy" decoding="async" width="1459" height="531" src="/_astro/IMG-20260722152512689.DG1G85FB_Z2ip0zN.webp"></p>
+<p><strong>最后，</strong> 开发完一个小程序要上线，也给我们提供了详细地接入流程。</p>
+<p><img alt="image-20221203211535565" loading="lazy" decoding="async" width="833" height="671" src="/_astro/IMG-20260722152512720.Dv2DZcC4_1RgtUk.webp"></p>
+<p><a id="reference-准备工作"></a></p>
+<h3 id="准备工作">准备工作</h3>
+<p>开发微信小程序之前需要做如下准备工作：</p>
+<ul>
+<li>注册小程序</li>
+<li>完善小程序信息</li>
+<li>下载开发者工具</li>
+</ul>
+<p><strong>1). 注册小程序</strong></p>
+<p>注册地址：<a href="https://mp.weixin.qq.com/wxopen/waregister?action=step1">https://mp.weixin.qq.com/wxopen/waregister?action=step1</a></p>
+<p><img alt="image-20221203212348111" loading="lazy" decoding="async" width="986" height="676" src="/_astro/IMG-20260722152512852.DBGikNYb_Z1zSVyu.webp"></p>
+<p><strong>2). 完善小程序信息</strong></p>
+<p>登录小程序后台：<a href="https://mp.weixin.qq.com/">https://mp.weixin.qq.com/</a></p>
+<p>两种登录方式选其一即可</p>
+<p><img alt="image-20221203212454040" loading="lazy" decoding="async" width="558" height="397" src="/_astro/IMG-20260722152512884.U23yv4lq_Z1AyKpa.webp"></p>
+<p>完善小程序信息、小程序类目</p>
+<p><img alt="image-20221203212615981" loading="lazy" decoding="async" width="1243" height="593" src="/_astro/IMG-20260722152512917.6wZjTEKi_Z11xH7u.webp"></p>
+<p>查看小程序的 AppID</p>
+<p><img alt="image-20221203212702993" loading="lazy" decoding="async" width="1333" height="637" src="/_astro/IMG-20260722152512947.2WzJXIsu_GYftG.webp"></p>
+<p><strong>3). 下载开发者工具</strong></p>
+<p>资料中已提供，无需下载，熟悉下载步骤即可。</p>
+<p>下载地址： <a href="https://developers.weixin.qq.com/miniprogram/dev/devtools/stable.html">https://developers.weixin.qq.com/miniprogram/dev/devtools/stable.html</a></p>
+<p><img alt="image-20221203212836364" loading="lazy" decoding="async" width="1287" height="615" src="/_astro/IMG-20260722152512980.kmFustFs_1TUBXC.webp"></p>
+<p>扫描登录开发者工具</p>
+<p><img alt="image-20221203212954956" loading="lazy" decoding="async" width="400" height="569" src="/_astro/IMG-20260722152513014.D4dlgLl__Z1XNmQz.webp"></p>
+<p>创建小程序项目</p>
+<p><img alt="image-20221203213042020" loading="lazy" decoding="async" width="832" height="624" src="/_astro/IMG-20260722152513038.BgtSmZXD_Q7oHP.webp"></p>
+<p>熟悉开发者工具布局</p>
+<p><img alt="image-20221203213108317" loading="lazy" decoding="async" width="1205" height="639" src="/_astro/IMG-20260722152513094.Cmhfed52_Z1U8hVD.webp"></p>
+<p>设置不校验合法域名</p>
+<p><img alt="image-20221203213212370" loading="lazy" decoding="async" width="578" height="655" src="/_astro/IMG-20260722152513117.D4HY8pkl_2fg9tB.webp"></p>
+<p><strong>注：</strong> 开发阶段，小程序发出请求到后端的 Tomcat 服务器，若不勾选，请求发送失败。</p>
+<p><a id="reference-入门案例-1"></a></p>
+<h3 id="入门案例-1">入门案例</h3>
+<p>实际上，小程序的开发本质上属于前端开发，主要使用 JavaScript 开发，咱们现在的定位主要还是在后端，所以，对于小程序开发简单了解即可。</p>
+<p><a id="reference-小程序目录结构"></a></p>
+<h4 id="小程序目录结构">小程序目录结构</h4>
+<p>小程序包含一个描述整体程序的 app 和多个描述各自页面的 page。一个小程序主体部分由三个文件组成，必须放在项目的根目录，如下：</p>
+<p><img alt="image-20221203220557676" loading="lazy" decoding="async" width="332" height="448" src="/_astro/IMG-20260722152513145.k80gCQO3_1R16pV.webp"></p>
+<p><strong>文件说明：</strong></p>
+<p><img alt="image-20221203220635867" loading="lazy" decoding="async" width="884" height="387" src="/_astro/IMG-20260722152513280.BPMLp2i2_Z1YcINx.webp"></p>
+<p><strong>app.js：</strong> 必须存在，主要存放小程序的逻辑代码</p>
+<p><strong>app.json：</strong> 必须存在，小程序配置文件，主要存放小程序的公共配置</p>
+<p><strong>app.wxss:</strong> 非必须存在，主要存放小程序公共样式表，类似于前端的 CSS 样式</p>
+<p>对小程序主体三个文件了解后，其实一个小程序又有多个页面。比如说，有商品浏览页面、购物车的页面、订单支付的页面、商品的详情页面等等。那这些页面会放在哪呢？
+会存放在 pages 目录。</p>
+<p>每个小程序页面主要由四个文件组成：</p>
+<p><img alt="image-20221203220826893" loading="lazy" decoding="async" width="352" height="501" src="/_astro/IMG-20260722152513335.OvPx_EtO_Z2k116O.webp"></p>
+<p><strong>文件说明：</strong></p>
+<p><img alt="image-20221203220839187" loading="lazy" decoding="async" width="836" height="448" src="/_astro/IMG-20260722152513358.C_4ibnap_kabke.webp"></p>
+<p><strong>js 文件：</strong> 必须存在，存放页面业务逻辑代码，编写的 js 代码。</p>
+<p><strong>wxml 文件：</strong> 必须存在，存放页面结构，主要是做页面布局，页面效果展示的，类似于 HTML 页面。</p>
+<p><strong>json 文件：</strong> 非必须，存放页面相关的配置。</p>
+<p><strong>wxss 文件：</strong> 非必须，存放页面样式表，相当于 CSS 文件。</p>
+<p><a id="reference-编写和编译小程序"></a></p>
+<h4 id="编写和编译小程序">编写和编译小程序</h4>
+<p><strong>1). 编写</strong></p>
+<p>进入到 index.wxml，编写页面布局</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">view</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> class</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"container"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">view</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;{{msg}}&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">view</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">   &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">view</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">button</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"default"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> bindtap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"getUserInfo"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;获取用户信息&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">button</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">image</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> style</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"width: 100px;height: 100px;"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> src</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"{{avatarUrl}}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    {{nickName}}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">view</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">   &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">view</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">button</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"primary"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> bindtap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"wxlogin"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;微信登录&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">button</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    授权码：{{code}}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">view</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">   &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">view</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">button</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"warn"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> bindtap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"sendRequest"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;发送请求&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">button</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    响应结果：{{result}}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">view</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">view</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p>进入到 index.js，编写业务逻辑代码</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">Page</span><span style="color:#24292E;--shiki-dark:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  data:{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    msg:</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'hello world'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    avatarUrl:</span><span style="color:#032F62;--shiki-dark:#9ECBFF">''</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    nickName:</span><span style="color:#032F62;--shiki-dark:#9ECBFF">''</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    code:</span><span style="color:#032F62;--shiki-dark:#9ECBFF">''</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    result:</span><span style="color:#032F62;--shiki-dark:#9ECBFF">''</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  },</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">  getUserInfo</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span><span style="color:#D73A49;--shiki-dark:#F97583">function</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    wx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getUserProfile</span><span style="color:#24292E;--shiki-dark:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      desc: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'获取用户信息'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">      success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:(</span><span style="color:#E36209;--shiki-dark:#FFAB70">res</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">=&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        console.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">log</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(res)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        this</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setData</span><span style="color:#24292E;--shiki-dark:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          avatarUrl:res.userInfo.avatarUrl,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          nickName:res.userInfo.nickName</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        })</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    })</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  },</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">  wxlogin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span><span style="color:#D73A49;--shiki-dark:#F97583">function</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    wx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">login</span><span style="color:#24292E;--shiki-dark:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">      success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: (</span><span style="color:#E36209;--shiki-dark:#FFAB70">res</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">=&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        console.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">log</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"授权码："</span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8">res.code)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        this</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setData</span><span style="color:#24292E;--shiki-dark:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          code:res.code</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        })</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    })</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  },</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">  sendRequest</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span><span style="color:#D73A49;--shiki-dark:#F97583">function</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    wx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">request</span><span style="color:#24292E;--shiki-dark:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      url: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'http://localhost:8080/user/shop/status'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      method:</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'GET'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">      success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:(</span><span style="color:#E36209;--shiki-dark:#FFAB70">res</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">=&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        console.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">log</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"响应结果："</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> res.data.data)</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        this</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setData</span><span style="color:#24292E;--shiki-dark:#E1E4E8">({</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          result:res.data.data</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        })</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    })</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }})</span></span></code></pre>
+<p><strong>2). 编译</strong></p>
+<p>点击编译按钮</p>
+<p><img alt="image-20221204181233015" loading="lazy" decoding="async" width="713" height="163" src="/_astro/IMG-20260722152513388.BD8g8TKl_Zp9OUG.webp"></p>
+<p><strong>3). 运行效果</strong></p>
+<p><img alt="image-20221204181606927" loading="lazy" decoding="async" width="395" height="533" src="/_astro/IMG-20260722152513521.DEHoe-dl_Z2e3g2A.webp"></p>
+<p>点击<strong>获取用户信息</strong></p>
+<p><img alt="image-20221204182056440" loading="lazy" decoding="async" width="276" height="284" src="/_astro/IMG-20260722152513554.BFllLBLy_ZXwoup.webp"></p>
+<p>点击<strong>微信登录</strong></p>
+<p><img alt="image-20221204182238762" loading="lazy" decoding="async" width="404" height="131" src="/_astro/IMG-20260722152513597.CueU_Vvo_Z1pzrG8.webp"></p>
+<p>点击<strong>发送请求</strong></p>
+<p>因为请求 <a href="http://localhost:8080/user/shop/status%EF%BC%8C%E5%85%88%E8%A6%81%E5%90%AF%E5%8A%A8%E5%90%8E%E5%8F%B0%E9%A1%B9%E7%9B%AE%E3%80%82">http://localhost:8080/user/shop/status，先要启动后台项目。</a></p>
+<p><img alt="image-20221204192519728" loading="lazy" decoding="async" width="898" height="270" src="/_astro/IMG-20260722152513702.CAWeJDc5_Z2v7af3.webp"></p>
+<p><strong>注：</strong> 设置不校验合法域名，若不勾选，请求发送失败。</p>
+<p><a id="reference-发布小程序"></a></p>
+<h4 id="发布小程序">发布小程序</h4>
+<p>小程序的代码都已经开发完毕，要将小程序发布上线，让所有的用户都能使用到这个小程序。</p>
+<p>点击上传按钮：</p>
+<p><img alt="image-20221204225355015" loading="lazy" decoding="async" width="1017" height="471" src="/_astro/IMG-20260722152513745.DaO30EHw_1MHNL6.webp"></p>
+<p>指定版本号：</p>
+<p><img alt="image-20221204225502698" loading="lazy" decoding="async" width="805" height="282" src="/_astro/IMG-20260722152513771.CCI2tw19_2kvY90.webp"></p>
+<p>上传成功：</p>
+<p><img alt="image-20221204225557820" loading="lazy" decoding="async" width="509" height="325" src="/_astro/IMG-20260722152513911.BjjiCAGF_ZEPnMG.webp"></p>
+<p>把代码上传到微信服务器就表示小程序已经发布了吗？
+<strong>其实并不是。</strong> 当前小程序版本只是一个开发版本。</p>
+<p>进到微信公众平台，打开版本管理页面。</p>
+<p><img alt="image-20221204230231476" loading="lazy" decoding="async" width="1276" height="350" src="/_astro/IMG-20260722152513935.Cf37KZQ9_ZAWvdW.webp"></p>
+<p>需提交审核，变成审核版本，审核通过后，进行发布，变成线上版本。</p>
+<p>一旦成为线上版本，这就说明小程序就已经发布上线了，微信用户就可以在微信里面去搜索和使用这个小程序了。</p>
+<p><a id="reference-微信登录"></a></p>
+<h2 id="微信登录">微信登录</h2>
+<p><a id="reference-导入小程序代码"></a></p>
+<h3 id="导入小程序代码">导入小程序代码</h3>
+<p>开发微信小程序，本质上是属于前端的开发，我们的重点其实还是后端代码开发。所以，小程序的代码已经提供好了，直接导入到微信开发者工具当中，直接来使用就可以了。</p>
+<p><strong>1). 找到资料</strong></p>
+<p><img alt="image-20221204205429798" loading="lazy" decoding="async" width="452" height="120" src="/_astro/IMG-20260722152513975.DIhH9QVS_Z2ugA3h.webp"></p>
+<p><strong>2). 导入代码</strong></p>
+<p><img alt="image-20221204205631809" loading="lazy" decoding="async" width="1194" height="883" src="/_astro/IMG-20260722152513999.B_WqzgHq_Z1qTyHw.webp"></p>
+<p>AppID：使用自己的 AppID</p>
+<p><img alt="image-20221204210011364" loading="lazy" decoding="async" width="1191" height="888" src="/_astro/IMG-20260722152514132.izlwLFvU_Z22snnR.webp"></p>
+<p><strong>3). 查看项目结构</strong></p>
+<p>主体的文件:app.js app.json app.wxss
+项目的页面比较多，主要存放在 pages 目录。</p>
+<p><img alt="image-20221204210739195" loading="lazy" decoding="async" width="1851" height="879" src="/_astro/IMG-20260722152514167.Cq1OMUpm_1nI2aT.webp"></p>
+<p><strong>4). 修改配置</strong></p>
+<p>因为小程序要请求后端服务，需要修改为自己后端服务的 ip 地址和端口号(默认不需要修改)</p>
+<p>common–&gt;vendor.js–&gt; 搜索(ctrl+f)–&gt;baseUri</p>
+<p><img alt="image-20221204211239035" loading="lazy" decoding="async" width="1015" height="833" src="/_astro/IMG-20260722152514194.Du7zOQDj_Z2jG8Xc.webp"></p>
+<p><a id="reference-微信登录流程"></a></p>
+<h3 id="微信登录流程">微信登录流程</h3>
+<p>微信登录：<a href="https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/login.html">https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/login.html</a></p>
+<p><strong>流程图：</strong></p>
+<p><img alt="image-20221204211800753" loading="lazy" decoding="async" width="832" height="738" src="/_astro/IMG-20260722152514324.BmISWmUM_Z1GriSM.webp"></p>
+<p><strong>步骤分析：</strong></p>
+<ol>
+<li>小程序端，调用 wx.login()获取 code，就是授权码。</li>
+<li>小程序端，调用 wx.request()发送请求并携带 code，请求开发者服务器(自己编写的后端服务)。</li>
+<li>开发者服务端，通过 HttpClient 向微信接口服务发送请求，并携带 appId+appsecret+code 三个参数。</li>
+<li>开发者服务端，接收微信接口服务返回的数据，session_key+opendId 等。opendId 是微信用户的唯一标识。</li>
+<li>开发者服务端，自定义登录态，生成令牌(token)和 openid 等数据返回给小程序端，方便后绪请求身份校验。</li>
+<li>小程序端，收到自定义登录态，存储 storage。</li>
+<li>小程序端，后绪通过 wx.request()发起业务请求时，携带 token。</li>
+<li>开发者服务端，收到请求后，通过携带的 token，解析当前登录用户的 id。</li>
+<li>开发者服务端，身份校验通过后，继续相关的业务逻辑处理，最终返回业务数据。</li>
+</ol>
+<p>接下来，我们使用 Postman 进行测试。</p>
+<p><strong>说明：</strong></p>
+<ol>
+<li>调用 <a href="https://developers.weixin.qq.com/miniprogram/dev/api/open-api/login/wx.login.html">wx.login()</a> 获取 <strong>临时登录凭证 code</strong> ，并回传到开发者服务器。</li>
+<li>调用 <a href="https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/login/auth.code2Session.html">auth.code2Session</a> 接口，换取 <strong>用户唯一标识 OpenID</strong> 、 用户在微信开放平台帐号下的<strong>唯一标识 UnionID</strong>（若当前小程序已绑定到微信开放平台帐号） 和 <strong>会话密钥 session_key</strong>。</li>
+</ol>
+<p>之后开发者服务器可以根据用户标识来生成自定义登录态，用于后续业务逻辑中前后端交互时识别用户身份。</p>
+<p><strong>实现步骤：</strong></p>
+<p><strong>1). 获取授权码</strong></p>
+<p>点击确定按钮，获取授权码，每个授权码只能使用一次，每次测试，需重新获取。</p>
+<p><img alt="image-20221204222008130" loading="lazy" decoding="async" width="1030" height="604" src="/_astro/IMG-20260722152514365.DjW4192y_Bimv2.webp"></p>
+<p><strong>2). 明确请求接口</strong></p>
+<p>请求方式、请求路径、请求参数</p>
+<p><img alt="image-20221204222434054" loading="lazy" decoding="async" width="963" height="759" src="/_astro/IMG-20260722152514386.BB5BRoUo_Z2q78ND.webp"></p>
+<p><strong>3). 发送请求</strong></p>
+<p>获取 session_key 和 openid</p>
+<p><img alt="image-20221204223956568" loading="lazy" decoding="async" width="1259" height="853" src="/_astro/IMG-20260722152514519.ZOXwKiEx_2pdAKY.webp"></p>
+<p>若出现 code been used 错误提示，说明授权码已被使用过，请重新获取</p>
+<p><img alt="image-20221204224130409" loading="lazy" decoding="async" width="1259" height="824" src="/_astro/IMG-20260722152514546.BiCBZkdN_1sBPgP.webp"></p>
+<p><a id="reference-需求分析和设计"></a></p>
+<h3 id="需求分析和设计">需求分析和设计</h3>
+<p><a id="reference-产品原型"></a></p>
+<h4 id="产品原型">产品原型</h4>
+<p>用户进入到小程序的时候，微信授权登录之后才能点餐。需要获取当前微信用户的相关信息，比如昵称、头像等，这样才能够进入到小程序进行下单操作。是基于微信登录来实现小程序的登录功能，没有采用传统账户密码登录的方式。若第一次使用小程序来点餐，就是一个新用户，需要把这个新的用户保存到数据库当中完成自动注册。</p>
+<p><strong>登录功能原型图：</strong></p>
+<p><img alt="image-20221205173711304" loading="lazy" decoding="async" width="854" height="673" src="/_astro/IMG-20260722152514577.VQ4H4_JB_2gby0A.webp"></p>
+<p><strong>业务规则：</strong></p>
+<ul>
+<li>基于微信登录实现小程序的登录功能</li>
+<li>如果是新用户需要自动完成注册</li>
+</ul>
+<p><a id="reference-接口设计"></a></p>
+<h4 id="接口设计">接口设计</h4>
+<p>通过微信登录的流程，如果要完成微信登录的话，最终就要获得微信用户的 openid。在小程序端获取授权码后，向后端服务发送请求，并携带授权码，这样后端服务在收到授权码后，就可以去请求微信接口服务。最终，后端向小程序返回 openid 和 token 等数据。</p>
+<p>基于上述的登录流程，就可以设计出该接口的<strong>请求参数</strong>和<strong>返回数据</strong>。</p>
+<p><img alt="image-20221205175429394" loading="lazy" decoding="async" width="614" height="647" src="/_astro/IMG-20260722152514616.CtCJXN7x_Z1j7qwd.webp"></p>
+<p><strong>说明：</strong> 请求路径/user/user/login,第一个 user 代表用户端，第二个 user 代表用户模块。</p>
+<p><a id="reference-表设计"></a></p>
+<h4 id="表设计">表设计</h4>
+<p>当用户第一次使用小程序时，会完成自动注册，把用户信息存储到 <strong>user</strong> 表中。</p>
+<table>
+<thead>
+<tr>
+<th><strong>字段名</strong></th>
+<th><strong>数据类型</strong></th>
+<th><strong>说明</strong></th>
+<th><strong>备注</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>bigint</td>
+<td>主键</td>
+<td>自增</td>
+</tr>
+<tr>
+<td>openid</td>
+<td>varchar(45)</td>
+<td>微信用户的唯一标识</td>
+<td></td>
+</tr>
+<tr>
+<td>name</td>
+<td>varchar(32)</td>
+<td>用户姓名</td>
+<td></td>
+</tr>
+<tr>
+<td>phone</td>
+<td>varchar(11)</td>
+<td>手机号</td>
+<td></td>
+</tr>
+<tr>
+<td>sex</td>
+<td>varchar(2)</td>
+<td>性别</td>
+<td></td>
+</tr>
+<tr>
+<td>id_number</td>
+<td>varchar(18)</td>
+<td>身份证号</td>
+<td></td>
+</tr>
+<tr>
+<td>avatar</td>
+<td>varchar(500)</td>
+<td>微信用户头像路径</td>
+<td></td>
+</tr>
+<tr>
+<td>create_time</td>
+<td>datetime</td>
+<td>注册时间</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>说明：</strong> 手机号字段比较特殊，个人身份注册的小程序没有权限获取到微信用户的手机号。如果是以企业的资质
+注册的小程序就能够拿到微信用户的手机号。</p>
+<p><a id="reference-代码开发"></a></p>
+<h3 id="代码开发">代码开发</h3>
+<p><a id="reference-定义相关配置"></a></p>
+<h4 id="定义相关配置">定义相关配置</h4>
+<p><strong>配置微信登录所需配置项：</strong></p>
+<p>application-dev.yml</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">sky</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  wechat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    appid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">wxa8b81a3cd768e593</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    secret</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">5a5456936b257503606a1d19a04479c4</span></span></code></pre>
+<p>application.yml</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">sky</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  wechat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    appid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">${sky.wechat.appid}</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    secret</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">${sky.wechat.secret}</span></span></code></pre>
+<p><strong>配置为微信用户生成 jwt 令牌时使用的配置项：</strong></p>
+<p>application.yml</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">sky</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  jwt</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 设置jwt签名加密时使用的秘钥</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    admin-secret-key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">itcast</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 设置jwt过期时间</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    admin-ttl</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">7200000</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 设置前端传递过来的令牌名称</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    admin-token-name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">token</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    user-secret-key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">itheima</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    user-ttl</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">7200000</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    user-token-name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">authentication</span></span></code></pre>
+<p><a id="reference-dto-设计"></a></p>
+<h4 id="dto-设计">DTO 设计</h4>
+<p><strong>根据传入参数设计 DTO 类：</strong></p>
+<p><img alt="image-20221205183625049" loading="lazy" decoding="async" width="765" height="199" src="/_astro/IMG-20260722152514643.DjBdsOIR_ZInaMr.webp"></p>
+<p>在 sky-pojo 模块，UserLoginDTO.java 已定义</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.dto;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Data;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.io.Serializable;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * C端用户登录</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Data</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserLoginDTO</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Serializable</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String code;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-vo-设计"></a></p>
+<h4 id="vo-设计">VO 设计</h4>
+<p><strong>根据返回数据设计 VO 类：</strong></p>
+<p><img alt="image-20221205183923272" loading="lazy" decoding="async" width="646" height="424" src="/_astro/IMG-20260722152514679.BxXeS9Yo_1UI58N.webp"></p>
+<p>在 sky-pojo 模块，UserLoginVO.java 已定义</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.AllArgsConstructor;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Builder;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Data;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.NoArgsConstructor;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.io.Serializable;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Data</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Builder</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">NoArgsConstructor</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">AllArgsConstructor</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserLoginVO</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Serializable</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Long id;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String openid;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String token;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-controller-层"></a></p>
+<h4 id="controller-层">Controller 层</h4>
+<p><strong>根据接口定义创建 UserController 的 login 方法：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.controller.user;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.constant.JwtClaimsConstant;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.dto.UserLoginDTO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.User;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.properties.JwtProperties;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.result.Result;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.UserService;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.utils.JwtUtil;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo.UserLoginVO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.swagger.annotations.Api;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.swagger.annotations.ApiOperation;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.extern.slf4j.Slf4j;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.PostMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RequestBody;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RequestMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RestController;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.HashMap;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.Map;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RestController</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/user/user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Api</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">tags</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "C端用户相关接口"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Slf4j</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserController</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> UserService userService;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> JwtProperties jwtProperties;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 微信登录</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> userLoginDTO</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">PostMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/login"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"微信登录"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">UserLoginVO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">login</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestBody</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> UserLoginDTO </span><span style="color:#E36209;--shiki-dark:#FFAB70">userLoginDTO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">info</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"微信用户登录：{}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,userLoginDTO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getCode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //微信登录</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        User user </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> userService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">wxLogin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(userLoginDTO);</span><span style="color:#6A737D;--shiki-dark:#6A737D">//后绪步骤实现</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //为微信用户生成jwt令牌</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Map&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">Object</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; claims </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> HashMap&lt;&gt;();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        claims.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(JwtClaimsConstant.USER_ID,user.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String token </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> JwtUtil.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">createJWT</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(jwtProperties.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getUserSecretKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(), jwtProperties.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getUserTtl</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(), claims);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        UserLoginVO userLoginVO </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> UserLoginVO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">builder</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(user.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">())</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">openid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(user.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getOpenid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">())</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">token</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(token)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(userLoginVO);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>其中，JwtClaimsConstant.USER_ID 常量已定义。</p>
+<p><a id="reference-service-层接口"></a></p>
+<h4 id="service-层接口">Service 层接口</h4>
+<p><strong>创建 UserService 接口：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.dto.UserLoginDTO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.User;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> interface</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 微信登录</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> userLoginDTO</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    User </span><span style="color:#6F42C1;--shiki-dark:#B392F0">wxLogin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(UserLoginDTO </span><span style="color:#E36209;--shiki-dark:#FFAB70">userLoginDTO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-service-层实现类"></a></p>
+<h4 id="service-层实现类">Service 层实现类</h4>
+<p><strong>创建 UserServiceImpl 实现类：</strong> 实现获取微信用户的 openid 和微信登录功能</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.impl;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.alibaba.fastjson.JSON;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.alibaba.fastjson.JSONObject;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.constant.MessageConstant;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.dto.UserLoginDTO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.User;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.exception.LoginFailedException;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.mapper.UserMapper;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.properties.WeChatProperties;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.UserService;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.utils.HttpClientUtil;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.extern.slf4j.Slf4j;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.stereotype.Service;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.time.LocalDateTime;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.HashMap;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.Map;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Service</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Slf4j</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserServiceImpl</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //微信服务接口地址</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> final</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String WX_LOGIN </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "https://api.weixin.qq.com/sns/jscode2session"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> WeChatProperties weChatProperties;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> UserMapper userMapper;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 微信登录</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> userLoginDTO</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> User </span><span style="color:#6F42C1;--shiki-dark:#B392F0">wxLogin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(UserLoginDTO </span><span style="color:#E36209;--shiki-dark:#FFAB70">userLoginDTO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String openid </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getOpenid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(userLoginDTO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getCode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //判断openid是否为空，如果为空表示登录失败，抛出业务异常</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(openid </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            throw</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> LoginFailedException</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(MessageConstant.LOGIN_FAILED);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //判断当前用户是否为新用户</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        User user </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> userMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getByOpenid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(openid);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //如果是新用户，自动完成注册</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(user </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            user </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> User.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">builder</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">openid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(openid)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">createTime</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(LocalDateTime.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">now</span><span style="color:#24292E;--shiki-dark:#E1E4E8">())</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            userMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">insert</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(user);</span><span style="color:#6A737D;--shiki-dark:#6A737D">//后绪步骤实现</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //返回这个用户对象</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> user;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 调用微信接口服务，获取微信用户的openid</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> code</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getOpenid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String </span><span style="color:#E36209;--shiki-dark:#FFAB70">code</span><span style="color:#24292E;--shiki-dark:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //调用微信接口服务，获得当前微信用户的openid</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Map&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; map </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> HashMap&lt;&gt;();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"appid"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,weChatProperties.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getAppid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"secret"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,weChatProperties.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getSecret</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"js_code"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,code);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">put</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"grant_type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"authorization_code"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String json </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> HttpClientUtil.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">doGet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(WX_LOGIN, map);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        JSONObject jsonObject </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> JSON.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">parseObject</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(json);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String openid </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> jsonObject.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"openid"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> openid;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-mapper-层"></a></p>
+<h4 id="mapper-层">Mapper 层</h4>
+<p><strong>创建 UserMapper 接口：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.mapper;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.User;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.ibatis.annotations.Mapper;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.apache.ibatis.annotations.Select;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Mapper</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> interface</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserMapper</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据openid查询用户</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> openid</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Select</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"select * from user where openid = #{openid}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    User </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getByOpenid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String </span><span style="color:#E36209;--shiki-dark:#FFAB70">openid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 插入数据</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> user</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> insert</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(User </span><span style="color:#E36209;--shiki-dark:#FFAB70">user</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>创建 UserMapper.xml 映射文件：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;?</span><span style="color:#22863A;--shiki-dark:#85E89D">xml</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1.0"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> encoding</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"UTF-8"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ?&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;!</span><span style="color:#D73A49;--shiki-dark:#F97583">DOCTYPE</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> mapper</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" &gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">mapper</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"com.sky.mapper.UserMapper"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">insert</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"insert"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> useGeneratedKeys</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"true"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> keyProperty</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        insert into user (openid, name, phone, sex, id_number, avatar, create_time)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        values (#{openid}, #{name}, #{phone}, #{sex}, #{idNumber}, #{avatar}, #{createTime})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">insert</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">mapper</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><a id="reference-编写拦截器"></a></p>
+<h4 id="编写拦截器">编写拦截器</h4>
+<p><strong>编写拦截器 JwtTokenUserInterceptor：</strong> 统一拦截用户端发送的请求并进行 jwt 校验</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.interceptor;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.constant.JwtClaimsConstant;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.context.BaseContext;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.properties.JwtProperties;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.utils.JwtUtil;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.jsonwebtoken.Claims;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.extern.slf4j.Slf4j;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.stereotype.Component;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.method.HandlerMethod;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.servlet.HandlerInterceptor;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> javax.servlet.http.HttpServletRequest;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> javax.servlet.http.HttpServletResponse;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * jwt令牌校验的拦截器</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Component</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Slf4j</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> JwtTokenUserInterceptor</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> HandlerInterceptor</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> JwtProperties jwtProperties;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 校验jwt</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> request</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> response</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> handler</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@throws</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Exception</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> boolean</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> preHandle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(HttpServletRequest </span><span style="color:#E36209;--shiki-dark:#FFAB70">request</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, HttpServletResponse </span><span style="color:#E36209;--shiki-dark:#FFAB70">response</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Object </span><span style="color:#E36209;--shiki-dark:#FFAB70">handler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">throws</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Exception {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //判断当前拦截到的是Controller的方法还是其他资源</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#D73A49;--shiki-dark:#F97583">!</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(handler </span><span style="color:#D73A49;--shiki-dark:#F97583">instanceof</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> HandlerMethod)) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            //当前拦截到的不是动态方法，直接放行</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //1、从请求头中获取令牌</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String token </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> request.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getHeader</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(jwtProperties.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getUserTokenName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //2、校验令牌</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        try</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">info</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"jwt校验:{}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, token);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            Claims claims </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> JwtUtil.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">parseJWT</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(jwtProperties.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getUserSecretKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(), token);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            Long userId </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Long.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">valueOf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(claims.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(JwtClaimsConstant.USER_ID).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">toString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">info</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"当前用户的id："</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, userId);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            BaseContext.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setCurrentId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(userId);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            //3、通过，放行</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        } </span><span style="color:#D73A49;--shiki-dark:#F97583">catch</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (Exception </span><span style="color:#E36209;--shiki-dark:#FFAB70">ex</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            //4、不通过，响应401状态码</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            response.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setStatus</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">401</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> false</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>在 WebMvcConfiguration 配置类中注册拦截器：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	@</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> JwtTokenUserInterceptor jwtTokenUserInterceptor;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 注册自定义拦截器</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> registry</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    protected</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> addInterceptors</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(InterceptorRegistry registry) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">info</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"开始注册自定义拦截器..."</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //.........</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        registry.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">addInterceptor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(jwtTokenUserInterceptor)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">addPathPatterns</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/user/**"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">excludePathPatterns</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/user/user/login"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">excludePathPatterns</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/user/shop/status"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><a id="reference-功能测试"></a></p>
+<h3 id="功能测试">功能测试</h3>
+<p>重新编译小程序，进行登录，获取到 openid 和 token 数据</p>
+<p><img alt="image-20221205192506490" loading="lazy" decoding="async" width="1851" height="853" src="/_astro/IMG-20260722152514710.uPLW_9Lh_Z2gQIXX.webp"></p>
+<p>查看后台日志</p>
+<p><img alt="image-20221205192943394" loading="lazy" decoding="async" width="1520" height="289" src="/_astro/IMG-20260722152514738.B0HWpTQo_1xVmWO.webp"></p>
+<p>查看数据库 user 表，第一次登录，会自动注册</p>
+<p><img alt="image-20221205193018421" loading="lazy" decoding="async" width="993" height="82" src="/_astro/IMG-20260722152514765.Dt8a7jYz_Z1xetHp.webp"></p>
+<p><a id="reference-导入商品浏览功能代码"></a></p>
+<h2 id="导入商品浏览功能代码">导入商品浏览功能代码</h2>
+<p><a id="reference-需求分析和设计-1"></a></p>
+<h3 id="需求分析和设计-1">需求分析和设计</h3>
+<p><a id="reference-产品原型-1"></a></p>
+<h4 id="产品原型-1">产品原型</h4>
+<p><img alt="image-20210812205330291" loading="lazy" decoding="async" width="69" height="35" src="/_astro/IMG-20260722152514795.BPHo37q2_Z2hgKu4.webp"></p>
+<p><img alt="image-20210812205346846" loading="lazy" decoding="async" width="33" height="29" src="/_astro/IMG-20260722152514918.CZF7iVIu_15XWb1.webp"></p>
+<p>用户登录成功后跳转到系统首页，在首页需要根据分类来展示菜品和套餐。如果菜品设置了口味信息，需要展示按钮，否则显示按钮。</p>
+<p>​ <strong>菜品列表效果图</strong> <strong>菜品口味效果图</strong></p>
+<p><img alt="image-20221205193821129" loading="lazy" decoding="async" width="398" height="706" src="/_astro/IMG-20260722152514950.qlnXOPO7_13O6dN.webp"></p>
+<p>​ <strong>套餐列表效果图</strong> <strong>套餐详情效果图</strong></p>
+<p><img alt="image-20221205193859016" loading="lazy" decoding="async" width="400" height="706" src="/_astro/IMG-20260722152514988.BR5OYFLx_2vDgg2.webp"></p>
+<p><a id="reference-接口设计-1"></a></p>
+<h4 id="接口设计-1">接口设计</h4>
+<p>根据上述原型图先<strong>粗粒度</strong>设计接口，共包含 4 个接口。</p>
+<p><strong>接口设计：</strong></p>
+<ul>
+<li>查询分类</li>
+<li>根据分类 id 查询菜品</li>
+<li>根据分类 id 查询套餐</li>
+<li>根据套餐 id 查询包含的菜品</li>
+</ul>
+<p>接下来<strong>细粒度</strong>分析每个接口，明确每个接口的请求方式、请求路径、传入参数和返回值。</p>
+<p><strong>1). 查询分类</strong></p>
+<p><img alt="image-20221205200235328" loading="lazy" decoding="async" width="620" height="502" src="/_astro/IMG-20260722152515012.B8D1auQy_Z1y1K3y.webp"></p>
+<p><strong>2). 根据分类 id 查询菜品</strong></p>
+<p><img alt="image-20221205200319686" loading="lazy" decoding="async" width="452" height="553" src="/_astro/IMG-20260722152515133.DGziWNJs_1KWW3C.webp"></p>
+<p><strong>3). 根据分类 id 查询套餐</strong></p>
+<p><img alt="image-20221205200415135" loading="lazy" decoding="async" width="446" height="565" src="/_astro/IMG-20260722152515167.Dpn8wTdj_26w8WI.webp"></p>
+<p><strong>4). 根据套餐 id 查询包含的菜品</strong></p>
+<p><img alt="image-20221205200537591" loading="lazy" decoding="async" width="710" height="893" src="/_astro/IMG-20260722152515193.up2QHoR-_ZiYJ0J.webp"></p>
+<p><a id="reference-代码导入"></a></p>
+<h3 id="代码导入">代码导入</h3>
+<p>注：只需要根据 url 前缀对 controller 进行子包划分，对于 service 和 mapper 就不用</p>
+<p>导入资料中的商品浏览功能代码即可</p>
+<p><img alt="image-20221205201043358" loading="lazy" decoding="async" width="808" height="452" src="/_astro/IMG-20260722152515314.GGyARgwd_2c3V5c.webp"></p>
+<p>可按照 mapper–&gt;service–&gt;controller 依次导入，这样代码不会显示相应的报错。</p>
+<p>进入到 sky-server 模块中</p>
+<p><a id="reference-mapper-层-1"></a></p>
+<h4 id="mapper-层-1">Mapper 层</h4>
+<p><strong>在 SetmealMapper.java 中添加 list 和 getDishItemBySetmealId 两个方法</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 动态条件查询套餐</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> setmeal</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    List</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">Setmeal</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Setmeal setmeal);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据套餐id查询菜品选项</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> setmealId</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Select</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"select sd.name, sd.copies, d.image, d.description "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "from setmeal_dish sd left join dish d on sd.dish_id = d.id "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "where sd.setmeal_id = #{setmealId}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    List</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">DishItemVO</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getDishItemBySetmealId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long setmealId);</span></span></code></pre>
+<p><strong>创建 SetmealMapper.xml 文件</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;?</span><span style="color:#22863A;--shiki-dark:#85E89D">xml</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1.0"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> encoding</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"UTF-8"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ?&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;!</span><span style="color:#D73A49;--shiki-dark:#F97583">DOCTYPE</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> mapper</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" &gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">mapper</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"com.sky.mapper.SetmealMapper"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">select</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"list"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> parameterType</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Setmeal"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> resultType</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Setmeal"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        select * from setmeal</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">where</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> test</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"name != null"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and name like concat('%',#{name},'%')</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> test</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"categoryId != null"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and category_id = #{categoryId}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> test</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"status != null"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                and status = #{status}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">where</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">mapper</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><a id="reference-service-层"></a></p>
+<h4 id="service-层">Service 层</h4>
+<p><strong>创建 SetmealService.java</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.dto.SetmealDTO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.dto.SetmealPageQueryDTO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.Setmeal;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.result.PageResult;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo.DishItemVO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo.SetmealVO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.List;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> interface</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> SetmealService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 条件查询</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> setmeal</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Setmeal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Setmeal </span><span style="color:#E36209;--shiki-dark:#FFAB70">setmeal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据id查询菜品选项</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> id</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">DishItemVO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getDishItemById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long </span><span style="color:#E36209;--shiki-dark:#FFAB70">id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>创建 SetmealServiceImpl.java</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.impl;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.Setmeal;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.mapper.DishMapper;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.mapper.SetmealDishMapper;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.mapper.SetmealMapper;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.SetmealService;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo.DishItemVO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.extern.slf4j.Slf4j;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.stereotype.Service;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.List;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * 套餐业务实现</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Service</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Slf4j</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> SetmealServiceImpl</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> SetmealService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SetmealMapper setmealMapper;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SetmealDishMapper setmealDishMapper;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> DishMapper dishMapper;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 条件查询</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> setmeal</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Setmeal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Setmeal </span><span style="color:#E36209;--shiki-dark:#FFAB70">setmeal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Setmeal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; list </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> setmealMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(setmeal);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据id查询菜品选项</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> id</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">DishItemVO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getDishItemById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long </span><span style="color:#E36209;--shiki-dark:#FFAB70">id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> setmealMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getDishItemBySetmealId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(id);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>在 DishService.java 中添加 listWithFlavor 方法定义</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 条件查询菜品和口味</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> dish</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    List</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">DishVO</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> listWithFlavor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Dish dish);</span></span></code></pre>
+<p><strong>在 DishServiceImpl.java 中实现 listWithFlavor 方法</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 条件查询菜品和口味</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> dish</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> List</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">DishVO</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> listWithFlavor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Dish dish) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Dish</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; dishList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dishMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dish);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">DishVO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; dishVOList </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ArrayList&lt;&gt;();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (Dish d </span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dishList) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            DishVO dishVO </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> DishVO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            BeanUtils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">copyProperties</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(d,dishVO);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            //根据菜品id查询对应的口味</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">DishFlavor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; flavors </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dishFlavorMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getByDishId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(d.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            dishVO.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setFlavors</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(flavors);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            dishVOList.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dishVO);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dishVOList;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span></code></pre>
+<p><a id="reference-controller-层-1"></a></p>
+<h4 id="controller-层-1">Controller 层</h4>
+<p><strong>创建 DishController.java</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.controller.user;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.constant.StatusConstant;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.Dish;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.result.Result;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.DishService;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo.DishVO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.swagger.annotations.Api;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.swagger.annotations.ApiOperation;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.extern.slf4j.Slf4j;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.GetMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RequestMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RestController;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.List;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RestController</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"userDishController"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/user/dish"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Slf4j</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Api</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">tags</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "C端-菜品浏览接口"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> DishController</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> DishService dishService;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据分类id查询菜品</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> categoryId</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/list"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"根据分类id查询菜品"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result&lt;List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">DishVO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long </span><span style="color:#E36209;--shiki-dark:#FFAB70">categoryId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Dish dish </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Dish</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        dish.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setCategoryId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(categoryId);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        dish.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setStatus</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(StatusConstant.ENABLE);</span><span style="color:#6A737D;--shiki-dark:#6A737D">//查询起售中的菜品</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">DishVO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; list </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dishService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">listWithFlavor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(dish);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(list);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>创建 CategoryController.java</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.controller.user;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.Category;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.result.Result;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.CategoryService;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.swagger.annotations.Api;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.swagger.annotations.ApiOperation;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.GetMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RequestMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RestController;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.List;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RestController</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"userCategoryController"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/user/category"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Api</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">tags</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "C端-分类接口"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> CategoryController</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> CategoryService categoryService;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 查询分类</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> type</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/list"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"查询分类"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result&lt;List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Category</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Integer </span><span style="color:#E36209;--shiki-dark:#FFAB70">type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Category</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; list </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> categoryService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(type);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(list);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>创建 SetmealController.java</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.controller.user;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.constant.StatusConstant;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.entity.Setmeal;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.result.Result;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.service.SetmealService;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.sky.vo.DishItemVO;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.swagger.annotations.Api;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> io.swagger.annotations.ApiOperation;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.GetMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.PathVariable;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RequestMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RestController;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.List;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RestController</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"userSetmealController"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/user/setmeal"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Api</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">tags</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "C端-套餐浏览接口"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> SetmealController</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SetmealService setmealService;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 条件查询</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> categoryId</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/list"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"根据分类id查询套餐"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result&lt;List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Setmeal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long </span><span style="color:#E36209;--shiki-dark:#FFAB70">categoryId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Setmeal setmeal </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Setmeal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        setmeal.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setCategoryId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(categoryId);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        setmeal.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setStatus</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(StatusConstant.ENABLE);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Setmeal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; list </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> setmealService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(setmeal);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(list);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    /**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * 根据套餐id查询包含的菜品列表</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@param</span><span style="color:#E36209;--shiki-dark:#FFAB70"> id</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     * </span><span style="color:#D73A49;--shiki-dark:#F97583">@return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">     */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/dish/{id}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">ApiOperation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"根据套餐id查询包含的菜品列表"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result&lt;List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">DishItemVO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">dishList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">PathVariable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) Long </span><span style="color:#E36209;--shiki-dark:#FFAB70">id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">DishItemVO</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; list </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> setmealService.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getDishItemById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(id);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Result.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(list);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-功能测试-1"></a></p>
+<h3 id="功能测试-1">功能测试</h3>
+<p>重启服务器、重新编译小程序</p>
+<p>微信登录进入首页</p>
+<p><strong>菜品和套餐分类查询：</strong></p>
+<p><img alt="image-20221205205634465" loading="lazy" decoding="async" width="1871" height="865" src="/_astro/IMG-20260722152515347.4JZKGtjK_Z2vnxgb.webp"></p>
+<p><strong>具体分类下的菜品查询：</strong></p>
+<p><img alt="image-20221205205935019" loading="lazy" decoding="async" width="1864" height="827" src="/_astro/IMG-20260722152515379.CQjGomGx_ZGBxMm.webp"></p>
+<p><strong>菜品口味查询：</strong></p>
+<p><img alt="image-20221205210121546" loading="lazy" decoding="async" width="1864" height="839" src="/_astro/IMG-20260722152515511.BrrgTq33_1xJ823.webp"></p>
+<p><a id="reference-代码提交"></a></p>
+<h3 id="代码提交">代码提交</h3>
+<p><img alt="image-20221205210421016" loading="lazy" decoding="async" width="1073" height="1000" src="/_astro/IMG-20260722152515538.ujfJ4Fsu_Z1WabKK.webp"></p>
+<p>后续步骤和其它功能代码提交一致，不再赘述。</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>登录 code、openid 与业务 token 能否互相替代？</li>
+<li>为什么不能直接信任客户端提交的用户 ID？</li>
+<li>商品浏览怎样与营业状态、起售状态协同？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#课程内容">课程内容</a></li><li style="--depth: 0"><a href="#httpclient">HttpClient</a></li><li style="--depth: 1"><a href="#介绍">介绍</a></li><li style="--depth: 1"><a href="#入门案例">入门案例</a></li><li style="--depth: 2"><a href="#get-方式请求">GET 方式请求</a></li><li style="--depth: 2"><a href="#post-方式请求">POST 方式请求</a></li><li style="--depth: 0"><a href="#微信小程序开发">微信小程序开发</a></li><li style="--depth: 1"><a href="#介绍-1">介绍</a></li><li style="--depth: 1"><a href="#准备工作">准备工作</a></li><li style="--depth: 1"><a href="#入门案例-1">入门案例</a></li><li style="--depth: 2"><a href="#小程序目录结构">小程序目录结构</a></li><li style="--depth: 2"><a href="#编写和编译小程序">编写和编译小程序</a></li><li style="--depth: 2"><a href="#发布小程序">发布小程序</a></li><li style="--depth: 0"><a href="#微信登录">微信登录</a></li><li style="--depth: 1"><a href="#导入小程序代码">导入小程序代码</a></li><li style="--depth: 1"><a href="#微信登录流程">微信登录流程</a></li><li style="--depth: 1"><a href="#需求分析和设计">需求分析和设计</a></li><li style="--depth: 2"><a href="#产品原型">产品原型</a></li><li style="--depth: 2"><a href="#接口设计">接口设计</a></li><li style="--depth: 2"><a href="#表设计">表设计</a></li><li style="--depth: 1"><a href="#代码开发">代码开发</a></li><li style="--depth: 2"><a href="#定义相关配置">定义相关配置</a></li><li style="--depth: 2"><a href="#dto-设计">DTO 设计</a></li><li style="--depth: 2"><a href="#vo-设计">VO 设计</a></li><li style="--depth: 2"><a href="#controller-层">Controller 层</a></li><li style="--depth: 2"><a href="#service-层接口">Service 层接口</a></li><li style="--depth: 2"><a href="#service-层实现类">Service 层实现类</a></li><li style="--depth: 2"><a href="#mapper-层">Mapper 层</a></li><li style="--depth: 2"><a href="#编写拦截器">编写拦截器</a></li><li style="--depth: 1"><a href="#功能测试">功能测试</a></li><li style="--depth: 0"><a href="#导入商品浏览功能代码">导入商品浏览功能代码</a></li><li style="--depth: 1"><a href="#需求分析和设计-1">需求分析和设计</a></li><li style="--depth: 2"><a href="#产品原型-1">产品原型</a></li><li style="--depth: 2"><a href="#接口设计-1">接口设计</a></li><li style="--depth: 1"><a href="#代码导入">代码导入</a></li><li style="--depth: 2"><a href="#mapper-层-1">Mapper 层</a></li><li style="--depth: 2"><a href="#service-层">Service 层</a></li><li style="--depth: 2"><a href="#controller-层-1">Controller 层</a></li><li style="--depth: 1"><a href="#功能测试-1">功能测试</a></li><li style="--depth: 1"><a href="#代码提交">代码提交</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

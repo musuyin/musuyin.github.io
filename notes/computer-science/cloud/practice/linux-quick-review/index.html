@@ -1,0 +1,473 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Linux 基础知识速览 · Musuyin&#39; Home</title><meta name="description" content="Linux 排障可以按进程、服务、资源、网络、权限与日志组织。每一类工具展示一部分状态，只有把时间、对象和影响范围对应起来，才足以支持故障结论。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/practice/linux-quick-review/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Linux 基础知识速览 · Musuyin' Home"><meta property="og:description" content="Linux 排障可以按进程、服务、资源、网络、权限与日志组织。每一类工具展示一部分状态，只有把时间、对象和影响范围对应起来，才足以支持故障结论。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/practice/linux-quick-review/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Linux 基础知识速览</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-10-20">2026-10-20</time></dd></div><div><dt>字数</dt><dd>4281</dd></div><div><dt>预计阅读</dt><dd>15 分钟</dd></div></dl></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Linux 基础知识速览</h1><time datetime="2026-10-20">2026-10-20</time></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>Linux 排障可以按进程、服务、资源、网络、权限与日志组织。每一类工具展示一部分状态，只有把时间、对象和影响范围对应起来，才足以支持故障结论。</p>
+<p>This note covers the Linux concepts most useful in operations and troubleshooting interviews. Each major topic includes an interview question, expected knowledge, an explanation, and a sample answer. For detailed scenarios, see <a href="/notes/computer-science/cloud/practice/kubernetes-linux-troubleshooting/">Kubernetes and Linux Troubleshooting Question Bank</a>.</p>
+<p><a id="reference-troubleshooting-mental-model"></a></p>
+<h2 id="troubleshooting-mental-model">Troubleshooting mental model</h2>
+<p>A Linux investigation can be organized around six areas:</p>
+<ul>
+<li>Process: Which process or thread is involved, and what state is it in?</li>
+<li>Service: How is the service started, supervised, restarted, and logged?</li>
+<li>Resource: Are CPU, memory, disk space, inodes, and I/O capacity sufficient?</li>
+<li>Network: Are name resolution, routing, ports, connections, and firewall rules correct?</li>
+<li>Permission: Which identity is performing the operation, and what policy permits or denies it?</li>
+<li>Logs: What evidence do the kernel, system, and application logs provide?</li>
+</ul>
+<p>A reliable answer structure is:</p>
+<p><code>symptom and scope → evidence → hypothesis → safe action → verification</code></p>
+<p><a id="reference-interview-question-what-is-your-general-approach-to-troubleshooting-a-linux-service"></a></p>
+<h3 id="interview-question-what-is-your-general-approach-to-troubleshooting-a-linux-service">Interview question: What is your general approach to troubleshooting a Linux service?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>Scope, timeline, and recent changes</li>
+<li>Service and process state</li>
+<li>Logs and resource evidence</li>
+<li>Dependency and network validation</li>
+<li>Safe mitigation and end-to-end verification</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>Start from an exact symptom instead of immediately listing commands. Determine whether the failure affects one request, one host, or the whole service. Use status, logs, metrics, and comparisons with a healthy host to find the first failing layer. Separate temporary mitigation from root-cause resolution.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>First, I confirm the exact error, start time, and impact scope and ask what changed recently. Then I check the service and process state, correlate system and application logs, and inspect the relevant resources and dependencies. I form a hypothesis from evidence and test it with the least disruptive action. After recovery, I verify the real user path, monitor for recurrence, and document the root cause and prevention work.</p>
+</blockquote>
+<p><a id="reference-filesystem"></a></p>
+<h2 id="filesystem">Filesystem</h2>
+<p><a id="reference-common-directories"></a></p>
+<h3 id="common-directories">Common directories</h3>
+<ul>
+<li><code>/etc</code>: System and service configuration.</li>
+<li><code>/var/log</code>: Traditional log file location.</li>
+<li><code>/var/lib</code>: Persistent service state.</li>
+<li><code>/run</code>: Runtime data for the current boot.</li>
+<li><code>/proc</code>: Virtual filesystem exposing process and kernel state.</li>
+<li><code>/sys</code>: Device and kernel object information.</li>
+<li><code>/tmp</code>: Temporary files; retention depends on system policy.</li>
+<li><code>/home</code>: Home directories for regular users.</li>
+<li><code>/root</code>: Home directory for the root user.</li>
+</ul>
+<p>Linux presents regular files, directories, devices, sockets, pipes, and symbolic links through the filesystem interface.</p>
+<ul>
+<li>An absolute path starts with <code>/</code>.</li>
+<li>A relative path is resolved from the current working directory.</li>
+<li>A symbolic link stores a reference to another path.</li>
+<li>A hard link refers to the same inode and cannot cross filesystems.</li>
+</ul>
+<p><a id="reference-disk-space-and-inodes"></a></p>
+<h3 id="disk-space-and-inodes">Disk space and inodes</h3>
+<ul>
+<li>Free bytes do not guarantee that a filesystem can create another file; it can run out of inodes.</li>
+<li>Deleting a file does not release its space while a process still holds an open file descriptor to it.</li>
+<li>If a filesystem is not mounted as expected, data may be written into the underlying mount-point directory and fill the root filesystem.</li>
+<li>Disk capacity, inode capacity, and storage latency are different constraints.</li>
+</ul>
+<p><a id="reference-interview-question-a-filesystem-is-full-but-you-cannot-find-enough-large-files-what-would-you-check"></a></p>
+<h3 id="interview-question-a-filesystem-is-full-but-you-cannot-find-enough-large-files-what-would-you-check">Interview question: A filesystem is full, but you cannot find enough large files. What would you check?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>Block usage and inode usage</li>
+<li>Deleted but open files</li>
+<li>Mount points and hidden underlying data</li>
+<li>Sparse files, snapshots, and filesystem reservations</li>
+<li>Safe cleanup and service impact</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p><code>df</code> reports filesystem allocation, while <code>du</code> walks visible directory entries. Their results can differ when a deleted file remains open, when data is hidden below a mount point, or because of filesystem-specific allocation. Inode exhaustion can also prevent file creation even when bytes remain available.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>I first confirm whether the problem is exhausted blocks or exhausted inodes using <code>df -h</code> and <code>df -i</code>. Then I compare filesystem usage with visible directory usage and check for deleted files that are still open, for example with <code>lsof +L1</code>. I also verify the mount table because data written below an unexpected mount can be hidden. I would not blindly delete files; I would identify the owner, release or rotate data safely, and verify both free capacity and application behavior.</p>
+</blockquote>
+<p><a id="reference-processes-and-signals"></a></p>
+<h2 id="processes-and-signals">Processes and signals</h2>
+<p>Each process has a PID, parent PID, user identity, environment, open file descriptors, and resource usage.</p>
+<p>Common process states:</p>
+<ul>
+<li>Running or runnable: Executing or waiting for CPU time.</li>
+<li>Interruptible sleep: Waiting for an event and can be awakened by a signal.</li>
+<li>Uninterruptible sleep: Usually waiting on I/O and often shown as <code>D</code> state.</li>
+<li>Stopped: Suspended.</li>
+<li>Zombie: Exited, but its parent has not collected the exit status.</li>
+</ul>
+<p>Important signals:</p>
+<ul>
+<li><code>SIGTERM</code>: Requests graceful termination and should normally be tried first.</li>
+<li><code>SIGKILL</code>: Forces termination in the kernel; the process cannot catch it or clean up.</li>
+<li><code>SIGHUP</code>: Traditionally means terminal disconnection and is often used to request configuration reload.</li>
+</ul>
+<p>Before terminating a process, confirm its identity, business impact, and whether systemd or another supervisor will restart it.</p>
+<p><a id="reference-interview-question-what-is-the-difference-between-sigterm-and-sigkill"></a></p>
+<h3 id="interview-question-what-is-the-difference-between-sigterm-and-sigkill">Interview question: What is the difference between SIGTERM and SIGKILL?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>Catchable graceful shutdown versus forced termination</li>
+<li>Cleanup, connection draining, and data integrity</li>
+<li>Supervisor restart behavior</li>
+<li>Uninterruptible sleep limitations</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>A process can catch <code>SIGTERM</code> and perform cleanup. It cannot catch <code>SIGKILL</code>; the kernel ends it immediately when possible. Even <code>SIGKILL</code> cannot make a task disappear until an uninterruptible kernel operation returns.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>I use SIGTERM first because it lets the application stop accepting work, flush data, and release resources. If it does not exit within an appropriate timeout and the impact justifies it, I may use SIGKILL, knowing that cleanup will not run. Before either action, I check whether a supervisor will recreate the process and whether termination could corrupt state. A process in uninterruptible <code>D</code> state may remain until the underlying I/O operation returns, even after SIGKILL.</p>
+</blockquote>
+<p><a id="reference-interview-question-what-is-a-zombie-process-and-is-it-consuming-cpu-or-memory"></a></p>
+<h3 id="interview-question-what-is-a-zombie-process-and-is-it-consuming-cpu-or-memory">Interview question: What is a zombie process, and is it consuming CPU or memory?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>Child exit status awaiting parent collection</li>
+<li>Process table entry rather than a running workload</li>
+<li>Parent process responsibility</li>
+<li>PID exhaustion risk from large accumulation</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>A zombie has already exited and no longer executes application code. The kernel retains a small process table entry until the parent calls <code>wait()</code> or exits. A few zombies are not normally a resource emergency, but continued accumulation indicates a parent-process bug and can consume PIDs.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>A zombie is a child process that has exited but whose parent has not collected its exit status. It does not consume normal CPU or application memory, but it keeps a process table entry and PID. I identify the parent process and investigate why it is not reaping children. Restarting or fixing the parent may be appropriate, but killing the zombie itself is not, because it has already exited.</p>
+</blockquote>
+<p><a id="reference-systemd-services"></a></p>
+<h2 id="systemd-services">systemd services</h2>
+<p>systemd manages services, sockets, timers, mounts, targets, and other units.</p>
+<p>Common service unit settings:</p>
+<ul>
+<li><code>ExecStart</code>: Start command.</li>
+<li><code>User</code> and <code>Group</code>: Runtime identity.</li>
+<li><code>Environment</code> and <code>EnvironmentFile</code>: Environment sources.</li>
+<li><code>WorkingDirectory</code>: Process working directory.</li>
+<li><code>Restart</code>: Restart policy after exit.</li>
+<li><code>After</code>: Ordering relationship, not a strong dependency by itself.</li>
+<li><code>Requires</code> and <code>Wants</code>: Stronger and weaker dependency relationships.</li>
+</ul>
+<p>A useful inspection sequence is status, exit code, journal, unit definition, configuration validation, permissions, dependencies, and port conflicts.</p>
+<p><a id="reference-interview-question-a-systemd-service-fails-to-start-how-would-you-investigate-it"></a></p>
+<h3 id="interview-question-a-systemd-service-fails-to-start-how-would-you-investigate-it">Interview question: A systemd service fails to start. How would you investigate it?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>Unit status and recent journal</li>
+<li>Exit code and failed command</li>
+<li>Effective unit configuration and overrides</li>
+<li>User, environment, working directory, dependencies, and ports</li>
+<li>Configuration validation before restart</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>Interactive shell behavior may differ from systemd because of the runtime user, environment, current directory, resource limits, or security sandbox. Inspect the effective unit rather than only the vendor file, because drop-in overrides may change behavior.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>I begin with <code>systemctl status</code> and the unit’s recent <code>journalctl</code> entries to find the exact exit code and failure time. Then I inspect the effective unit and its drop-ins, checking the start command, runtime user, environment, working directory, dependencies, and restart policy. I validate the application’s configuration and check permissions and port conflicts. After a minimal fix, I restart or reload as appropriate and verify both the unit state and the application’s real endpoint.</p>
+</blockquote>
+<p><a id="reference-users-groups-and-permissions"></a></p>
+<h2 id="users-groups-and-permissions">Users, groups, and permissions</h2>
+<ul>
+<li>UID identifies a user and GID identifies a group.</li>
+<li>A process’s effective user and group determine most access checks.</li>
+<li>Root has broad privileges but can still be constrained by SELinux, read-only mounts, namespaces, and Linux capabilities.</li>
+</ul>
+<p>Traditional permissions are defined for owner, group, and others:</p>
+<ul>
+<li><code>r</code>: Read a file or list directory entries.</li>
+<li><code>w</code>: Modify a file or create and delete directory entries.</li>
+<li><code>x</code>: Execute a file or traverse a directory.</li>
+</ul>
+<p>For directories, execute permission controls traversal. Access to a file therefore depends on every parent directory as well as the file itself.</p>
+<p>Additional controls include:</p>
+<ul>
+<li>ACLs for more granular permissions.</li>
+<li>SELinux or AppArmor mandatory access control.</li>
+<li>Capabilities that split root privilege into smaller units.</li>
+<li>Mount options such as read-only or <code>noexec</code>.</li>
+<li><code>umask</code>, which influences default permissions for new objects.</li>
+</ul>
+<p><a id="reference-interview-question-how-would-you-troubleshoot-permission-denied"></a></p>
+<h3 id="interview-question-how-would-you-troubleshoot-permission-denied">Interview question: How would you troubleshoot <code>Permission denied</code>?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>Effective process identity</li>
+<li>Ownership and mode of every path component</li>
+<li><em>ACLs</em> and mandatory access control</li>
+<li>Mount options and capabilities</li>
+<li>Evidence before weakening permissions</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>Changing a file to mode <code>777</code> is unsafe and may not solve the problem. A denial can come from a <em>parent directory</em>, <em>ACL</em>, SELinux or AppArmor rule, <em>read-only filesystem</em>, missing capability, or the wrong runtime user.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>I first identify the exact operation and the process’s effective user and groups. Then I inspect the target and every parent directory for ownership, mode, and ACLs. If traditional permissions allow the operation, I check SELinux or AppArmor denials, mount options, filesystem state, and required capabilities. I make the narrowest permission change possible and retest as the actual service identity rather than granting broad access.</p>
+</blockquote>
+<p><a id="reference-cpu-and-load-average"></a></p>
+<h2 id="cpu-and-load-average">CPU and load average</h2>
+<p>CPU time commonly includes:</p>
+<ul>
+<li><code>user</code>: Time running user-space code.</li>
+<li><code>system</code>: Time doing kernel work.</li>
+<li><code>idle</code>: Unused CPU time.</li>
+<li><code>iowait</code>: CPU idle time while tasks are waiting for I/O.</li>
+<li><code>steal</code>: Time a virtual CPU waits for the hypervisor to provide physical CPU.</li>
+</ul>
+<p>Load average is the average number of runnable tasks and tasks in uninterruptible sleep over time. It is not a CPU percentage.</p>
+<ul>
+<li>High load and high CPU can indicate computation, increased traffic, lock contention, or a loop.</li>
+<li>High load with moderate CPU can indicate storage or network filesystem waits.</li>
+<li>Interpretation must include CPU count, process state, and historical baseline.</li>
+</ul>
+<p><a id="reference-interview-question-can-load-average-be-high-while-cpu-usage-is-low"></a></p>
+<h3 id="interview-question-can-load-average-be-high-while-cpu-usage-is-low">Interview question: Can load average be high while CPU usage is low?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>Runnable and uninterruptible tasks</li>
+<li>CPU core count and queueing</li>
+<li>I/O wait and <code>D</code> state</li>
+<li>Point-in-time observation versus historical trend</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>Load includes tasks waiting in uninterruptible sleep, not only tasks waiting for CPU. A slow disk or network filesystem can therefore raise load while CPUs remain partly idle. A load value also has different significance on a two-core and a sixty-four-core system.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>Yes. Load average counts runnable tasks and tasks in uninterruptible sleep, so storage or network filesystem delays can produce high load without high CPU utilization. I compare the load with the number of CPUs, review per-CPU usage and run queues, and identify tasks in <code>D</code> state. Then I correlate that evidence with disk latency, queue depth, and kernel or storage logs before concluding that the system is CPU-bound.</p>
+</blockquote>
+<p><a id="reference-interview-question-one-process-uses-high-cpu-what-would-you-do"></a></p>
+<h3 id="interview-question-one-process-uses-high-cpu-what-would-you-do">Interview question: One process uses high CPU. What would you do?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>Process and thread-level CPU usage</li>
+<li>Expected workload and recent changes</li>
+<li>User time versus system time</li>
+<li>Profiling or stack evidence</li>
+<li>Mitigation without destroying evidence</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>High CPU can be legitimate demand or a defect. Identify whether one thread, many workers, kernel activity, or a dependency retry loop is responsible. Compare with traffic, deployments, and normal baselines before restarting the process.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>I confirm whether the CPU increase is host-wide or isolated to one process and inspect its threads. I correlate the start time with traffic, deployments, and logs and distinguish user CPU from system CPU. If safe, I capture a profile, stack sample, or runtime diagnostic before restarting so I do not lose the evidence. I mitigate according to impact, then verify latency and throughput and follow up with capacity or code changes.</p>
+</blockquote>
+<p><a id="reference-memory"></a></p>
+<h2 id="memory">Memory</h2>
+<p>Important concepts:</p>
+<ul>
+<li>Used memory includes application memory and reclaimable caches, so a high used value alone does not prove memory exhaustion.</li>
+<li>Available memory estimates what the system can still provide without severe swapping.</li>
+<li>Page cache uses otherwise idle memory to improve I/O and can often be reclaimed.</li>
+<li>Swap can absorb some pressure, but sustained paging causes latency.</li>
+<li>Memory pressure, paging rate, application growth, and OOM evidence are more useful than one snapshot.</li>
+</ul>
+<p>When memory is critically low, the kernel OOM killer may terminate a process. In a cgroup, a process can be OOM-killed because it reached the cgroup limit even when the host still has available memory.</p>
+<p><a id="reference-interview-question-how-would-you-investigate-an-oom-kill"></a></p>
+<h3 id="interview-question-how-would-you-investigate-an-oom-kill">Interview question: How would you investigate an OOM kill?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>Kernel or cgroup OOM evidence</li>
+<li><em>Victim process</em> and <em>memory limit</em></li>
+<li>Resident memory, working set, and growth trend</li>
+<li>Leak, traffic peak, cache, or undersized limit</li>
+<li>Restart behavior and recurrence risk</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>An OOM event must be classified as host-level or cgroup-level. The terminated process may be the selected victim rather than the original source of pressure. Historical metrics and workload changes help distinguish a leak from a temporary peak or incorrect capacity setting.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>I first confirm the OOM event in kernel, system, or container runtime logs and determine whether it was a host OOM or a cgroup limit violation. I identify the killed process, its configured limit, memory trend, and recent workload or deployment changes. Then I distinguish a leak, a legitimate peak, an oversized cache, and an undersized limit. I may restart or reschedule for immediate recovery, but I also correct the application behavior or capacity and monitor for recurrence.</p>
+</blockquote>
+<p><a id="reference-storage-and-io"></a></p>
+<h2 id="storage-and-io">Storage and I/O</h2>
+<p>A simplified storage path is:</p>
+<p><code>Block device → Partition or LVM → Filesystem → Mount point → File</code></p>
+<p>Important terms:</p>
+<ul>
+<li>Block device: Physical or virtual disk-like device.</li>
+<li>Partition: Region of a block device.</li>
+<li>LVM: Flexible logical volume management using PVs, VGs, and LVs.</li>
+<li>Filesystem: Structure such as ext4 or XFS that organizes files and directories.</li>
+<li>Mount point: Directory where a filesystem appears.</li>
+<li>Inode: Metadata object that refers to a file’s data blocks.</li>
+</ul>
+<p>I/O analysis should include throughput, IOPS, latency, queue depth, utilization, and blocked tasks. Capacity alone is not enough.</p>
+<p><a id="reference-interview-question-how-would-you-determine-whether-a-server-is-suffering-from-disk-io-problems"></a></p>
+<h3 id="interview-question-how-would-you-determine-whether-a-server-is-suffering-from-disk-io-problems">Interview question: How would you determine whether a server is suffering from disk I/O problems?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>Application latency and blocked tasks</li>
+<li>Device latency, queue depth, throughput, and utilization</li>
+<li>Filesystem and kernel errors</li>
+<li>Local disk versus remote storage</li>
+<li>Workload source and saturation versus failure</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>A high utilization percentage alone does not prove a problem, especially for modern devices. Latency and queueing must be interpreted against device type and workload. Also determine whether the delay is local, in a storage network, or at a remote filesystem server.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>I correlate the application slowdown with host I/O metrics and look for tasks blocked in uninterruptible sleep. I inspect per-device latency, queue depth, throughput, and utilization and review kernel logs for timeouts or filesystem errors. Then I identify which processes are generating I/O and whether the storage is local or remote. I mitigate only after distinguishing expected saturation from a failing path, and I verify both device metrics and application latency afterward.</p>
+</blockquote>
+<p><a id="reference-networking"></a></p>
+<h2 id="networking">Networking</h2>
+<p>A client connection normally follows this path:</p>
+<p><code>Hostname resolution → Route selection → Layer 3 reachability → TCP handshake → TLS or application protocol</code></p>
+<p>Important concepts:</p>
+<ul>
+<li>Interface: Network device and its state.</li>
+<li>IP address and prefix: Host address and network range.</li>
+<li>Route: Decision about where traffic to a destination should go.</li>
+<li>Default gateway: Route used when no more specific route matches.</li>
+<li>DNS resolver: Translates hostnames into addresses.</li>
+<li>Listening socket: Local address and port accepting connections.</li>
+<li>Established connection: Connection whose handshake has completed.</li>
+<li>Firewall: Filters traffic by protocol, address, port, state, and other properties.</li>
+</ul>
+<p>Common error meanings:</p>
+<ul>
+<li>Timeout: May indicate routing failure, packet loss, silent firewall drop, overloaded service, or no response.</li>
+<li>Connection refused: The destination was reachable but nothing accepted the port, or a device actively rejected it.</li>
+<li>Permission denied: Often indicates that communication reached an authentication or authorization stage.</li>
+<li>Name or service not known: Usually starts with hostname spelling and resolver configuration.</li>
+</ul>
+<p>Ping uses ICMP and cannot by itself prove that a TCP service port is usable.</p>
+<p><a id="reference-interview-question-a-remote-tcp-port-is-unreachable-how-would-you-troubleshoot-it"></a></p>
+<h3 id="interview-question-a-remote-tcp-port-is-unreachable-how-would-you-troubleshoot-it">Interview question: A remote TCP port is unreachable. How would you troubleshoot it?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li><em>DNS</em> result and address family</li>
+<li><em>Route</em> and interface state</li>
+<li>Listener <em>address</em> and <em>port</em></li>
+<li><em>Firewall</em> and <em>security policy</em></li>
+<li>Packet flow and return path</li>
+<li>Timeout versus refusal</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>Test from the affected source because network policy and routes can differ by location. Move layer by layer and use the exact error to decide the next branch. A service listening only on <code>127.0.0.1</code> is not reachable through the host’s external address.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>I reproduce the problem from the affected client and record whether it is a DNS failure, timeout, or refusal. I verify the resolved IP and address family, route selection, and basic reachability. On the server, I check whether the process is listening on the expected address and port and then inspect host and network firewalls. If the path is still unclear, I capture packets on the relevant sides to see whether the SYN arrives and whether the response returns, then verify the application protocol after TCP succeeds.</p>
+</blockquote>
+<p><a id="reference-interview-question-what-is-the-difference-between-a-timeout-and-connection-refused"></a></p>
+<h3 id="interview-question-what-is-the-difference-between-a-timeout-and-connection-refused">Interview question: What is the difference between a timeout and connection refused?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>Silent absence of response versus active rejection</li>
+<li>Listener state</li>
+<li>Firewall behavior</li>
+<li>Routing and packet loss</li>
+<li>Need for packet-level confirmation</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>A refusal commonly means the host or an intermediate device actively returned <em>a reset or rejection</em>. A timeout means <em>no useful response arrived before the deadline</em>. Neither message alone proves a single root cause, but each narrows the investigation.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>Connection refused usually means the destination is reachable but no process is listening on that address and port, or a firewall is actively rejecting it. A timeout means the response never arrived, which can result from routing, packet loss, a silently dropping firewall, or an overloaded endpoint. I use listener checks, firewall rules, and packet capture to confirm which case applies rather than relying only on the client message.</p>
+</blockquote>
+<p><a id="reference-interview-question-why-is-ping-not-enough-to-prove-that-a-service-is-available"></a></p>
+<h3 id="interview-question-why-is-ping-not-enough-to-prove-that-a-service-is-available">Interview question: Why is ping not enough to prove that a service is available?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>ICMP versus TCP or UDP</li>
+<li>Different firewall policies</li>
+<li>Port listener and application health</li>
+<li>End-to-end protocol validation</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>Ping only tests a form of ICMP reachability. ICMP may be blocked while the service works, or ping may work while the service port is closed. Availability must be tested with the actual transport and application protocol.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>Ping tests ICMP reachability, not whether the required TCP port is listening or the application can serve a valid request. Network devices can allow or block ICMP independently of application traffic. I therefore test the actual destination port and then perform a protocol-level check, such as a TLS handshake or HTTP request, from the same source as the affected client.</p>
+</blockquote>
+<p><a id="reference-logs"></a></p>
+<h2 id="logs">Logs</h2>
+<p>Common log sources:</p>
+<ul>
+<li>systemd journal for service and system events.</li>
+<li>Kernel log for drivers, devices, networking, OOM, and filesystem events.</li>
+<li>Application logs for requests, errors, and business context.</li>
+<li>Audit logs for security and access-control decisions.</li>
+</ul>
+<p>Reading principles:</p>
+<ul>
+<li>Limit the investigation to the failure time window.</li>
+<li>Read context before and after an error rather than searching only one keyword.</li>
+<li>Correlate logs with metrics, deployments, and request identifiers.</li>
+<li>Account for time zones, clock synchronization, rotation, and multiple instances.</li>
+<li>Remember that an error may be an effect of an upstream failure rather than the root cause.</li>
+</ul>
+<p><a id="reference-interview-question-how-do-you-use-logs-effectively-during-an-incident"></a></p>
+<h3 id="interview-question-how-do-you-use-logs-effectively-during-an-incident">Interview question: How do you use logs effectively during an incident?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>Time window and clock consistency</li>
+<li>Correlation IDs and instance identity</li>
+<li>Multi-layer correlation</li>
+<li>Signal versus repeated secondary errors</li>
+<li>Preservation of evidence</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>Logs are most useful when tied to a known symptom and timestamp. The same request may appear in a load balancer, application, database, and kernel log, so time and request correlation are important. A flood of identical errors can hide the first causal event.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>I start with the user’s failure time and normalize time zones and host clocks. I identify the affected instance and trace a request or correlation ID across system, application, and dependency logs. I read the context around the first error and compare it with metrics and recent changes. I preserve important evidence before rotating, restarting, or making a change that could remove it.</p>
+</blockquote>
+<p><a id="reference-software-and-configuration-changes"></a></p>
+<h2 id="software-and-configuration-changes">Software and configuration changes</h2>
+<ul>
+<li>Distinguish installed packages, running processes, and currently loaded configuration.</li>
+<li>Validate syntax or configuration before reloading or restarting a service.</li>
+<li>Reload usually attempts to apply configuration without recreating the process, while restart creates a new process; exact behavior depends on the service.</li>
+<li>Investigate recent package upgrades, configuration edits, certificate rotation, and automation changes.</li>
+</ul>
+<p><a id="reference-interview-question-what-is-the-difference-between-reload-and-restart"></a></p>
+<h3 id="interview-question-what-is-the-difference-between-reload-and-restart">Interview question: What is the difference between reload and restart?</h3>
+<p><strong>Key knowledge</strong></p>
+<ul>
+<li>In-process configuration reload versus process replacement</li>
+<li>Service-specific implementation</li>
+<li>Connection impact and state preservation</li>
+<li>Configuration validation and rollback</li>
+</ul>
+<p><strong>Explanation</strong></p>
+<p>Reload is not universally supported and may not apply every setting. Restart is more complete but can interrupt connections and clear process state. The correct choice depends on documentation, availability design, and the type of change.</p>
+<p><strong>Sample answer</strong></p>
+<blockquote>
+<p>A reload asks the existing process to reread supported configuration, usually with less disruption. A restart stops and recreates the process, so it applies startup-only settings but may interrupt traffic or lose in-memory state. I validate the configuration first, confirm what the service supports, prepare a rollback, and verify that the new configuration is actually loaded after the action.</p>
+</blockquote>
+<p><a id="reference-compact-command-map"></a></p>
+<h2 id="compact-command-map">Compact command map</h2>
+<p>Commands are evidence-collection tools, not a substitute for a troubleshooting method.</p>
+<ul>
+<li>Service: <code>systemctl status</code>, <code>systemctl cat</code>, <code>journalctl -u</code></li>
+<li>Process: <code>ps</code>, <code>top</code>, <code>pidstat</code>, <code>pstree</code>, <code>/proc/&lt;pid&gt;</code></li>
+<li>Open files: <code>lsof</code>, <code>/proc/&lt;pid&gt;/fd</code></li>
+<li>Filesystem: <code>df -h</code>, <code>df -i</code>, <code>du</code>, <code>findmnt</code>, <code>lsblk</code></li>
+<li>Memory: <code>free</code>, <code>vmstat</code>, <code>sar</code>, kernel logs</li>
+<li>CPU and load: <code>uptime</code>, <code>top</code>, <code>mpstat</code>, <code>pidstat</code></li>
+<li>I/O: <code>iostat</code>, <code>iotop</code>, <code>vmstat</code></li>
+<li>Sockets: <code>ss</code>, <code>lsof -i</code></li>
+<li>Address and route: <code>ip address</code>, <code>ip route</code>, <code>ip link</code></li>
+<li>DNS: <code>getent hosts</code>, <code>dig</code>, <code>resolvectl</code></li>
+<li>Connectivity: <code>nc</code>, <code>curl</code>, <code>openssl s_client</code>, <code>traceroute</code> or <code>tracepath</code></li>
+<li>Packets: <code>tcpdump</code></li>
+<li>Permissions: <code>namei -l</code>, <code>getfacl</code>, <code>id</code>, security audit logs</li>
+</ul>
+<p><a id="reference-quick-review-questions"></a></p>
+<h2 id="quick-review-questions">Quick review questions</h2>
+<ul>
+<li>Why can disk space remain allocated after a file is deleted?</li>
+<li>Why can a process remain after receiving SIGKILL?</li>
+<li>Why can a command work in an interactive shell but fail under systemd?</li>
+<li>Why is mode <code>777</code> not a proper response to <code>Permission denied</code>?</li>
+<li>Why can load average be high when CPU usage is moderate?</li>
+<li>Why can a cgroup OOM occur while the host still has available memory?</li>
+<li>Why does a successful ping not prove that an HTTPS endpoint works?</li>
+<li>What evidence would you preserve before restarting a failing process?</li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>对服务变慢分别提出 CPU、内存和 I/O 假设，说明各自需要什么证据，而不是仅说使用 top。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/sre/process-resource-log-troubleshooting/">L02-进程资源与日志排障</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#troubleshooting-mental-model">Troubleshooting mental model</a></li><li style="--depth: 1"><a href="#interview-question-what-is-your-general-approach-to-troubleshooting-a-linux-service">Interview question: What is your general approach to troubleshooting a Linux service?</a></li><li style="--depth: 0"><a href="#filesystem">Filesystem</a></li><li style="--depth: 1"><a href="#common-directories">Common directories</a></li><li style="--depth: 1"><a href="#disk-space-and-inodes">Disk space and inodes</a></li><li style="--depth: 1"><a href="#interview-question-a-filesystem-is-full-but-you-cannot-find-enough-large-files-what-would-you-check">Interview question: A filesystem is full, but you cannot find enough large files. What would you check?</a></li><li style="--depth: 0"><a href="#processes-and-signals">Processes and signals</a></li><li style="--depth: 1"><a href="#interview-question-what-is-the-difference-between-sigterm-and-sigkill">Interview question: What is the difference between SIGTERM and SIGKILL?</a></li><li style="--depth: 1"><a href="#interview-question-what-is-a-zombie-process-and-is-it-consuming-cpu-or-memory">Interview question: What is a zombie process, and is it consuming CPU or memory?</a></li><li style="--depth: 0"><a href="#systemd-services">systemd services</a></li><li style="--depth: 1"><a href="#interview-question-a-systemd-service-fails-to-start-how-would-you-investigate-it">Interview question: A systemd service fails to start. How would you investigate it?</a></li><li style="--depth: 0"><a href="#users-groups-and-permissions">Users, groups, and permissions</a></li><li style="--depth: 1"><a href="#interview-question-how-would-you-troubleshoot-permission-denied">Interview question: How would you troubleshoot Permission denied?</a></li><li style="--depth: 0"><a href="#cpu-and-load-average">CPU and load average</a></li><li style="--depth: 1"><a href="#interview-question-can-load-average-be-high-while-cpu-usage-is-low">Interview question: Can load average be high while CPU usage is low?</a></li><li style="--depth: 1"><a href="#interview-question-one-process-uses-high-cpu-what-would-you-do">Interview question: One process uses high CPU. What would you do?</a></li><li style="--depth: 0"><a href="#memory">Memory</a></li><li style="--depth: 1"><a href="#interview-question-how-would-you-investigate-an-oom-kill">Interview question: How would you investigate an OOM kill?</a></li><li style="--depth: 0"><a href="#storage-and-io">Storage and I/O</a></li><li style="--depth: 1"><a href="#interview-question-how-would-you-determine-whether-a-server-is-suffering-from-disk-io-problems">Interview question: How would you determine whether a server is suffering from disk I/O problems?</a></li><li style="--depth: 0"><a href="#networking">Networking</a></li><li style="--depth: 1"><a href="#interview-question-a-remote-tcp-port-is-unreachable-how-would-you-troubleshoot-it">Interview question: A remote TCP port is unreachable. How would you troubleshoot it?</a></li><li style="--depth: 1"><a href="#interview-question-what-is-the-difference-between-a-timeout-and-connection-refused">Interview question: What is the difference between a timeout and connection refused?</a></li><li style="--depth: 1"><a href="#interview-question-why-is-ping-not-enough-to-prove-that-a-service-is-available">Interview question: Why is ping not enough to prove that a service is available?</a></li><li style="--depth: 0"><a href="#logs">Logs</a></li><li style="--depth: 1"><a href="#interview-question-how-do-you-use-logs-effectively-during-an-incident">Interview question: How do you use logs effectively during an incident?</a></li><li style="--depth: 0"><a href="#software-and-configuration-changes">Software and configuration changes</a></li><li style="--depth: 1"><a href="#interview-question-what-is-the-difference-between-reload-and-restart">Interview question: What is the difference between reload and restart?</a></li><li style="--depth: 0"><a href="#compact-command-map">Compact command map</a></li><li style="--depth: 0"><a href="#quick-review-questions">Quick review questions</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

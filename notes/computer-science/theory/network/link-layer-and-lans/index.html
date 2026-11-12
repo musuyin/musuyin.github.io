@@ -1,0 +1,533 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>链路层和局域网 · Musuyin&#39; Home</title><meta name="description" content="链路层负责相邻节点间的帧传输，共享介质还需要决定谁能发送。差错检测、多路访问、MAC 寻址与交换共同组成局域网数据传递过程。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/network/link-layer-and-lans/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="链路层和局域网 · Musuyin' Home"><meta property="og:description" content="链路层负责相邻节点间的帧传输，共享介质还需要决定谁能发送。差错检测、多路访问、MAC 寻址与交换共同组成局域网数据传递过程。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/network/link-layer-and-lans/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">链路层和局域网</p><dl><div><dt>发布日期</dt><dd><time datetime="2024-12-14">2024-12-14</time></dd></div><div><dt>字数</dt><dd>12510</dd></div><div><dt>预计阅读</dt><dd>42 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">#计算机网络</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>链路层和局域网</h1><time datetime="2024-12-14">2024-12-14</time><p class="tags"><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a><a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">#计算机网络</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>链路层负责相邻节点间的帧传输，共享介质还需要决定谁能发送。差错检测、多路访问、MAC 寻址与交换共同组成局域网数据传递过程。</p>
+<p><a id="reference-概述"></a></p>
+<h2 id="概述">概述</h2>
+<p><a id="reference-两类链路层信道"></a></p>
+<h3 id="两类链路层信道">两类链路层信道</h3>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>描述</th>
+<th>典型场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>广播信道（broadcast channel）</strong></td>
+<td>多台主机连接到同一信道，需要**媒体访问协议（MAC）**协调传输</td>
+<td>有线局域网、WiFi、HFC 接入网</td>
+</tr>
+<tr>
+<td><strong>点对点链路（point-to-point link）</strong></td>
+<td>链路两端各一个节点，无需竞争</td>
+<td>路由器间长距离链路、主机到以太网交换机</td>
+</tr>
+</tbody>
+</table>
+<p><strong>节点（node）</strong>：运行链路层协议的任何设备，包括主机、路由器、交换机和 WiFi 接入点。</p>
+<p><strong>链路（link）</strong>：连接相邻节点的通信信道。数据报从源到目的，要经过多段链路逐跳传输——每段链路可能是不同类型（WiFi、以太网等）。</p>
+<p><a id="reference-链路层提供的服务"></a></p>
+<h3 id="链路层提供的服务">链路层提供的服务</h3>
+<table>
+<thead>
+<tr>
+<th>服务</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>成帧（framing）</strong></td>
+<td>将网络层数据报封装为链路层<strong>帧（frame）</strong>，附加首部和尾部字段</td>
+</tr>
+<tr>
+<td><strong>链路接入（link access）</strong></td>
+<td>MAC 协议规定帧在链路上的传输规则，协调多节点竞争</td>
+</tr>
+<tr>
+<td><strong>可靠交付（reliable delivery）</strong></td>
+<td>通过确认和重传保证帧无差错通过链路（常用于高差错率的<strong>无线链路</strong>；有线链路通常不提供，因为开销不必要）</td>
+</tr>
+<tr>
+<td><strong>差错检测与纠正</strong></td>
+<td>接收方检测（并可能纠正）比特翻转差错</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-链路层在哪里实现"></a></p>
+<h3 id="链路层在哪里实现">链路层在哪里实现</h3>
+<p>链路层的主体在<strong>网络适配器</strong>（网卡，NIC）中实现，其核心是<strong>链路层控制器芯片</strong>（硬件实现）。</p>
+<ul>
+<li><strong>发送端</strong>：控制器从内存取出数据报 → 封装成帧 → 遵循链路接入协议发送到链路</li>
+<li><strong>接收端</strong>：控制器接收帧 → 提取数据报 → 若开启差错检测则执行校验 → 传递给网络层</li>
+</ul>
+<p>链路层是协议栈中<strong>硬件与软件的交接处</strong>：底层由硬件实现，高层功能（如寻址信息组装、中断处理）由运行在 CPU 上的驱动程序实现。</p>
+<p><a id="reference-差错检测和纠正技术"></a></p>
+<h2 id="差错检测和纠正技术">差错检测和纠正技术</h2>
+<p>发送方在数据 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi></mrow><annotation encoding="application/x-tex">D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span></span></span></span> 后附上<strong>差错检测和纠正比特（EDC）</strong>，接收方收到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>D</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></mrow><annotation encoding="application/x-tex">D'</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7519em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mi>D</mi><msup><mi>C</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></mrow><annotation encoding="application/x-tex">EDC'</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7519em;"></span><span class="mord mathnormal" style="margin-right:0.0576em;">E</span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span> 后，判断 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>D</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></mrow><annotation encoding="application/x-tex">D'</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7519em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span> 是否等于原始 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi></mrow><annotation encoding="application/x-tex">D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span></span></span></span>。</p>
+<blockquote>
+<p>注意：任何差错检测方案都可能存在<strong>未检出差错</strong>，需要在开销和可靠性之间权衡。</p>
+</blockquote>
+<p>三种技术，复杂度和可靠性依次递增：</p>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>典型应用层次</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>奇偶校验</strong></td>
+<td>概念演示</td>
+</tr>
+<tr>
+<td><strong>检验和（Checksum）</strong></td>
+<td>传输层（因特网检验和）</td>
+</tr>
+<tr>
+<td><strong>循环冗余检测（CRC）</strong></td>
+<td>链路层（网卡硬件）</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-奇偶校验parity-check"></a></p>
+<h3 id="奇偶校验parity-check">奇偶校验（Parity Check）</h3>
+<p><a id="reference-一维奇偶校验"></a></p>
+<h4 id="一维奇偶校验">一维奇偶校验</h4>
+<ul>
+<li><strong>偶校验</strong>：添加 1 个校验位，使得 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">d+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 位中 1 的个数为<strong>偶数</strong></li>
+<li><strong>奇校验</strong>：使得 1 的个数为<strong>奇数</strong></li>
+</ul>
+<p>接收方计数收到的 1 的个数，与预期奇偶性不符即检测出差错。</p>
+<p><strong>局限</strong>：只能检测<strong>奇数个</strong>比特差错；若出现偶数个差错，则<strong>无法检出</strong>。突发差错场景下，漏检率高达 50%。</p>
+<p><a id="reference-二维奇偶校验前向纠错"></a></p>
+<h4 id="二维奇偶校验前向纠错">二维奇偶校验（前向纠错）</h4>
+<p>将 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> 个比特排列为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 行 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span></span></span></span> 列的矩阵，对每行每列分别计算奇偶位，共产生 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>+</mo><mi>j</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i+j+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7429em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0572em;">j</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 个校验位。</p>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>能检测单比特差错，还能<strong>定位</strong>出错的行和列 → 直接<strong>纠正</strong>该比特（无需重传）</li>
+<li>这种能力称为<strong>前向纠错（Forward Error Correction，FEC）</strong></li>
+</ul>
+<p><a id="reference-检验和方法checksum"></a></p>
+<h3 id="检验和方法checksum">检验和方法（Checksum）</h3>
+<p>将数据视为若干 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> 位整数序列，求和后取反码作为校验字段（<strong>因特网检验和</strong>：以 16 位字为单位求和）。</p>
+<p>接收方对收到的所有数据（含检验和）求和，若结果为全 1 则无差错。</p>
+<p><strong>特点</strong>：计算简单，软件实现；检测能力比 CRC 弱，主要用于传输层和网络层。</p>
+<p><a id="reference-循环冗余检测crc"></a></p>
+<h3 id="循环冗余检测crc">循环冗余检测（CRC）</h3>
+<p>CRC 又称<strong>多项式编码（polynomial code）</strong>，是链路层硬件中使用最广泛的差错检测技术。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li>发送方和接收方约定一个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">r+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 位的<strong>生成多项式 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span></span></span></span></strong>（最高位为 1）</li>
+<li>发送方在数据 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi></mrow><annotation encoding="application/x-tex">D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span></span></span></span>（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> 位）后面附加 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span></span> 位的 CRC 码 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span>，使得 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>⋅</mo><msup><mn>2</mn><mi>r</mi></msup><mo>⊕</mo><mi>R</mi></mrow><annotation encoding="application/x-tex">D \cdot 2^r \oplus R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7477em;vertical-align:-0.0833em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">r</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⊕</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> 能被 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span></span></span></span> 整除（模 2 算术）</li>
+<li>接收方用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span></span></span></span> 除收到的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>+</mo><mi>r</mi></mrow><annotation encoding="application/x-tex">d+r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span></span> 位，余数为 0 则无差错</li>
+</ol>
+<p><strong>模 2 算术规则</strong>：加法和减法都等价于<strong>按位异或（XOR）</strong>，不进位不借位。</p>
+<p><a id="reference-crc-计算示例"></a></p>
+<h4 id="crc-计算示例">CRC 计算示例</h4>
+<p><strong>已知</strong>：原始数据 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>1101011011</mn></mrow><annotation encoding="application/x-tex">D = 1101011011</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1101011011</span></span></span></span>，生成多项式 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi><mo>=</mo><mn>10011</mn></mrow><annotation encoding="application/x-tex">G = 10011</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">10011</span></span></span></span>（5 位，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">r=4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span></span></span></span>）</p>
+<p><strong>步骤</strong>：</p>
+<ol>
+<li>在 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi></mrow><annotation encoding="application/x-tex">D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span></span></span></span> 后补 4 个 0：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1101011011</mn><mtext> </mtext><mn>0000</mn></mrow><annotation encoding="application/x-tex">1101011011\ 0000</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1101011011</span><span class="mspace"> </span><span class="mord">0000</span></span></span></span></li>
+<li>用模 2 除法除以 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">G</span></span></span></span>，得余数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mo>=</mo><mn>1110</mn></mrow><annotation encoding="application/x-tex">R = 1110</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1110</span></span></span></span></li>
+<li>实际发送：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1101011011</mn><mtext> </mtext><mn>1110</mn></mrow><annotation encoding="application/x-tex">1101011011\ 1110</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1101011011</span><span class="mspace"> </span><span class="mord">1110</span></span></span></span></li>
+</ol>
+<p><strong>校验</strong>：接收方用 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10011</mn></mrow><annotation encoding="application/x-tex">10011</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">10011</span></span></span></span> 除 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1101011011</mn><mtext> </mtext><mn>1110</mn></mrow><annotation encoding="application/x-tex">1101011011\ 1110</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1101011011</span><span class="mspace"> </span><span class="mord">1110</span></span></span></span>，余数为 0 → 无差错。</p>
+<p><strong>CRC 检测能力</strong>（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span></span> 位生成多项式）：</p>
+<ul>
+<li>检测所有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><mi>r</mi></mrow><annotation encoding="application/x-tex">\leq r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7719em;vertical-align:-0.136em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span></span> 位的突发差错</li>
+<li>以概率 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><msup><mn>0.5</mn><mi>r</mi></msup></mrow><annotation encoding="application/x-tex">1 - 0.5^r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6644em;"></span><span class="mord">0.</span><span class="mord"><span class="mord">5</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0278em;">r</span></span></span></span></span></span></span></span></span></span></span> 检测长于 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">r+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 位的突发差错</li>
+<li>检测所有奇数个比特差错</li>
+</ul>
+<p>实践中，CRC-32（32 位生成多项式）被多种以太网 IEEE 协议采用。</p>
+<p><a id="reference-多路访问链路和协议"></a></p>
+<h2 id="多路访问链路和协议">多路访问链路和协议</h2>
+<p><strong>多路访问问题（multiple access problem）</strong>：多个节点共享同一广播信道时，如何协调传输，避免碰撞？</p>
+<p><strong>碰撞（collision）</strong>：两个或多个节点同时传输，信号叠加，所有接收方均无法正确解读。</p>
+<p>理想的多路访问协议（信道速率 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> bps）应满足：</p>
+<ol>
+<li>只有一个节点活跃时，它的吞吐量为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span></li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> 个节点活跃时，每个节点平均吞吐量为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mi mathvariant="normal">/</mi><mi>M</mi></mrow><annotation encoding="application/x-tex">R/M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span></li>
+<li>完全分散，无单点故障</li>
+<li>实现简单</li>
+</ol>
+<p>三类协议：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>原理</th>
+<th>代表</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>信道划分协议</strong></td>
+<td>预先分配时间/频率/编码</td>
+<td>TDM、FDM、CDMA</td>
+</tr>
+<tr>
+<td><strong>随机接入协议</strong></td>
+<td>碰撞后随机等待重传</td>
+<td>ALOHA、CSMA、CSMA/CD</td>
+</tr>
+<tr>
+<td><strong>轮流协议</strong></td>
+<td>有序传递发送权</td>
+<td>轮询、令牌传递</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-信道划分协议"></a></p>
+<h3 id="信道划分协议">信道划分协议</h3>
+<p><a id="reference-tdm时分多路复用"></a></p>
+<h4 id="tdm时分多路复用">TDM（时分多路复用）</h4>
+<p>将时间划分为固定时间帧，每帧再分为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 个时隙，每个节点固定占用一个时隙。</p>
+<ul>
+<li><strong>优点</strong>：无碰撞，每个节点公平地获得 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mi mathvariant="normal">/</mi><mi>N</mi></mrow><annotation encoding="application/x-tex">R/N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 的速率</li>
+<li><strong>缺点</strong>：节点有数据要发时，最坏情况要等待 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">N-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> 个时隙；信道空闲时不能被其他节点利用</li>
+</ul>
+<p><a id="reference-fdm频分多路复用"></a></p>
+<h4 id="fdm频分多路复用">FDM（频分多路复用）</h4>
+<p>将 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> bps 信道划分为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mi mathvariant="normal">/</mi><mi>N</mi></mrow><annotation encoding="application/x-tex">R/N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> bps 的频段，每个节点分配一个频段。优缺点与 TDM 相同。</p>
+<p><a id="reference-cdma码分多址"></a></p>
+<h4 id="cdma码分多址">CDMA（码分多址）</h4>
+<p>每个节点分配唯一的<strong>编码（码片序列）</strong>，所有节点可<strong>同时</strong>在同一信道传输，接收方用对应编码解出发送方的数据。前提：各节点的编码需精心设计（正交），以避免相互干扰。</p>
+<p><a id="reference-随机接入协议"></a></p>
+<h3 id="随机接入协议">随机接入协议</h3>
+<p>随机接入协议：节点总以信道<strong>全速率</strong> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> 发送，碰撞后等待<strong>随机时延</strong>再重传。</p>
+<blockquote>
+<p>比喻：就像多人在一个会议室抢着发言——谁先开口就说，冲突了就都停下来，等一段随机时间后再试。</p>
+</blockquote>
+<p><a id="reference-时隙-alohaslotted-aloha"></a></p>
+<h4 id="时隙-alohaslotted-aloha">时隙 ALOHA（Slotted ALOHA）</h4>
+<p><strong>假设</strong>：所有帧等长 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi></mrow><annotation encoding="application/x-tex">L</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span></span></span></span> 位，时间划分为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mi mathvariant="normal">/</mi><mi>R</mi></mrow><annotation encoding="application/x-tex">L/R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">L</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> 秒的时隙，节点只在时隙起点开始传输，且节点同步。</p>
+<p><strong>规则</strong>：有帧要发 → 在下一时隙发送；碰撞 → 以概率 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> 在后续每个时隙重传，直到成功。</p>
+<p><strong>效率分析</strong>（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> 个节点，每个以概率 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> 传输）：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>效率</mtext><mo>=</mo><mi>N</mi><mi>p</mi><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false">)</mo><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\text{效率} = Np(1-p)^{N-1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord cjk_fallback">效率</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mord mathnormal">p</span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.1413em;vertical-align:-0.25em;"></span><span class="mord mathnormal">p</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8913em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.109em;">N</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span></span></span></div>
+<p>当 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>→</mo><mi mathvariant="normal">∞</mi></mrow><annotation encoding="application/x-tex">N \to \infty</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord">∞</span></span></span></span> 时，最大效率为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle scriptlevel="0" displaystyle="true"><mfrac><mn>1</mn><mi>e</mi></mfrac></mstyle><mo>≈</mo><mn>37</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">\dfrac{1}{e} \approx 37%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">e</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">37%</span></span></span></span>。</p>
+<p>即最多只有 37% 的时隙在做有用的工作，其余时隙要么碰撞，要么空闲。</p>
+<p><a id="reference-纯-alohapure-aloha"></a></p>
+<h4 id="纯-alohapure-aloha">纯 ALOHA（Pure ALOHA）</h4>
+<p><strong>无时隙同步</strong>，帧一到达就立刻发送，碰撞后以概率 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> 立刻重传。</p>
+<p>由于发送时刻不同步，一帧可能与前一帧的末尾或后一帧的开头相互干扰，碰撞概率更高：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>最大效率</mtext><mo>=</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>e</mi></mrow></mfrac><mo>≈</mo><mn>18.4</mn><mi mathvariant="normal">%</mi></mrow><annotation encoding="application/x-tex">\text{最大效率} = \frac{1}{2e} \approx 18.4\%</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord cjk_fallback">最大效率</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span><span class="mord mathnormal">e</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">18.4%</span></span></span></span></span></div>
+<p>刚好是时隙 ALOHA 的一半。</p>
+<p><a id="reference-csma载波侦听多路访问"></a></p>
+<h4 id="csma载波侦听多路访问">CSMA（载波侦听多路访问）</h4>
+<p><strong>载波侦听（carrier sensing）</strong>：发送前先“听”信道，若信道忙则等待，空闲再发。</p>
+<blockquote>
+<p>比喻：就像礼貌交谈——先听别人说完，再开口。</p>
+</blockquote>
+<p><strong>为什么还会碰撞？</strong> 信号传播有时延（传播时延），节点 A 开始发送后，信号还没到达节点 D 时，D 侦听到信道空闲，也开始发送 → 碰撞。<strong>传播时延越大，碰撞概率越高</strong>。</p>
+<p><a id="reference-csmacd带碰撞检测的-csma"></a></p>
+<h4 id="csmacd带碰撞检测的-csma">CSMA/CD（带碰撞检测的 CSMA）</h4>
+<p>在 CSMA 基础上增加<strong>碰撞检测（collision detection）</strong>：</p>
+<ul>
+<li>发送时持续监听信道</li>
+<li>一旦检测到碰撞（同时收到其他信号），<strong>立即中止发送</strong>，不再浪费信道</li>
+</ul>
+<p>CSMA/CD 运行步骤：</p>
+<ol>
+<li>从网络层获取数据报，封装成帧放入缓存</li>
+<li>侦听信道空闲 → 开始发送；信道忙 → 等待</li>
+<li>发送过程中持续监听，检测碰撞</li>
+<li>若无碰撞，完成发送</li>
+<li>若检测到碰撞，<strong>中止传输</strong>，等待随机时间后回到步骤 2</li>
+</ol>
+<p><strong>二进制指数退避（binary exponential backoff）</strong>：</p>
+<p>经历 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 次碰撞后，从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">{</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msup><mn>2</mn><mi>n</mi></msup><mo>−</mo><mn>1</mn><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">{0, 1, \ldots, 2^n - 1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">{</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6644em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">}</span></span></span></span> 中随机选一个整数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">K</span></span></span></span>，等待 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi><mo>×</mo><mn>512</mn></mrow><annotation encoding="application/x-tex">K \times 512</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">512</span></span></span></span> 比特时间（以太网），<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 最大取到 10。碰撞越多，等待范围越大——避免节点持续同时重传。</p>
+<p><strong>CSMA/CD 效率</strong>（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mtext>prop</mtext></msub></mrow><annotation encoding="application/x-tex">d_{\text{prop}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">prop</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span>：最大传播时延，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mtext>trans</mtext></msub></mrow><annotation encoding="application/x-tex">d_{\text{trans}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">trans</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>：最大帧传输时延）：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>效率</mtext><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><mn>5</mn><msub><mi>d</mi><mtext>prop</mtext></msub><mi mathvariant="normal">/</mi><msub><mi>d</mi><mtext>trans</mtext></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">\text{效率} = \frac{1}{1 + 5d_{\text{prop}}/d_{\text{trans}}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord text"><span class="mord cjk_fallback">效率</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:2.2935em;vertical-align:-0.9721em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord">5</span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">prop</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord">/</span><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">trans</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9721em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></div>
+<p>传播时延趋近 0 或帧传输时间很大时，效率趋近 1。</p>
+<p><a id="reference-轮流协议taking-turns-protocol"></a></p>
+<h3 id="轮流协议taking-turns-protocol">轮流协议（Taking-Turns Protocol）</h3>
+<p>ALOHA/CSMA 能满足“单节点活跃时吞吐量为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span>”，但多节点时效率低。轮流协议两个条件都能满足：</p>
+<p><a id="reference-轮询协议polling-protocol"></a></p>
+<h4 id="轮询协议polling-protocol">轮询协议（Polling Protocol）</h4>
+<p>主节点依次轮询每个从节点，告知它能发送多少帧。从节点发完后，主节点轮询下一个。</p>
+<ul>
+<li><strong>优点</strong>：无碰撞，高效</li>
+<li><strong>缺点</strong>：主节点故障 → 整个网络瘫痪；轮询本身引入时延</li>
+</ul>
+<p><a id="reference-令牌传递协议token-passing-protocol"></a></p>
+<h4 id="令牌传递协议token-passing-protocol">令牌传递协议（Token-Passing Protocol）</h4>
+<p>一个特殊的<strong>令牌帧</strong>在节点间按固定顺序传递（如 1→2→3→…→N→1）。</p>
+<ul>
+<li>节点收到令牌 → 有帧要发：发送最多允许数目的帧，再传递令牌；没有帧：直接传递令牌</li>
+<li><strong>优点</strong>：分散化，高效</li>
+<li><strong>缺点</strong>：一个节点故障或令牌丢失可能导致网络崩溃，需要恢复机制</li>
+</ul>
+<p><a id="reference-交换局域网"></a></p>
+<h2 id="交换局域网">交换局域网</h2>
+<p><a id="reference-链路层寻址和-arp"></a></p>
+<h3 id="链路层寻址和-arp">链路层寻址和 ARP</h3>
+<p><a id="reference-mac-地址"></a></p>
+<h4 id="mac-地址">MAC 地址</h4>
+<p><strong>MAC 地址</strong>（又称 LAN 地址、物理地址）是网络适配器（网卡）的地址，不是主机或路由器的地址。</p>
+<table>
+<thead>
+<tr>
+<th>特点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>长度</td>
+<td>6 字节（48 位），共 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>48</mn></msup></mrow><annotation encoding="application/x-tex">2^{48}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8141em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">48</span></span></span></span></span></span></span></span></span></span></span></span> 个可能地址</td>
+</tr>
+<tr>
+<td>表示</td>
+<td>十六进制，如 <code>1A-2F-BB-76-09-AD</code></td>
+</tr>
+<tr>
+<td>结构</td>
+<td><strong>扁平结构</strong>，全球唯一，不随移动地点而改变</td>
+</tr>
+<tr>
+<td>分配</td>
+<td>IEEE 统一管理：前 24 位由 IEEE 分配给厂商，后 24 位由厂商自行分配</td>
+</tr>
+<tr>
+<td>广播地址</td>
+<td><code>FF-FF-FF-FF-FF-FF</code>（48 个全 1），发送给局域网所有设备</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>对比：IP 地址是<strong>层次结构</strong>（网络部分 + 主机部分），主机移动时 IP 地址需要改变；而 MAC 地址是<strong>扁平的</strong>，就像人的身份证号，去哪里都不变。</p>
+</blockquote>
+<p>链路层交换机<strong>没有</strong> MAC 地址，因为它透明地转发帧，主机无需知道交换机的存在。</p>
+<p><a id="reference-arp地址解析协议"></a></p>
+<h4 id="arp地址解析协议">ARP（地址解析协议）</h4>
+<p><strong>问题</strong>：主机知道目的 IP 地址，但要在链路层发帧，需要目的 MAC 地址 → ARP 负责这个翻译。</p>
+<blockquote>
+<p>ARP 之于链路层，就像 DNS 之于应用层：一个解析 IP→MAC，一个解析域名→IP。区别在于：<strong>ARP 只能解析同一子网内的地址</strong>。</p>
+</blockquote>
+<p><strong>ARP 表</strong>：每台主机/路由器内存中维护一张 IP→MAC 的映射表，每条表项有 <strong>TTL</strong>（通常 20 分钟），过期自动删除。</p>
+<p><strong>ARP 查询流程</strong>（主机 A 要向 IP 为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 的主机 B 发帧，但 ARP 表中没有 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 的记录）：</p>
+<ol>
+<li>A 构造 <strong>ARP 查询分组</strong>（含自己的 IP/MAC，目的 IP = <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>，目的 MAC = 广播地址）</li>
+<li>A 用广播地址 <code>FF-FF-FF-FF-FF-FF</code> 封装为帧，发送到局域网</li>
+<li>子网内所有设备收到并解析 ARP 分组，匹配 IP = <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 的主机 B 发送 <strong>ARP 响应</strong>（单播，含自己的 MAC）</li>
+<li>A 收到响应，更新 ARP 表，然后正式发送数据帧</li>
+</ol>
+<p><strong>特点</strong>：ARP 是<strong>即插即用</strong>的，表自动建立，无需手动配置。</p>
+<p><a id="reference-发送数据报到子网之外"></a></p>
+<h4 id="发送数据报到子网之外">发送数据报到子网之外</h4>
+<p>当目的主机与发送方不在同一子网时（需要路由器转发）：</p>
+<ol>
+<li>发送方查询路由表，找到<strong>第一跳路由器接口</strong>的 IP 地址（如 <code>111.111.111.110</code>）</li>
+<li>用 ARP 解析该路由器接口的 MAC 地址</li>
+<li>将帧的目的 MAC 设为路由器接口的 MAC，IP 目的地址仍为最终目的主机的 IP</li>
+<li>路由器收到帧 → 解析 IP 目的地址 → 查转发表 → 向下一跳发出（此时目的 MAC 改为下一跳的 MAC）</li>
+<li>重复直到到达目的子网，最后一跳路由器用 ARP 获取目的主机 MAC，直接投递</li>
+</ol>
+<blockquote>
+<p>每过一跳，链路层帧的 MAC 地址（源/目的）都在变化，但 IP 数据报中的 IP 地址始终不变。</p>
+</blockquote>
+<p><a id="reference-以太网ethernet"></a></p>
+<h3 id="以太网ethernet">以太网（Ethernet）</h3>
+<p>以太网是目前最主流的有线局域网技术，经历了从总线拓扑 → 集线器星形 → <strong>交换机星形</strong>的演进。</p>
+<p><strong>集线器（hub）</strong>：物理层设备，把收到的比特放大并转发到所有接口 → 共享介质，所有节点在同一碰撞域。</p>
+<p><strong>交换机（switch）</strong>：取代集线器，每个接口独立，无碰撞，性能大幅提升（详见下节）。</p>
+<p><a id="reference-以太网帧结构"></a></p>
+<h4 id="以太网帧结构">以太网帧结构</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>| 前同步码(8B) | 目的MAC(6B) | 源MAC(6B) | 类型(2B) | 数据(46~1500B) | CRC(4B) |</span></span></code></pre>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>大小</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>前同步码（Preamble）</strong></td>
+<td>8 字节</td>
+<td>前 7 字节为 <code>10101010</code>，用于唤醒接收方并同步时钟；第 8 字节为 <code>10101011</code>，标志帧内容开始</td>
+</tr>
+<tr>
+<td><strong>目的 MAC 地址</strong></td>
+<td>6 字节</td>
+<td>目的适配器 MAC，或广播地址</td>
+</tr>
+<tr>
+<td><strong>源 MAC 地址</strong></td>
+<td>6 字节</td>
+<td>发送适配器 MAC</td>
+</tr>
+<tr>
+<td><strong>类型字段</strong></td>
+<td>2 字节</td>
+<td>上层协议标识（IP=0x0800，ARP=0x0806），用于多路分解</td>
+</tr>
+<tr>
+<td><strong>数据字段</strong></td>
+<td>46～1500 字节</td>
+<td>IP 数据报（MTU=1500B）；最小 46 字节，不足需<strong>填充（padding）</strong></td>
+</tr>
+<tr>
+<td><strong>CRC</strong></td>
+<td>4 字节</td>
+<td>循环冗余校验，接收方检测差错，出错则丢弃</td>
+</tr>
+</tbody>
+</table>
+<p><strong>以太网服务特性</strong>：</p>
+<ul>
+<li><strong>无连接</strong>：发送前不握手，直接发帧</li>
+<li><strong>不可靠</strong>：不发 ACK，出错直接丢弃，依赖上层（TCP）负责端到端可靠性</li>
+</ul>
+<p>以太网标准命名规则示例：<code>100BASE-T</code> → 100Mbps、基带传输、双绞铜线（T = twisted pair）。</p>
+<p><a id="reference-链路层交换机"></a></p>
+<h3 id="链路层交换机">链路层交换机</h3>
+<p>交换机对主机/路由器<strong>透明</strong>：它们只知道目的地址，不知道中间经过了哪台交换机。</p>
+<p><a id="reference-转发与过滤"></a></p>
+<h4 id="转发与过滤">转发与过滤</h4>
+<p>交换机依靠**交换机表（switch table）**工作，表项包含：MAC 地址、对应接口、放入时间。</p>
+<p>收到目的 MAC 为 <code>DD-DD-DD-DD-DD-DD</code> 的帧时：</p>
+<table>
+<thead>
+<tr>
+<th>情况</th>
+<th>动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表中无该 MAC</td>
+<td><strong>广播</strong>：转发到除入接口外的所有接口</td>
+</tr>
+<tr>
+<td>表中该 MAC 对应入接口本身</td>
+<td><strong>过滤</strong>：丢弃（目的已在同一网段）</td>
+</tr>
+<tr>
+<td>表中该 MAC 对应另一接口 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span></td>
+<td><strong>转发</strong>：发往接口 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span></td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-自学习self-learning"></a></p>
+<h4 id="自学习self-learning">自学习（Self-Learning）</h4>
+<p>交换机表由交换机<strong>自动建立</strong>，无需手动配置：</p>
+<ol>
+<li>初始时交换机表为空</li>
+<li>每收到一帧，将<strong>源 MAC 地址</strong>和<strong>入接口</strong>记入表，并打上时间戳</li>
+<li>超过**老化期（aging time）**未收到来自某 MAC 的帧，则删除该表项</li>
+</ol>
+<blockquote>
+<p>这就像餐厅服务员记住常客的座位一样——每次看到他从某个门进来，就记下他在那个位置；如果很久没来，就忘掉了。交换机也是如此，零配置、即插即用。</p>
+</blockquote>
+<p><a id="reference-交换机-vs-路由器"></a></p>
+<h4 id="交换机-vs-路由器">交换机 vs 路由器</h4>
+<table>
+<thead>
+<tr>
+<th>对比维度</th>
+<th>链路层交换机</th>
+<th>路由器</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工作层次</td>
+<td>第 2 层（链路层，MAC 地址）</td>
+<td>第 3 层（网络层，IP 地址）</td>
+</tr>
+<tr>
+<td>即插即用</td>
+<td>是</td>
+<td>否（需配置 IP 地址）</td>
+</tr>
+<tr>
+<td>拓扑限制</td>
+<td>受**生成树（STP）**限制，防广播环路</td>
+<td>无生成树限制，支持冗余路径</td>
+</tr>
+<tr>
+<td>广播风暴</td>
+<td>无保护，广播帧无限转发</td>
+<td>路由器隔离广播域，提供保护</td>
+</tr>
+<tr>
+<td>ARP 开销</td>
+<td>大型网络中 ARP 表庞大，开销大</td>
+<td>每个子网独立，ARP 开销小</td>
+</tr>
+<tr>
+<td>适用规模</td>
+<td>小型网络（数百台主机）</td>
+<td>大型网络（数千台主机）</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-虚拟局域网vlan"></a></p>
+<h3 id="虚拟局域网vlan">虚拟局域网（VLAN）</h3>
+<p><strong>问题</strong>：传统交换机局域网中，广播流量（ARP、DHCP 等）会扩散到所有主机，且不同部门间难以隔离流量或灵活管理用户移动。</p>
+<p><strong>解决方案：VLAN（Virtual Local Area Network）</strong></p>
+<ul>
+<li>在<strong>一台物理交换机</strong>上划分多个逻辑局域网（虚拟局域网）</li>
+<li>不同 VLAN 间流量<strong>相互隔离</strong>（就像连接到不同的物理交换机）</li>
+<li>VLAN 内广播只在本 VLAN 扩散，不跨越 VLAN 边界</li>
+</ul>
+<p><a id="reference-基于端口的-vlan"></a></p>
+<h4 id="基于端口的-vlan">基于端口的 VLAN</h4>
+<p>网络管理员将交换机接口划分到不同 VLAN 组：</p>
+<ul>
+<li>接口 2～8：EE（电气工程系）VLAN</li>
+<li>接口 9～15：CS（计算机科学系）VLAN</li>
+</ul>
+<p>EE VLAN 的帧只在接口 2～8 中转发，CS 的帧只在接口 9～15 中转发，互不干扰。</p>
+<p><strong>VLAN 间通信</strong>：需要经过路由器，将一个接口配置为同属两个 VLAN，流量先跨越 VLAN→路由器→另一 VLAN。</p>
+<p><a id="reference-vlan-干线连接vlan-trunking"></a></p>
+<h4 id="vlan-干线连接vlan-trunking">VLAN 干线连接（VLAN Trunking）</h4>
+<p>多台 VLAN 交换机互联时，用**干线端口（trunk port）**代替每个 VLAN 单独一条链路，实现扩展性：</p>
+<ul>
+<li>干线端口属于<strong>所有 VLAN</strong>，所有 VLAN 的帧都通过干线链路传输</li>
+<li>为了让接收方识别帧属于哪个 VLAN，使用 <strong>802.1Q 标准</strong>在帧中加入 VLAN 标签</li>
+</ul>
+<p><strong>802.1Q 帧格式</strong>（在标准以太网帧首部加入 4 字节 VLAN 标签）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>| 目的MAC(6B) | 源MAC(6B) | TPID(2B=0x8100) | 优先级(3bit)+VLAN ID(12bit) | 类型(2B) | 数据 | CRC |</span></span></code></pre>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TPID</strong></td>
+<td>2 字节，固定值 <code>0x8100</code>，标识这是 802.1Q 帧</td>
+</tr>
+<tr>
+<td><strong>优先级</strong></td>
+<td>3 位，类似 IP 数据报的 TOS，用于 QoS</td>
+</tr>
+<tr>
+<td><strong>VLAN ID</strong></td>
+<td>12 位，标识帧所属的 VLAN（最多 4094 个 VLAN）</td>
+</tr>
+</tbody>
+</table>
+<p>VLAN 标签在发送侧交换机加入，在接收侧交换机解析后删除，对端节点透明。</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>CRC 检测到错误后是否自动完成重传？交换机转发表与路由表的寻址对象有何不同？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#概述">概述</a></li><li style="--depth: 1"><a href="#两类链路层信道">两类链路层信道</a></li><li style="--depth: 1"><a href="#链路层提供的服务">链路层提供的服务</a></li><li style="--depth: 1"><a href="#链路层在哪里实现">链路层在哪里实现</a></li><li style="--depth: 0"><a href="#差错检测和纠正技术">差错检测和纠正技术</a></li><li style="--depth: 1"><a href="#奇偶校验parity-check">奇偶校验（Parity Check）</a></li><li style="--depth: 2"><a href="#一维奇偶校验">一维奇偶校验</a></li><li style="--depth: 2"><a href="#二维奇偶校验前向纠错">二维奇偶校验（前向纠错）</a></li><li style="--depth: 1"><a href="#检验和方法checksum">检验和方法（Checksum）</a></li><li style="--depth: 1"><a href="#循环冗余检测crc">循环冗余检测（CRC）</a></li><li style="--depth: 2"><a href="#crc-计算示例">CRC 计算示例</a></li><li style="--depth: 0"><a href="#多路访问链路和协议">多路访问链路和协议</a></li><li style="--depth: 1"><a href="#信道划分协议">信道划分协议</a></li><li style="--depth: 2"><a href="#tdm时分多路复用">TDM（时分多路复用）</a></li><li style="--depth: 2"><a href="#fdm频分多路复用">FDM（频分多路复用）</a></li><li style="--depth: 2"><a href="#cdma码分多址">CDMA（码分多址）</a></li><li style="--depth: 1"><a href="#随机接入协议">随机接入协议</a></li><li style="--depth: 2"><a href="#时隙-alohaslotted-aloha">时隙 ALOHA（Slotted ALOHA）</a></li><li style="--depth: 2"><a href="#纯-alohapure-aloha">纯 ALOHA（Pure ALOHA）</a></li><li style="--depth: 2"><a href="#csma载波侦听多路访问">CSMA（载波侦听多路访问）</a></li><li style="--depth: 2"><a href="#csmacd带碰撞检测的-csma">CSMA/CD（带碰撞检测的 CSMA）</a></li><li style="--depth: 1"><a href="#轮流协议taking-turns-protocol">轮流协议（Taking-Turns Protocol）</a></li><li style="--depth: 2"><a href="#轮询协议polling-protocol">轮询协议（Polling Protocol）</a></li><li style="--depth: 2"><a href="#令牌传递协议token-passing-protocol">令牌传递协议（Token-Passing Protocol）</a></li><li style="--depth: 0"><a href="#交换局域网">交换局域网</a></li><li style="--depth: 1"><a href="#链路层寻址和-arp">链路层寻址和 ARP</a></li><li style="--depth: 2"><a href="#mac-地址">MAC 地址</a></li><li style="--depth: 2"><a href="#arp地址解析协议">ARP（地址解析协议）</a></li><li style="--depth: 2"><a href="#发送数据报到子网之外">发送数据报到子网之外</a></li><li style="--depth: 1"><a href="#以太网ethernet">以太网（Ethernet）</a></li><li style="--depth: 2"><a href="#以太网帧结构">以太网帧结构</a></li><li style="--depth: 1"><a href="#链路层交换机">链路层交换机</a></li><li style="--depth: 2"><a href="#转发与过滤">转发与过滤</a></li><li style="--depth: 2"><a href="#自学习self-learning">自学习（Self-Learning）</a></li><li style="--depth: 2"><a href="#交换机-vs-路由器">交换机 vs 路由器</a></li><li style="--depth: 1"><a href="#虚拟局域网vlan">虚拟局域网（VLAN）</a></li><li style="--depth: 2"><a href="#基于端口的-vlan">基于端口的 VLAN</a></li><li style="--depth: 2"><a href="#vlan-干线连接vlan-trunking">VLAN 干线连接（VLAN Trunking）</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

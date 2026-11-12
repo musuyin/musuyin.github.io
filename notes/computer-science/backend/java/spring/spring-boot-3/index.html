@@ -1,0 +1,976 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SpringBoot3 · Musuyin&#39; Home</title><meta name="description" content="Spring Boot 通过自动配置与依赖管理建立应用的默认运行环境。先理解 Starter、配置属性和启动类，再整合 MVC、数据源与 MyBatis，最后验证打包和外部参数覆盖；自动配置仍依赖条件，不是无条件创建所有组件。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/java/spring/spring-boot-3/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="SpringBoot3 · Musuyin' Home"><meta property="og:description" content="Spring Boot 通过自动配置与依赖管理建立应用的默认运行环境。先理解 Starter、配置属性和启动类，再整合 MVC、数据源与 MyBatis，最后验证打包和外部参数覆盖；自动配置仍依赖条件，不是无条件创建所有组件。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/java/spring/spring-boot-3/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">SpringBoot3</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-06">2026-08-06</time></dd></div><div><dt>字数</dt><dd>5816</dd></div><div><dt>预计阅读</dt><dd>20 分钟</dd></div></dl></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>SpringBoot3</h1><time datetime="2026-08-06">2026-08-06</time></header><div class="prose"><p>Spring Boot 通过自动配置与依赖管理建立应用的默认运行环境。先理解 Starter、配置属性和启动类，再整合 MVC、数据源与 MyBatis，最后验证打包和外部参数覆盖；自动配置仍依赖条件，不是无条件创建所有组件。</p>
+<p><strong>版本核对</strong>：原稿环境表混淆了 Servlet 版本。以 Boot 3.4 为例，要求 Java 17+，内嵌 Tomcat 10.1 对应 Servlet 6.0；部署外部容器要求 Servlet 5.0+。其他 3.x 小版本应核对各自说明。见 <a href="https://docs.spring.io/spring-boot/3.4/system-requirements.html">Boot 3.4 系统要求</a>。</p>
+<p><a id="reference-概述"></a></p>
+<h2 id="概述">概述</h2>
+<p>SpringBoot 帮我们简单、快速地创建一个独立的、生产级别的 <strong>Spring 应用（说明：SpringBoot 底层是 Spring）</strong> ，大多数 SpringBoot 应用只需要编写少量配置即可快速整合 Spring 平台以及第三方技术！</p>
+<p>SpringBoot 的主要目标是：</p>
+<ul>
+<li>为所有 Spring 开发提供更快速、可广泛访问的入门体验。</li>
+<li>开箱即用，设置合理的默认值，但是也可以根据需求进行适当的调整。</li>
+<li>提供一系列大型项目通用的非功能性程序（如嵌入式服务器、安全性、指标、运行检查等）。</li>
+<li><strong>约定大于配置</strong>，基本不需要主动编写配置类、也不需要 XML 配置文件。</li>
+</ul>
+<p><a id="reference-系统要求"></a></p>
+<h3 id="系统要求">系统要求</h3>
+<table>
+<thead>
+<tr>
+<th>技术&amp;工具</th>
+<th>版本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>maven</td>
+<td>3.6.3 or later 3.6.3 或更高版本</td>
+</tr>
+<tr>
+<td>Tomcat</td>
+<td>10.0+</td>
+</tr>
+<tr>
+<td>Servlet</td>
+<td>5.0+（外部容器；具体Boot小版本见官方要求）</td>
+</tr>
+<tr>
+<td>JDK</td>
+<td>17+</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-快速入门"></a></p>
+<h3 id="快速入门">快速入门</h3>
+<p>场景：浏览器发送 <strong>/hello</strong>请求，返回”<strong>Hello,Spring Boot 3!</strong> “</p>
+<blockquote>
+<p>开发步骤</p>
+</blockquote>
+<ol>
+<li><strong>创建 Maven 工程</strong></li>
+<li><strong>添加依赖(springboot 父工程依赖 , web 启动器依赖)</strong></li>
+<li><strong>编写启动引导类(springboot 项目运行的入口)</strong></li>
+<li><strong>编写处理器 Controller</strong></li>
+<li><strong>启动项目</strong></li>
+</ol>
+<blockquote>
+<p>创建项目</p>
+</blockquote>
+<p><img alt="" loading="lazy" decoding="async" width="1054" height="705" src="/_astro/IMG-20260722152531138.C5-LdWTd_Zjq5Y5.webp"></p>
+<blockquote>
+<p>添加依赖</p>
+</blockquote>
+<ol>
+<li>添加父工程坐标</li>
+</ol>
+<p>SpringBoot 可以帮我们方便的管理项目依赖 , 在 Spring Boot 提供了一个名为<strong>spring-boot-starter-parent</strong>的工程，里面已经对各种常用依赖的版本进行了管理，我们的项目需要<strong>以这个项目为父工程</strong>，这样我们就不用操心依赖的版本问题了，需要什么依赖，直接引入坐标(不需要添加版本)即可！</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">&lt;!--所有springboot项目都必须继承自 spring-boot-starter-parent--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-parent&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;3.3.4&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<ol start="2">
+<li>添加 web 启动器</li>
+</ol>
+<p>为了让 Spring Boot 帮我们完成各种自动配置，我们必须引入 Spring Boot 提供的<strong>自动配置依赖</strong>，我们称为<strong>启动器</strong>。因为我们是 web 项目，这里我们引入 web 启动器，在 pom.xml 文件中加入如下依赖：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependencies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">&lt;!--web开发的场景启动器--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-web&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependencies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<blockquote>
+<p>创建启动类</p>
+</blockquote>
+<p>创建 package：com.atguigu</p>
+<p>创建启动类：MainApplication</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.SpringApplication;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.autoconfigure.SpringBootApplication;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @SpringBootApplication是一个特殊的注解，用于标识一个Spring Boot应用程序的入口类。它的主要作用是将三个常用注解组合在一起，简化了配置的过程。</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * 具体而言，@SpringBootApplication注解包含以下三个注解的功能：</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> *     @Configuration：将该类标识为应用程序的配置类。它允许使用Java代码定义和配置Bean。</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> *     @EnableAutoConfiguration：启用Spring Boot的自动配置机制。它根据项目的依赖项自动配置Spring应用程序的行为。自动配置根据类路径、注解和配置属性等条件来决定要使用的功能和配置。</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> *     @ComponentScan：自动扫描并加载应用程序中的组件，如控制器、服务、存储库等。它默认扫描@SpringBootApplication注解所在类的包及其子包中的组件。</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> *</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * 使用@SpringBootApplication注解，可以将上述三个注解的功能集中在一个注解上，简化了配置文件的编写和组件的加载和扫描过程。它是Spring Boot应用程序的入口点，标识了应用程序的主类，</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * 并告诉Spring Boot在启动时应如何配置和加载应用程序。</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">SpringBootApplication</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> MainApplication</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //SpringApplication.run() 方法是启动 Spring Boot 应用程序的关键步骤。它创建应用程序上下文、</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 自动配置应用程序、启动应用程序，并处理命令行参数，使应用程序能够运行和提供所需的功能</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[] </span><span style="color:#E36209;--shiki-dark:#FFAB70">args</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        SpringApplication.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">run</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(MainApplication.class,args);  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 自动创建IoC容器，启动Tomcat服务器软件</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<blockquote>
+<p>编写处理器 Controller</p>
+</blockquote>
+<p>创建 package：com.atguigu.controller</p>
+<p>创建类：HelloController</p>
+<p>注意： IoC 和 DI 注解需要在<strong>启动类的同包或者子包下方可生效</strong>！无需指定，约束俗称。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu.controller;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.GetMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RequestMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RestController;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Author: Zephyrtoria</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @CreateTime: 2024-10-06</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Description:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Version: 1.0</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RestController</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hello"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> HelloController</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"boot"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String </span><span style="color:#6F42C1;--shiki-dark:#B392F0">hello</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "hello springboot3!"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<blockquote>
+<p>启动测试</p>
+</blockquote>
+<p><img alt="" loading="lazy" decoding="async" width="1473" height="528" src="/_astro/IMG-20260722152531167.D9Pq-vgm_D3J2R.webp"></p>
+<p><a id="reference-总结"></a></p>
+<h3 id="总结">总结</h3>
+<p><a id="reference-为什么依赖不需要写版本"></a></p>
+<h4 id="为什么依赖不需要写版本">为什么依赖不需要写版本？</h4>
+<ul>
+<li>每个 boot 项目都有一个父项目<code>spring-boot-starter-parent</code>​</li>
+<li>parent 的父项目是<code>spring-boot-dependencies</code>​</li>
+<li>父项目 <strong>版本仲裁中心</strong>，把所有常见的 jar 的依赖版本都声明好了。</li>
+<li>比如：<code>mysql-connector-j</code>​</li>
+</ul>
+<p><img alt="" loading="lazy" decoding="async" width="864" height="429" src="/_astro/IMG-20260722152531188.8oTJr4u0_1xB14o.webp"></p>
+<p><a id="reference-启动器starter是什么"></a></p>
+<h4 id="启动器starter是什么">启动器(Starter)是什么？</h4>
+<p>Spring Boot 提供了一种叫做 Starter 的概念，它是一组<strong>预定义的依赖项集合</strong>，旨在简化 Spring 应用程序的配置和构建过程。Starter 包含了一组相关的依赖项，以便在启动应用程序时自动引入所需的库、配置和功能。</p>
+<p>主要作用如下：</p>
+<ol>
+<li>简化依赖管理：Spring Boot Starter 通过捆绑和管理一组相关的依赖项，减少了手动解析和配置依赖项的工作。只需引入一个相关的 Starter 依赖，即可获取应用程序所需的全部依赖。</li>
+<li>自动配置：Spring Boot Starter 在应用程序启动时自动配置所需的组件和功能。通过根据类路径和其他设置的自动检测，Starter 可以自动配置 Spring Bean、数据源、消息传递等常见组件，从而使应用程序的配置变得简单和维护成本降低。</li>
+<li>提供约定优于配置：Spring Boot Starter 遵循“约定优于配置”的原则，通过提供一组默认设置和约定，减少了手动配置的需要。它定义了标准的配置文件命名约定、默认属性值、日志配置等，使得开发者可以更专注于业务逻辑而不是繁琐的配置细节。</li>
+<li>快速启动和开发应用程序：Spring Boot Starter 使得从零开始构建一个完整的 Spring Boot 应用程序变得容易。它提供了主要领域（如 Web 开发、数据访问、安全性、消息传递等）的 Starter，帮助开发者快速搭建一个具备特定功能的应用程序原型。</li>
+<li>模块化和可扩展性：Spring Boot Starter 的组织结构使得应用程序的不同模块可以进行分离和解耦。每个模块可以有自己的 Starter 和依赖项，使得应用程序的不同部分可以按需进行开发和扩展。</li>
+</ol>
+<p><img alt="" loading="lazy" decoding="async" width="353" height="354" src="/_astro/IMG-20260722152531237.BABCGYwH_ZPXmJT.webp"></p>
+<p>Spring Boot 提供了许多预定义的 Starter，例如 spring-boot-starter-web 用于构建 Web 应用程序，spring-boot-starter-data-jpa 用于使用 JPA 进行数据库访问，spring-boot-starter-security 用于安全认证和授权等等。</p>
+<p>使用 Starter 非常简单，只需要在项目的构建文件（例如 Maven 的 pom.xml）中添加所需的 Starter 依赖，Spring Boot 会自动处理依赖管理和配置。</p>
+<p>通过使用 Starter，开发人员可以方便地引入和配置应用程序所需的功能，避免了手动添加大量的依赖项和编写冗长的配置文件的繁琐过程。同时，Starter 也提供了一致的依赖项版本管理，确保依赖项之间的兼容性和稳定性。</p>
+<p>spring boot 提供的全部启动器地址：</p>
+<p><a href="https://docs.spring.io/spring-boot/docs/current/reference/html/using.html#using.build-systems.starters">https://docs.spring.io/spring-boot/docs/current/reference/html/using.html#using.build-systems.starters</a></p>
+<p>命名规范：</p>
+<ul>
+<li>官方提供的场景：命名为：<code>spring-boot-starter-*</code>​</li>
+<li>第三方提供场景：命名为：<code>*-spring-boot-starter</code>​</li>
+</ul>
+<p><a id="reference-springbootapplication-注解的功效"></a></p>
+<h4 id="springbootapplication-注解的功效">@SpringBootApplication 注解的功效？</h4>
+<p>​<code>@SpringBootApplication</code>​ 添加到启动类上，是一个组合注解，他的功效有具体的子注解实现！</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">SpringBootConfiguration</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">EnableAutoConfiguration</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">ComponentScan</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> @</span><span style="color:#D73A49;--shiki-dark:#F97583">interface</span><span style="color:#D73A49;--shiki-dark:#F97583"> SpringBootApplication</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {}</span></span></code></pre>
+<p>​<code>@SpringBootApplication</code>​ 注解是 Spring Boot 框架中的核心注解，它的主要作用是简化和加速 Spring Boot 应用程序的配置和启动过程。</p>
+<p>具体而言，<code>@SpringBootApplication</code>​ 注解起到以下几个主要作用：</p>
+<ol>
+<li>自动配置：<code>@SpringBootApplication</code>​ 注解包含了<code>@EnableAutoConfiguration</code>​ 注解，用于启用 Spring Boot 的自动配置机制。自动配置会根据应用程序的依赖项和类路径，<strong>自动配置各种常见的 Spring 配置和功能</strong>，减少开发者的手动配置工作。它通过智能地分析类路径、加载配置和条件判断，为应用程序提供适当的默认配置。</li>
+<li>组件扫描：<code>@SpringBootApplication</code>​ 注解包含了<code>@ComponentScan</code>​ 注解，用于<strong>自动扫描并加载应用程序中的组件</strong>，例如控制器（Controllers）、服务（Services）、存储库（Repositories）等。它默认会扫描<code>@SpringBootApplication</code>​ 注解所在类的<strong>包及其子包中</strong>的组件，并将它们纳入 Spring Boot 应用程序的上下文中，使它们可被自动注入和使用。</li>
+<li>声明配置类：<code>@SpringBootApplication</code>​ 注解本身就是一个组合注解，它包含了<code>@Configuration</code>​ 注解，<strong>将被标注的类声明为配置类</strong>。配置类可以包含 Spring 框架相关的配置、Bean 定义，以及其他的自定义配置。通过<code>@SpringBootApplication</code>​ 注解，开发者可以将配置类与启动类合并在一起，使得配置和启动可以同时发生。</li>
+</ol>
+<p>总的来说，<code>@SpringBootApplication</code>​ 注解的主要作用是简化 Spring Boot 应用程序的配置和启动过程。它自动配置应用程序、扫描并加载组件，并将配置和启动类合二为一，简化了开发者的工作量，提高了开发效率。</p>
+<p><a id="reference-配置文件"></a></p>
+<h2 id="配置文件">配置文件</h2>
+<p><a id="reference-统一配置管理概述"></a></p>
+<h3 id="统一配置管理概述">统一配置管理概述</h3>
+<p>SpringBoot 工程下，进行统一的配置管理，你想设置的任何参数（端口号、项目根路径、数据库连接信息等等)都集中到一个固定位置和命名的配置文件（<code>application.properties</code>​ 或<code>application.yml</code>​）中！</p>
+<p>配置文件应该放置在 Spring Boot 工程的<code>src/main/resources</code>​ 目录下。这是因为<code>src/main/resources</code>​ 目录是 Spring Boot 默认的类路径（classpath），配置文件会被自动加载并可供应用程序访问。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="450" height="259" src="/_astro/IMG-20260722152531445.-megqTQl_Z1JMObL.webp"></p>
+<p>细节总结：</p>
+<ul>
+<li>集中式管理配置。统一在一个文件完成程序功能参数设置和自定义参数声明 。</li>
+<li><strong>位置：resources 文件夹下，必须命名 application 后缀 .properties / .yaml / .yml 。</strong></li>
+<li>如果同时存在 application.properties | application.yml(.yaml) , properties 的优先级更高。</li>
+<li>配置基本都有默认值。</li>
+</ul>
+<p><a id="reference-属性配置文件使用"></a></p>
+<h3 id="属性配置文件使用">属性配置文件使用</h3>
+<p><a href="https://docs.spring.io/spring-boot/appendix/application-properties/index.html#appendix.application-properties">功能配置参数说明</a></p>
+<ol>
+<li>固定的 key 配置参数</li>
+<li>自定义的 key 配置，使用<code>@Value("{key}")</code>​ 访问</li>
+</ol>
+<p>在 resources 文件夹下面新建 application.properties 配置文件</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="properties"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用SpringBoot提供的配置修改程序的参数，key是固定的</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">server.port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=808</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">server.servlet.context-path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=/Exusiai</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 自定义配置</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">w.name</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> = Exusiai</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">w.age</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> = 19</span></span></code></pre>
+<p><img alt="image" loading="lazy" decoding="async" width="587" height="162" src="/_astro/IMG-20260722152531473.kebd5aP__Z6A3hE.webp"></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"${w.name}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String name;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"${w.age}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Integer age;</span></span></code></pre>
+<p><a id="reference-yaml-配置文件使用"></a></p>
+<h3 id="yaml-配置文件使用">YAML 配置文件使用</h3>
+<p><a id="reference-概述-1"></a></p>
+<h4 id="概述-1">概述</h4>
+<p>application.porperties 是 SpringBoot 为所有框架提供配置参数的配置文件，为了保证 key 不重复，使用了多重命名，导致书写麻烦。为了更简便地书写，使用了 YAML。</p>
+<p>YAML（YAML Ain’t Markup Language）是一种基于层次结构的数据序列化格式，旨在提供一种易读、人类友好的数据表示方式。</p>
+<p>与<code>.properties</code>​ 文件相比，YAML 格式有以下优势：</p>
+<ol>
+<li>层次结构：YAML 文件使用缩进和冒号来表示层次结构，使得数据之间的关系更加清晰和直观。这样可以更容易理解和维护复杂的配置，特别适用于深层次嵌套的配置情况。</li>
+<li>自我描述性：YAML 文件具有自我描述性，字段和值之间使用冒号分隔，并使用缩进表示层级关系。这使得配置文件更易于阅读和理解，并且可以减少冗余的标点符号和引号。</li>
+<li>注释支持：YAML 格式支持注释，可以在配置文件中添加说明性的注释，使配置更具可读性和可维护性。相比之下，<code>.properties</code>​ 文件不支持注释，无法提供类似的解释和说明。</li>
+<li>多行文本：YAML 格式支持多行文本的表示，可以更方便地表示长文本或数据块。相比之下，<code>.properties</code>​ 文件需要使用转义符或将长文本拆分为多行。</li>
+<li>类型支持：YAML 格式天然支持复杂的数据类型，如列表、映射等。这使得在配置文件中表示嵌套结构或数据集合更加容易，而不需要进行额外的解析或转换。</li>
+<li>更好的可读性：由于 YAML 格式的特点，它更容易被人类读懂和解释。它减少了配置文件中需要的特殊字符和语法，让配置更加清晰明了，从而减少了错误和歧义。</li>
+</ol>
+<p>综上所述，YAML 格式相对于<code>.properties</code>​ 文件具有更好的层次结构表示、自我描述性、注释支持、多行文本表示、复杂数据类型支持和更好的可读性。这些特点使 YAML 成为一种有力的配置文件格式，尤其适用于复杂的配置需求和人类可读的场景。然而，选择使用 YAML 还是<code>.properties</code>​ 取决于实际需求和团队的偏好，简单的配置可以使用<code>.properties</code>​，而复杂的配置可以选择 YAML 以获得更多的灵活性和可读性</p>
+<p><a id="reference-使用"></a></p>
+<h4 id="使用">使用</h4>
+<ol>
+<li>数据结构用树形结构呈现，通过<strong>缩进</strong>来表示层级，</li>
+<li>连续的项目（集合）通过减号 <code>- </code>​ 来表示</li>
+<li>键值结构里面的 key/value 对用冒号<code>: </code>​ 来分隔，注意冒号后面的<strong>空格是必须的</strong>。</li>
+<li>YAML 配置文件的扩展名是 yaml 或 yml</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># server.port=80</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># server.servlet.context-path=/Ex</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># yaml有层次，可以继承；使用缩进代替了.</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">server</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">80</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  servlet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    context-path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/Ex</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">w</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  info</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    age</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">19</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Exusiai</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  root</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    username</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">root</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    password</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">123456</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  g</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">G1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">G2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">G3</span></span></code></pre>
+<p>读取方式和 properties 一致</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu.pojo;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Data;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Value;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.stereotype.Component;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.List;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Author: Zephyrtoria</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @CreateTime: 2024-10-09</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Description:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Version: 1.0</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Data</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Component</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> User</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"${w.root.username}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String name;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"${w.root.password}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String password;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"${w.g[0]}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// @Value(key必须写全，而且只能读取单个值，可以使用批量注入优化)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; g;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-批量配置文件注入"></a></p>
+<h3 id="批量配置文件注入">批量配置文件注入</h3>
+<p>添加<code>@ConfigurationProperties(prefix = "")</code>​ 读取属性文件中前缀为指定字符串的值。<strong>前缀和属性名称</strong>和配置文件中的<strong>key</strong>必须要保持一致才可以注入成功</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu.pojo;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> lombok.Data;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Value;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.context.properties.ConfigurationProperties;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.stereotype.Component;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.List;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Author: Zephyrtoria</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @CreateTime: 2024-10-09</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Description:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Version: 1.0</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Data</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Component</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">ConfigurationProperties</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">prefix</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "w.user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/*</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * 写入通用的前缀，会自动映射到同名的属性中</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * 好处：</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> *   1. 方便，不用一个一个读取</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> *   2. 可以给集合类型赋值</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> User</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String username;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String password;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; g;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-多环境配置和使用"></a></p>
+<h3 id="多环境配置和使用">多环境配置和使用</h3>
+<p><a id="reference-需求"></a></p>
+<h4 id="需求">需求</h4>
+<p>在 Spring Boot 中，可以使用多环境配置来根据不同的运行环境（如开发、测试、生产）加载不同的配置。SpringBoot 支持多环境配置让应用程序在不同的环境中使用不同的配置参数，例如数据库连接信息、日志级别、缓存配置等。</p>
+<p>以下是实现 Spring Boot 多环境配置的常见方法：</p>
+<ol>
+<li>属性文件分离：将应用程序的配置参数分离到不同的属性文件中，每个环境对应一个属性文件。例如，可以创建<code>application-dev.properties</code>​、<code>application-prod.properties</code>​ 和<code>application-test.properties</code>​ 等文件。在这些文件中，可以定义各自环境的配置参数，如数据库连接信息、端口号等。然后，在<code>application.properties</code>​ 中通过<code>spring.profiles.active</code>​ 属性指定当前使用的环境。Spring Boot 会根据该属性来加载对应环境的属性文件，覆盖默认的配置。</li>
+<li>YAML 配置文件：与属性文件类似，可以将配置参数分离到不同的 YAML 文件中，每个环境对应一个文件。例如，可以创建<code>application-dev.yml</code>​、<code>application-prod.yml</code>​ 和<code>application-test.yml</code>​ 等文件。在这些文件中，可以使用 YAML 语法定义各自环境的配置参数。同样，通过<code>spring.profiles.active</code>​ 属性指定当前的环境，Spring Boot 会加载相应的 YAML 文件。</li>
+<li>命令行参数(动态)：可以通过命令行参数来指定当前的环境。例如，可以使用<code>--spring.profiles.active=dev</code>​ 来指定使用开发环境的配置。</li>
+</ol>
+<p>通过上述方法，Spring Boot 会<strong>根据当前指定的环境来加载相应的配置文件或参数</strong>，从而实现多环境配置。这样可以简化在不同环境之间的配置切换，并且确保应用程序在不同环境中具有正确的配置。</p>
+<p><a id="reference-多环境配置"></a></p>
+<h4 id="多环境配置">多环境配置</h4>
+<p>创建多环境配置文件</p>
+<blockquote>
+<p>application.yaml</p>
+</blockquote>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># server.port=80</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># server.servlet.context-path=/Ex</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># yaml有层次，可以继承；使用缩进代替了.</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">server</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8080</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  servlet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    context-path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/Ex</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  profiles</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    active</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">test, dev</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 激活application-test.yaml和application-dev.yaml</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">w</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  user</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    username</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">admin-application</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    g</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">G1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">G2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">G3</span></span></code></pre>
+<blockquote>
+<p>application-test.yaml</p>
+</blockquote>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">w</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  user</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    username</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">root-test</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    password</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">123456test</span></span></code></pre>
+<blockquote>
+<p>application-dev.yaml</p>
+</blockquote>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">w</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  user</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    username</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">root-dev</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    password</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">123456dev</span></span></code></pre>
+<p>激活顺序：application -&gt; active.1 -&gt; active.2 -&gt; …</p>
+<p>后面激活的会覆盖前面激活的重叠属性</p>
+<ul>
+<li>如果设置了 spring.profiles.active，并且和 application 有重叠属性，以 active 设置优先。</li>
+<li>如果设置了 spring.profiles.active，和 application 无重叠属性，application 设置依然生效</li>
+</ul>
+<p><a id="reference-整合-springmvc"></a></p>
+<h2 id="整合-springmvc">整合 SpringMVC</h2>
+<p><a id="reference-实现过程"></a></p>
+<h3 id="实现过程">实现过程</h3>
+<ol>
+<li>创建程序</li>
+<li>导入依赖</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">   &lt;?</span><span style="color:#22863A;--shiki-dark:#85E89D">xml</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1.0"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> encoding</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"UTF-8"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">?&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">   &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">project</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> xmlns</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://maven.apache.org/POM/4.0.0"</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">            xmlns:xsi</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://www.w3.org/2001/XMLSchema-instance"</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">            xsi:schemaLocation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">modelVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;4.0.0&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">modelVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">           &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">           &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-parent&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">           &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;3.3.4&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;com.atguigu&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;springboot-03&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;1.0-SNAPSHOT&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependencies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">           &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">               &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">               &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-web&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">           &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">           &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">               &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.projectlombok&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">               &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;lombok&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">               &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;1.18.34&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">           &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependencies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">   &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">project</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<ol start="3">
+<li>创建启动类</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">   package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">   import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.SpringApplication;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">   import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.autoconfigure.SpringBootApplication;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">   @</span><span style="color:#D73A49;--shiki-dark:#F97583">SpringBootApplication</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">   public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Main</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">       public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[] </span><span style="color:#E36209;--shiki-dark:#FFAB70">args</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">           SpringApplication.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">run</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Main.class, args);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">   }</span></span></code></pre>
+<ol start="4">
+<li>创建实体类</li>
+<li>创建 Controller</li>
+<li>测试</li>
+</ol>
+<p><a id="reference-web-相关配置"></a></p>
+<h3 id="web-相关配置">Web 相关配置</h3>
+<p>位置：application.yml</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># web相关的配置</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html#appendix.application-properties.server</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">server</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  # 端口号设置</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">80</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  # 项目根路径</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  servlet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    context-path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/boot</span></span></code></pre>
+<p>当涉及 Spring Boot 的 Web 应用程序配置时，五个重要的配置参数：</p>
+<ol>
+<li>​<code>server.port</code>​: 指定应用程序的 HTTP 服务器端口号。默认情况下，Spring Boot 使用 8080 作为默认端口。可以通过在配置文件中设置<code>server.port</code>​ 来更改端口号。</li>
+<li>​<code>server.servlet.context-path</code>​: 设置应用程序的上下文路径。这是应用程序在 URL 中的基本路径。默认情况下，上下文路径为空。可以通过在配置文件中设置<code>server.servlet.context-path</code>​ 属性来指定自定义的上下文路径。</li>
+<li>​<code>spring.mvc.view.prefix</code>​ 和<code>spring.mvc.view.suffix</code>​: 这两个属性用于配置视图解析器的前缀和后缀。视图解析器用于解析控制器返回的视图名称，并将其映射到实际的视图页面。<code>spring.mvc.view.prefix</code>​ 定义视图的前缀，<code>spring.mvc.view.suffix</code>​ 定义视图的后缀。</li>
+<li>​<code>spring.resources.static-locations</code>​: 配置静态资源的位置。静态资源可以是 CSS、JavaScript、图像等。默认情况下，Spring Boot 会将静态资源放在<code>classpath:/static</code>​ 目录下。可以通过在配置文件中设置<code>spring.resources.static-locations</code>​ 属性来自定义静态资源的位置。</li>
+<li>​<code>spring.http.encoding.charset</code>​ 和<code>spring.http.encoding.enabled</code>​: 这两个属性用于配置 HTTP 请求和响应的字符编码。<code>spring.http.encoding.charset</code>​ 定义字符编码的名称（例如 UTF-8），<code>spring.http.encoding.enabled</code>​ 用于启用或禁用字符编码的自动配置。</li>
+</ol>
+<p><a id="reference-静态资源处理"></a></p>
+<h3 id="静态资源处理">静态资源处理</h3>
+<p>在 WEB 开发中需要引入一些静态资源 , 如果是普通的项目静态资源可以放在项目的 webapp 目录下。现在使用 Spring Boot 做开发 , 项目中没有 webapp 目录 , 是一个 jar 工程，那么就没有 webapp，静态资源该放哪里？</p>
+<p><a id="reference-默认路径"></a></p>
+<h4 id="默认路径">默认路径</h4>
+<p>在 SpringBoot 中定义了静态资源的默认查找路径：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.autoconfigure.web;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">//..................</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        private</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> final</span><span style="color:#D73A49;--shiki-dark:#F97583"> String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[] CLASSPATH_RESOURCE_LOCATIONS </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#D73A49;--shiki-dark:#F97583"> String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[]{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"classpath:/META-INF/resources/"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"classpath:/resources/"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"classpath:/static/"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"classpath:/public/"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">};</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        private</span><span style="color:#D73A49;--shiki-dark:#F97583"> String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[] staticLocations;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        private</span><span style="color:#D73A49;--shiki-dark:#F97583"> boolean</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> addMappings;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        private</span><span style="color:#D73A49;--shiki-dark:#F97583"> boolean</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> customized;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        private</span><span style="color:#D73A49;--shiki-dark:#F97583"> final</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Chain chain;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        private</span><span style="color:#D73A49;--shiki-dark:#F97583"> final</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Cache cache;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        public</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">            this</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.staticLocations </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> CLASSPATH_RESOURCE_LOCATIONS;</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">            this</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.addMappings </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">            this</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.customized </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> false</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">            this</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.chain </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Chain</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">            this</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.cache </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Cache</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">//...........</span></span></code></pre>
+<p><strong>默认的静态资源路径为：</strong> ​</p>
+<ul>
+<li>classpath:/META-INF/resources/</li>
+<li>classpath:/resources/</li>
+<li>classpath:/static/</li>
+<li>classpath:/public/</li>
+</ul>
+<p>我们只要静态资源放在这些目录中任何一个，SpringMVC 都会帮我们处理。 我们习惯会把静态资源放在<code>classpath:/static/</code>​ 目录下。在 resources 目录下创建 index.html 文件</p>
+<p>外部访问静态资源的时候，不需要写静态资源文件夹</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>静态资源位于默认目录时，请求 URL 使用应用上下文路径加资源路径，不包含 static 等 classpath 目录名。</span></span></code></pre>
+<p>浏览器输入: <code>http://localhost:8080/ex/index.html</code>​（受配置的 server 影响）</p>
+<p>如果放在 resources/webapp 文件夹下则无法被浏览器访问到</p>
+<p><a id="reference-覆盖路径"></a></p>
+<h4 id="覆盖路径">覆盖路径</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># web相关的配置</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html#appendix.application-properties.server</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">server</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  # 端口号设置</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8080</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  # 项目根路径</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  servlet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    context-path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/ex</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  web</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 配置静态资源地址,如果设置,会覆盖默认值；一旦配置了，原先的默认资源文件夹就无法访问了</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      static-locations</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">classpath:/webapp</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>覆盖静态资源目录后，本例 login.html 的访问路径仍为 /ex/login.html，webapp 是资源位置而非 URL 前缀。</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>访问地址：http://localhost:8080/ex/login.html（不需要添加webapp）</span></span></code></pre>
+<p><a id="reference-自定义拦截器springmvc-配置"></a></p>
+<h3 id="自定义拦截器springmvc-配置">自定义拦截器（SpringMVC 配置）</h3>
+<p><a id="reference-声明"></a></p>
+<h4 id="声明">声明</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu.interceptor;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> jakarta.servlet.http.HttpServletRequest;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> jakarta.servlet.http.HttpServletResponse;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.servlet.HandlerInterceptor;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Author: Zephyrtoria</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @CreateTime: 2024-10-09</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Description:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Version: 1.0</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> MyInterceptor</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> HandlerInterceptor</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Override</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> boolean</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> preHandle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(HttpServletRequest </span><span style="color:#E36209;--shiki-dark:#FFAB70">request</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, HttpServletResponse </span><span style="color:#E36209;--shiki-dark:#FFAB70">response</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Object </span><span style="color:#E36209;--shiki-dark:#FFAB70">handler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">throws</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Exception {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"request = "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> request </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ", response = "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ", handler = "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> handler);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-配置"></a></p>
+<h4 id="配置">配置</h4>
+<p>正常使用配置类，只要保证，配置类要在启动类的同包或者子包即可生效</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu.config;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu.interceptor.MyInterceptor;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.context.annotation.Configuration;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.servlet.config.annotation.EnableWebMvc;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.servlet.config.annotation.InterceptorRegistry;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.servlet.config.annotation.WebMvcConfigurer;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Author: Zephyrtoria</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @CreateTime: 2024-10-09</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Description:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Version: 1.0</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Configuration</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> WebMvcConfig</span><span style="color:#D73A49;--shiki-dark:#F97583"> implements</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> WebMvcConfigurer</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Override</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> addInterceptors</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(InterceptorRegistry </span><span style="color:#E36209;--shiki-dark:#FFAB70">registry</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        registry.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">addInterceptor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> MyInterceptor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-整合-druid-数据源"></a></p>
+<h2 id="整合-druid-数据源">整合 Druid 数据源</h2>
+<p><a id="reference-导入依赖"></a></p>
+<h3 id="导入依赖">导入依赖</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;?</span><span style="color:#22863A;--shiki-dark:#85E89D">xml</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1.0"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> encoding</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"UTF-8"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">?&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">project</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> xmlns</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://maven.apache.org/POM/4.0.0"</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">         xmlns:xsi</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://www.w3.org/2001/XMLSchema-instance"</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">         xsi:schemaLocation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">modelVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;4.0.0&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">modelVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-parent&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;3.3.4&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;com.atguigu&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;springboot-04&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;1.0-SNAPSHOT&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    &lt;!--  web开发的场景启动器 --&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependencies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-web&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        &lt;!-- 数据库相关配置启动器 jdbctemplate 事务相关--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-jdbc&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        &lt;!-- druid启动器的依赖  --&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;com.alibaba&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;druid-spring-boot-3-starter&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;1.2.20&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        &lt;!-- 驱动类--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;mysql&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;mysql-connector-java&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;8.0.25&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.projectlombok&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;lombok&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;1.18.34&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependencies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    &lt;!--    SpringBoot应用打包插件--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">plugins</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">plugin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-maven-plugin&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">plugin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">plugins</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">project</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><a id="reference-配置文件-1"></a></p>
+<h3 id="配置文件-1">配置文件</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  datasource</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">com.alibaba.druid.pool.DruidDataSource</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    driver-class-name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">com.mysql.cj.jdbc.Driver</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    url</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">jdbc:mysql://localhost:3306/mybatis-example</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    username</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">root</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    password</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">123456</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # druid 连接池管理</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    druid</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 初始化时建立物理连接的个数</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      initial-size</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 连接池的最小空闲数量</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      min-idle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 连接池最大连接数量</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      max-active</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">20</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 获取连接时最大等待时间，单位毫秒</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      max-wait</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">60000</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 申请连接的时候检测，如果空闲时间大于timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效。</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      test-while-idle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 既作为检测的间隔时间又作为testWhileIdel执行的依据</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      time-between-eviction-runs-millis</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">60000</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 销毁线程时检测当前连接的最后活动时间和当前时间差大于该值时，关闭当前连接(配置连接在池中的最小生存时间)</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      min-evictable-idle-time-millis</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">30000</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 用来检测数据库连接是否有效的sql 必须是一个查询语句(oracle中为 select 1 from dual)</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      validation-query</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">select 'x'</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 申请连接时会执行validationQuery检测连接是否有效,开启会降低性能,默认为true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      test-on-borrow</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 归还连接时会执行validationQuery检测连接是否有效,开启会降低性能,默认为true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      test-on-return</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 是否缓存preparedStatement, 也就是PSCache,PSCache对支持游标的数据库性能提升巨大，比如说oracle,在mysql下建议关闭。</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      pool-prepared-statements</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 置监控统计拦截的filters，去掉后监控界面sql无法统计，stat: 监控统计、Slf4j:日志记录、waLL: 防御sqL注入</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      filters</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">stat,wall,slf4j</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 要启用PSCache，必须配置大于0，当大于0时，poolPreparedStatements自动触发修改为true。在Druid中，不会存在Oracle下PSCache占用内存过多的问题，可以把这个数值配置大一些，比如说100</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      max-pool-prepared-statement-per-connection-size</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">-1</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 合并多个DruidDataSource的监控数据</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      use-global-data-source-stat</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">      # 通过connectProperties属性来打开mergeSql功能；慢SQL记录</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      connect-properties</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      web-stat-filter</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 是否启用StatFilter默认值true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        enabled</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 添加过滤规则</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        url-pattern</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/*</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 忽略过滤的格式</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        exclusions</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/druid/*,*.js,*.gif,*.jpg,*.png,*.css,*.ico</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      stat-view-servlet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 是否启用StatViewServlet默认值true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        enabled</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 访问路径为/druid时，跳转到StatViewServlet</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        url-pattern</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">/druid/*</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 是否能够重置数据</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        reset-enable</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # 需要账号密码才能访问控制台，默认为root</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        login-username</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">druid</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        login-password</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">druid</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # IP白名单</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        allow</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">127.0.0.1</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # IP黑名单（共同存在时，deny优先于allow）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        deny</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span></code></pre>
+<p><a id="reference-测试"></a></p>
+<h3 id="测试">测试</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu.controller;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu.pojo.User;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.jdbc.core.BeanPropertyRowMapper;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.jdbc.core.JdbcTemplate;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.GetMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RequestMapping;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.web.bind.annotation.RestController;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> java.util.List;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Author: Zephyrtoria</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @CreateTime: 2024-10-09</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Description:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Version: 1.0</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RestController</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserController</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> JdbcTemplate jdbcTemplate;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"list"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">User</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String sql </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "select * from user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        List&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">User</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; list </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> jdbcTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">query</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(sql, </span><span style="color:#D73A49;--shiki-dark:#F97583">new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> BeanPropertyRowMapper&lt;&gt;(User.class));</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-兼容问题"></a></p>
+<h3 id="兼容问题">兼容问题</h3>
+<p>注意：Druid1.2.20 版本中已经创建了 META-INF/spring 文件夹，不需要再手动创建了！</p>
+<p>通过源码分析，druid-spring-boot-3-starter (1.2.18)，虽然适配了 SpringBoot3，但缺少自动装配的配置文件，需要手动在 resources 目录下创建 META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports，文件内容如下!</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure</span></span></code></pre>
+<p><a id="reference-整合-mybatis"></a></p>
+<h2 id="整合-mybatis">整合 MyBatis</h2>
+<p><a id="reference-整合步骤"></a></p>
+<h3 id="整合步骤">整合步骤</h3>
+<ol>
+<li>导入依赖：在 Spring Boot 项目的构建文件（如 pom.xml）中添加 MyBatis 和数据库驱动的相关依赖。例如，如果使用 MySQL 数据库，需要添加 MyBatis 和 MySQL 驱动的依赖。</li>
+<li>配置数据源：在<code>application.properties</code>​ 或<code>application.yaml</code>​ 中配置数据库连接信息，包括数据库 URL、用户名、密码、mybatis 的功能配置等。</li>
+<li>创建实体类：创建与数据库表对应的实体类。</li>
+<li>创建 Mapper 接口：创建与数据库表交互的 Mapper 接口。</li>
+<li>创建 Mapper 接口 SQL 实现： 可以使用 mapperxml 文件或者注解方式</li>
+<li>创建程序启动类</li>
+<li>注解扫描：在 Spring Boot 的主应用类上添加<code>@MapperScan</code>​ 注解，用于扫描和注册 Mapper 接口。</li>
+<li>使用 Mapper 接口：在需要使用数据库操作的地方，通过依赖注入或直接实例化 Mapper 接口，并调用其中的方法进行数据库操作。</li>
+</ol>
+<p><a id="reference-实例"></a></p>
+<h3 id="实例">实例</h3>
+<p><a id="reference-导入依赖-1"></a></p>
+<h4 id="导入依赖-1">导入依赖</h4>
+<p>比之前多导入了 mybatis 相关依赖</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;?</span><span style="color:#22863A;--shiki-dark:#85E89D">xml</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1.0"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> encoding</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"UTF-8"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">?&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">project</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> xmlns</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://maven.apache.org/POM/4.0.0"</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">         xmlns:xsi</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://www.w3.org/2001/XMLSchema-instance"</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">         xsi:schemaLocation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">modelVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;4.0.0&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">modelVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-parent&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;3.3.4&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;com.atguigu&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;springboot-04&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;1.0-SNAPSHOT&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    &lt;!--  web开发的场景启动器 --&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependencies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-web&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        &lt;!-- 数据库相关配置启动器 jdbctemplate 事务相关--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-jdbc&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        &lt;!-- druid启动器的依赖  --&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;com.alibaba&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;druid-spring-boot-3-starter&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;1.2.20&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        &lt;!-- 驱动类--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;mysql&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;mysql-connector-java&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;8.0.25&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.projectlombok&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;lombok&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;1.18.34&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.mybatis.spring.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;mybatis-spring-boot-starter&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;3.0.3&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependencies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    &lt;!--    SpringBoot应用打包插件--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">plugins</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">plugin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-maven-plugin&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">plugin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">plugins</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">project</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><a id="reference-配置文件-2"></a></p>
+<h4 id="配置文件-2">配置文件</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># druid</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  datasource</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">com.alibaba.druid.pool.DruidDataSource</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    driver-class-name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">com.mysql.cj.jdbc.Driver</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    url</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">jdbc:mysql://localhost:3306/mybatis-example</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    username</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">root</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    password</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">123456</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># MyBatis 彻底抛弃了MyBatis的配置文件</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 需要配置：mapper.xml的位置 settings的配置 别名的配置...</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">mybatis</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  mapper-locations</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">classpath:/mappers/*.xml</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 指定xml文件的位置</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  type-aliases-package</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">com.atguigu.pojo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  configuration</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    map-underscore-to-camel-case</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    auto-mapping-behavior</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">full</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    log-impl</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">org.apache.ibatis.logging.slf4j.Slf4jImpl</span></span></code></pre>
+<p><a href="https://blog.csdn.net/myhes/article/details/86430126">mybatis 报 org.apache.ibatis.binding.BindingException: Invalid bound statement (not found)错误</a></p>
+<p><a id="reference-启动类"></a></p>
+<h4 id="启动类">启动类</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.mybatis.spring.annotation.MapperScan;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.SpringApplication;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.boot.autoconfigure.SpringBootApplication;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">MapperScan</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"com.atguigu.mappers"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 指定mapper接口所在的位置</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">SpringBootApplication</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Main</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[] </span><span style="color:#E36209;--shiki-dark:#FFAB70">args</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        SpringApplication.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">run</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Main.class, args);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>实现类和以前一致</p>
+<p><a id="reference-文件结构"></a></p>
+<h5 id="文件结构">文件结构</h5>
+<p><img alt="image" loading="lazy" decoding="async" width="356" height="400" src="/_astro/IMG-20260722152531502.B38ZG2g1_1bWOQK.webp"></p>
+<p>注意：此时 UserMapper.java 和 UserMapper.xml 并不需要存放在相同路径，因为前者通过启动类指定路径，后者通过 application.yaml 指定路径。实现了分别管理路径。</p>
+<p><a id="reference-声明式事务整合配置"></a></p>
+<h3 id="声明式事务整合配置">声明式事务整合配置</h3>
+<p>依赖导入:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8"> &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-jdbc&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p>注：SpringBoot 项目会自动配置一个 DataSourceTransactionManager，所以我们只需在方法（或者类）加上 <code>@Transactional</code>​ 注解，就自动纳入 Spring 的事务管理了</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu.service;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu.mappers.UserMapper;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.beans.factory.annotation.Autowired;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.stereotype.Service;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.transaction.annotation.Transactional;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Author: Zephyrtoria</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @CreateTime: 2024-10-09</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Description:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Version: 1.0</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Service</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> UserMapper userMapper;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Transactional</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> delete</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Integer </span><span style="color:#E36209;--shiki-dark:#FFAB70">id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> rows </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> userMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">deleteById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(id);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"rows = "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> rows);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#D73A49;--shiki-dark:#F97583"> /</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 手动抛出异常，查看是否回滚</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-aop-整合配置"></a></p>
+<h3 id="aop-整合配置">AOP 整合配置</h3>
+<p><a href="/notes/computer-science/backend/java/spring/spring-ioc/#reference-spring-aop-%E6%A1%86%E6%9E%B6">Spring AOP 框架</a></p>
+<p>依赖导入:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-aop&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p>直接使用 aop 注解即可:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.atguigu.advice;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.aspectj.lang.JoinPoint;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.aspectj.lang.annotation.Aspect;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.aspectj.lang.annotation.Before;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.core.annotation.Order;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> org.springframework.stereotype.Component;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">/**</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Author: Zephyrtoria</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @CreateTime: 2024-10-09</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Description:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> * @Version: 1.0</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> */</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Component</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Aspect</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Order</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> LogAdvice</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Before</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"execution(* com..service.*.*(..))"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> before</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(JoinPoint </span><span style="color:#E36209;--shiki-dark:#FFAB70">joinPoint</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String className </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> joinPoint.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getTarget</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getClass</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getSimpleName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String methodName </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> joinPoint.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getSignature</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"className = "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> className);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"methodName = "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> methodName);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-项目打包和运行"></a></p>
+<h2 id="项目打包和运行">项目打包和运行</h2>
+<p><a id="reference-打包插件"></a></p>
+<h3 id="打包插件">打包插件</h3>
+<p>在 Spring Boot 项目中添加<code>spring-boot-maven-plugin</code>​ 插件是为了支持将项目打包成可执行的可运行 jar 包。如果不添加<code>spring-boot-maven-plugin</code>​ 插件配置，使用常规的<code>java -jar</code>​ 命令来运行打包后的 Spring Boot 项目是无法找到应用程序的入口点，因此导致无法运行。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">&lt;!--    SpringBoot应用打包插件--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">plugins</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">plugin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-maven-plugin&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">plugin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">plugins</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><a id="reference-执行打包"></a></p>
+<h3 id="执行打包">执行打包</h3>
+<p>在 idea 点击 package 进行打包</p>
+<p>可以在编译的 target 文件中查看 jar 包</p>
+<p><img alt="" loading="lazy" decoding="async" width="1008" height="1020" src="/_astro/IMG-20260722152531536.C92cO1mh_1aiDXe.webp"></p>
+<p><a id="reference-命令启动"></a></p>
+<h3 id="命令启动">命令启动</h3>
+<p>​<code>java -jar</code>​ 命令用于在 Java 环境中执行可执行的 JAR 文件。下面是关于<code>java -jar</code>​ 命令的说明：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">java</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -jar</span><span style="color:#24292E;--shiki-dark:#E1E4E8">  [选项] [参数] </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">jar文件名</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<ol>
+<li>
+<p>​<code>-D&lt;name&gt;=&lt;value&gt;</code>​：设置系统属性，可以通过<code>System.getProperty()</code>​ 方法在应用程序中获取该属性值。例如：<code>java -jar -Dserver.port=8080 myapp.jar</code>​。</p>
+</li>
+<li>
+<p>​<code>-X</code>​：设置 JVM 参数，例如内存大小、垃圾回收策略等。常用的选项包括：</p>
+<ul>
+<li>​<code>-Xmx&lt;size&gt;</code>​：设置 JVM 的最大堆内存大小，例如 <code>-Xmx512m</code>​ 表示设置最大堆内存为 512MB。</li>
+<li>​<code>-Xms&lt;size&gt;</code>​：设置 JVM 的初始堆内存大小，例如 <code>-Xms256m</code>​ 表示设置初始堆内存为 256MB。</li>
+</ul>
+</li>
+<li>
+<p>​<code>-Dspring.profiles.active=&lt;profile&gt;</code>​：指定 Spring Boot 的激活配置文件，可以通过<code>application-&lt;profile&gt;.properties</code>​ 或<code>application-&lt;profile&gt;.yml</code>​ 文件来加载相应的配置。例如：<code>java -Dspring.profiles.active=dev -jar myapp.jar</code>​。</p>
+</li>
+</ol>
+<p>启动和测试：</p>
+<p><img alt="" loading="lazy" decoding="async" width="2806" height="910" src="/_astro/IMG-20260722152531572.BGdpLuzg_bEX2Y.webp"></p>
+<p>注意： -D 参数必须要在 jar 之前！否则不生效！</p>
+<p>这些配置都是临时修改，不会更改 jar 包中的配置文件</p>
+<p>‍</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>Starter 引入依赖与自动配置生效之间还需要什么条件？</li>
+<li>多环境配置如何选择并覆盖属性？</li>
+<li>JVM -D 参数与应用 – 参数应分别放在哪里？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#概述">概述</a></li><li style="--depth: 1"><a href="#系统要求">系统要求</a></li><li style="--depth: 1"><a href="#快速入门">快速入门</a></li><li style="--depth: 1"><a href="#总结">总结</a></li><li style="--depth: 2"><a href="#为什么依赖不需要写版本">为什么依赖不需要写版本？</a></li><li style="--depth: 2"><a href="#启动器starter是什么">启动器(Starter)是什么？</a></li><li style="--depth: 2"><a href="#springbootapplication-注解的功效">@SpringBootApplication 注解的功效？</a></li><li style="--depth: 0"><a href="#配置文件">配置文件</a></li><li style="--depth: 1"><a href="#统一配置管理概述">统一配置管理概述</a></li><li style="--depth: 1"><a href="#属性配置文件使用">属性配置文件使用</a></li><li style="--depth: 1"><a href="#yaml-配置文件使用">YAML 配置文件使用</a></li><li style="--depth: 2"><a href="#概述-1">概述</a></li><li style="--depth: 2"><a href="#使用">使用</a></li><li style="--depth: 1"><a href="#批量配置文件注入">批量配置文件注入</a></li><li style="--depth: 1"><a href="#多环境配置和使用">多环境配置和使用</a></li><li style="--depth: 2"><a href="#需求">需求</a></li><li style="--depth: 2"><a href="#多环境配置">多环境配置</a></li><li style="--depth: 0"><a href="#整合-springmvc">整合 SpringMVC</a></li><li style="--depth: 1"><a href="#实现过程">实现过程</a></li><li style="--depth: 1"><a href="#web-相关配置">Web 相关配置</a></li><li style="--depth: 1"><a href="#静态资源处理">静态资源处理</a></li><li style="--depth: 2"><a href="#默认路径">默认路径</a></li><li style="--depth: 2"><a href="#覆盖路径">覆盖路径</a></li><li style="--depth: 1"><a href="#自定义拦截器springmvc-配置">自定义拦截器（SpringMVC 配置）</a></li><li style="--depth: 2"><a href="#声明">声明</a></li><li style="--depth: 2"><a href="#配置">配置</a></li><li style="--depth: 0"><a href="#整合-druid-数据源">整合 Druid 数据源</a></li><li style="--depth: 1"><a href="#导入依赖">导入依赖</a></li><li style="--depth: 1"><a href="#配置文件-1">配置文件</a></li><li style="--depth: 1"><a href="#测试">测试</a></li><li style="--depth: 1"><a href="#兼容问题">兼容问题</a></li><li style="--depth: 0"><a href="#整合-mybatis">整合 MyBatis</a></li><li style="--depth: 1"><a href="#整合步骤">整合步骤</a></li><li style="--depth: 1"><a href="#实例">实例</a></li><li style="--depth: 2"><a href="#导入依赖-1">导入依赖</a></li><li style="--depth: 2"><a href="#配置文件-2">配置文件</a></li><li style="--depth: 2"><a href="#启动类">启动类</a></li><li style="--depth: 3"><a href="#文件结构">文件结构</a></li><li style="--depth: 1"><a href="#声明式事务整合配置">声明式事务整合配置</a></li><li style="--depth: 1"><a href="#aop-整合配置">AOP 整合配置</a></li><li style="--depth: 0"><a href="#项目打包和运行">项目打包和运行</a></li><li style="--depth: 1"><a href="#打包插件">打包插件</a></li><li style="--depth: 1"><a href="#执行打包">执行打包</a></li><li style="--depth: 1"><a href="#命令启动">命令启动</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

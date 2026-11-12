@@ -1,0 +1,841 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Gin · Musuyin&#39; Home</title><meta name="description" content="Gin 接收请求后，依次经过路由匹配、中间件、绑定校验与业务处理，再写入响应。先实现最小 CRUD，再将 Handler、Service、Repository 的职责分开，最后加入错误收口、鉴权与优雅关闭。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/go/web/gin/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Gin · Musuyin' Home"><meta property="og:description" content="Gin 接收请求后，依次经过路由匹配、中间件、绑定校验与业务处理，再写入响应。先实现最小 CRUD，再将 Handler、Service、Repository 的职责分开，最后加入错误收口、鉴权与优雅关闭。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/go/web/gin/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Gin</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-07-23">2026-07-23</time></dd></div><div><dt>字数</dt><dd>2384</dd></div><div><dt>预计阅读</dt><dd>8 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Go/">#Go</a><a href="/tags/Web/">#Web</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Gin</h1><time datetime="2026-07-23">2026-07-23</time><p class="tags"><a href="/tags/Go/">#Go</a><a href="/tags/Web/">#Web</a></p></header><div class="prose"><p>Gin 接收请求后，依次经过路由匹配、中间件、绑定校验与业务处理，再写入响应。先实现最小 CRUD，再将 Handler、Service、Repository 的职责分开，最后加入错误收口、鉴权与优雅关闭。</p>
+<p>Gin 是一个用 Go 语言编写的高性能 Web 框架，以其高效的路由系统和优秀的性能著称。本文将详细介绍如何使用 Gin 框架开发 Web 应用。</p>
+<p><a id="reference-安装-gin"></a></p>
+<h2 id="安装-gin">安装 Gin</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -u</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> github.com/gin-gonic/gin</span></span></code></pre>
+<p><a id="reference-基本使用"></a></p>
+<h3 id="基本使用">基本使用</h3>
+<p><a id="reference-创建-http-服务器"></a></p>
+<h4 id="创建-http-服务器">创建 HTTP 服务器</h4>
+<p>使用 Gin 创建一个基本的 HTTP 服务器非常简单：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#6F42C1;--shiki-dark:#B392F0">github.com/gin-gonic/gin</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#6F42C1;--shiki-dark:#B392F0">net/http</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 创建默认的路由引擎</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">r </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> gin.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Default</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 注册一个GET路由</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // curl http://localhost:8080/ping</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GET</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/ping"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"pong"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        })</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    })</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 启动HTTP服务，默认在0.0.0.0:8080启动服务</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Run</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span></code></pre>
+<p><a id="reference-路由参数"></a></p>
+<h4 id="路由参数">路由参数</h4>
+<p>Gin 支持多种路由参数形式：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 获取 get 请求的路径参数，参数名为 name</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// curl http://localhost:8080/user/musuyin</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">r</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Engine</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GET</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/user/:name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">ctx</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		name </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Param</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Hello </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, name)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 获取 get 请求的路径参数，参数名为 name，age，age 的默认值为 20</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// curl http://localhost:8080/users?name=musuyin&amp;age=21</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Users</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">r</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Engine</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GET</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/users"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">ctx</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		name </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Query</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		age </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">DefaultQuery</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"age"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"20"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 获取 age 参数，默认值为 20</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">			"name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: name,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">			"age"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:  age,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-处理表单数据"></a></p>
+<h4 id="处理表单数据">处理表单数据</h4>
+<p>Gin 可以轻松处理 POST 请求中的表单数据：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 获取表单参数</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// curl -X POST http://localhost:8080 -d "username=musuyin&amp;password=123456"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Form</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">r</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Engine</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">POST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/form"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">ctx</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		username </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">PostForm</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"username"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		password </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">DefaultPostForm</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"password"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">			"username"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: username,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">			"password"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: password,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-处理-json-数据"></a></p>
+<h4 id="处理-json-数据">处理 JSON 数据</h4>
+<p>Gin 可以处理 POST 请求中的 JSON 数据</p>
+<p><a id="reference-将请求体-json-绑定到结构体上"></a></p>
+<h5 id="将请求体-json-绑定到结构体上">将请求体 JSON 绑定到结构体上</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> LoginRequest</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	Username </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> `json:"username" binding:"required"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	Password </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> `json:"password" binding:"required"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 将请求体 JSON 绑定到结构体上</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Login</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">r</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Engine</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">POST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/login"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">ctx</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> login </span><span style="color:#6F42C1;--shiki-dark:#B392F0">LoginRequest</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">		// 请求体绑定到结构体</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">BindJSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">login); err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">			ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusBadRequest, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">				"error"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: err.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">			})</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">			return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">		// Login</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">			"message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:  </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Login Success"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">			"username"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: login.Username,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>使用结构体接收 JSON 数据时，可以通过 <code>tag</code> 来指定字段的验证规则
+<ul>
+<li><code>binding:"required"</code> 表示该字段是必需的</li>
+</ul>
+</li>
+<li><code>ctx.BindJSON()</code> 会自动检查 Content-Type 是否为 application/json</li>
+</ul>
+<p><a id="reference-使用-map-接收-json"></a></p>
+<h5 id="使用-map-接收-json">使用 <code>map</code> 接收 JSON</h5>
+<p>可以使用 map 来接收不固定结构的 JSON 数据</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 直接使用 map 接收 JSON</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Raw</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">r</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Engine</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">POST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/raw"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">ctx</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> data </span><span style="color:#D73A49;--shiki-dark:#F97583">map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#D73A49;--shiki-dark:#F97583">interface</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">BindJSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">data); err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">			ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusBadRequest, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">				"error"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: err.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">			})</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">			return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, data)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-上传文件"></a></p>
+<h4 id="上传文件">上传文件</h4>
+<p>Gin 支持单文件和多文件上传</p>
+<p><a id="reference-单文件上传"></a></p>
+<h5 id="单文件上传">单文件上传</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 单文件上传</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">POST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/upload"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">file, _ </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">FormFile</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"file"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 保存文件</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SaveUploadedFile</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(file, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"./"</span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8">file.Filename)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"File </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> uploaded successfully"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, file.Filename)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span></code></pre>
+<p><a id="reference-多文件上传"></a></p>
+<h5 id="多文件上传">多文件上传</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 多文件上传</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">POST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/uploads"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">form, _ </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">MultipartForm</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">files </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> form.File[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"files"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, file </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> files {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SaveUploadedFile</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(file, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"./"</span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8">file.Filename)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> files uploaded successfully"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(files))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span></code></pre>
+<p><a id="reference-中间件"></a></p>
+<h3 id="中间件">中间件</h3>
+<p>Gin 的中间件可以在请求处理过程中执行一些公共的操作</p>
+<p><a id="reference-定义中间件"></a></p>
+<h4 id="定义中间件">定义中间件</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 定义一个中间件</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Logger</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">HandlerFunc</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	return</span><span style="color:#D73A49;--shiki-dark:#F97583"> func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">ctx</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		t </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> time.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Now</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">		// 在请求之前</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		ctx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Next</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">		// 在请求之后</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		latency </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> time.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Since</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(t)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"请求处理时间: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%v</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, latency)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-使用中间件"></a></p>
+<h4 id="使用中间件">使用中间件</h4>
+<p>Gin 的中间件只对<strong>在 <code>Use()</code> 调用之后注册的路由</strong>生效</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 使用中间件</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Use</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Logger</span><span style="color:#24292E;--shiki-dark:#E1E4E8">())</span></span></code></pre>
+<p><a id="reference-分组路由"></a></p>
+<h3 id="分组路由">分组路由</h3>
+<p>Gin 支持路由分组，可以更好地组织 API</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 创建v1版本的路由组</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">v1 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Group</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/v1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	v1.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">POST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/login"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, loginEndpoint)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	v1.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">POST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/submit"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, submitEndpoint)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	v1.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">POST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/read"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, readEndpoint)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 创建v2版本的路由组</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">v2 </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Group</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/v2"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	v2.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">POST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/login"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, loginEndpointV2)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	v2.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">POST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/submit"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, submitEndpointV2)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	v2.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">POST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/read"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, readEndpointV2)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-完整示例"></a></p>
+<h2 id="完整示例">完整示例</h2>
+<p>以下是一个完整的示例，展示了如何使用 Gin 框架创建一个简单的 RESTful API 服务</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">	"</span><span style="color:#6F42C1;--shiki-dark:#B392F0">log</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">	"</span><span style="color:#6F42C1;--shiki-dark:#B392F0">net/http</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">	"</span><span style="color:#6F42C1;--shiki-dark:#B392F0">github.com/gin-gonic/gin</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// User 用户模型</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> User</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	ID   </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#032F62;--shiki-dark:#9ECBFF">    `json:"id"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	Name </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> `json:"name"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	Age  </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#032F62;--shiki-dark:#9ECBFF">    `json:"age"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 模拟数据库</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> users </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#6F42C1;--shiki-dark:#B392F0">User</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	{ID: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Name: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"张三"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Age: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">25</span><span style="color:#24292E;--shiki-dark:#E1E4E8">},</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	{ID: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Name: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"李四"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Age: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">30</span><span style="color:#24292E;--shiki-dark:#E1E4E8">},</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 创建默认的路由引擎</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	r </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> gin.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Default</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 注册路由</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GET</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/users"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, getUsers)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GET</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/users/:id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, getUserByID) </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 这里的冒号表示路径参数,可以通过c.Param("id")获取</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">POST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/users"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, createUser)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">PUT</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/users/:id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, updateUser)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">DELETE</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/users/:id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, deleteUser)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 启动http服务器，监听8080端口</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Run</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">":8080"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">); err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fatalf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Server error: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%v</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, err)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 获取所有用户</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getUsers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, users)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 根据ID获取用户</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getUserByID</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	id </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Param</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, user </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> users {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		if</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(user.ID) </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> id {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">			c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, user)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">			return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusNotFound, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"User not found"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 创建用户</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> createUser</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> newUser </span><span style="color:#6F42C1;--shiki-dark:#B392F0">User</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">BindJSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">newUser); err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusBadRequest, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"error"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: err.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()})</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	users </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(users, newUser)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusCreated, newUser)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 更新用户</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> updateUser</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 获取路径参数中的ID</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	id </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Param</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> updatedUser </span><span style="color:#6F42C1;--shiki-dark:#B392F0">User</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">	// 绑定请求体中的JSON数据到updatedUser</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">BindJSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">updatedUser); err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusBadRequest, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"error"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: err.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()})</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i, user </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> users {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		if</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(user.ID) </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> id {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">			users[i] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> updatedUser</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">			c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, updatedUser)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">			return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusNotFound, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"User not found"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 删除用户</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> deleteUser</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	id </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Param</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i, user </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> users {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">		if</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(user.ID) </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> id {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">			users </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(users[:i], users[i</span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:]</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">			c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"User deleted"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">			return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">		}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusNotFound, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"User not found"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-程序测试"></a></p>
+<h3 id="程序测试">程序测试</h3>
+<p>使用 curl 命令测试 API</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 获取所有用户</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> http://localhost:8080/users</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 获取指定用户</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> http://localhost:8080/users/1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 创建用户</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -X</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> POST</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -H</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Content-Type: application/json"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '{"id":3,"name":"王五","age":35}'</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> http://localhost:8080/users</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 更新用户</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -X</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> PUT</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -H</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Content-Type: application/json"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '{"id":1,"name":"张三丰","age":26}'</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> http://localhost:8080/users/1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 删除用户</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -X</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> DELETE</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> http://localhost:8080/users/2</span></span></code></pre>
+<p><a id="reference-项目结构"></a></p>
+<h2 id="项目结构">项目结构</h2>
+<p><a id="reference-标准布局"></a></p>
+<h3 id="标准布局">标准布局</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>myapp/</span></span>
+<span class="line"><span>├── cmd/</span></span>
+<span class="line"><span>│   └── server/</span></span>
+<span class="line"><span>│       └── main.go          # 程序入口，每个可执行文件一个子目录</span></span>
+<span class="line"><span>├── internal/                # 私有代码，外部包无法导入</span></span>
+<span class="line"><span>│   ├── handler/             # 等同于 Controller 层</span></span>
+<span class="line"><span>│   ├── service/             # 业务逻辑层</span></span>
+<span class="line"><span>│   ├── repository/          # 数据访问层（DAO）</span></span>
+<span class="line"><span>│   ├── model/               # 数据库结构体（GORM Model）</span></span>
+<span class="line"><span>│   └── middleware/          # 中间件</span></span>
+<span class="line"><span>├── pkg/                     # 可被外部复用的公共库</span></span>
+<span class="line"><span>│   └── utils/</span></span>
+<span class="line"><span>├── config/                  # 配置文件（yaml/toml）</span></span>
+<span class="line"><span>├── api/                     # API 定义（Swagger/Proto）</span></span>
+<span class="line"><span>├── scripts/                 # 构建/部署脚本</span></span>
+<span class="line"><span>├── go.mod</span></span>
+<span class="line"><span>└── go.sum</span></span></code></pre>
+<table>
+<thead>
+<tr>
+<th>Spring Boot</th>
+<th>Go</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Controller</code></td>
+<td><code>internal/handler/</code></td>
+</tr>
+<tr>
+<td><code>@Service</code></td>
+<td><code>internal/service/</code></td>
+</tr>
+<tr>
+<td><code>@Repository</code></td>
+<td><code>internal/repository/</code></td>
+</tr>
+<tr>
+<td><code>@Entity</code> / <code>@Table</code></td>
+<td><code>internal/model/</code></td>
+</tr>
+<tr>
+<td><code>resources/application.yml</code></td>
+<td><code>config/config.yaml</code></td>
+</tr>
+<tr>
+<td><code>src/main/java/.../Application.java</code></td>
+<td><code>cmd/server/main.go</code></td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-原理与进阶"></a></p>
+<h2 id="原理与进阶">原理与进阶</h2>
+<p><a id="reference-路由原理压缩前缀树radix-tree"></a></p>
+<h3 id="路由原理压缩前缀树radix-tree">路由原理：压缩前缀树（Radix Tree）</h3>
+<p>Gin 的路由底层来自 <code>httprouter</code>，用<strong>压缩前缀树</strong>（Radix Tree）存储路由，而非 hash map。</p>
+<p>对比：</p>
+<table>
+<thead>
+<tr>
+<th>数据结构</th>
+<th>查找复杂度</th>
+<th>动态参数支持</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hash Map</td>
+<td>O(1)，但键是完整路径，不支持参数</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>Radix Tree</td>
+<td>O(k)，k 为路径长度，与路由数量无关</td>
+<td>支持</td>
+</tr>
+</tbody>
+</table>
+<p>每种 HTTP Method 独立维护一棵树，共享路径前缀节点，节省内存：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>GET tree:</span></span>
+<span class="line"><span>/</span></span>
+<span class="line"><span>├── users</span></span>
+<span class="line"><span>│   └── /:id</span></span>
+<span class="line"><span>└── ping</span></span></code></pre>
+<p>路由注册时，handler 存入叶节点；请求到来时从根节点逐段向下匹配，同时提取路径参数存入 <code>c.Params</code>。</p>
+<p>两种动态路径语法：</p>
+<ul>
+<li><code>:name</code>：具名参数，只匹配单段（<code>/users/:id</code> 匹配 <code>/users/1</code>，不匹配 <code>/users/1/orders</code>）</li>
+<li><code>*path</code>：通配符，匹配剩余所有段（<code>/static/*filepath</code> 匹配任意后续路径）</li>
+</ul>
+<p>同一位置不能同时注册具名参数和静态段，Gin 会在启动时 panic。</p>
+<p><a id="reference-中间件原理handler-链"></a></p>
+<h3 id="中间件原理handler-链">中间件原理：Handler 链</h3>
+<p><code>gin.Context</code> 内部维护一个 handler 切片和一个游标：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Context</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    handlers </span><span style="color:#6F42C1;--shiki-dark:#B392F0">HandlersChain</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // []HandlerFunc，中间件 + 路由 handler 的合并切片</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    index    </span><span style="color:#D73A49;--shiki-dark:#F97583">int8</span><span style="color:#6A737D;--shiki-dark:#6A737D">            // 当前执行到第几个 handler</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><code>r.Use(mw)</code> 将中间件追加到引擎的全局 handlers；路由注册时，Gin 把<strong>全局 handlers + 路由自身的 handlers</strong> 合并为一个切片，存入路由树节点。</p>
+<p>请求到来时，<code>c.index</code> 从 -1 开始，<code>c.Next()</code> 把 index 推进并依次执行：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#E36209;--shiki-dark:#FFAB70">c </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Next</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    c.index</span><span style="color:#D73A49;--shiki-dark:#F97583">++</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.index </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583"> int8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(c.handlers)) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">handlers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#6F42C1;--shiki-dark:#B392F0">c</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">index</span><span style="color:#24292E;--shiki-dark:#E1E4E8">](c)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        c.index</span><span style="color:#D73A49;--shiki-dark:#F97583">++</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><code>c.Abort()</code> 将 index 设为 <code>abortIndex</code>（63），使后续所有 handler 不再执行。</p>
+<p>执行流程（洋葱模型）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Request</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>[MW1 before] → c.Next()</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>  [MW2 before] → c.Next()</span></span>
+<span class="line"><span>    ↓</span></span>
+<span class="line"><span>    [Handler 业务逻辑]</span></span>
+<span class="line"><span>    ↑</span></span>
+<span class="line"><span>  [MW2 after]</span></span>
+<span class="line"><span>  ↑</span></span>
+<span class="line"><span>[MW1 after]</span></span>
+<span class="line"><span>  ↑</span></span>
+<span class="line"><span>Response</span></span></code></pre>
+<p><code>c.Next()</code> 之前的代码在请求处理<strong>前</strong>执行，<code>c.Next()</code> 之后的代码在<strong>后</strong>执行，这就是为什么日志中间件能同时记录请求入参和响应耗时。</p>
+<p><a id="reference-分层架构handler--service--repository"></a></p>
+<h3 id="分层架构handler--service--repository">分层架构：Handler → Service → Repository</h3>
+<p><a id="reference-为什么分层"></a></p>
+<h4 id="为什么分层">为什么分层</h4>
+<p>每层只承担一种职责：</p>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>职责</th>
+<th>只依赖</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Handler</td>
+<td>解析 HTTP 请求、参数校验、组装 HTTP 响应</td>
+<td>Service 接口</td>
+</tr>
+<tr>
+<td>Service</td>
+<td>业务逻辑编排，不感知 HTTP 协议</td>
+<td>Repository 接口</td>
+</tr>
+<tr>
+<td>Repository</td>
+<td>数据库读写，不感知业务规则</td>
+<td>DB 连接</td>
+</tr>
+</tbody>
+</table>
+<p>分层带来的好处：</p>
+<ul>
+<li><strong>可测试性</strong>：Service 层可以 mock Repository，不需要真实数据库做单元测试</li>
+<li><strong>可替换性</strong>：换数据库只改 Repository；从 HTTP 迁移到 gRPC 只改 Handler</li>
+<li><strong>故障定位快</strong>：业务 bug 在 Service，SQL 慢查询在 Repository，参数校验在 Handler</li>
+</ul>
+<p><a id="reference-通过接口依赖依赖倒置"></a></p>
+<h4 id="通过接口依赖依赖倒置">通过接口依赖（依赖倒置）</h4>
+<p>层与层之间通过<strong>接口</strong>而非具体实现依赖：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// Repository 接口定义在 service 层（或单独的 domain 层）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserRepository</span><span style="color:#D73A49;--shiki-dark:#F97583"> interface</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    FindByID</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">ctx</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">id</span><span style="color:#D73A49;--shiki-dark:#F97583"> int64</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) (</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">model</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">User</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    Save</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">ctx</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">user</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">model</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">User</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">error</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// Service 只依赖接口，不感知底层是 GORM 还是 Redis</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserService</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    repo </span><span style="color:#6F42C1;--shiki-dark:#B392F0">UserRepository</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>这样测试时可以传入 mock 实现，生产时传入 GORM 实现，配合 Wire 自动注入。</p>
+<p><a id="reference-参数绑定与校验"></a></p>
+<h3 id="参数绑定与校验">参数绑定与校验</h3>
+<p><a id="reference-shouldbind-vs-bind"></a></p>
+<h4 id="shouldbind-vs-bind">ShouldBind vs Bind</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>Bind</code> / <code>BindJSON</code></th>
+<th><code>ShouldBind</code> / <code>ShouldBindJSON</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>绑定失败时</td>
+<td>自动写 400 响应并调用 Abort</td>
+<td>只返回 error，不动响应</td>
+</tr>
+<tr>
+<td>推荐程度</td>
+<td>不推荐</td>
+<td>推荐，错误处理权交给调用方</td>
+</tr>
+</tbody>
+</table>
+<p>统一使用 <code>ShouldBind</code>，错误统一处理：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> CreateUser</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> req </span><span style="color:#6F42C1;--shiki-dark:#B392F0">CreateUserRequest</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ShouldBindJSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">req); err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusBadRequest, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"error"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: err.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()})</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // ...</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-validator-标签"></a></p>
+<h4 id="validator-标签">validator 标签</h4>
+<p>Gin 内置 <code>go-playground/validator</code>，通过结构体 <code>binding</code> tag 声明校验规则：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> CreateUserRequest</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Name  </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> `json:"name"  binding:"required,min=2,max=50"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Email </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> `json:"email" binding:"required,email"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Age   </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#032F62;--shiki-dark:#9ECBFF">    `json:"age"   binding:"gte=0,lte=150"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>常用标签：</p>
+<table>
+<thead>
+<tr>
+<th>标签</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>required</code></td>
+<td>必填（零值也会报错）</td>
+</tr>
+<tr>
+<td><code>min=n</code> / <code>max=n</code></td>
+<td>字符串最小/最大长度；数值最小/最大值</td>
+</tr>
+<tr>
+<td><code>gte=n</code> / <code>lte=n</code></td>
+<td>数值 ≥ n / ≤ n</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td>邮箱格式</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>URL 格式</td>
+</tr>
+<tr>
+<td><code>oneof=a b c</code></td>
+<td>枚举值</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-自定义校验器"></a></p>
+<h4 id="自定义校验器">自定义校验器</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> init</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> v, ok </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> binding.Validator.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Engine</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().(</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">validator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Validate</span><span style="color:#24292E;--shiki-dark:#E1E4E8">); ok {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        v.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">RegisterValidation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"phone"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, validatePhone)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> validatePhone</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">fl</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> validator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">FieldLevel</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    matched, _ </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> regexp.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">MatchString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">`^1[3-9]\d{9}$`</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, fl.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Field</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">())</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> matched</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 使用：binding:"required,phone"</span></span></code></pre>
+<p><a id="reference-restful-api-设计"></a></p>
+<h3 id="restful-api-设计">RESTful API 设计</h3>
+<p><a id="reference-核心原则"></a></p>
+<h4 id="核心原则">核心原则</h4>
+<ul>
+<li><strong>资源用名词，复数</strong>：<code>/users</code>，不用 <code>/getUsers</code> 或 <code>/user</code></li>
+<li><strong>用 HTTP 方法表达操作</strong>：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>用途</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td>查询</td>
+<td><code>GET /users</code>、<code>GET /users/:id</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td>创建</td>
+<td><code>POST /users</code></td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>全量更新</td>
+<td><code>PUT /users/:id</code>（传完整资源）</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td>部分更新</td>
+<td><code>PATCH /users/:id</code>（只传变更字段）</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>删除</td>
+<td><code>DELETE /users/:id</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>用状态码表达结果</strong>：200 成功、201 创建成功、204 成功无响应体、400 参数错误、401 未认证、403 无权限、404 不存在、500 服务器错误</li>
+<li><strong>嵌套资源</strong>用路径表达归属：<code>GET /users/:id/orders</code></li>
+</ul>
+<p><a id="reference-统一响应格式"></a></p>
+<h4 id="统一响应格式">统一响应格式</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Response</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Code    </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#032F62;--shiki-dark:#9ECBFF">         `json:"code"`</span><span style="color:#6A737D;--shiki-dark:#6A737D">           // 业务错误码，0 表示成功</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Message </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#032F62;--shiki-dark:#9ECBFF">      `json:"message"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Data    </span><span style="color:#D73A49;--shiki-dark:#F97583">interface</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{} </span><span style="color:#032F62;--shiki-dark:#9ECBFF">`json:"data,omitempty"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Success</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">data</span><span style="color:#D73A49;--shiki-dark:#F97583"> interface</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{}) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusOK, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Response</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{Code: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Message: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"ok"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Data: data})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Fail</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">httpCode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">bizCode</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">msg</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(httpCode, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Response</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{Code: bizCode, Message: msg})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-统一错误处理"></a></p>
+<h3 id="统一错误处理">统一错误处理</h3>
+<p><a id="reference-定义业务错误类型"></a></p>
+<h4 id="定义业务错误类型">定义业务错误类型</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> AppError</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Code    </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // 业务错误码</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Message </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // 对外暴露的信息</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Err     </span><span style="color:#D73A49;--shiki-dark:#F97583">error</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 内部原始错误，不对外暴露</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#E36209;--shiki-dark:#FFAB70">e </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">AppError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> { </span><span style="color:#D73A49;--shiki-dark:#F97583">return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> e.Message }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#E36209;--shiki-dark:#FFAB70">e </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">AppError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Unwrap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">error</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> { </span><span style="color:#D73A49;--shiki-dark:#F97583">return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> e.Err }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ErrNotFound  </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">AppError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{Code: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10001</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Message: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"资源不存在"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ErrUnAuth    </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">AppError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{Code: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10002</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Message: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"未登录"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ErrForbidden </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">AppError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{Code: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10003</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Message: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"无权限"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p><a id="reference-错误收口中间件"></a></p>
+<h4 id="错误收口中间件">错误收口中间件</h4>
+<p>Handler 只负责把错误挂到 Context，中间件统一处理响应：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ErrorHandler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">HandlerFunc</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#D73A49;--shiki-dark:#F97583"> func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Next</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(c.Errors) </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.Errors.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Last</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().Err</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> appErr </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">AppError</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> errors.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">As</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(err, </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">appErr) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusBadRequest, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Response</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{Code: appErr.Code, Message: appErr.Message})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        } </span><span style="color:#D73A49;--shiki-dark:#F97583">else</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            // 未预期的错误，不暴露细节</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"unexpected error: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%v</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, err)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusInternalServerError, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Response</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{Code: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">50000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, Message: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"服务器内部错误"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// Handler 中只需要：</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ErrNotFound)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Abort</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span></code></pre>
+<p><a id="reference-日志鉴权限流"></a></p>
+<h3 id="日志鉴权限流">日志、鉴权、限流</h3>
+<p><a id="reference-日志zap"></a></p>
+<h4 id="日志zap">日志：zap</h4>
+<p>生产环境推荐 <code>go.uber.org/zap</code>，结构化日志，性能远优于标准库 <code>log</code>（零 alloc 热路径）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> RequestLogger</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">logger</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">zap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Logger</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">HandlerFunc</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#D73A49;--shiki-dark:#F97583"> func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        requestID </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> uuid.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">New</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Set</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"request_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, requestID)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        start </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> time.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Now</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Next</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        logger.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Info</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http request"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            zap.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"request_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, requestID),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            zap.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"method"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, c.Request.Method),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            zap.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"path"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, c.Request.URL.Path),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            zap.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"status"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, c.Writer.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Status</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            zap.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Duration</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"latency"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, time.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Since</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(start)),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            zap.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"client_ip"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ClientIP</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>每个请求生成唯一 <code>request_id</code>，存入 Context，在 Service/Repository 层继续透传，方便全链路追踪。</p>
+<p><a id="reference-鉴权jwt-中间件"></a></p>
+<h4 id="鉴权jwt-中间件">鉴权：JWT 中间件</h4>
+<p>JWT（JSON Web Token）是无状态鉴权方案，服务端不存 session，token 自带用户信息和签名：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> JWTAuth</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">secret</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#D73A49;--shiki-dark:#F97583">byte</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">HandlerFunc</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#D73A49;--shiki-dark:#F97583"> func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        tokenStr </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TrimPrefix</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GetHeader</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Authorization"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">), </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Bearer "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        claims, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> parseToken</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(tokenStr, secret)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusUnauthorized, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"invalid token"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Abort</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 把用户信息存入 Context，供后续 handler 取用</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Set</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, claims.UserID)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Next</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// Handler 中取用：</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">userID </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GetInt64</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p><a id="reference-限流令牌桶"></a></p>
+<h4 id="限流令牌桶">限流：令牌桶</h4>
+<p>使用 <code>golang.org/x/time/rate</code>（官方库）实现令牌桶：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 全局限流</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> RateLimiter</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">r</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> rate</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Limit</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">burst</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">HandlerFunc</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    limiter </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> rate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewLimiter</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(r, burst)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#D73A49;--shiki-dark:#F97583"> func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">c</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#D73A49;--shiki-dark:#F97583"> !</span><span style="color:#24292E;--shiki-dark:#E1E4E8">limiter.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Allow</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">JSON</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(http.StatusTooManyRequests, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">gin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">H</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"too many requests"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Abort</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Next</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// r.Use(RateLimiter(100, 200)) // 每秒 100 个请求，桶容量 200（允许短暂突发）</span></span></code></pre>
+<p>生产上通常需要<strong>按 IP 或用户 ID 维度</strong>限流，用 <code>sync.Map</code> 为每个 key 维护独立 limiter，并定期清理过期条目。</p>
+<p><a id="reference-优雅关闭"></a></p>
+<h3 id="优雅关闭">优雅关闭</h3>
+<p><code>r.Run()</code> 内部直接调用 <code>http.ListenAndServe</code>，进程退出时正在处理的请求会被强制中断。</p>
+<p>正确做法是手动管理 <code>http.Server</code>，监听系统信号后调用 <code>Shutdown</code>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    r </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> gin.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Default</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 注册路由...</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    srv </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">http</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Server</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Addr:    </span><span style="color:#032F62;--shiki-dark:#9ECBFF">":8080"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Handler: r,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    go</span><span style="color:#D73A49;--shiki-dark:#F97583"> func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> srv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ListenAndServe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(); err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;&amp;</span><span style="color:#D73A49;--shiki-dark:#F97583"> !</span><span style="color:#24292E;--shiki-dark:#E1E4E8">errors.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Is</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(err, http.ErrServerClosed) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fatalf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"listen: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%v</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, err)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    quit </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> make</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">chan</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> os</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Signal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    signal.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Notify</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(quit, syscall.SIGINT, syscall.SIGTERM)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    &lt;-</span><span style="color:#24292E;--shiki-dark:#E1E4E8">quit</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Shutting down server..."</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 给进行中的请求最多 5 秒完成</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ctx, cancel </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> context.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">WithTimeout</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(context.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Background</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(), </span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">time.Second)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    defer</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> cancel</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> srv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Shutdown</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx); err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fatal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Server forced to shutdown:"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, err)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Server exited"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><code>srv.Shutdown()</code> 的行为：停止接受新连接 → 等待活跃请求处理完毕（直到超时）→ 关闭所有空闲连接。</p>
+<p><a id="reference-性能优化"></a></p>
+<h3 id="性能优化">性能优化</h3>
+<p><a id="reference-关闭调试模式"></a></p>
+<h4 id="关闭调试模式">关闭调试模式</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">gin.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SetMode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(gin.ReleaseMode) </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 必须在 gin.New()/gin.Default() 之前调用</span></span></code></pre>
+<p>Debug 模式下 Gin 会打印每条已注册路由，日志更啰嗦，生产环境必须关闭。</p>
+<p><a id="reference-用-ginnew-替代-gindefault"></a></p>
+<h4 id="用-ginnew-替代-gindefault">用 <code>gin.New()</code> 替代 <code>gin.Default()</code></h4>
+<p><code>gin.Default()</code> 自带 Logger 和 Recovery 中间件。已接入 zap 等自定义日志时，改用 <code>gin.New()</code> 只挂必要的中间件，避免双重日志开销。</p>
+<p><a id="reference-设置合理的-server-超时"></a></p>
+<h4 id="设置合理的-server-超时">设置合理的 Server 超时</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">srv </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">http</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Server</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Addr:         </span><span style="color:#032F62;--shiki-dark:#9ECBFF">":8080"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Handler:      r,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ReadTimeout:  </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> time.Second, </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 读取完整请求（含 body）的超时，防慢客户端攻击</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    WriteTimeout: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> time.Second, </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 写响应的超时</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    IdleTimeout:  </span><span style="color:#005CC5;--shiki-dark:#79B8FF">60</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> time.Second, </span><span style="color:#6A737D;--shiki-dark:#6A737D">// keep-alive 连接的空闲超时</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>不设超时的服务在遭遇慢客户端时会堆积大量 goroutine，最终耗尽内存。</p>
+<p><a id="reference-pprof-性能分析"></a></p>
+<h4 id="pprof-性能分析">pprof 性能分析</h4>
+<p>定位 CPU 热点和内存泄漏：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ginpprof </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#6F42C1;--shiki-dark:#B392F0">github.com/gin-contrib/pprof</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 建议只在内网或 debug 路由组开启</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ginpprof.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Register</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(r)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 访问 http://localhost:8080/debug/pprof/</span></span></code></pre>
+<p>采样 30 秒 CPU profile：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> tool</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pprof</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> http://localhost:8080/debug/pprof/profile?seconds=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">30</span></span></code></pre>
+<p><a id="reference-减少内存分配"></a></p>
+<h4 id="减少内存分配">减少内存分配</h4>
+<ul>
+<li>高频路径避免大量字符串拼接，用 <code>strings.Builder</code></li>
+<li>频繁创建的临时结构体用 <code>sync.Pool</code> 复用，减少 GC 压力</li>
+<li>用 <code>c.JSON</code> 直接写响应，避免先序列化到 <code>[]byte</code> 再写入</li>
+</ul>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>Abort 为什么需要与 return 的控制流区别理解？</li>
+<li>参数绑定成功是否等于业务约束已验证？</li>
+<li>使用 gin.New 后需要自行补上哪些中间件？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#安装-gin">安装 Gin</a></li><li style="--depth: 1"><a href="#基本使用">基本使用</a></li><li style="--depth: 2"><a href="#创建-http-服务器">创建 HTTP 服务器</a></li><li style="--depth: 2"><a href="#路由参数">路由参数</a></li><li style="--depth: 2"><a href="#处理表单数据">处理表单数据</a></li><li style="--depth: 2"><a href="#处理-json-数据">处理 JSON 数据</a></li><li style="--depth: 3"><a href="#将请求体-json-绑定到结构体上">将请求体 JSON 绑定到结构体上</a></li><li style="--depth: 3"><a href="#使用-map-接收-json">使用 map 接收 JSON</a></li><li style="--depth: 2"><a href="#上传文件">上传文件</a></li><li style="--depth: 3"><a href="#单文件上传">单文件上传</a></li><li style="--depth: 3"><a href="#多文件上传">多文件上传</a></li><li style="--depth: 1"><a href="#中间件">中间件</a></li><li style="--depth: 2"><a href="#定义中间件">定义中间件</a></li><li style="--depth: 2"><a href="#使用中间件">使用中间件</a></li><li style="--depth: 1"><a href="#分组路由">分组路由</a></li><li style="--depth: 0"><a href="#完整示例">完整示例</a></li><li style="--depth: 1"><a href="#程序测试">程序测试</a></li><li style="--depth: 0"><a href="#项目结构">项目结构</a></li><li style="--depth: 1"><a href="#标准布局">标准布局</a></li><li style="--depth: 0"><a href="#原理与进阶">原理与进阶</a></li><li style="--depth: 1"><a href="#路由原理压缩前缀树radix-tree">路由原理：压缩前缀树（Radix Tree）</a></li><li style="--depth: 1"><a href="#中间件原理handler-链">中间件原理：Handler 链</a></li><li style="--depth: 1"><a href="#分层架构handler--service--repository">分层架构：Handler → Service → Repository</a></li><li style="--depth: 2"><a href="#为什么分层">为什么分层</a></li><li style="--depth: 2"><a href="#通过接口依赖依赖倒置">通过接口依赖（依赖倒置）</a></li><li style="--depth: 1"><a href="#参数绑定与校验">参数绑定与校验</a></li><li style="--depth: 2"><a href="#shouldbind-vs-bind">ShouldBind vs Bind</a></li><li style="--depth: 2"><a href="#validator-标签">validator 标签</a></li><li style="--depth: 2"><a href="#自定义校验器">自定义校验器</a></li><li style="--depth: 1"><a href="#restful-api-设计">RESTful API 设计</a></li><li style="--depth: 2"><a href="#核心原则">核心原则</a></li><li style="--depth: 2"><a href="#统一响应格式">统一响应格式</a></li><li style="--depth: 1"><a href="#统一错误处理">统一错误处理</a></li><li style="--depth: 2"><a href="#定义业务错误类型">定义业务错误类型</a></li><li style="--depth: 2"><a href="#错误收口中间件">错误收口中间件</a></li><li style="--depth: 1"><a href="#日志鉴权限流">日志、鉴权、限流</a></li><li style="--depth: 2"><a href="#日志zap">日志：zap</a></li><li style="--depth: 2"><a href="#鉴权jwt-中间件">鉴权：JWT 中间件</a></li><li style="--depth: 2"><a href="#限流令牌桶">限流：令牌桶</a></li><li style="--depth: 1"><a href="#优雅关闭">优雅关闭</a></li><li style="--depth: 1"><a href="#性能优化">性能优化</a></li><li style="--depth: 2"><a href="#关闭调试模式">关闭调试模式</a></li><li style="--depth: 2"><a href="#用-ginnew-替代-gindefault">用 gin.New() 替代 gin.Default()</a></li><li style="--depth: 2"><a href="#设置合理的-server-超时">设置合理的 Server 超时</a></li><li style="--depth: 2"><a href="#pprof-性能分析">pprof 性能分析</a></li><li style="--depth: 2"><a href="#减少内存分配">减少内存分配</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

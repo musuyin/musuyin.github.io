@@ -1,0 +1,735 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>interview · Musuyin&#39; Home</title><meta name="description" content="面试知识需要围绕组件协作展开：API 接收意图，控制器维持对象关系，Scheduler 选择节点，Kubelet 组织执行。把对象、控制面和数据面连起来后，再进入调度、网络、存储与故障场景。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-interview/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="interview · Musuyin' Home"><meta property="og:description" content="面试知识需要围绕组件协作展开：API 接收意图，控制器维持对象关系，Scheduler 选择节点，Kubelet 组织执行。把对象、控制面和数据面连起来后，再进入调度、网络、存储与故障场景。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-interview/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">interview</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-09-07">2026-09-07</time></dd></div><div><dt>字数</dt><dd>14285</dd></div><div><dt>预计阅读</dt><dd>48 分钟</dd></div></dl></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>interview</h1><time datetime="2026-09-07">2026-09-07</time></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>面试知识需要围绕组件协作展开：API 接收意图，控制器维持对象关系，Scheduler 选择节点，Kubelet 组织执行。把对象、控制面和数据面连起来后，再进入调度、网络、存储与故障场景。</p>
+<p><a id="reference-第一篇基础概念篇"></a></p>
+<h2 id="第一篇基础概念篇">第一篇：基础概念篇</h2>
+<p><strong>定位：</strong>  夯实  Kubernetes  的基础认知，弄清组件与对象的关系</p>
+<p><strong>主要内容：</strong></p>
+<ul>
+<li>K8s 的核心组件与架构（API Server、ControllerManager、Scheduler、etcd、Kubelet、Kube-Proxy）</li>
+<li>Pod、ReplicaSet、Deployment、Namespace 基础</li>
+<li>ConfigMap、Secret 的区别与使用场景</li>
+<li>Pod 生命周期与状态流转</li>
+<li>控制器工作机制与 Reconciliation Loop</li>
+</ul>
+<p><strong>示例面试题：</strong></p>
+<ol>
+<li>描述一下 K8s 各种组件的功能？</li>
+</ol>
+<blockquote>
+<p><strong>控制平面</strong></p>
+<ol>
+<li>kube-apiserver：中心控制组件，负责处理所有 REST 请求，并将结果状态持久化到 etcd 中，提供了 K8s 集群的 API，是与 K8s 集群进行交互的唯一入口，并负责验证请求、进行身份认证和授权</li>
+<li>kube-controller-manager：负责管理 K8s 集群中的所有控制器，每个控制器都负责一种资源状态的调整，确保 K8s 集群处于预期状态</li>
+<li>kube-scheduler：默认调度器，负责调度 Pod 到合适的节点上，根据调度策略（如资源请求、亲和性、反亲和性等）为 Pod 选择一个最优的节点，只做决策，不实际执行 Pod 的创建过程</li>
+<li>etcd：强一致性的分布式键值数据库，持久化存储整个集群的所有配置数据和状态数据，保证集群的的高可用性、可靠性及一致性</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>工作节点</strong></p>
+<ol>
+<li>kubelet：每个节点上运行的主要组件，负责管理节点上容器的生命周期，定期向 master 节点报告当前节点和 Pod 的状态，是 master 和 node 节点通信的桥梁，执行主节点下发的命令</li>
+<li>kube-proxy：网络代理，负责实现 K8s 服务的网络抽象和负载均衡，它将对服务的访问转发到后端的一组 Pod 上，提供服务的网络访问能力，确保服务的可靠性和可扩展性</li>
+<li>容器运行时：负责在节点上运行容器的运行时环境，支持 Docker、Containerd、CRI-O 等，是容器化应用运行的基础，提供容器的创建、运行和管理能力</li>
+</ol>
+</blockquote>
+<ol start="2">
+<li>K8s 常见控制器有哪些？</li>
+</ol>
+<blockquote>
+<ol>
+<li><strong>Deployment</strong><br>
+管理无状态应用的部署和生命周期，用户只需声明目标状态，Deployment 控制器会自动对 Replicaset 进行操作，确保集群达到期望状态，提供滚动更新和回滚、扩缩容等能力；适用于不需要持久化存储或稳定网络标识的应用</li>
+<li><strong>StatefulSet</strong><br>
+管理有状态应用，确保每个 Pod 有唯一的网络标识和持久化存储，支持有序部署和扩展；适用于需要持久化数据和稳定网络标识的应用</li>
+<li><strong>DaemonSet</strong><br>
+确保在所有节点上都运行一个 Pod 副本，当有新节点加入 K8s 集群时，会自动在该节点上新增一个 Pod，当节点被移除时，Pod 也会被回收；适用于日志收集器（如 Filebeat）、节点监控代理（如 Node Exporter）、网络插件（如 flannel）等</li>
+<li><strong>Job</strong><br>
+用于完成一次性任务，支持重试和并行处理，并确保 Pod 在完成工作后终止；适用于一次性任务或周期性任务，如数据处理和分析</li>
+<li><strong>CronJob</strong><br>
+基于时间表（Cron 格式）周期性地运行 Job ；适用于定期备份、报告生成等场景</li>
+<li><strong>ReplicaSet</strong><br>
+确保在任何时候都有指定数量的 Pod 副本在运行，是 Deployment 底层真正控制副本数的组件，通常不直接操作，通过 Deployment 来管理它</li>
+</ol>
+</blockquote>
+<ol start="3">
+<li>Pod 分为有状态和无状态两种类型，请问它们的区别是什么？</li>
+</ol>
+<blockquote>
+<p><strong>无状态 Pod</strong></p>
+<ol>
+<li>不存储需要持久化的数据，或数据存储在外部集群，实例完全等同且可替代</li>
+<li>通常使用 EmptyDir（随 Pod 销毁而销毁）或直连外部存储服务（MySQL、Redis 等）</li>
+<li>Pod 重建后，名字和 IP 都会发生改变</li>
+<li>使用 Deployment 控制器，Pod 的创建、销毁和扩缩容都是无序、随机的</li>
+<li>典型应用场景比如 web 服务器、API 网关、微服务等</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>有状态 Pod</strong></p>
+<ol start="6">
+<li>必须持久化存储数据，每个 Pod 都有唯一的身份标识和稳定的持久化存储，实例不可替代</li>
+<li>必须使用 PV 和 PVC，确保 Pod 重启或重新调度时能挂载到同一个数据卷，确保数据不丢失</li>
+<li>具有稳定的网络标识（如 DNS 名称），Pod 名称也是固定不变的</li>
+<li>使用 StatefulSet 控制器，Pod 的创建、销毁等都遵循严格的顺序（如从 0 到 N-1 的顺序扩展）</li>
+<li>典型应用场景比如数据库、消息队列、分布式缓存等</li>
+</ol>
+</blockquote>
+<ol start="4">
+<li>Pod 频繁重启是什么原因，如何排查？</li>
+</ol>
+<p>根本原因是容器进程终止了，kubelet 会根据 Pod 的 RestartPolicy 策略（通常是 Always）尝试重启来恢复服务</p>
+<blockquote>
+<p><strong>常见原因</strong></p>
+<ol>
+<li>OOM：Pod 内存 requests / limits 设置过小，触发 OOM</li>
+<li>应用本身 bug：代码存在未处理的异常（如空指针、内存泄漏等）；依赖服务（数据库、API）不可用导致频繁重启</li>
+<li>存活探针配置不当：检测路径、端口或超时时间错误；应用启动较慢，但 initalDelaySeconds 设置过短，导致探测过早触发</li>
+<li>节点资源不足：节点 CPU、内存耗尽，网络故障或其他硬件故障</li>
+<li>镜像问题：私有镜像未配置 imagePullSecrets 或镜像标签错误；镜像中未指定持久化进程，启动后立即退出</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>排查步骤</strong></p>
+<ol start="6">
+<li>检查 Pod 状态与事件：使用 kubectl describe pod 查看，结合 Events 和 Containers 部分内容，重点关注 Last State，能看到 Pod 重启原因（如 OOMKillerd、ERROR 等）、状态码等信息，非 0 状态码代表异常退出（应用进程崩溃、抛出未捕获的异常等）</li>
+<li>检查 Pod 日志：使用 kubectl logs 查看日志，以及使用 –previous 参数查看 Pod 重启前的日志是否有异常信息</li>
+<li>检查探针配置：如果前两步都没有发现明显错误，那么可能是存活探针失败导致的重启，检查 Pod 的 Yaml 文件定义中 livenessProbe 的配置，排查探测端点（path）是否设置错误；或者是初始延迟时间太短，应用启动较慢导致还没准备好接收请求，探针就开始检查并失败；或者是超时时间（timeoutSeconds）或探测周期（periodSeconds）设置不合理</li>
+<li>检查资源限制：如果看到 OOM，使用 kubectl top pod 查看 Pod 的资源使用情况，kubectl describe 查看资源限制，检查 limits.memory 是否小于 Pod 实际运行时的内存</li>
+<li>深入排查：如果上面步骤都无法定位问题，使用 kubectl describe node 查看节点总体资源分配和剩余情况，可能是节点资源不足导致 Pod 被驱逐，查看 Conditions 部分是否存在磁盘压力、内存压力等问题；确认容器镜像的版本和标签是否正确；如果 Pod 挂载了 PVC，检查存储是否能成功挂载</li>
+</ol>
+</blockquote>
+<ol start="5">
+<li>Pod 创建的底层流程是什么？</li>
+</ol>
+<blockquote>
+<ol start="11">
+<li>集群管理员通过 kubectl 或者客户端等构建 REST 请求，经由 API Server 进行鉴权认证（使用 kubeconfig 文件），验证准入信息后将请求数据（metadata）写入 etcd 中</li>
+<li>控制器组件通过 watch 机制发现创建 Pod 的信息，并将整合信息通过 API Server 写入 etcd 中，此时 Pod 处于可调度状态</li>
+<li>调度器组件基于 watch 机制获取可调度 Pod 的列表信息，通过调度算法（过滤或打分）为待调度 Pod 选择最合适的节点，并将创建 Pod 信息写入 etcd 中，创建请求发送给节点上的 kubelet</li>
+<li>kubelet 收到 Pod 创建请求后，调用 CNI 接口为 Pod 创建网络环境，调用 CRI 接口创建 Pod 内部容器，调用 CSI 接口对 Pod 进行存储卷的挂载</li>
+<li>等待 Pod 内部运行环境创建完成，基于探针或者监控检查监测业务运行容器启动状态，启动完成后 Pod 处于 running 状态，Pod 进入运行阶段</li>
+</ol>
+</blockquote>
+<ol start="6">
+<li>Kubelet 的功能、作用是什么？</li>
+</ol>
+<blockquote>
+<ol start="16">
+<li><strong>Pod 生命周期管理</strong><br>
+kubelet 会持续监听 API Server，一旦发现有分配给其所在节点的 Pod，会根据 Pod 定义文件中的描述，调用底层的容器运行时来拉取镜像并启动容器；kubelet 确保 Pod 中所有容器都健康运行，如果某个容器崩溃，kubelet 会根据 Pod 的重启策略决定是否重启；当 API Server 通知删除 Pod 时，kubelet 会先发送 SIGTERM 信号优雅终止 Pod，并清理相关资源</li>
+<li><strong>节点状态报告</strong><br>
+kubelet 定期向 API Server 发送节点状态，包括 CPU、内存、磁盘空间等，这些信息是 Master 做出调度决策的基础；通过 cAdvisor 收集本节点上所有 Pod 和容器的资源使用量</li>
+<li><strong>与容器运行时交互</strong><br>
+kubelet 通过 CRI 标准接口与容器运行时进行通信；kubelet 本身不直接操作容器，而是通过 CRI 来执行比如创建、启动、停止等操作；kubelet 支持多种容器运行时</li>
+<li><strong>容器健康检查</strong><br>
+kubelet 负责执行 Pod 中定义的三种探针，比如启动探针判断容器是否已启动完成；存活探针判断容器是否还在正常运行，如果检查失败，kubelet 会重启该容器；就绪探针判断容器是否已准备好接收流量，如果检查失败，kubelet 会将该 Pod 从关联的 Service 的负载均衡端点（Endpoints）中移除</li>
+<li><strong>与网络和存储插件交互</strong><br>
+kubelet 不直接提供网络，但它会调用 CNI 插件（如 flannel）为 Pod 配置网络；kubelet 会调用 CSI 插件来挂载 Pod 请求的持久化存储卷</li>
+</ol>
+</blockquote>
+<ol start="7">
+<li>描述一下 Pod 生命周期？</li>
+</ol>
+<blockquote>
+<p><strong>Pod 生命周期状态</strong></p>
+<ol start="21">
+<li>Pending（挂起）：Pod 已经被 API Server 接受，但有一个或者多个容器尚未创建完成；通常处于拉取镜像、调度决策的阶段</li>
+<li>Rrunning（运行）：Pod 已经绑定到了某个节点，并且所有容器都已经被创建，至少有一个容器仍在运行或者正在启动或重启中</li>
+<li>Succeeded（成功）：Pod 中的所有容器都已成功终止，并且不会再重启；常见于 Job</li>
+<li>Failed（失败）：Pod 中的所有容器都已终止，并且至少有一个容器是因为失败而终止（非 0 状态码退出）</li>
+<li>Unknown（未知）：通常是因为与 Pod 所在节点的 kubelet 通信失联，无法获取 Pod 的状态</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>补充说明</strong></p>
+<ol start="26">
+<li>CrashLoopBackOff：<code>复合状态</code>，本质上来讲是因为 Pod 不断崩溃，然后被 kubelet 不断重启导致的，K8s 为了应对这种故障，会使用指数退避策略来延迟重启的时间，这个阶段就是 CrashLoopBackOff ；常见触发原因比如应用自身错误（代码 bug、配置错误等）、资源配额不足（CPU 或内存设置过小导致 OOM）、探针配置不当（存活探针配置错误）、镜像问题（镜像不存在或无法拉取等）</li>
+<li>Terminating：<code>过渡状态</code>，本质上来讲是因为执行 kubelet delete pod 后，Pod 不会立即消失，会进入 Terminating 状态，并执行优雅终止流程；常见触发原因比如节点失联（Node 节点宕机或与 Master 的网络中断等）</li>
+</ol>
+</blockquote>
+<ol start="8">
+<li>K8s 命名空间的作用是什么？</li>
+</ol>
+<blockquote>
+<ol start="28">
+<li><strong>资源隔离</strong><br>
+把集群内的资源（如 Pod、Service 等）进行资源隔离，避免不同业务的资源相互干扰；比如把生产环境和测试环境分别在 prod 和 test 命名空间运行，即使资源名字相同也不会冲突</li>
+<li><strong>权限控制</strong><br>
+RBAC（基于角色的访问控制）的作用域，可以针对某个命名空间设置用户的访问权限；比如开发人员只允许访问 dev，而运维人员可以访问所有</li>
+<li><strong>资源配额管理</strong><br>
+可以为命名空间配置资源配额，限制该命名空间内的 CPU、内存、Pod 数量等；比如创建 ResourceQuota 资源使用 hard 对命名空间 test 进行资源配额，避免测试环境占满整个集群资源</li>
+<li><strong>便于管理和组织</strong><br>
+命名空间相当于逻辑分组；比如使用 kubelet get pod -n 就能快速查看某个业务 Pod，避免全局混乱</li>
+</ol>
+</blockquote>
+<p><a id="reference-第二篇调度与资源管理篇"></a></p>
+<h3 id="第二篇调度与资源管理篇">第二篇：调度与资源管理篇</h3>
+<p>定位： 理解调度器如何决策 Pod 的归宿<br>
+主要内容：</p>
+<ul>
+<li>Scheduler 调度流程与调度算法</li>
+<li>NodeAffinity、PodAffinity、Taint/Toleration</li>
+<li>Requests、Limits、QoS Classes</li>
+<li>Pod Priority 与 Preemption</li>
+<li>节点标签与调度约束</li>
+</ul>
+<p><strong>示例面试题：</strong></p>
+<ol>
+<li>Pod 是如何被调度到节点上的？</li>
+</ol>
+<p>Pod 被调度到节点上的过程，核心是由 kube-scheduler 这个核心组件来驱动的，整个过程可以概括为 <code>过滤</code> 和 <code>评分</code> 两个核心阶段，当创建一个 Pod 时，API Server  会接收到这个请求，并将其持久化到 etcd 中，此时这个 Pod 在 API Server 中的记录是 pending 状态，并且 nodeName 字段是空的，kube-scheduler 作为一个控制器会持续监听 API Server，寻找那些 nodeName 为空且未被调度的 Pod，一旦发现这样的 Pod，调度器便会开始工作</p>
+<blockquote>
+<p><strong>过滤</strong><br>
+这个阶段也称为 Predicate，调度器会基于一系列预定义的策略，对所有健康的节点进行筛选，过滤掉那些不满足要求的节点，目标是找出一个可以运行该 Pod 的节点候选集，常见的 <code>过滤策略</code> 包括：</p>
+<ol>
+<li>PodFitsResources：检查节点的可分配资源（CPU、内存）是否满足 Pod 的 requests 中声明的需求，如果一个节点剩余的可分配 CPU 不足 1 核，而 Pod 请求了 1 核，那么这个节点会被过滤掉</li>
+<li>PodFitsHostPorts：检查 Pod 声明的 hostPort 在节点上是否已经被占用</li>
+<li>MatchNodeSelector：检查节点标签是否匹配 Pod 规范中定义的 nodeselector 或 nodeAffinity 规则</li>
+<li>CheckNodeVolumeZone：检查持久卷的可用区是否与节点匹配，主要用于跨多可用区的集群</li>
+<li>CheckNodeMemoryPressure / CheckNodeDiskPressure：检查节点是否存在内存或磁盘压力，如果节点压力过大，则不会将 Pod 调度上去</li>
+<li>PodToleratesNodeTaints：检查 Pod 的 tolerations 是否能够容忍（Tolerate）节点的污点（Taint），这是实现 Pod <code>排斥机制</code> 的关键</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>评分</strong><br>
+这个阶段也称为 Priority，当有多个节点都满足基本要求时，调度器需要决定哪个是”最优“的，调度器会为每个候选节点进行打分，分数范围是 0~10 分，得分最高的节点就是最终被选中的节点，常见的 <code>评分策略</code> 包括：</p>
+<ol start="7">
+<li>LeastRequestedPriority：倾向于将 Pod 调度到资源请求需求更少的节点上，换句话说，优先选择资源更充裕的节点，计算公式大致是 <code>得分=（节点可分配 CPU - Pod 请求 CPU） / 节点总 CPU * 10</code>，内存同理，然后取平均值</li>
+<li>BalancedResourceAllocation：在节点上平衡 CPU 和内存的使用率，它倾向于选择调度后 CPU 和内存使用率更均衡的节点，避免出现 CPU 用满而内存剩余很多或很少的情况</li>
+<li>ImageLocalityPriority：倾向于选择已经缓存了 Pod 所需容器镜像的节点，可以加速 Pod 启动过程</li>
+<li>NodeAffinityPriority：根据节点亲和性规则进行加权评分</li>
+<li>InterPodAffinity / Anti-Affinity：根据 Pod 亲和性或反亲和性规则进行评分，比如希望同一服务的多个 Pod 分散在不通节点上（使用反亲和性）以获得高可用</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>最终绑定</strong><br>
+选出最优节点后，调度器并不会直接去节点上创建 Pod，它会调用 API Server，执行一个 <code>绑定</code> 操作，将这个 Pod 的 nodeName 字段更新为选中的节点名称，这个写操作被 API Server 接收后，Pod 在 Etcd 中的记录就被更新了，随后该节点上的 kubelet（它也会持续监听 API Server 中与自己节点相关的 Pod）会检测到这个属于它的、且尚未运行的 Pod，于是 kubelet 会负责拉取镜像、创建容器、启动 Pod 等一系列操作</p>
+</blockquote>
+<ol start="2">
+<li>什么是 QoS Class？</li>
+</ol>
+<p>QoS Class，全称是服务质量等级，它是 K8s 内部根据 Pod 中容器设置的 <code>资源请求和限制</code>，自动为 Pod 分配的一个 <code>优先级分类</code>，核心目的是在节点资源（主要是 CPU 和内存）不足时，帮助 K8s 做出决策，决定应该“牺牲”哪些 Pod 来保障更重要的 Pod 运行，从而确保整个系统的稳定性<br>
+K8s 将 Pod 的 Qos Class 分为三个等级，从高到底依次是：<code>Guaranteed &gt; Burstable &gt; Best-Effort</code></p>
+<blockquote>
+<ol>
+<li><strong>Guaranteed（保证级别）- 最高优先级</strong><br>
+这类 Pod 获得所需要的资源的保证，当节点资源耗尽时，这类 Pod 是最后被考虑杀死的，因此服务质量最高<br>
+判定条件：Pod 中的每一个容器都必须设置资源请求和资源限制；对于 CPU 和内存这两种资源，请求值必须等于限制值<br>
+适用场景：核心业务，如数据库、关键应用服务，需要确保它们在任何情况下都能获得所需资源</li>
+<li><strong>Burstable（可突发级别）- 中等优先级</strong><br>
+这类 Pod 被确保能获得它所请求的资源量，在节点充足时，它有可能突发使用超过请求值的资源（但不能超过限制值）；当节点资源不足时，它的优先级低于 Guaranteed，但高于 Best-Effort<br>
+判定条件：Pod 不符合 Guaranteed 的标准；但 Pod 至少有一个容器设置了资源请求或限制<br>
+适用场景：大多数常规业务应用，平时资源需求稳定，但在高峰期可能需要更多资源</li>
+<li><strong>Best-Effort（尽力而为级别）- 最低优先级</strong><br>
+这类 Pod 可以使用的资源没有下限（请求为 0），也没有上限（理论上可以使用节点所有空闲资源），但是当节点资源不足时，它们会是最先被系统杀死的对象<br>
+判定条件：Pod 中的所有容器都没有设置任何资源请求和限制<br>
+适用场景：非核心的、可随时重启的批处理任务等，对可用性要求不高的场景</li>
+</ol>
+</blockquote>
+<ol start="3">
+<li>如何让 Pod 优先调度到某台节点？</li>
+</ol>
+<p>使用节点亲和性的“软偏好”规则，给目标节点打上一个独特标签，然后在 Pod 的配置中声明对该标签的偏好，并赋予较高权重</p>
+<blockquote>
+<ol>
+<li><strong>标记目标节点</strong><br>
+使用 kubectl label nodes 在那台希望优先调度的节点上打上一个独特的标签</li>
+<li><strong>在 Pod 中声明偏好</strong><br>
+在我们想要调度的 Pod 的配置中，声明一个节点软亲和性规则 preferredDuringSchedulingIgnoredDuringExecution</li>
+<li><strong>设置偏好权重</strong><br>
+配置 weight 权重值字段，取值范围是 1~100，这个权重值代表了这条偏好的重要性，权重越高，调度器在决策时就越倾向于满足这个条件</li>
+</ol>
+</blockquote>
+<ol start="4">
+<li>节点亲和性（Node Affinity）有哪几种类型，有什么区别？</li>
+</ol>
+<blockquote>
+<p><strong>节点亲和性类型</strong></p>
+<ol start="4">
+<li>硬亲和性（requiredDuringSchedulingIgnoredDuringExecution）：强制性规则，必须满足，如果集群中没有任何一个节点满足 Pod 所设置的硬亲和性规则，那么 K8s 调度器就不会把这个 Pod 分配到任何节点上，它将一直处于无法运行的 Pending 状态；通常用于有严格运行要求的场景，比如必须运行在带有 GPU 的节点上</li>
+<li>软亲和性（preferredDuringSchedulingIgnoredDuringExecution）：偏好型规则，尽量满足，它不会导致 Pod 无法调度，可以通过 weight 字段（取值范围 1~100）为多个软性规则设置优先级，权重越高优先级也就越高</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>共同点和配置</strong></p>
+<ol start="6">
+<li>无论是硬亲和性还是软亲和性，规则仅在 <code>调度时刻</code> 起作用，一旦 Pod 被成功调度到某个节点上，即使该节点的标签后来发生了变化，变得不再符合亲和性规则，Pod 也不会被驱逐，它会继续在该节点上运行</li>
+<li>节点亲和性支持丰富的操作符，如 In、NotIn、Exists、DoesNotExist、Gt、Lt 等；如果 nodeSelectorTerms 下有多个 matchExpressions，则节点必须满足所有表达式（逻辑与关系），如果定义了多个 nodeSelectorTerms，则节点只需满足其中任意一个即可（逻辑或关系）</li>
+</ol>
+</blockquote>
+<ol start="5">
+<li>节点资源不足时 K8s 如何处理？</li>
+</ol>
+<blockquote>
+<p><strong>节点压力驱逐</strong></p>
+<ol start="8">
+<li>资源监控与压力检测<br>
+kubelet 持续监控节点的资源使用情况，主要包括内存、磁盘空间、进程号等，当资源使用量超过阈值时，节点就报告相应的压力信号，比如 MemoryPressure、DiskPressure</li>
+<li>节点污点与调度阻止<br>
+一旦这些节点出现压力，kubelet 会自动给这些节点打上对应的污点，比如 node.kubernetes.io/memory-pressure，这个污点会阻止新的 Pod 被调度到本节点上（效果是 NoSchedule），避免雪上加霜</li>
+<li>主动驱逐 Pod<br>
+kubelet 会开始主动驱逐节点上的 Pod 以释放资源，kubelet 不是随机驱逐的，而是按照 Pod 的 QoS 等级和资源使用情况进行排序驱逐，首选驱逐 BestEffort 类型的 Pod，其次驱逐 Burstable 类型的 Pod，最后考虑驱逐 Guaranteed 类型的 Pod</li>
+<li>软驱逐与硬驱逐<br>
+软驱逐：当资源使用量超过“软阈值”时，kubelet 会有一个宽限期，只有在超过宽限期后才会开始驱逐<br>
+硬驱逐：当资源使用量超过“硬阈值”时，kubelet 会立即开始驱逐 Pod，没有宽限期<br>
+补充：软阈值可通过 kubelet 配置文件 /var/lib/kubelet/config.yaml 添加或修改  <code>evictionSoft</code>  和  <code>evictionSoftGracePeriod</code>  字段后重启 kubelet 生效，硬阈值可通过配置  <code>evictionHard</code>  字段后重启 kubelet 生效</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>系统 OOM Killer</strong><br>
+如果 kubelet 的驱逐机制跟不上资源消耗的速度（比如某个进程突然疯狂申请内存），系统可能会触发无法响应的状态，并触发 Linux 内核的 OOM Killer，以释放内存恢复系统</p>
+</blockquote>
+<p><a id="reference-第三篇网络篇"></a></p>
+<h3 id="第三篇网络篇">第三篇：网络篇</h3>
+<p>定位： 掌握 K8s 网络通信模型与常见问题排查<br>
+主要内容：</p>
+<ul>
+<li>Kubernetes 网络模型原则</li>
+<li>CNI 插件（Flannel、Calico、Cilium）</li>
+<li>Service 类型（ClusterIP、NodePort、LoadBalancer、ExternalName）</li>
+<li>Ingress 控制器原理</li>
+<li>DNS 服务与内部解析机制</li>
+<li>NetworkPolicy 安全策略</li>
+</ul>
+<p><strong>示例面试题：</strong></p>
+<ol>
+<li>解释一下 Service 的四种类型？</li>
+</ol>
+<blockquote>
+<ol>
+<li>ClusterIP：默认类型，仅在 K8s 集群内部访问，不能被外部直接访问；适用于微服务内部通信</li>
+<li>NodePort：绑定一个固定端口，外部可以通过 NodeIP:NodePort 访问服务；适用于临时测试、内网访问</li>
+<li>LoadBalancer：云端负载均衡；适用于云环境，自动分配公网 IP，通过云负载均衡器（ELB、ALB）进行流量分发</li>
+<li>ExternalName：DNS 代理，用于将 K8s 内部服务映射到外部域名（如 MySQL），不会创建实际的负载均衡或代理，仅提供 DNS 解析</li>
+</ol>
+</blockquote>
+<ol start="2">
+<li>Service 是如何实现负载均衡的？</li>
+</ol>
+<p>Service 的负载均衡机制是一个分布式的、基于内核网络规则的负载均衡，它依靠每个节点上的 kube-proxy 组件监听 API Server 中的 Service 与 Endpoints 变化，动态维护本机的转发规则，kube-proxy 通过 iptables 或 IPVS，将所有发往 Service 虚拟 IP（ClusterIP） 的流量，通过 DNAT 的方式，透明且随机的转发到后端健康的 Pod 上，从而实现集群内的负载均衡</p>
+<blockquote>
+<ol>
+<li>定义服务：用户创建 Service，指定 selector</li>
+<li>发现后端：Endpoints Controller 监控 Service 和 Pod，动态维护同名 Endpoints 对象，存储健康后端 Pod IP:Port 列表</li>
+<li>分发规则：所有节点上的 kube-proxy 监听 Endpoints 变化，获取最新后端列表</li>
+<li>配置规则：每个 kube-proxy 在本机内核配置负载均衡规则（iptables / IPVS），将 Service VIP 映射到动态后端列表</li>
+<li>流量均衡：发往 Service VIP 的流量，在入节点被内核规则拦截，根据算法选择后端 Pod，执行 DNAT 后转发</li>
+<li>动态更新：Pod 变化 -&gt; Endpoints 更新 -&gt; kube-proxy 更新规则 -&gt; 后续流量使用新列表</li>
+</ol>
+</blockquote>
+<ol start="3">
+<li>Service 是怎么知道哪些 Pod 可以接收请求的？</li>
+</ol>
+<blockquote>
+<p>Service 会根据自己的 selector 匹配符合标签的 Pod，然后把这些 Pod 的 IP 和端口记录在 Endpoints 对象中，如果 Pod 的就绪探针没有通过，就不会被加入到 Endpoints 中，探针通过自动加入；如果 Pod 被删除或探针失败，则会从 Endpoints 中移除</p>
+</blockquote>
+<ol start="4">
+<li>Pod 被删除或重建时，Service 会发生什么变化？</li>
+</ol>
+<blockquote>
+<p>Service 本身是通过 Endpoints 对象来维护 Pod 列表的，当 Pod 被删除或不再处于 Ready 状态时，kube-controller-manager 会立即从 Endpoints 中移除它；新的 Pod 创建后，一旦就绪探针通过，就会自动加入 Endpoints，整个过程 kube-proxy 会实时更新负载规则<br>
+当 Pod 被删除或重建时，K8s 会自动更新 Service 的 Endpoints 对象，旧的 Pod IP 会立即被移除，新 Pod 启动后通过就绪探针检查成功后才会被加回来，这样可以保证负载均衡只转发给健康的 Pod，从而避免请求中断</p>
+</blockquote>
+<ol start="5">
+<li>Pod 之间的通信是如何实现的？</li>
+</ol>
+<blockquote>
+<ol>
+<li>同一 Pod 内：通过 localhost 直接通信</li>
+<li>同一节点内：通过节点上的虚拟网桥直接转发</li>
+<li>跨节点：由 CNI 插件（如 flannel）通过 Overlay 网络或路由模式实现互通</li>
+</ol>
+</blockquote>
+<p><a id="reference-第四篇存储与持久化篇"></a></p>
+<h3 id="第四篇存储与持久化篇">第四篇：存储与持久化篇</h3>
+<p>定位： 深入理解有状态服务的存储机制<br>
+主要内容：</p>
+<ul>
+<li>Volume、PersistentVolume、PersistentVolumeClaim、StorageClass</li>
+<li>PV 生命周期与绑定过程</li>
+<li>Volume 类型（EmptyDir、HostPath、NFS、CSI）</li>
+<li>StatefulSet 与持久化存储</li>
+<li>数据恢复与回收策略</li>
+</ul>
+<p><strong>示例面试题：</strong></p>
+<ol>
+<li>PV 的回收策略有哪些？</li>
+</ol>
+<blockquote>
+<ol>
+<li><strong>Retain（保留）</strong><br>
+默认且最常用、最安全的策略，当绑定的 PVC 被删除后，PV 不会被自动删除，它的状态会变为 Released（已释放），但卷本身和存储在卷上的所有数据都会被完整的保留下来；处于 Released 状态的 PV 不能被新的 PVC 直接绑定，需要手动介入来处理这个卷<br>
+场景一：清理数据并重新使用 -&gt; 删除 PV 对象（kubectl delete pv），但后端存储资产（如云磁盘、NFS 目录）依然存在；按照需求手动清理后端存储资产上的数据；创建一个新的 PV 对象来代表这个清理过的存储资产<br>
+场景二：直接恢复数据 -&gt; 如果需要，可以从这个保留的卷中恢复误删的数据<br>
+场景三：直接销毁 -&gt; 如果数据不再需要，可以手动删除 PV 对象，并同时在后端存储系统上删除对应的存储资产</li>
+<li><strong>Delete（删除）</strong><br>
+当绑定的 PVC 被删除后，K8s 会自动执行删除集群内的 PV 对象，并在后端的存储设施（如 AWS EBS）中删除对应的存储资产，数据也会随之被永久销毁；适用于动态制备的存储场景<br>
+实现机制：依赖于 PV 所使用的 StorageClass（存储类）中配置的 provisioner（存储制备器），是制备器在 PVC 删除时，去调用云供应商的 API 执行了真正的删除操作</li>
+<li><strong>Recycle（回收）- 已废弃</strong><br>
+K8s 早期提供的简单回收机制，当 PVC 被删除后，PV 上的数据会被简单擦除，然后 PV 状态变为 Available（可用），等待被新的 PVC 绑定</li>
+</ol>
+</blockquote>
+<ol start="2">
+<li>NFS、HostPath、EmptyDir 的区别？</li>
+</ol>
+<blockquote>
+<ol>
+<li><strong>EmptyDir（空目录）：临时工作空间</strong><br>
+生命周期：与 Pod 完全绑定，当 Pod 被分配到某个节点上时，EmptyDir 被创建；当 Pod 从该节点上删除（无论何种原因），EmptyDir 和其中的数据会被永久清理<br>
+数据存储位置：默认存储在节点本地磁盘上，速度极快，但节点重启后数据即丢失<br>
+核心用途：同一个 Pod 内多个容器之间的共享存储；为计算密集型应用（如数据分析）提供临时缓存空间，加速处理；存放中间状态，以便在容器崩溃重启后能快速恢复</li>
+<li><strong>HostPath（主机路径）：节点挂载</strong><br>
+生命周期：与节点绑定，它将节点服务器上的一个实际目录直接挂载给 Pod 使用，Pod 被删除后数据依然保留在节点的硬盘上，但如果 Pod 被调度到另一个节点，或者节点本身宕机、被销毁，数据将无法访问或永久丢失<br>
+数据共享性：可以被调度到同一节点上的多个 Pod 共享访问<br>
+核心用途：Pod 运行需要访问节点本身资源，如 Node Exporter 需要访问 /proc、/sys 来收集节点指标，Filebeat 需要访问节点的 /var/log 目录</li>
+<li><strong>NFS（网络文件系统）：网络持久化存储</strong><br>
+生命周期：独立持久化，数据存储在远程的 NFS 服务器上，Pod 和节点的生命周期与数据完全解耦，无论 Pod 如何重建、调度到哪个节点、甚至节点宕机，数据都安全的存在于远程 NFS 服务器上<br>
+数据共享性：支持跨节点、跨 Pod 的读写共享<br>
+核心用途：持久化应用数据如数据库文件、用户上传的内容；多个 Pod 需要读取同一套配置文件</li>
+</ol>
+</blockquote>
+<ol start="3">
+<li>PVC 是如何和 PV 绑定的？匹配逻辑是什么？</li>
+</ol>
+<p>PVC 和 PV 的绑定过程主要是由 K8s 集群中的 PresistentVolumeController 来负责的，模式分为静态供应（预创建 PV）和动态供应（按需创建），匹配逻辑的核心是通过 StorageClass、accessModes、容量等字段进行精确匹配和筛选，然后在候选者中选择最小的可用 PV 以节省资源</p>
+<blockquote>
+<p><strong>供应模式</strong></p>
+<ol>
+<li>静态供应：集群管理员会预先创建好一批 PV，这些 PV 携带着真实的存储空间细节（比如 NFS 路径、云盘 ID 等），它们处于可用状态，等待被申领</li>
+<li>动态供应：当集群中没有静态创建的 PV 能够匹配用户的 PVC 时，会触发动态供应，这需要预先创建好 StorageClass 资源，K8s 会根据 PVC 中指定的 SC，自动调用对应的 CSI 驱动来创建真正的存储卷，并随之自动创建一个 PV 与之关联</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>匹配逻辑</strong></p>
+<ol>
+<li>筛选阶段 - 必须满足<br>
+storageClassName 字段（最核心的匹配条件）：如果 PVC 中指定了 storageClassName，那么控制器只会去寻找具有完全相同 storageClassName 的 PV ；如果 PVC 中的 storageClassName 被设置为空字符串，则表示此 PVC 明确要求匹配那些没有设置 storageClass 的 PV ；如果 PVC 完全没有设置 storageClassName 字段，其行为取决于是否启用了 DefaultStorageClass 准入控制器；如果启用并存在默认的 SC，系统会自动为这个 PVC 添加默认的 SC，然后去匹配具有该 SC 的 PV，没匹配到则会触发动态供应；如果未启用或没有默认 SC，那么该 PVC 只能匹配那些同样没有设置 storageClassName 的 PV<br>
+accessModes：PVC 中请求的访问模式（如 ReadWriteOnce）必须被 PV 所支持，PV 的访问模式列表必须包含 PVC 请求的模式<br>
+容量：PV 的容量必须大于或等于 PVC 所请求的容量，比如一个请求 5Gi 的 PVC 可以绑定到一个 10Gi 的 PV，但不能绑定到一个 3Gi 的 PV<br>
+标签选择器：如果 PVC 中使用了 selector 字段来指定一组标签，那么 PV 必须拥有所有这组标签<br>
+VolumeMode：PVC 和 PV 的 volumeMode（文件系统 Filesystem 或块设备 Block）必须一致</li>
+<li>排序阶段 - 选择最优的 PV<br>
+在通过筛选的 PV 候选列表中，K8s 会选择一个最佳的 PV，排序逻辑是按容量从小到大排序，选择满足要求的最小可用 PV，避免存储空间的浪费</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>绑定过程的状态流转</strong></p>
+<ol>
+<li>PV 状态：新创建的、可用的 PV 处于 Available 状态</li>
+<li>PVC 创建：用户创建一个 PVC，其状态为 Pending</li>
+<li>查找与绑定：PV 控制器根据上述匹配逻辑找到一个合适的 PV</li>
+<li>状态更新：找到后，对应的 PV 状态会变为 Bound，并通过 claimRef 字段子路是哪个 PVC 绑定了它；PVC 的状态也会变为 Bound，并通过 volumeName 字段记录绑定的是哪个 PV</li>
+</ol>
+</blockquote>
+<ol start="4">
+<li>如果 PVC 一直 Pending，可能是什么原因？如何排查？</li>
+</ol>
+<blockquote>
+<ol start="5">
+<li><strong>检查 PVC 本身</strong><br>
+使用 kubectl describe pvc 和 kubectl get pdv -o yaml 查看 PVC 的详细信息，重点关注 Events 中的信息，常见的有 no storage class（静态供给模式，但集群中没有符合条件的、现成的 PV）、pvc not found（PV 的 claimRef 字段错误的指向了一个不存在的 PVC，导致该 PV 被锁死，无法被正确的 PVC 绑定）、waiting for …（动态供给，表示正在等待存储插件 privisioner 创建存储卷和 PV）</li>
+<li><strong>根据错误信息排查</strong><br>
+使用 kubectl get pv 查看是否有状态为 Available 的 PV，而且要确保 storageClassName 完全一致、PV 必须支持 PVC 请求的访问模式、PV 的容量必须必须大于等于 PVC 请求的容量等<br>
+使用 kubectl get sc 和 kubectl describe sc 检查 SC 的详细信息，比如是否存在，是否设置了默认 SC，Provisioner 是否正确等；以及使用 kubectl get pods -n kube-system | grep provisioner 查看是否运行正常</li>
+<li><strong>检查更深层次的集群问题</strong><br>
+使用 kubectl describe resourcequota 检查命名空间的资源配额是否已用完</li>
+</ol>
+</blockquote>
+<ol start="5">
+<li>StatefulSet 如何保证 Pod 的稳定标识？和 PVC 有什么关系？</li>
+</ol>
+<blockquote>
+<p><strong>如何保证 Pod 的稳定标识</strong></p>
+<ol start="8">
+<li>稳定且唯一的 Pod 名称<br>
+StatefulSet 创建的 Pod 名称不是随机的，而是遵循固定模板（如 mysql-0、mysql-1），这个名称在 Pod 的整个生命周期内保持不变，即使 Pod 被重新调度到其他节点，K8s 也会重建一个 <code>名称完全相同</code> 的 Pod</li>
+<li>稳定的网络标识（通过 Headless Service）<br>
+StatefulSet 必须与一个无头 Service（clusterIP:None）配合使用，K8s 会为每个 Pod 创建一条稳定的 DNS 记录，比如 mysql-0.mysql-svc.default.svc.cluster.local，当应用解析这个域名时，会直接得到该 Pod 的当前 IP 地址，而不是一个负载均衡的虚拟 IP，即使 Pod 重建并获得了新的 IP，它的 DNS 名称也始终保持不变</li>
+<li>有序的部署和管理<br>
+StatefulSet 对 Pod 的操作（创建、扩容等）默认是有序的，创建 / 扩容操作从序号 0 到 N-1 依次进行，删除 / 缩容操作则是逆序进行，这种顺序性确保了在操作像主从数据库这样的集群时，主节点会最先启动并稳定运行，从节点再依次加入，避免集群脑裂或初始化混乱的问题</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>和 PVC 的关系</strong></p>
+<ol start="11">
+<li>动态、专有的存储供给<br>
+可以通过在 StatefulSet 的 YAML 文件中声明一个 volumeClaimTemplates（卷申请模板）为每个 Pod 提供稳定的、专有的存储，PVC 的命名规则同样具有稳定性，比如一个名为 data 的卷模板，StatefulSet 名为 mysql，会为 mysql-0 创建出 data-mysql-0，为 mysql-1 创建出 data-mysql-1</li>
+<li>Pod 与 PVC 的强绑定关系<br>
+一对一终身绑定：由 StatefulSet 为 Pod 创建的 PVC，会为该特定序号的 Pod 形成一种终身绑定关系<br>
+数据不丢失：当 mysql-0 被删除或重建时，StatefulSet 控制器会确保新创建的 mysql-0 仍然绑定到原来那个名为 data-mysql-0 的 PVC 上，这意味着这个 Pod 的存储卷和数据得到了永久性的保留</li>
+</ol>
+</blockquote>
+<ol start="6">
+<li>Pod 迁移到其他节点后，数据丢了怎么办？如何避免？</li>
+</ol>
+<blockquote>
+<p><strong>紧急恢复数据</strong></p>
+<ol start="13">
+<li>停止相关操作，防止任何可能覆盖数据的写入操作继续发生</li>
+<li>确定数据存储方式：使用 kubectl get pod -o yaml 和 kubectl get pvc 、kubectl get pv 等命令检查 Pod 和 PVC 的配置</li>
+<li>根据存储类型尝试恢复<br>
+场景 A（使用 PVC / PV）：Pod 被删除后，其 PVC 和 PV 通常不会被删除（除非回收策略是 Delete），如果 PV 状态是 Released，说明数据还在底层存储上，可通过创建一个新的 PVC，设置 volumeName 字段直接绑定到这个已有的 PV，或者创建一个新的 PV 指向这块旧的存储进行数据恢复<br>
+场景 B（使用本地存储）：数据存储在原节点的磁盘上，需要立即找到 Pod 之前运行的节点，寻找数据目录，较为困难</li>
+<li>从备份中恢复：通过备份工具（如 Velero）或应用级备份（如 mysqldump 导出的文件）将数据恢复到新的 Pod 中</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>如何避免</strong></p>
+<ol start="17">
+<li>为需要持久化的数据使用 PVC</li>
+<li>理解并正确配置 PV 的回收策略，生产环境推荐使用 Retain，即使删除 PVC 后，PV 变为 Released 状态，但底层存储和数据都会被保留</li>
+<li>对于有状态服务，使用 StatefulSet，不仅能有效管理 Pod，还能通过 volumeClaimTemplate 为每个 Pod 实例创建并绑定一个独有的 PVC，这意味着即使 Pod 被重建或迁移，它也一定会绑定回原来那块属于它的数据盘</li>
+</ol>
+</blockquote>
+<p><a id="reference-第五篇权限与安全篇"></a></p>
+<h3 id="第五篇权限与安全篇">第五篇：权限与安全篇</h3>
+<p>定位： 掌握 RBAC 模型与集群安全机制<br>
+主要内容：</p>
+<ul>
+<li>RBAC（Role、ClusterRole、RoleBinding、ClusterRoleBinding）</li>
+<li>ServiceAccount 与授权机制</li>
+<li>Secret 的安全存储与访问</li>
+<li>Admission Controller 与安全策略</li>
+<li>网络安全与多租户隔离</li>
+</ul>
+<p><strong>示例面试题：</strong></p>
+<ol>
+<li>RBAC 权限模型的核心概念？</li>
+</ol>
+<blockquote>
+<ol>
+<li><strong>主体 - 权限的授予对象</strong><br>
+主体是需要在 K8s 中执行操作的用户、用户组或服务，主要有两类<br>
+ServiceAccount：这是最常见的主体，它是 K8s 命名空间内的资源，为运行在集群中的 Pod 内部进程提供身份标识，比如一个监控组件的 Pod 需要一个 ServiceAccount 来获取读取集群指标的权限<br>
+User：通常指通过证书或外部系统验证的外部用户，通常是开发者或管理员通过 kubelet 访问集群</li>
+<li><strong>资源与操作 - 权限的具体内容</strong><br>
+权限始终围绕“能对什么资源做什么操作”来定义<br>
+资源：K8s 中的 API 对象，比如核心资源 Pod、services、configmaps、secrets、nodes 等，扩展资源 deployments.app、statefulsets.apps 等，可以通过 kubectl api-resources 命令查看所有资源列表<br>
+操作：对资源执行的动词，对应 HTTP API 的请求方法，包括查询资源 get、list、watch，增删改资源 create、update、patch、delete，特殊操作 use、bind 等，特殊的动词 * 代表所有操作</li>
+<li><strong>角色 - 权限规则的集合</strong><br>
+角色是一组权限规则的集合，它定义了“能做什么”，K8s 中有两种角色，它们结构完全相同，但作用范围不通<br>
+Role：作用范围是单个命名空间内，资源类型 Role、RoleBinding，适用场景为定义特定项目或环境内的权限<br>
+ClusterRole：作用范围是整个集群，资源类型 ClusterRole、ClusterRoleBinding，定义集群级别资源（如 nodes，pv）的权限，或为所有命名空间提供通用权限</li>
+<li><strong>角色绑定 - 将角色授予主体</strong><br>
+角色绑定建立了主体和角色之间的桥梁，它决定了“谁”获得了“哪个角色”的权限，与角色对应，也有两种绑定<br>
+RoleBinding：绑定对象为一个 Role 或一个 ClusterRole，作用范围是单个命名空间<br>
+ClusterRoleBinding：绑定对象为一个 ClusterRole，作用范围是整个集群</li>
+</ol>
+</blockquote>
+<p><a id="reference-第六篇cicd-与部署优化篇"></a></p>
+<h3 id="第六篇cicd-与部署优化篇">第六篇：CI/CD 与部署优化篇</h3>
+<p>定位： 将 Kubernetes 与持续集成、持续部署体系融合<br>
+主要内容：</p>
+<ul>
+<li>Deployment 滚动更新与回滚</li>
+<li>StatefulSet、DaemonSet、Job、CronJob 应用场景</li>
+<li>startupProbe、livenessProbe、readlinessProbe Helm Chart 原理与模板化管理</li>
+<li>与 Jenkins/GitLab CI 集成自动部署</li>
+<li>灰度发布与蓝绿部署策略</li>
+</ul>
+<p><strong>示例面试题：</strong></p>
+<ol>
+<li>K8s 的探针有几种？</li>
+</ol>
+<blockquote>
+<p><strong>按类型划分</strong></p>
+<ol>
+<li>启动探针（startupProbe）：检测应用程序是否已经成功启动，在成功之前，K8s 会禁用存活和就绪探针的检查，一旦启动成功一次，就永远不会再触发；作用是防止因为应用启动过慢，导致存活探针在应用还没准备好之前就连续探测失败，从而误杀容器</li>
+<li>存活探针（livenessProbe）：检测容器是否还在正常运行，如果存活探针检查连续失败，K8s 会认为容器已经不健康了，它会根据重启策略杀死并重启该容器；作用是修复由于内存溢出等导致应用进程还在但已经无法提供服务的故障状态，是保障高可用的核心机制</li>
+<li>就绪探针（readlinessProbe）：检测容器是否已经准备就绪可以开始接收外部流量，如果就绪探针检查失败，K8s 的 Service 会将该 Pod 从负载均衡器的端点列表中移除，这样新的流量就不会再被发送到这个 Pod，直到就绪探针再次成功，才会被重新加回列表；作用是保证流量只被发送到已经准备好处理请求的 Pod</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>按检查方式划分</strong></p>
+<ol start="4">
+<li>HTTP 探针：发送 HTTP 请求检查返回码；适合 web 服务</li>
+<li>TCP 探针：检测端口是否能建立连接；适合非 HTTP 应用，比如数据库</li>
+<li>Exec 探针：在容器内部执行命令检查结果；适合自定义逻辑，比如检测某个文件是否存在</li>
+<li>HTTP 探针返回 200~399 被视为成功，Exec 探针 exit code 为 0 视为成功</li>
+</ol>
+</blockquote>
+<p><a id="reference-第七篇实战与故障排查篇"></a></p>
+<h3 id="第七篇实战与故障排查篇">第七篇：实战与故障排查篇</h3>
+<p>定位： 面试中最能体现经验的一环<br>
+主要内容：</p>
+<ul>
+<li>Pod Pending、CrashLoopBackOff、ImagePullBackOff 问题排查</li>
+<li>节点宕机后的恢复机制</li>
+<li>kubelet 日志与事件分析</li>
+<li>etcd 备份与恢复</li>
+</ul>
+<p><strong>示例面试题：</strong></p>
+<ol>
+<li>Pod 一直 Pending 的可能原因？</li>
+</ol>
+<p>遇到 Pending 的 Pod，第一个且最重要的命令是  <code>kubectl describe pod</code>，重点关注 Events 部分的最后几条信息，调度器会明确告知失败的原因</p>
+<blockquote>
+<p><strong>原因一：资源不足（最常见的原因）</strong></p>
+<ol>
+<li>CPU 或内存不足：调度器在过滤节点时，发现没有节点拥有足够的可分配资源来满足 Pod 的请求，根本原因是 Pod 配置中定义了 resoucres.requests，但集群中所有节点的剩余可分配资源都无法满足这个请求，可通过  <code>kubectl describe nodes | grep -C5 "Allocatable"</code>  和  <code>kubectl top nodes</code>  查看实际资源使用情况。解决方案是扩容集群，增加新节点；调整已有 Pod 的 resoures.requests / limits，释放资源</li>
+<li>存储资源不足：Pod 使用了 PVC，但 PVC 无法绑定到合适的 PV，可通过  <code>kubectl get pvc</code>  和  <code>kubectl describe pvc</code>  查看 PVC 状态</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>原因二：调度约束不满足</strong></p>
+<ol>
+<li>节点选择器 / 节点亲和性不匹配：Pod 中配置了 nodeSelector 或 nodeAffinity 规则，但集群中没有节点拥有匹配的标签；检查 Pod 的 YAML 文件中的亲和性配置，并用  <code>kubectl get nodes --show-labels</code>  查看节点标签</li>
+<li>Pod 亲和性 / 反亲和性过于严格：规则定义过于严格，导致找不到满足拓扑域约束的节点，比如要求必须和某个 Pod 在同一节点，但目标 Pod 还未调度成功；检查 Events 中的错误信息，并审查 Pod 的亲和性 / 反亲和性规则</li>
+<li>节点污点于 Pod 容忍度不匹配：节点被打上了污点，而 Pod 没有配置相应的容忍度，导致 Pod 无法被调度到该节点；使用 kubectl describe node | grep Taints 排查，并在 Pod 的 YAML 文件中配置 spec.tolerations 添加对应的容忍策略</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>原因三：节点本身问题</strong><br>
+节点状态异常，导致其被调度器排除在候选列表之外</p>
+<ol start="4">
+<li>节点不可调度：节点状态为 NotReady（如 kubelet 进程异常、网络插件故障、机器宕机等），NotReady 的节点不会被调度；可使用  <code>kubectl get nodes</code>  进行排查</li>
+<li>节点有磁盘或内存压力：节点磁盘空间已满或严重不足，节点会打上 MemoryPressure 或 DiskPressure 污点，阻止新的 Pod 调度上来；可使用 kubectl describe node 查看 Conditions 部分</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><strong>其他原因</strong></p>
+<ol start="6">
+<li>不满足端口请求：Pod 配置了 hostPort 或 hostNetwork，但所需端口在节点上已被占用</li>
+<li>镜像拉取策略问题：在开始拉取镜像前，如果节点无法访问镜像仓库，也可能导致调度器在评估阶段就犹豫不决，但更常见的表现是 ImagePullBackOff</li>
+<li>kube-scheduler 本身故障：极少数情况，调度器组件本身挂掉导致没有 Pod 能被调度</li>
+</ol>
+</blockquote>
+<ol start="2">
+<li>节点宕机后 Pod 如何恢复？</li>
+</ol>
+<blockquote>
+<ol start="9">
+<li><strong>故障检测：控制平面发现节点异常</strong><br>
+当一台工作节点宕机后，集群控制平面中的 kube-controller-manager 会持续检测节点的心跳（由 kubelet 定期上报），如果节点在预设的超时时间（默认 40 秒）内没有上报状态，控制平面就会将该节点的状态标记为 NotReady，此时该节点上所有 Pod 的状态会变为 Unknown 或 Terminating，但请注意，这只是一个状态标记，并不会立即触发任何操作</li>
+<li><strong>触发驱逐：标记 Pod 为需重建状态</strong><br>
+接下来，另一个重要的控制器 node-controller 会在一个更长的容忍时间（默认是 5 分钟）后，正式判定该节点为不可用（Unreachable），此时 node-controller 会为这些 Unknown 状态的 Pod 添加一个污点（Taint），比如 node.kubernetes.io/unreachable</li>
+<li><strong>核心恢复：控制器开始工作</strong><br>
+情况一：Pod 由控制器管理<br>
+控制器（如 deployment-controller）会持续监控它应该管理的 Pod 数量（期望副本数），当它发现有一个 Pod 因为节点宕机而处于 Unknown 状态时，它会认为这个 Pod 已经丢失了，为了满足期望的副本数，控制器会立即在 K8s 集群中创建一个全新的 Pod 实例，这个新的 Pod 会进入正常的调度流程，由 kube-scheduler 将其分配到一个当前健康且资源充足的节点上，然后由该节点的 kubelet 拉取镜像并启动容器<br>
+情况二：Pod 是自主式 Pod（没有控制器管理）<br>
+如果是直接用 kubectl run 创建且没有绑定控制器的 Pod，那么它不会被自动恢复，这个 Pod 会一直处于 Unknown 状态，直到节点恢复或者管理员手动删除它</li>
+<li><strong>调度与重建</strong><br>
+新创建的 Pod 会被调度器分配到一个健康的节点上，一旦 Pod 被成功调度并启动，且通过就绪检查（如果有配置），它就可以开始接收流量提供服务了</li>
+</ol>
+</blockquote>
+<ol start="3">
+<li>kubectl 常用诊断命令？</li>
+</ol>
+<blockquote>
+<ol start="13">
+<li><strong>资源查看类</strong><br>
+查看当前命名空间下所有核心资源的基本状态：kubectl get all<br>
+查看 Pod 列表：kubectl get pods，可选参数 -o wide（显示 Pod IP 和所在节点）、-w（持续观察变化）、–show-labels（显示标签）<br>
+查看所有节点状态：kubectl get nodes，可选参数 -o wide（显示节点 IP 和资源容量）<br>
+查看集群级别的事件流：kubectl get events，可选参数 –sort-by=.metadata.creationTimestamp（按时间排序）、–field-selector involvedObject.name=pod-name（只看特定 Pod 的事件）</li>
+<li><strong>深入诊断类</strong><br>
+获取资源详细配置和状态：kubectl describe，重点关注 Events、Conditions、标签、镜像、IP 等详细信息<br>
+查看 Pod 标准输出日志：kubectl logs pod-name，可选参数 -c（指定多容器 Pod 中的某个容器）、-f（实时追踪日志）、–previous（查看上次崩溃的容器日志，用于诊断 CrashLoopBackOff）<br>
+进入正在运行的容器内部调试：kubectl exec -it pod-name – /bin/sh，用于检查环境变量、配置文件、网络连通性等</li>
+<li><strong>网络与服务诊断类</strong><br>
+验证 Service 是否正确关联到后端 Pod：kubectl get endpoints service-name，诊断 Service 是否工作的关键命令，如果 Endpoints 为空，说明没有匹配标签的 Pod<br>
+查看 Service 的详细配置：kubectl describe service service-name，查看如 ClusterIP、端口、选择器等</li>
+<li><strong>性能与资源诊断类</strong><br>
+查看节点和 Pod 的实时资源使用率（CPU / 内存）：kubectl top nodes / kubectl top pods，前提集群已部署 metrics-server<br>
+查看节点的详细资源分配情况：kubectl describe node node-name，输出中的 Allocatable 和 Allocated resources 部分可以看到资源总量和已分配量，判断是否资源不足</li>
+<li><strong>模拟与验证类</strong><br>
+验证 YAML 文件语法是否正确：kubectl apply –dry-run=client -f file.yaml，干运行，不会实际创建资源<br>
+以 YAML 格式输出资源的当前实际运行配置：kubectl get -o {resoucre} {name}，用于对比实际配置与期望配置是否一致<br>
+端口转发： kubectl port-forward {pod-name} {local-port}:{pod-port}，将本地端口映射到 Pod 的端口，用于临时从本地网络访问集群内的 Pod 服务，进行调试和测试</li>
+</ol>
+</blockquote>
+<p><a id="reference-第八篇监控与优化篇"></a></p>
+<h3 id="第八篇监控与优化篇">第八篇：监控与优化篇</h3>
+<p>定位： 让面试官看到你有工程视角<br>
+主要内容：</p>
+<ul>
+<li>Metrics-server、Prometheus、Grafana</li>
+<li>EFK / Loki 日志采集体系</li>
+<li>Pod 资源优化与 HPA（水平自动伸缩）</li>
+<li>集群容量规划与性能调优</li>
+</ul>
+<p><strong>示例面试题：</strong></p>
+<ol>
+<li>解释一下 HPA 的工作原理？</li>
+</ol>
+<p>周期性的监控目标 Pod 的指标数据，并与用户定义的期望指标值进行比对，进而计算并调整 Pod 数量，以使实际指标值尽可能接近期望值</p>
+<blockquote>
+<ol>
+<li><strong>监控指标采集</strong><br>
+HPA 工作的基础，K8s 通过 Metrics API 来获取资源指标数据，需要部署 Metrics Server 或 Prometheus + Prometheus Adapter，使用 kebectl top pod 命令快速验证基础资源指标是否正常</li>
+<li><strong>指标查询与比对</strong><br>
+HPA 控制器默认每 30 秒（可通过 –horizontal-pod-autoscaler-sync-period 调整）进行一次决策循环，在每次循环中，它会通过 Metrics Server 获取当前该 Deployment 下所有 Pod 的指定指标的平均值，根据当前指标值和目标值，使用算法计算出期望的 Pod 副本数，然后通过 API Server 直接修改目标资源的 spec.replicas 字段，最后 Deployment 控制器会感知到期望状态的变化，开始驱动创建或删除 Pod 的流程，使实际状态与期望状态一致</li>
+</ol>
+</blockquote>
+<ol start="2">
+<li>服务流量激增，但 HPA 并未及时扩容，导致部分请求失败，你会如何优化 HPA 策略已提升响应能力？</li>
+</ol>
+<blockquote>
+<ol>
+<li><strong>调整 HPA 触发阈值</strong><br>
+修改 CPU 阈值，提前触发扩容<br>
+增加副本数上线（maxReplicas），防止因副本数限制而无法继续扩容</li>
+<li><strong>调整扩缩容阈值</strong><br>
+修改 kube-controller-manager 的启动参数，默认值是 10%，可以调整为 5%，这样系统会更快的触发扩容决策</li>
+<li><strong>调整扩缩容速度参数</strong><br>
+HPA 默认每次扩容 1~2 个 Pod，可以调整 HPA 的 behavior 字段中的 scaleUp 策略，允许每次扩容更多 Pod</li>
+</ol>
+</blockquote>
+<ol start="3">
+<li>HPA 没有根据指标扩容，但监控显示负载已超过阈值，为什么？</li>
+</ol>
+<blockquote>
+<ol>
+<li><strong>指标采集异常</strong><br>
+Metrics API 无法提供正确的指标数据<br>
+使用 kubectl get pod 和 kubectl logs 查看 metrics-server 是否正常运行<br>
+使用 kubectl top 看是否能获取到数据<br>
+使用 kubectl get apiserver 检查 API 状态是否为 True</li>
+<li><strong>HPA 配置错误</strong><br>
+使用 kubectl describe hpa 重点检查 Reference 字段（指向 HPA 的目标资源）是否正确，Metrics 字段的 current（实时指标值）和 target（阈值）是否正确，还有 Conditions 字段能查看到是否能够扩缩容以及获取指标等信息</li>
+<li><strong>资源限制未设置</strong><br>
+确保 Pod 模板中有 resources.requests.cpu 定义，使用 kubectl describe pod 或 kubectl get deployment -o yaml 检查资源配置</li>
+<li><strong>冷却周期干扰</strong><br>
+HPA 有默认的扩缩容冷却时间，刚发生完扩缩容后会等待一段时间才会再次执行操作（默认 5 分钟）</li>
+<li><strong>达到副本数限制</strong><br>
+HPA 配置的 maxReplicas 可能已经达到，无法继续扩容</li>
+</ol>
+</blockquote>
+<ol start="4">
+<li>如何排查 K8s 集群性能瓶颈？</li>
+</ol>
+<blockquote>
+<ol start="6">
+<li><strong>控制平面监控检查</strong><br>
+API Server 性能：使用 kubectl top pods -n kube-system 查看 API Server Pod 的资源使用情况<br>
+etcd 健康情况：执行 etcdctl –endpoints=<a href="https://127.0.0.1:2379">https://127.0.0.1:2379</a> –cacert=/etc/kubernetes/pki/etcd/ca.crt –cert=/etc/kubernetes/pki/etcd/server.crt –key=/etc/kubernetes/pki/etcd/server.key endpoint health 检查状态，etcd 性能问题通常与磁盘 I/O 延迟高或存储空间不足有关，需确保使用高性能 SSD 并监控磁盘指标</li>
+<li><strong>节点资源分析</strong><br>
+资源利用率：使用 kubectl top nodes 命令快速查看所有节点的 CPU 和内存使用概况，对于疑似瓶颈的节点，使用 kubectl describe node 命令查看详细资源分配情况，关注 Allocatable（可分配资源）和 Allocated（已分配资源）部分，判断是否因资源不足导致 Pod 无法调度<br>
+深入系统指标：通过 Node Exporter 和 Prometheus 监控节点的详细指标，如 node_cpu_seconds_total（CPU 使用）、node_memory_MemAvailable_bytes（可用内存）、node_disk_io_time_seconds_total（磁盘 I/O 时间）</li>
+<li><strong>Pod 与容器深入排查</strong><br>
+Pod 状态与事件：对于异常 Pod（如 Pending、CrashLoopBackOff），使用 kubectl describe pod 查看 Events 部分，这些事件通常可以直接指出问题根源，如镜像拉取失败、资源不足、调度失败等；使用 kubectl logs {pod-name} –previous 查看容器上次崩溃的日志，对于诊断 CrashLoopBackOff 非常有用<br>
+资源限制与 OOKM：在 kubectl describe pod 的输出中关注容器是否被标记为 OOMKillerd（Exit Code 137），这表示容器内存不足，确保为容器设置合理的 resources.requests 和 resources.limits，尤其是内存限制<br>
+CPU 限流（Throttling）：通过 Prometheus 查询容器 CPU 使用情况，如果容器频繁达到 CPU 限制，会导致应用性能下降，需要考虑调整 CPU limit 或优化应用代码</li>
+<li><strong>网络与存储性能诊断</strong><br>
+网络性能：使用 ping 或 mtr 测试 Pod 之间或节点之间的网络延迟和丢包率，监控 CoreDNS 相关指标，DNS 解析延迟高会直接影响应用响应，检查 CNI 插件（如 Calicao、Flannel）的状态和配置<br>
+存储性能：很多慢请求的根源是磁盘 I/O 瓶颈，通过 Node Exporter 的 node_disk_io_time_seconds_total 等指标监控磁盘 I/O 使用率，对于使用网络存储（如 NFS、Ceph）的 PVC，需检查存储后端的网络带宽和延迟</li>
+</ol>
+</blockquote>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>选择一个 Pod 启动失败的现象，说明已有证据能排除哪些层；回答中同时交代观察、行动与恢复验证。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/practice/kubernetes-linux-troubleshooting/">Kubernetes and Linux Troubleshooting Question Bank</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#第一篇基础概念篇">第一篇：基础概念篇</a></li><li style="--depth: 1"><a href="#第二篇调度与资源管理篇">第二篇：调度与资源管理篇</a></li><li style="--depth: 1"><a href="#第三篇网络篇">第三篇：网络篇</a></li><li style="--depth: 1"><a href="#第四篇存储与持久化篇">第四篇：存储与持久化篇</a></li><li style="--depth: 1"><a href="#第五篇权限与安全篇">第五篇：权限与安全篇</a></li><li style="--depth: 1"><a href="#第六篇cicd-与部署优化篇">第六篇：CI/CD 与部署优化篇</a></li><li style="--depth: 1"><a href="#第七篇实战与故障排查篇">第七篇：实战与故障排查篇</a></li><li style="--depth: 1"><a href="#第八篇监控与优化篇">第八篇：监控与优化篇</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

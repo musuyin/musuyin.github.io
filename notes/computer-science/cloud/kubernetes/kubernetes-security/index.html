@@ -1,0 +1,272 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kubernetes 安全基线 · Musuyin&#39; Home</title><meta name="description" content="按 API 身份与授权、准入、工作负载、网络和数据建立纵深防御。Namespace 是管理边界，安全效果需要 RBAC、运行时限制、网络策略与秘密管理共同提供。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-security/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Kubernetes 安全基线 · Musuyin' Home"><meta property="og:description" content="按 API 身份与授权、准入、工作负载、网络和数据建立纵深防御。Namespace 是管理边界，安全效果需要 RBAC、运行时限制、网络策略与秘密管理共同提供。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-security/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Kubernetes 安全基线</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-13">2026-08-13</time></dd></div><div><dt>字数</dt><dd>1949</dd></div><div><dt>预计阅读</dt><dd>7 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/Security/">#Security</a><a href="/tags/SRE/">#SRE</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Kubernetes 安全基线</h1><time datetime="2026-08-13">2026-08-13</time><p class="tags"><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/Security/">#Security</a><a href="/tags/SRE/">#SRE</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>按 API 身份与授权、准入、工作负载、网络和数据建立纵深防御。Namespace 是管理边界，安全效果需要 RBAC、运行时限制、网络策略与秘密管理共同提供。</p>
+<p><a id="reference-学习目标"></a></p>
+<h2 id="学习目标">学习目标</h2>
+<p>学完本章后，应当能够：</p>
+<ul>
+<li>从 API 访问、工作负载、网络、供应链和数据五个层面建立纵深防御。</li>
+<li>为人和 ServiceAccount 设计最小权限 RBAC，并识别可间接提权的高风险权限。</li>
+<li>使用 Restricted 风格的 SecurityContext、Pod Security Admission 与 NetworkPolicy。</li>
+<li>设计镜像验证、Secret 保护、审计检测和安全事件响应流程。</li>
+</ul>
+<blockquote>
+<p>心智模型：安全不是单个开关，而是假设某一层会失守后，其他层仍能限制影响范围并留下可调查证据。</p>
+</blockquote>
+<p><a id="reference-安全模型"></a></p>
+<h2 id="安全模型">安全模型</h2>
+<p><img alt="IMG-20260817144451277" loading="lazy" decoding="async" width="1346" height="1496" src="/_astro/IMG-20260817144451277.D_5uCMBx_Z1rEzFN.webp"></p>
+<blockquote>
+<p>图：从镜像供应链、API 准入、工作负载身份、运行时、网络和密钥到检测响应的纵深防御体系。</p>
+</blockquote>
+<p>Kubernetes 安全至少包含四层：</p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>主要控制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API 访问</td>
+<td>身份认证、RBAC、准入控制、审计</td>
+</tr>
+<tr>
+<td>工作负载</td>
+<td>ServiceAccount、SecurityContext、Pod Security Admission</td>
+</tr>
+<tr>
+<td>网络</td>
+<td>NetworkPolicy、入口 TLS、控制面网络隔离</td>
+</tr>
+<tr>
+<td>供应链与数据</td>
+<td>镜像签名/扫描、Secret 加密与外部密钥系统</td>
+</tr>
+</tbody>
+</table>
+<p>Namespace 只是管理边界，不等于安全边界；多租户环境还需考虑独立 Node、沙箱运行时甚至独立集群。</p>
+<p><a id="reference-rbac"></a></p>
+<h2 id="rbac">RBAC</h2>
+<p>RBAC 的四个核心对象：</p>
+<ul>
+<li><code>Role</code>：Namespace 范围权限。</li>
+<li><code>ClusterRole</code>：集群范围权限，也可被 RoleBinding 引用后限制在某 Namespace 使用。</li>
+<li><code>RoleBinding</code>：在一个 Namespace 中绑定权限。</li>
+<li><code>ClusterRoleBinding</code>：在全集群绑定权限。</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">rbac.authorization.k8s.io/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Role</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">config-reader</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">production</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">rules</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">- </span><span style="color:#22863A;--shiki-dark:#85E89D">apiGroups</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"configmaps"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  resourceNames</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"app-config"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  verbs</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"get"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">---</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">rbac.authorization.k8s.io/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">RoleBinding</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api-config-reader</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">production</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">subjects</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">- </span><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ServiceAccount</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">production</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">roleRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  apiGroup</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">rbac.authorization.k8s.io</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Role</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">config-reader</span></span></code></pre>
+<p>最小权限原则：</p>
+<ul>
+<li>避免 <code>resources: ["*"]</code>、<code>verbs: ["*"]</code> 和不必要的 ClusterRoleBinding。</li>
+<li><code>create pods</code>、<code>pods/exec</code>、读取 Secret、创建 RoleBinding、<code>impersonate</code> 等可能间接获取更高权限，应重点审计。</li>
+<li>不要通过把用户加入 <code>system:masters</code> 解决日常授权问题。</li>
+<li>将人类身份与工作负载身份分开，优先使用短期凭据。</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> auth</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> can-i</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> secrets</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --as=system:serviceaccount:production:api</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> production</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> auth</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> can-i</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --list</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --as=system:serviceaccount:production:api</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> production</span></span></code></pre>
+<p><a id="reference-serviceaccount"></a></p>
+<h2 id="serviceaccount">ServiceAccount</h2>
+<p>每个 Namespace 都有 <code>default</code> ServiceAccount，但业务应使用专用 ServiceAccount。若 Pod 不需要访问 Kubernetes API，关闭自动挂载 Token：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ServiceAccount</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">production</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">automountServiceAccountToken</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">---</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Pod</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">production</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  serviceAccountName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  automountServiceAccountToken</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">example/api@sha256:&lt;digest&gt;</span></span></code></pre>
+<p>现代 Kubernetes 默认使用有期限、与 Pod 绑定的投射 Token。不要依赖长期 ServiceAccount Token Secret，也不要将 Token 导出后长期复用。</p>
+<p><a id="reference-securitycontext"></a></p>
+<h2 id="securitycontext">SecurityContext</h2>
+<p>SecurityContext 控制 Pod/容器运行时权限。面向普通 Linux 应用的推荐基线：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  securityContext</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    runAsNonRoot</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    seccompProfile</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">RuntimeDefault</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">example/api@sha256:&lt;digest&gt;</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    securityContext</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      allowPrivilegeEscalation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      readOnlyRootFilesystem</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      capabilities</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        drop</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"ALL"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      runAsUser</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10001</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      runAsGroup</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10001</span></span></code></pre>
+<p>还应避免：</p>
+<ul>
+<li><code>privileged: true</code>。</li>
+<li><code>hostNetwork</code>、<code>hostPID</code>、<code>hostIPC</code>。</li>
+<li>不必要的 <code>hostPath</code> 和设备挂载。</li>
+<li>增加 <code>SYS_ADMIN</code>、<code>NET_ADMIN</code> 等高风险 capability。</li>
+<li>以 root 运行，或允许写入根文件系统。</li>
+</ul>
+<p>确需特权的 CNI、CSI、监控等系统组件应使用独立 Namespace、专用 Node、精确 RBAC 和额外审计。</p>
+<p><a id="reference-pod-security-admission"></a></p>
+<h2 id="pod-security-admission">Pod Security Admission</h2>
+<p>Pod Security Standards 定义三个级别：</p>
+<ul>
+<li><code>privileged</code>：不限制，适合受信任的系统组件。</li>
+<li><code>baseline</code>：阻止已知的高风险配置。</li>
+<li><code>restricted</code>：更严格的加固基线，适合普通应用。</li>
+</ul>
+<p>Pod Security Admission 使用 Namespace label 执行 <code>enforce</code>、<code>audit</code>、<code>warn</code>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> label</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> namespace</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> production</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  pod-security.kubernetes.io/enforce=restricted</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  pod-security.kubernetes.io/enforce-version=latest</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  pod-security.kubernetes.io/audit=restricted</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  pod-security.kubernetes.io/audit-version=latest</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  pod-security.kubernetes.io/warn=restricted</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  pod-security.kubernetes.io/warn-version=latest</span></span></code></pre>
+<p>上线顺序建议：先对现有 Namespace 启用 <code>warn</code>/<code>audit</code> 并修复，再启用 <code>enforce</code>。生产环境可以将版本固定到集群版本，升级时评估标准变化后再更新，而不是无条件使用 <code>latest</code>。</p>
+<p><a id="reference-networkpolicy"></a></p>
+<h2 id="networkpolicy">NetworkPolicy</h2>
+<p>安全基线采用 Namespace 默认拒绝，再按业务流量放行：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">networking.k8s.io/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">NetworkPolicy</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">default-deny</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">production</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  podSelector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {}</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  policyTypes</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">Ingress</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Egress</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span></code></pre>
+<p>需要显式允许：</p>
+<ul>
+<li>到集群 DNS 的 UDP/TCP 53。</li>
+<li>来自 Ingress/Gateway Controller 的入口流量。</li>
+<li>必要的数据库、消息队列、身份服务和外部 API。</li>
+<li>监控抓取和日志发送。</li>
+</ul>
+<p>NetworkPolicy 通常只控制 L3/L4，不能代替应用认证、TLS 或 API 授权；并确认所用 CNI 支持策略执行。</p>
+<p><a id="reference-镜像与供应链安全"></a></p>
+<h2 id="镜像与供应链安全">镜像与供应链安全</h2>
+<ul>
+<li>使用不可变 digest：<code>image@sha256:...</code>，避免生产使用 <code>latest</code>。</li>
+<li>从受控 Registry 拉取，限制 Node 到公共 Registry 的出口。</li>
+<li>在 CI 中扫描 OS 包与语言依赖漏洞，定义严重级别和修复 SLA。</li>
+<li>生成 SBOM，保存镜像构建来源和签名，使用准入策略验证来源、签名和允许仓库。</li>
+<li>使用最小基础镜像、多阶段构建、非 root 用户，不把 shell/调试工具带进不需要它们的生产镜像。</li>
+<li>Registry 凭据使用 <code>imagePullSecrets</code> 或云工作负载身份，并定期轮换。</li>
+</ul>
+<p>镜像扫描只能发现已知问题，不能替代代码审查、运行时限制和网络隔离。</p>
+<p><a id="reference-secret-与外部密钥管理"></a></p>
+<h2 id="secret-与外部密钥管理">Secret 与外部密钥管理</h2>
+<p>Kubernetes Secret 的 Base64 不是加密。基础要求：</p>
+<ul>
+<li>API Server 到 etcd 启用 TLS，Secret 在 etcd 中启用 encryption at rest。</li>
+<li>RBAC 限制读取 Secret、创建可挂载 Secret 的 Pod、exec 和调试容器权限。</li>
+<li>Git 中只存密钥引用或加密后的声明，不存明文/Base64 Secret。</li>
+<li>建立轮换、审计、吊销和泄露响应流程。</li>
+</ul>
+<p>External Secrets Operator、Secrets Store CSI Driver 等是生态组件，不是 Kubernetes 核心内置功能。典型流程是工作负载通过集群身份从 Vault 或云 KMS/Secret Manager 获取密钥，减少长期密钥落入 Git 和人工操作。</p>
+<p>选型时明确：</p>
+<ul>
+<li>是否将外部密钥同步为 Kubernetes Secret；同步后仍受 Kubernetes Secret 的安全边界约束。</li>
+<li>密钥如何轮换，应用是 reload、重启还是支持双凭据并存。</li>
+<li>外部密钥系统不可用时，新 Pod 和现有 Pod 的行为。</li>
+<li>Controller/CSI Driver 自身的权限、审计和高可用。</li>
+</ul>
+<p><a id="reference-安全检查命令"></a></p>
+<h2 id="安全检查命令">安全检查命令</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># RBAC 与身份</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> serviceaccount,role,rolebinding</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> clusterrolebinding</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> auth</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> can-i</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --list</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Pod 权限与镜像</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> jsonpath='{range .items[*]}{.metadata.namespace}{"\t"}{.metadata.name}{"\t"}{.spec.serviceAccountName}{"\t"}{range .spec.containers[*]}{.image}{" "}{end}{"\n"}{end}'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Namespace 安全标签与网络策略</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> namespace</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --show-labels</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> networkpolicy</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span></code></pre>
+<p><a id="reference-安全事件-runbook"></a></p>
+<h2 id="安全事件-runbook">安全事件 Runbook</h2>
+<ol>
+<li>保存时间线、审计日志、受影响身份、Pod、Node、镜像 digest 和网络连接证据。</li>
+<li>控制影响：撤销/轮换凭据，隔离工作负载或 Node；避免先删除所有证据。</li>
+<li>识别攻击路径：入口 → Pod 权限 → ServiceAccount/RBAC → Secret → Node/控制面。</li>
+<li>从可信镜像和配置重建，不在疑似被入侵容器内“修复”。</li>
+<li>验证持久化机制、横向移动和数据访问范围。</li>
+<li>恢复后补充准入策略、检测、Runbook 与演练。</li>
+</ol>
+<p><a id="reference-生产基线"></a></p>
+<h2 id="生产基线">生产基线</h2>
+<ul>
+<li>默认拒绝、最小权限、专用 ServiceAccount、无 API 需求则不挂载 Token。</li>
+<li>普通应用满足 Restricted 标准，使用非 root、默认 seccomp、只读根文件系统并删除 capabilities。</li>
+<li>Namespace 默认拒绝网络，出口采用允许列表。</li>
+<li>镜像固定 digest、扫描、签名并限制来源。</li>
+<li>Secret 启用静态加密，优先对接外部密钥系统并自动轮换。</li>
+<li>启用 Kubernetes Audit Log，并为高风险 RBAC、Secret 读取、exec、特权 Pod 和准入拒绝告警。</li>
+</ul>
+<p><a id="reference-实践与验收"></a></p>
+<h2 id="实践与验收">实践与验收</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> 创建只能读取一个指定 ConfigMap 的 ServiceAccount，并用 <code>kubectl auth can-i</code> 验证正反权限。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 在测试 Namespace 先启用 Restricted 的 warn/audit，再修复工作负载并切换 enforce。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 配置入站、出站默认拒绝策略，只开放应用所需流量。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 检查镜像 digest、ServiceAccount Token、特权配置与 Secret 读取权限，形成审计记录。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 桌面推演一次凭据泄露：保全证据、隔离、轮换、重建、验证和复盘。</li>
+</ul>
+<p><a id="reference-官方参考"></a></p>
+<h2 id="官方参考">官方参考</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/security/">Kubernetes：安全</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/security/rbac-good-practices/">Kubernetes：RBAC 最佳实践</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/security/service-accounts/">Kubernetes：ServiceAccount</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/security/pod-security-standards/">Kubernetes：Pod Security Standards</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/security/secrets-good-practices/">Kubernetes：Secret 最佳实践</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>选一个 ServiceAccount，检查它能创建什么、能读取什么、是否可能间接提权，再检查运行中的 Pod 实际使用了哪些权限。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/kubernetes/kubernetes-configmaps-secrets/">L06-ConfigMap and Secret</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#学习目标">学习目标</a></li><li style="--depth: 0"><a href="#安全模型">安全模型</a></li><li style="--depth: 0"><a href="#rbac">RBAC</a></li><li style="--depth: 0"><a href="#serviceaccount">ServiceAccount</a></li><li style="--depth: 0"><a href="#securitycontext">SecurityContext</a></li><li style="--depth: 0"><a href="#pod-security-admission">Pod Security Admission</a></li><li style="--depth: 0"><a href="#networkpolicy">NetworkPolicy</a></li><li style="--depth: 0"><a href="#镜像与供应链安全">镜像与供应链安全</a></li><li style="--depth: 0"><a href="#secret-与外部密钥管理">Secret 与外部密钥管理</a></li><li style="--depth: 0"><a href="#安全检查命令">安全检查命令</a></li><li style="--depth: 0"><a href="#安全事件-runbook">安全事件 Runbook</a></li><li style="--depth: 0"><a href="#生产基线">生产基线</a></li><li style="--depth: 0"><a href="#实践与验收">实践与验收</a></li><li style="--depth: 0"><a href="#官方参考">官方参考</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

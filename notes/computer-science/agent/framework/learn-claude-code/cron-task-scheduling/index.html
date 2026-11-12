@@ -1,0 +1,313 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Cron Scheduler · Musuyin&#39; Home</title><meta name="description" content="Cron 负责判断何时产生工作，队列负责把工作交给执行循环。调度器与 Agent 不应互相阻塞，持久任务和会话任务也要区分保存范围。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/cron-task-scheduling/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Cron Scheduler · Musuyin' Home"><meta property="og:description" content="Cron 负责判断何时产生工作，队列负责把工作交给执行循环。调度器与 Agent 不应互相阻塞，持久任务和会话任务也要区分保存范围。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/cron-task-scheduling/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Cron Scheduler</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-07-22">2026-07-22</time></dd></div><div><dt>字数</dt><dd>2192</dd></div><div><dt>预计阅读</dt><dd>8 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Cron Scheduler</h1><time datetime="2026-07-22">2026-07-22</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>Cron 负责判断何时产生工作，队列负责把工作交给执行循环。调度器与 Agent 不应互相阻塞，持久任务和会话任务也要区分保存范围。</p>
+<p><a id="reference-cron-scheduler--按时间表生产工作"></a></p>
+<h2 id="cron-scheduler--按时间表生产工作">Cron Scheduler — 按时间表生产工作</h2>
+<blockquote>
+<p><em>“按时间表生产工作，调度与执行解耦”</em>——cron 调度，持久化或会话级。</p>
+<p><strong>Harness 层</strong>：调度——独立线程判断时间，队列传递触发。</p>
+</blockquote>
+<p><a id="reference-问题"></a></p>
+<h3 id="问题">问题</h3>
+<p>闹钟不需要你盯着它才会响。你设好 7:00，到点它自己响，你在睡觉、在洗澡、在做饭，它都照响不误。</p>
+<p>S13 让 Agent 能后台执行慢操作，但所有操作仍然是你手动触发的。你说一句，Agent 动一下。“每天早上 9 点跑测试”、“每 30 分钟检查 CI 状态”，这些周期性任务不该需要人每次来推。</p>
+<p><a id="reference-解决方案"></a></p>
+<h3 id="解决方案">解决方案</h3>
+<p><img alt="IMG-20260928133931325" loading="lazy" decoding="async" width="760" height="480" src="/_astro/IMG-20260928133931325.DftXN2hG_Z27vE6b.svg"></p>
+<p>教学代码沿用 S13 的简化任务系统、后台执行和 prompt 组装；为了聚焦调度器，省略完整错误恢复、记忆和技能系统。新增：独立的 cron 调度线程，每秒检查一次，时间到了把任务塞进 <code>cron_queue</code>；再由 queue processor 在 Agent 空闲时自动交付。</p>
+<p>手动 vs 定时：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>手动触发 (S13)</th>
+<th>定时触发 (S14)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>触发者</td>
+<td>用户输入</td>
+<td>调度线程</td>
+</tr>
+<tr>
+<td>触发时机</td>
+<td>随时</td>
+<td>cron 表达式指定</td>
+</tr>
+<tr>
+<td>需要人参与</td>
+<td>是</td>
+<td>否（调度器自动入队，空闲时自动交付）</td>
+</tr>
+<tr>
+<td>持久性</td>
+<td>—</td>
+<td>durable 跨重启</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-工作原理"></a></p>
+<h3 id="工作原理">工作原理</h3>
+<p><a id="reference-四层模型"></a></p>
+<h4 id="四层模型">四层模型</h4>
+<p>Cron 调度分四层：</p>
+<ol>
+<li><strong>Scheduler</strong>：daemon 线程，每秒轮询，判断时间到了没有</li>
+<li><strong>Queue</strong>：<code>cron_queue</code>，调度线程写入已触发任务</li>
+<li><strong>Queue Processor</strong>：发现队列非空且 Agent 空闲，启动一轮 agent_loop</li>
+<li><strong>Consumer</strong>：agent_loop 从队列消费，注入到 messages</li>
+</ol>
+<p>教学版实现的是最小 queue processor：用 <code>agent_lock</code> 判断 Agent 是否空闲，空闲时自动交付定时任务。真实 CC 的 <code>useQueueProcessor.ts</code> 还会处理 UI 阻塞、队列优先级和不同消息模式。</p>
+<p><a id="reference-cronjob-数据结构"></a></p>
+<h4 id="cronjob-数据结构">CronJob*: 数据结构</h4>
+<p>每个 <em>cron 任务</em>是一个 <code>CronJob</code> 对象：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">@dataclass</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> CronJob</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    cron: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#6A737D;--shiki-dark:#6A737D">        # "0 9 * * *" (五段式 cron 表达式)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    prompt: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#6A737D;--shiki-dark:#6A737D">      # 触发时注入给 Agent 的消息</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    recurring: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">bool</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # True=周期性，False=一次性</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    durable: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">bool</span><span style="color:#6A737D;--shiki-dark:#6A737D">    # True=写磁盘，跨会话保留</span></span></code></pre>
+<p><em>Cron 表达式</em>，五段式，Unix 用了 50 年：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>分钟  小时  日  月  星期</span></span>
+<span class="line"><span>  *    *   *   *   *      每分钟</span></span>
+<span class="line"><span>  0    9   *   *   *      每天早上 9:00</span></span>
+<span class="line"><span> */5    *   *   *   *      每 5 分钟</span></span>
+<span class="line"><span>  0    9   *   *  1-5     工作日早上 9:00</span></span></code></pre>
+<p>支持 <code>*</code>、<code>*/N</code>、<code>N</code>、<code>N-M</code>、<code>N,M,...</code>。</p>
+<p><a id="reference-cron_matches-五段式匹配"></a></p>
+<h4 id="cron_matches-五段式匹配">cron_matches: 五段式匹配</h4>
+<p>标准 cron 语义：分钟、小时、月必须全部匹配；日（DOM）和星期（DOW）同时被约束时任一匹配即可（OR）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> cron_matches</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cron_expr: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, dt: datetime) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    fields </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> cron_expr.strip().split()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(fields) </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 5</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> False</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    minute, hour, dom, month, dow </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fields</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    dow_val </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (dt.weekday() </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">%</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 7</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # Python Monday=0 → cron Sunday=0</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    m </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _cron_field_matches(minute, dt.minute)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    h </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _cron_field_matches(hour, dt.hour)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    dom_ok </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _cron_field_matches(dom, dt.day)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    month_ok </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _cron_field_matches(month, dt.month)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    dow_ok </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _cron_field_matches(dow, dow_val)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (m </span><span style="color:#D73A49;--shiki-dark:#F97583">and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> h </span><span style="color:#D73A49;--shiki-dark:#F97583">and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> month_ok):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> False</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # DOM and DOW: both constrained → either matching is enough (OR)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    dom_unconstrained </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dom </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "*"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    dow_unconstrained </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dow </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "*"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dom_unconstrained </span><span style="color:#D73A49;--shiki-dark:#F97583">and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dow_unconstrained:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> True</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dom_unconstrained:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dow_ok</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dow_unconstrained:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dom_ok</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dom_ok </span><span style="color:#D73A49;--shiki-dark:#F97583">or</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> dow_ok</span></span></code></pre>
+<p><a id="reference-独立调度线程-每秒轮询"></a></p>
+<h4 id="独立调度线程-每秒轮询">独立调度线程: 每秒轮询</h4>
+<p>调度器跑在独立的 daemon 线程里，不依赖 agent_loop 是否在执行。单个 job 异常不会杀掉整个线程：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> cron_scheduler_loop</span><span style="color:#24292E;--shiki-dark:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    while</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        time.sleep(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        now </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> datetime.now()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        minute_marker </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> now.strftime(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"%Y-%m-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> %H:%M"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        with</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> cron_lock:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> job </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> list</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(scheduled_jobs.values()):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                try</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> cron_matches(job.cron, now):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _last_fired.get(job.id) </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> minute_marker:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                            cron_queue.append(job)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                            _last_fired[job.id] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> minute_marker</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                        if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> job.recurring:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                            scheduled_jobs.pop(job.id, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> job.durable:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                                save_durable_jobs()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                except</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> Exception</span><span style="color:#D73A49;--shiki-dark:#F97583"> as</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> e:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">                    print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"[cron error] </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">job.id</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p>关键设计：</p>
+<ul>
+<li><strong>独立于 agent_loop</strong>：即使 agent_loop 没在跑，调度器也在后台检查时间</li>
+<li><strong>date-aware minute_marker</strong>：用 <code>"YYYY-MM-DD HH:MM"</code> 防止同一分钟重复触发，同时不会在第二天跳过</li>
+<li><strong>单 job try/except</strong>：一个坏 job 不会拖垮整个调度线程</li>
+<li><strong>一次性任务</strong>：触发后自动从 scheduled_jobs 里删除</li>
+</ul>
+<p><a id="reference-queue-processor--agent_loop-交付端"></a></p>
+<h4 id="queue-processor--agent_loop-交付端">Queue Processor + agent_loop: 交付端</h4>
+<p>queue processor 不检查时间，只负责在队列有任务且 Agent 空闲时拉起一轮执行：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> queue_processor_loop</span><span style="color:#24292E;--shiki-dark:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    while</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        time.sleep(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0.2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> has_cron_queue():</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            continue</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> agent_lock.acquire(</span><span style="color:#E36209;--shiki-dark:#FFAB70">blocking</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">False</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            continue</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        try</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> has_cron_queue():</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                run_agent_turn_locked()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        finally</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            agent_lock.release()</span></span></code></pre>
+<p>agent_loop 也不负责检查时间，它只从 <code>cron_queue</code> 里拿已触发的任务，注入到 messages 里：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">fired </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> consume_cron_queue()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> job </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fired:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    messages.append({</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">                     "content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"[Scheduled] </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">job.prompt</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span></code></pre>
+<p>生产者（调度线程）、交付者（queue processor）和消费者（agent_loop）通过 <code>cron_queue</code>、<code>cron_lock</code>、<code>agent_lock</code> 解耦。</p>
+<p><a id="reference-校验防止坏-cron-杀掉调度器"></a></p>
+<h4 id="校验防止坏-cron-杀掉调度器">校验：防止坏 cron 杀掉调度器</h4>
+<p><code>schedule_job</code> 在注册前校验 cron 表达式，非法的直接返回错误：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> schedule_job</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cron, prompt, recurring</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, durable</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    err </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> validate_cron(cron)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # ... register job</span></span></code></pre>
+<p>从磁盘加载 durable job 时也会跳过非法表达式，避免单个坏任务拖垮启动。</p>
+<p><a id="reference-durable-vs-session-only"></a></p>
+<h4 id="durable-vs-session-only">Durable vs Session-only</h4>
+<ul>
+<li><strong>Durable</strong>：任务定义写进 <code>.scheduled_tasks.json</code>。Agent 重启后加载文件，恢复任务。</li>
+<li><strong>Session-only</strong>：只在内存里。Agent 关闭就没了。</li>
+</ul>
+<blockquote>
+<p><strong>重要前提</strong>：cron 调度器必须在 Agent 进程内跑。进程关闭，调度也停。Durable 只意味着任务定义跨重启保留，下次 Agent 启动时调度器才会发现“该触发了”并触发。如果需要“即使应用关闭也能定时跑”，请用系统 crontab 或 systemd timer。</p>
+</blockquote>
+<p><a id="reference-合起来跑"></a></p>
+<h4 id="合起来跑">合起来跑</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>1. 启动时：</span></span>
+<span class="line"><span>   load_durable_jobs() → 从 .scheduled_tasks.json 恢复持久化任务</span></span>
+<span class="line"><span>   Thread(cron_scheduler_loop, daemon=True).start() → 调度线程开始轮询</span></span>
+<span class="line"><span>   Thread(queue_processor_loop, daemon=True).start() → 队列处理器等待交付</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>2. 注册任务：</span></span>
+<span class="line"><span>   schedule_cron(cron="*/2 * * * *", prompt="run date", durable=True)</span></span>
+<span class="line"><span>   → CronJob 写入 scheduled_jobs + .scheduled_tasks.json</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>3. 每 2 分钟：</span></span>
+<span class="line"><span>   调度线程检查 → cron_matches 返回 True → cron_queue.append(job)</span></span>
+<span class="line"><span>   → queue processor 发现 Agent 空闲 → agent_loop consume_cron_queue</span></span>
+<span class="line"><span>   → 注入 "[Scheduled] run date"</span></span>
+<span class="line"><span>   → LLM 收到消息，执行 date 命令</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>4. 关闭进程：</span></span>
+<span class="line"><span>   调度线程跟着停（daemon=True）</span></span>
+<span class="line"><span>   .scheduled_tasks.json 还在磁盘上</span></span>
+<span class="line"><span>   下次启动 → load_durable_jobs → 任务恢复</span></span></code></pre>
+<p><a id="reference-相对-s13-的变更"></a></p>
+<h3 id="相对-s13-的变更">相对 S13 的变更</h3>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s13)</th>
+<th>之后 (s14)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>触发方式</td>
+<td>用户手动触发</td>
+<td>调度线程自动入队</td>
+</tr>
+<tr>
+<td>新类型</td>
+<td>—</td>
+<td>CronJob dataclass (id, cron, prompt, recurring, durable)</td>
+</tr>
+<tr>
+<td>新函数</td>
+<td>—</td>
+<td>cron_matches, validate_cron, schedule_job, cancel_job, cron_scheduler_loop, queue_processor_loop</td>
+</tr>
+<tr>
+<td>新存储</td>
+<td>—</td>
+<td>.scheduled_tasks.json (durable) + 内存 (session-only)</td>
+</tr>
+<tr>
+<td>线程</td>
+<td>后台执行线程</td>
+<td>+ 调度线程 (daemon, 1s 轮询) + queue processor 线程</td>
+</tr>
+<tr>
+<td>队列</td>
+<td>background_results</td>
+<td>+ cron_queue (调度线程写, queue processor 交付, agent_loop 消费)</td>
+</tr>
+<tr>
+<td>工具</td>
+<td>8 (S12/S13)</td>
+<td>+ schedule_cron, list_crons, cancel_cron (11)</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-试一下"></a></p>
+<h3 id="试一下">试一下</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> learn-claude-code</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">python</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> s14_cron_scheduler/code.py</span></span></code></pre>
+<p>试试这些 prompt：</p>
+<ol>
+<li><code>Schedule a task to print the current date every 2 minutes</code></li>
+<li><code>List all cron jobs</code></li>
+<li><code>Create a one-shot reminder in 1 minute to check the build status</code></li>
+<li><code>Cancel the recurring job and verify with list_crons</code></li>
+</ol>
+<p>观察重点：调度线程是否在独立运行？cron 任务是否在正确的时间点触发？不输入新 prompt 时，是否也出现 <code>[queue processor]</code> 并自动执行？durable job 是否写入了 <code>.scheduled_tasks.json</code>？</p>
+<p><a id="reference-接下来"></a></p>
+<h3 id="接下来">接下来</h3>
+<p>一个 Agent 能做很多事了，能计划、能压缩、能后台、能定时。但有些任务太大了，不是一个 Agent 能搞定的。</p>
+<p>“重构整个后端”，把认证模块、数据库层、API 路由、测试全部翻新。一个 Agent 的注意力是有限的，这需要一个团队。</p>
+<p>S15 Agent Teams → 一个 Agent 不够，组队吧。持久队友 + 异步收件箱。</p>
+<p><a id="reference-claude-code"></a></p>
+<h2 id="claude-code">Claude Code</h2>
+<blockquote>
+<p>以下基于 CC 源码 <code>CronCreateTool.ts</code>、<code>cronScheduler.ts</code>、<code>cron.ts</code>、<code>cronTasks.ts</code>、<code>cronTasksLock.ts</code>、<code>useScheduledTasks.ts</code>（139 行）的完整分析。</p>
+</blockquote>
+<p><a id="reference-三个-cron-工具"></a></p>
+<h3 id="三个-cron-工具">三个 Cron 工具</h3>
+<p>CC 暴露了三个 cron 工具给模型：<code>CronCreate</code>、<code>CronDelete</code>、<code>CronList</code>。全部由编译时门控 <code>feature('AGENT_TRIGGERS')</code> 和运行时 GrowthBook 标志 <code>tengu_kairos_cron</code> 控制。还有一个 <code>CLAUDE_CODE_DISABLE_CRON</code> 环境变量做本地覆盖。</p>
+<p><a id="reference-存储claudescheduled_tasksjson"></a></p>
+<h3 id="存储claudescheduled_tasksjson">存储：<code>.claude/scheduled_tasks.json</code></h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{ </span><span style="color:#005CC5;--shiki-dark:#79B8FF">"tasks"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [{ </span><span style="color:#005CC5;--shiki-dark:#79B8FF">"id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"abc12345"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">"cron"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"0 9 * * *"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">"prompt"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"..."</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">"recurring"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">"durable"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">"createdAt"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1714567890000</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }] }</span></span></code></pre>
+<p>Durable 任务写磁盘；session-only 任务存于 <code>STATE.sessionCronTasks</code> 内存数组（进程重启丢失）。还有一个 <code>.scheduled_tasks.lock</code> 文件防止同项目的多个 session 重复触发。</p>
+<p><a id="reference-调度器1-秒轮询"></a></p>
+<h3 id="调度器1-秒轮询">调度器：1 秒轮询</h3>
+<p><code>cronScheduler.ts</code> 每秒检查一次（<code>CHECK_INTERVAL_MS = 1000</code>）。谁持有锁谁触发文件任务；所有 session 都触发仅 session 任务。还有一个 <code>chokidar</code> 文件观察者监视 <code>scheduled_tasks.json</code> 变更。</p>
+<p><a id="reference-cron-表达式标准-5-字段"></a></p>
+<h3 id="cron-表达式标准-5-字段">Cron 表达式：标准 5 字段</h3>
+<p>分钟 小时 日 月 星期。支持 <code>*</code>、<code>*/N</code>、<code>N</code>、<code>N-M</code>、<code>N-M/S</code>、<code>N,M,...</code>。不支持 <code>L</code>、<code>W</code>、<code>?</code>。所有时间以本地时区解释。Day-of-month 和 day-of-week 同时约束时用 OR 语义。</p>
+<p><a id="reference-抖动防惊群效应"></a></p>
+<h3 id="抖动防惊群效应">抖动（防惊群效应）</h3>
+<ul>
+<li>重复性任务：触发延迟最多可达期间的 10%（上限 15 分钟），基于任务 ID 的确定性哈希</li>
+<li>一次性任务：当触发时间落在 <code>:00</code> 或 <code>:30</code> 时，最多提前 90 秒触发</li>
+<li>抖动配置可通过 GrowthBook 实时调整，60 秒刷新一次</li>
+</ul>
+<p><a id="reference-自动过期"></a></p>
+<h3 id="自动过期">自动过期</h3>
+<p>重复性任务 7 天后自动过期（可配置，上限 30 天）。过期前最后一次触发，触发后自动删除。</p>
+<p><a id="reference-作业数上限"></a></p>
+<h3 id="作业数上限">作业数上限</h3>
+<p><code>MAX_JOBS = 50</code>（<code>CronCreateTool.ts:25</code>）。超限时返回错误：“Too many scheduled jobs (max 50). Cancel one first.”</p>
+<p><a id="reference-触发注入"></a></p>
+<h3 id="触发注入">触发注入</h3>
+<p>触发后通过 <code>enqueuePendingNotification()</code> 以 <code>priority: 'later'</code> 入队命令队列。标记 <code>workload: WORKLOAD_CRON</code>，API 在容量紧张时以更低的 QoS 为 cron 发起的请求服务。</p>
+<p><a id="reference-queue-processor自动交付"></a></p>
+<h3 id="queue-processor自动交付">Queue Processor：自动交付</h3>
+<p>真实 CC 通过 <code>useQueueProcessor.ts:48-60</code> 在无 query、无阻塞 UI、队列非空时自动触发处理。<code>queueProcessor.ts:52-87</code> 按队列优先级把命令交给 <code>handlePromptSubmit()</code>。教学版用 <code>queue_processor_loop</code> 保留核心行为：队列有任务且 Agent 空闲时，自动启动一轮 agent_loop。</p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>验证表达式、重复触发、过期和进程重启四种情形；说明时间命中为何不等于任务已经成功执行。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续理解相关机制：<a href="/notes/computer-science/agent/framework/learn-claude-code/agent-team-messaging/">S15-Agent Team</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#cron-scheduler--按时间表生产工作">Cron Scheduler — 按时间表生产工作</a></li><li style="--depth: 1"><a href="#问题">问题</a></li><li style="--depth: 1"><a href="#解决方案">解决方案</a></li><li style="--depth: 1"><a href="#工作原理">工作原理</a></li><li style="--depth: 2"><a href="#四层模型">四层模型</a></li><li style="--depth: 2"><a href="#cronjob-数据结构">CronJob*: 数据结构</a></li><li style="--depth: 2"><a href="#cron_matches-五段式匹配">cron_matches: 五段式匹配</a></li><li style="--depth: 2"><a href="#独立调度线程-每秒轮询">独立调度线程: 每秒轮询</a></li><li style="--depth: 2"><a href="#queue-processor--agent_loop-交付端">Queue Processor + agent_loop: 交付端</a></li><li style="--depth: 2"><a href="#校验防止坏-cron-杀掉调度器">校验：防止坏 cron 杀掉调度器</a></li><li style="--depth: 2"><a href="#durable-vs-session-only">Durable vs Session-only</a></li><li style="--depth: 2"><a href="#合起来跑">合起来跑</a></li><li style="--depth: 1"><a href="#相对-s13-的变更">相对 S13 的变更</a></li><li style="--depth: 1"><a href="#试一下">试一下</a></li><li style="--depth: 1"><a href="#接下来">接下来</a></li><li style="--depth: 0"><a href="#claude-code">Claude Code</a></li><li style="--depth: 1"><a href="#三个-cron-工具">三个 Cron 工具</a></li><li style="--depth: 1"><a href="#存储claudescheduled_tasksjson">存储：.claude/scheduled_tasks.json</a></li><li style="--depth: 1"><a href="#调度器1-秒轮询">调度器：1 秒轮询</a></li><li style="--depth: 1"><a href="#cron-表达式标准-5-字段">Cron 表达式：标准 5 字段</a></li><li style="--depth: 1"><a href="#抖动防惊群效应">抖动（防惊群效应）</a></li><li style="--depth: 1"><a href="#自动过期">自动过期</a></li><li style="--depth: 1"><a href="#作业数上限">作业数上限</a></li><li style="--depth: 1"><a href="#触发注入">触发注入</a></li><li style="--depth: 1"><a href="#queue-processor自动交付">Queue Processor：自动交付</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

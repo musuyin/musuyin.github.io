@@ -1,0 +1,373 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Error Recovery · Musuyin&#39; Home</title><meta name="description" content="恢复策略取决于失败类型：输出截断、输入超限和临时服务故障需要不同处理。重试是带上限的状态迁移，不能只把相同请求无限重发。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/agent-error-recovery/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Error Recovery · Musuyin' Home"><meta property="og:description" content="恢复策略取决于失败类型：输出截断、输入超限和临时服务故障需要不同处理。重试是带上限的状态迁移，不能只把相同请求无限重发。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/agent-error-recovery/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Error Recovery</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-07-22">2026-07-22</time></dd></div><div><dt>字数</dt><dd>1932</dd></div><div><dt>预计阅读</dt><dd>7 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Error Recovery</h1><time datetime="2026-07-22">2026-07-22</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>恢复策略取决于失败类型：输出截断、输入超限和临时服务故障需要不同处理。重试是带上限的状态迁移，不能只把相同请求无限重发。</p>
+<p><a id="reference-error-recovery--错误不是结束是重试的开始"></a></p>
+<h2 id="error-recovery--错误不是结束是重试的开始">Error Recovery — 错误不是结束，是重试的开始</h2>
+<blockquote>
+<p><em>“错误不是终点，是重试的起点”</em> — 升级 token、压缩上下文、切换模型。</p>
+<p><strong>Harness 层</strong>：韧性——主循环遇到错误时分类并恢复。</p>
+</blockquote>
+<p><a id="reference-问题"></a></p>
+<h3 id="问题">问题</h3>
+<p>Agent 跑着跑着报错了：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Error: 529 overloaded</span></span></code></pre>
+<p>Agent 崩溃了。它没有重试，没有换模型，没有减少上下文——直接崩溃。</p>
+<p>生产环境中 API 错误是常态。三种最常见的故障模式：<strong>输出被截断</strong>（模型话说一半 token 用完了）、<strong>上下文超限</strong>（压缩后还是太长）、<strong>临时故障</strong>（429 限流 / 529 过载）。一个不处理错误的 Agent 就像一个一碰就熄火的车。</p>
+<p><a id="reference-解决方案"></a></p>
+<h3 id="解决方案">解决方案</h3>
+<p><img alt="Error Recovery Overview|717" loading="lazy" decoding="async" width="760" height="440" src="/_astro/IMG-20260722154654887.CIw1KPqn_13YdYy.svg"></p>
+<p>s10 的循环、prompt 组装全部保留。唯一的变动：LLM 调用包裹在 try/except 里，根据错误类型走不同的恢复路径。恢复后 <code>continue</code> 回到循环开头重新调用 LLM。</p>
+<p>三种最常见的恢复模式（教学版只处理 429/529；真实系统还覆盖连接错误、超时、云厂商认证缓存等。CC 实际有 13+ reason code，其余见 Deep dive）：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>触发</th>
+<th>恢复动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>输出截断</td>
+<td><code>max_tokens</code></td>
+<td>升级 8K→64K / 续写提示</td>
+</tr>
+<tr>
+<td>上下文超限</td>
+<td><code>prompt_too_long</code></td>
+<td>reactive compact → 重试</td>
+</tr>
+<tr>
+<td>临时故障</td>
+<td>429 / 529</td>
+<td><em>指数退避</em> + 抖动，连续 529 可切换备用模型</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-工作原理"></a></p>
+<h3 id="工作原理">工作原理</h3>
+<p><a id="reference-路径-1-输出被截断"></a></p>
+<h4 id="路径-1-输出被截断">路径 1: 输出被截断</h4>
+<p>模型话说一半，<code>max_tokens</code> 用完了。默认 8000 token 不够它输出完整回答。</p>
+<p>第一次发生时，直接把 <code>max_tokens</code> 从 8K 升级到 64K（8 倍空间），重试同一请求——此时不追加截断输出到 messages，保持原始请求不变。如果 64K 还是不够，才保存截断输出并注入续写提示让模型接着刚才的话继续说，最多 3 次：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.stop_reason </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "max_tokens"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # First escalation: don't append truncated output, retry same request</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state.has_escalated:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        max_tokens </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> ESCALATED_MAX_TOKENS</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        state.has_escalated </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> True</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        continue</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # messages unchanged, same request with more tokens</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 64K still truncated: save output + continuation prompt</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    messages.append({</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"assistant"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: response.content})</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state.recovery_count </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> MAX_RECOVERY_RETRIES</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        messages.append({</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "Output token limit hit. Resume directly — "</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "no apology, no recap. Pick up mid-thought."</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        state.recovery_count </span><span style="color:#D73A49;--shiki-dark:#F97583">+=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        continue</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # still truncated after 3 continuations</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Normal: append after max_tokens check</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">messages.append({</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"assistant"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: response.content})</span></span></code></pre>
+<p>升级只有一次机会，续写最多 3 次。超过就退出——继续续写也不会有实质产出。</p>
+<p><a id="reference-路径-2-上下文超限"></a></p>
+<h4 id="路径-2-上下文超限">路径 2: 上下文超限</h4>
+<p>LLM 说“你的上下文太长了”（<code>prompt_too_long</code>）。s08 的四层压缩全跑过了，还是超。</p>
+<p>触发 reactive compact——比 auto compact 更激进。教学版只保留最后 5 条消息模拟压缩效果；真实实现会调用 LLM 生成 compact 摘要再重试。压缩后重试。但如果压缩过一次还是超限，只能退出——再压缩也不会变小：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">except</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> PromptTooLongError:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state.has_attempted_reactive_compact:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        messages[:] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> reactive_compact(messages)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        state.has_attempted_reactive_compact </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> True</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        continue</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 压缩过了还是超限，只能退出</span></span></code></pre>
+<p><a id="reference-路径-3-临时故障"></a></p>
+<h4 id="路径-3-临时故障">路径 3: 临时故障</h4>
+<p>网络抖动、429 限流、529 过载——这些不是 bug，是分布式系统的常态。</p>
+<p>429 和 529 统一走指数退避 + 抖动：第一次等 0.5 秒，第二次等 1 秒，第三次等 2 秒，最多 10 次。加随机抖动让并发请求不在同一时刻重试。连续 3 次 529 过载 → 切换到备用模型（若配置了 <code>FALLBACK_MODEL_ID</code> 环境变量）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> retry_delay</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(attempt, retry_after</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> retry_after:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> retry_after</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    base </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> min</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">500</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#D73A49;--shiki-dark:#F97583"> **</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> attempt), </span><span style="color:#005CC5;--shiki-dark:#79B8FF">32000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1000</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> base </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> random.uniform(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, base </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0.25</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> with_retry</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(fn, state, max_retries</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> attempt </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(max_retries):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        try</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fn()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        except</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (RateLimitError, OverloadedError):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            delay </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> retry_delay(attempt)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            time.sleep(delay)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> is_overloaded:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                state.consecutive_529 </span><span style="color:#D73A49;--shiki-dark:#F97583">+=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state.consecutive_529 </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> FALLBACK_MODEL</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    state.current_model </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> FALLBACK_MODEL</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    raise</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> MaxRetriesExceeded()</span></span></code></pre>
+<p>退避公式：<code>min(500 × 2^attempt, 32000) + random(0~25%)</code>。如果服务器返回 <code>Retry-After</code> header，优先用那个值。</p>
+<p><a id="reference-合起来跑"></a></p>
+<h4 id="合起来跑">合起来跑</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> agent_loop</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages, context):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    system </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> get_system_prompt(context)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    state </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> RecoveryState()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    max_tokens </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 8000</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    while</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        try</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            response </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> with_retry(</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                lambda</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: client.messages.create(</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">                    model</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">state.current_model, </span><span style="color:#E36209;--shiki-dark:#FFAB70">system</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">system,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">                    messages</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">messages, </span><span style="color:#E36209;--shiki-dark:#FFAB70">tools</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">TOOLS</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">                    max_tokens</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">max_tokens),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                state)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        except</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> Exception</span><span style="color:#D73A49;--shiki-dark:#F97583"> as</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> e:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> is_prompt_too_long_error(e):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state.has_attempted_reactive_compact:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    messages[:] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> reactive_compact(messages)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    state.has_attempted_reactive_compact </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> True</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                    continue</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            log_error(e)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # max_tokens check BEFORE appending to messages</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.stop_reason </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "max_tokens"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state.has_escalated:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                max_tokens </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 64000</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                state.has_escalated </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> True</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                continue</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # retry same request, messages unchanged</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            # save truncated output + continuation prompt</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            messages.append({</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"assistant"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: response.content})</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            messages.append({</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">CONTINUATION_PROMPT</span><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            continue</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # Normal completion</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        messages.append({</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"assistant"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: response.content})</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> response.stop_reason </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "tool_use"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        # ... tool execution ...</span></span></code></pre>
+<p>外层 try/except 捕获 API 异常（prompt_too_long 等），<code>with_retry</code> 处理瞬态错误（429/529），<code>stop_reason</code> 检查处理截断。三种恢复机制各管各的错误类型。</p>
+<p><a id="reference-相对-s10-的变更"></a></p>
+<h3 id="相对-s10-的变更">相对 S10 的变更</h3>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s10)</th>
+<th>之后 (s11)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>错误处理</td>
+<td>无（一碰就崩溃）</td>
+<td>三种恢复模式 + 指数退避</td>
+</tr>
+<tr>
+<td>新常量</td>
+<td>—</td>
+<td>ESCALATED_MAX_TOKENS=64000, MAX_RETRIES=10, BASE_DELAY_MS=500, FALLBACK_MODEL</td>
+</tr>
+<tr>
+<td>新函数</td>
+<td>—</td>
+<td>with_retry, retry_delay, reactive_compact, is_prompt_too_long_error, RecoveryState</td>
+</tr>
+<tr>
+<td>工具</td>
+<td>bash, read_file, write_file (3)</td>
+<td>bash, read_file, write_file (3) — 不变</td>
+</tr>
+<tr>
+<td>循环</td>
+<td>裸调用 LLM</td>
+<td>try/except 包裹 + continue 重试</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-试一下"></a></p>
+<h3 id="试一下">试一下</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> learn-claude-code</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">python</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> s11_error_recovery/code.py</span></span></code></pre>
+<p>试试这些 prompt：</p>
+<ol>
+<li>让 Agent 生成一段很长的代码，观察截断后是否自动续写（看 <code>[max_tokens] escalating</code> 日志）</li>
+<li>连续读取大量文件撑大上下文，观察 reactive compact</li>
+<li>如果遇到 429/529，观察指数退避的日志输出</li>
+</ol>
+<p><a id="reference-接下来"></a></p>
+<h3 id="接下来">接下来</h3>
+<p>Agent 现在能在错误中自动恢复了。但它处理的任务仍然是“一次性”的——你给它一个任务，它做完，结束。</p>
+<p>能不能让 Agent 管理一个<strong>任务列表</strong>——有依赖关系、持久化到磁盘、跨会话能恢复？TODO 列表不是任务系统。</p>
+<p>S12 Task System → 任务是有依赖、有状态、持久化的图。这是多 Agent 协作的基础。</p>
+<p><a id="reference-claude-code"></a></p>
+<h2 id="claude-code">Claude Code</h2>
+<blockquote>
+<p>以下基于 CC 源码 <code>query.ts</code>（1729 行）、<code>services/api/withRetry.ts</code>（822 行）、<code>query/tokenBudget.ts</code>（93 行）、<code>utils/tokenBudget.ts</code>（73 行）的分析。</p>
+</blockquote>
+<p><a id="reference-十几种-reasontransition不只是-3-条"></a></p>
+<h3 id="十几种-reasontransition不只是-3-条">十几种 reason/transition（不只是 3 条）</h3>
+<p>教学版讲了 3 种最常见的恢复模式。CC 实际有十几种 reason/transition，每轮 LLM 调用后都会判断：</p>
+<table>
+<thead>
+<tr>
+<th>reason/transition</th>
+<th>教学版对应</th>
+<th>CC 行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>completed</code></td>
+<td>正常完成</td>
+<td>返回结果</td>
+</tr>
+<tr>
+<td><code>next_turn</code></td>
+<td>正常工具调用</td>
+<td>继续下一轮工具执行</td>
+</tr>
+<tr>
+<td><code>max_output_tokens_escalate</code></td>
+<td>路径 1</td>
+<td>8K→64K 升级</td>
+</tr>
+<tr>
+<td><code>max_output_tokens_recovery</code></td>
+<td>路径 1 续写</td>
+<td>续写提示（最多 3 次）</td>
+</tr>
+<tr>
+<td><code>reactive_compact_retry</code></td>
+<td>路径 2</td>
+<td>reactive compact → 重试</td>
+</tr>
+<tr>
+<td><code>prompt_too_long</code></td>
+<td>路径 2</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><code>collapse_drain_retry</code></td>
+<td>未展开</td>
+<td>context collapse 先提交暂存</td>
+</tr>
+<tr>
+<td><code>model_error</code></td>
+<td>未展开</td>
+<td>重试</td>
+</tr>
+<tr>
+<td><code>image_error</code></td>
+<td>未展开</td>
+<td><code>ImageSizeError</code> / <code>ImageResizeError</code> 专门处理</td>
+</tr>
+<tr>
+<td><code>aborted_streaming</code></td>
+<td>未展开</td>
+<td>流式中止恢复</td>
+</tr>
+<tr>
+<td><code>aborted_tools</code></td>
+<td>未展开</td>
+<td>工具中止</td>
+</tr>
+<tr>
+<td><code>stop_hook_blocking</code></td>
+<td>未展开</td>
+<td>注入 blocking error → 模型自纠</td>
+</tr>
+<tr>
+<td><code>stop_hook_prevented</code></td>
+<td>未展开</td>
+<td>hooks 阻止</td>
+</tr>
+<tr>
+<td><code>hook_stopped</code></td>
+<td>未展开</td>
+<td>hook 停止执行</td>
+</tr>
+<tr>
+<td><code>token_budget_continuation</code></td>
+<td>未展开</td>
+<td>token 用量 &lt; 90% 时继续</td>
+</tr>
+<tr>
+<td><code>blocking_limit</code></td>
+<td>未展开</td>
+<td>阻塞限制</td>
+</tr>
+<tr>
+<td><code>max_turns</code></td>
+<td>未展开</td>
+<td>达到最大轮次</td>
+</tr>
+</tbody>
+</table>
+<p>教学版只展开了前 5 种（最常见的），其余各有专门处理逻辑。</p>
+<p><a id="reference-指数退避的精确公式"></a></p>
+<h3 id="指数退避的精确公式">指数退避的精确公式</h3>
+<p>CC 的退避延迟（<code>withRetry.ts:530-548</code>）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>delay = min(500 × 2^(attempt-1), 32000) + random(0~25%)</span></span></code></pre>
+<table>
+<thead>
+<tr>
+<th>尝试</th>
+<th>基础延迟</th>
+<th>+ 抖动</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>500ms</td>
+<td>0-125ms</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1000ms</td>
+<td>0-250ms</td>
+</tr>
+<tr>
+<td>4</td>
+<td>4000ms</td>
+<td>0-1000ms</td>
+</tr>
+<tr>
+<td>7+</td>
+<td>32000ms（上限）</td>
+<td>0-8000ms</td>
+</tr>
+</tbody>
+</table>
+<p>如果服务器返回 <code>Retry-After</code> header，优先用那个值。</p>
+<p><a id="reference-continuation-提示原文"></a></p>
+<h3 id="continuation-提示原文">CONTINUATION 提示原文</h3>
+<p>CC 的续写提示（<code>query.ts:1225-1227</code>）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Output token limit hit. Resume directly — no apology, no recap of what</span></span>
+<span class="line"><span>you were doing. Pick up mid-thought if that is where the cut happened.</span></span>
+<span class="line"><span>Break remaining work into smaller pieces.</span></span></code></pre>
+<p>Token budget 的 nudge 提示（<code>tokenBudget.ts:72</code>）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Stopped at {pct}% of token target. Keep working — do not summarize.</span></span></code></pre>
+<p><a id="reference-流式错误处理"></a></p>
+<h3 id="流式错误处理">流式错误处理</h3>
+<p>CC 的流式路径中，可恢复的错误（413、max_tokens、media error）在 streaming 期间<strong>被暂扣不展示</strong>（<code>query.ts:788-822</code>）——SDK 消费者看不到，只有恢复逻辑能看到。等 streaming 结束后才判断是否需要恢复。</p>
+<p><a id="reference-fallback-model-切换"></a></p>
+<h3 id="fallback-model-切换">Fallback Model 切换</h3>
+<p>连续 3 次 529 过载错误后（<code>MAX_529_RETRIES = 3</code>），CC 自动切换到 fallback model（如 Opus → Sonnet）。切换时清除所有 pending 消息和 tool 结果，给用户展示 “Switched to {model} due to high demand”。</p>
+<p><a id="reference-diminishing-returns-检测"></a></p>
+<h3 id="diminishing-returns-检测">Diminishing Returns 检测</h3>
+<p>Token budget 的“继续”不是无限的。当连续 3 次 continuation 且 token 增量 &lt; 500 时，系统判断“继续也没有实质性产出”，停止 continuation（<code>tokenBudget.ts:60-62</code>）。</p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>分别为截断、429、上下文超限选择正文中的恢复路径，并解释何时停止继续投入。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续理解相关机制：<a href="/notes/computer-science/agent/framework/learn-claude-code/persistent-task-system/">S12-Task System</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#error-recovery--错误不是结束是重试的开始">Error Recovery — 错误不是结束，是重试的开始</a></li><li style="--depth: 1"><a href="#问题">问题</a></li><li style="--depth: 1"><a href="#解决方案">解决方案</a></li><li style="--depth: 1"><a href="#工作原理">工作原理</a></li><li style="--depth: 2"><a href="#路径-1-输出被截断">路径 1: 输出被截断</a></li><li style="--depth: 2"><a href="#路径-2-上下文超限">路径 2: 上下文超限</a></li><li style="--depth: 2"><a href="#路径-3-临时故障">路径 3: 临时故障</a></li><li style="--depth: 2"><a href="#合起来跑">合起来跑</a></li><li style="--depth: 1"><a href="#相对-s10-的变更">相对 S10 的变更</a></li><li style="--depth: 1"><a href="#试一下">试一下</a></li><li style="--depth: 1"><a href="#接下来">接下来</a></li><li style="--depth: 0"><a href="#claude-code">Claude Code</a></li><li style="--depth: 1"><a href="#十几种-reasontransition不只是-3-条">十几种 reason/transition（不只是 3 条）</a></li><li style="--depth: 1"><a href="#指数退避的精确公式">指数退避的精确公式</a></li><li style="--depth: 1"><a href="#continuation-提示原文">CONTINUATION 提示原文</a></li><li style="--depth: 1"><a href="#流式错误处理">流式错误处理</a></li><li style="--depth: 1"><a href="#fallback-model-切换">Fallback Model 切换</a></li><li style="--depth: 1"><a href="#diminishing-returns-检测">Diminishing Returns 检测</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

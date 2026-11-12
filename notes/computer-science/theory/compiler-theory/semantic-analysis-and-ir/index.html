@@ -1,0 +1,1236 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>静态语义分析和中间代码生成 · Musuyin&#39; Home</title><meta name="description" content="符号表记录名字的类型、作用域和位置，静态语义分析据此检查合法性。中间代码再把表达式和控制结构转换为更接近执行的操作序列。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/compiler-theory/semantic-analysis-and-ir/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="静态语义分析和中间代码生成 · Musuyin' Home"><meta property="og:description" content="符号表记录名字的类型、作用域和位置，静态语义分析据此检查合法性。中间代码再把表达式和控制结构转换为更接近执行的操作序列。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/compiler-theory/semantic-analysis-and-ir/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">静态语义分析和中间代码生成</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-05-08">2026-05-08</time></dd></div><div><dt>字数</dt><dd>12298</dd></div><div><dt>预计阅读</dt><dd>41 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/">#编译原理</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>静态语义分析和中间代码生成</h1><time datetime="2026-05-08">2026-05-08</time><p class="tags"><a href="/tags/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/">#编译原理</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>符号表记录名字的类型、作用域和位置，静态语义分析据此检查合法性。中间代码再把表达式和控制结构转换为更接近执行的操作序列。</p>
+<p><a id="reference-符号表"></a></p>
+<h2 id="符号表">符号表</h2>
+<p><a id="reference-符号表的作用"></a></p>
+<h3 id="符号表的作用">符号表的作用</h3>
+<p><em>符号表</em>（Symbol Table）是编译器中存储程序各种<strong>名字</strong>（标识符）信息的数据结构，贯穿编译的各个阶段。</p>
+<table>
+<thead>
+<tr>
+<th>编译阶段</th>
+<th>对符号表的操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>词法分析</td>
+<td>将识别到的标识符字符串存入符号表</td>
+</tr>
+<tr>
+<td>语法分析</td>
+<td>验证名字的使用是否符合语法</td>
+</tr>
+<tr>
+<td>语义分析</td>
+<td>填写/查询名字的类型、作用域等属性</td>
+</tr>
+<tr>
+<td>代码生成</td>
+<td>查询名字的存储位置，生成地址</td>
+</tr>
+</tbody>
+</table>
+<p>三大核心作用：</p>
+<ol>
+<li><strong>记录名字的属性</strong>：类型、作用域、存储位置等</li>
+<li><strong>支持语义检查</strong>：变量是否声明、类型是否匹配</li>
+<li><strong>辅助代码生成</strong>：确定变量的存储位置和大小</li>
+</ol>
+<p><a id="reference-符号的常见属性"></a></p>
+<h3 id="符号的常见属性">符号的常见属性</h3>
+<p>不同种类的名字存储的属性不同。</p>
+<p><a id="reference-变量常量"></a></p>
+<h4 id="变量常量">变量/常量</h4>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>名字</strong>（Name）</td>
+<td>标识符字符串，如 <code>count</code></td>
+</tr>
+<tr>
+<td><strong>类型</strong>（Type）</td>
+<td><code>int</code>、<code>float</code>、数组类型、指针类型等</td>
+</tr>
+<tr>
+<td><strong>作用域</strong>（Scope）</td>
+<td>全局 / 局部 / 块级</td>
+</tr>
+<tr>
+<td><strong>存储类别</strong></td>
+<td><code>auto</code>、<code>static</code>、<code>extern</code>、<code>register</code></td>
+</tr>
+<tr>
+<td><strong>偏移量</strong>（Offset）</td>
+<td>在栈帧或数据段中的相对地址</td>
+</tr>
+<tr>
+<td><strong>初始值</strong></td>
+<td>常量或静态变量的初始值</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-函数过程"></a></p>
+<h4 id="函数过程">函数/过程</h4>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>名字</strong></td>
+<td>函数名</td>
+</tr>
+<tr>
+<td><strong>返回类型</strong></td>
+<td>返回值类型</td>
+</tr>
+<tr>
+<td><strong>参数列表</strong></td>
+<td>参数的个数和各参数类型</td>
+</tr>
+<tr>
+<td><strong>入口地址</strong></td>
+<td>函数体代码的起始地址</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-类型定义结构体类"></a></p>
+<h4 id="类型定义结构体类">类型定义（结构体、类）</h4>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>字段列表</strong></td>
+<td>各字段的名字和类型</td>
+</tr>
+<tr>
+<td><strong>大小</strong></td>
+<td>总占用字节数</td>
+</tr>
+<tr>
+<td><strong>对齐方式</strong></td>
+<td>内存对齐要求</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-符号表的表现"></a></p>
+<h3 id="符号表的表现">符号表的表现</h3>
+<p>符号表本质是一个<strong>字典</strong>，需要高效支持插入和查找。常见实现方式：</p>
+<p><a id="reference-线性表"></a></p>
+<h4 id="线性表">线性表</h4>
+<p>用数组或链表顺序存储所有记录。</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>时间复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>插入</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>（追加到末尾）</td>
+</tr>
+<tr>
+<td>查找</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>（顺序扫描）</td>
+</tr>
+</tbody>
+</table>
+<p>适用于名字数量少的小型语言或教学编译器。</p>
+<p><a id="reference-散列表hash-table"></a></p>
+<h4 id="散列表hash-table">散列表（Hash Table）</h4>
+<p>用哈希函数将名字映射到表中位置，是实际编译器最常用的方式。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> hash</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(name):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    h </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        h </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (h </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 31</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> ord</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(c)) </span><span style="color:#D73A49;--shiki-dark:#F97583">%</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> TABLE_SIZE</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> h</span></span></code></pre>
+<p><strong>冲突处理</strong>：</p>
+<ul>
+<li><strong>开放定址法</strong>：冲突时探查下一个空槽</li>
+<li><strong>链地址法</strong>（最常用）：每个槽维护一个链表</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>平均</th>
+<th>最坏</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>插入</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+<tr>
+<td>查找</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+</tbody>
+</table>
+<p>GCC、LLVM 等工业编译器均使用散列表。</p>
+<p><a id="reference-二叉搜索树"></a></p>
+<h4 id="二叉搜索树">二叉搜索树</h4>
+<p>按名字字典序组织，平衡 BST（AVL 树、红黑树）保证 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span> 的查找，适合需要按序枚举名字的场景。</p>
+<p><a id="reference-符号表体现作用域与可见性"></a></p>
+<h3 id="符号表体现作用域与可见性">符号表体现作用域与可见性</h3>
+<p><a id="reference-作用域的概念"></a></p>
+<h4 id="作用域的概念">作用域的概念</h4>
+<p><em>作用域</em>（Scope）是<strong>拥有共同有效范围的符号</strong>所在的程序单元。作用域之间可以<strong>嵌套</strong>（一个作用域被另一个包围），但<strong>不会交错</strong>——两个作用域要么嵌套，要么不相交。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span><span style="color:#6A737D;--shiki-dark:#6A737D">        // 全局作用域</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // 块级作用域（嵌套在全局内）</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, x);</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 输出 2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, x);</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 输出 1</span></span></code></pre>
+<p><a id="reference-开作用域与闭作用域"></a></p>
+<h4 id="开作用域与闭作用域">开作用域与闭作用域</h4>
+<p>对于程序中的<strong>某一特定点</strong>，作用域分为两类：</p>
+<p><strong>当前作用域</strong>：该点所在的作用域。</p>
+<p><strong>开作用域（Open Scope）</strong>：当前作用域，以及<strong>所有包含它的外层作用域</strong>，合称该点的开作用域。</p>
+<blockquote>
+<p>即从当前作用域一路向外，直到最顶层，沿途经过的所有作用域都是开作用域。</p>
+</blockquote>
+<p><strong>闭作用域（Closed Scope）</strong>：<strong>不属于开作用域</strong>的作用域——既不是当前作用域，也不是包含它的外层作用域（例如其他函数内部的作用域，或与当前块并列的兄弟块）。</p>
+<blockquote>
+<p><strong>类比</strong>：站在一栋楼的某一层（当前作用域），你能看到这一层和所有更低的楼层（开作用域）；相邻栋的楼层和高于你的楼层你都看不到（闭作用域）。</p>
+</blockquote>
+<p><strong>示例</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>作用域结构：</span></span>
+<span class="line"><span>  全局 (G)</span></span>
+<span class="line"><span>   ├── 函数 f (F)</span></span>
+<span class="line"><span>   │    ├── 块 1 (B1)  ← 当前点在这里</span></span>
+<span class="line"><span>   │    └── 块 2 (B2)</span></span>
+<span class="line"><span>   └── 函数 g (Fg)</span></span></code></pre>
+<p>若当前点在 B1 内：</p>
+<ul>
+<li><strong>开作用域</strong>：B1、F、G（当前 + 所有外层）</li>
+<li><strong>闭作用域</strong>：B2、Fg（与当前点无包含关系）</li>
+</ul>
+<p><a id="reference-可见性规则"></a></p>
+<h4 id="可见性规则">可见性规则</h4>
+<p><em>可见性</em>（Visibility）是指在程序某一特定点，哪些符号是<strong>可访问的</strong>（即可见的）。</p>
+<p>常用的可见性规则：</p>
+<ol>
+<li>
+<p><strong>只有开作用域中声明的符号才可访问</strong>——闭作用域中的符号在当前点不可见。</p>
+</li>
+<li>
+<p><strong>最近声明优先</strong>——若同一名字在多个开作用域中都有声明，取<strong>离当前点最近</strong>的那个声明作为解释（即内层遮蔽外层）。</p>
+</li>
+<li>
+<p><strong>新的声明只能出现在当前作用域</strong>——不能在外层或闭作用域中添加新声明。</p>
+</li>
+</ol>
+<blockquote>
+<p>示例：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span><span style="color:#6A737D;--shiki-dark:#6A737D">           // G 中声明 x</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> f</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span><span style="color:#6A737D;--shiki-dark:#6A737D">       // F 中声明 x，遮蔽 G 中的 x</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 当前点：B1</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 开作用域：B1、F、G</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 可见的 x：F 中的 x=2（最近声明）</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">        printf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, x);</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // 输出 2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+</blockquote>
+<p><a id="reference-符号表对开闭作用域的实现"></a></p>
+<h4 id="符号表对开闭作用域的实现">符号表对开/闭作用域的实现</h4>
+<p>用<strong>嵌套符号表栈</strong>直接对应开/闭作用域的概念：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>当前栈（从栈顶到栈底）：</span></span>
+<span class="line"><span>  当前作用域的符号表   ← 栈顶</span></span>
+<span class="line"><span>  外层作用域的符号表</span></span>
+<span class="line"><span>  ...</span></span>
+<span class="line"><span>  全局符号表           ← 栈底</span></span></code></pre>
+<ul>
+<li><strong>栈中所有符号表</strong>对应该点的<strong>开作用域</strong></li>
+<li><strong>不在栈中的符号表</strong>对应<strong>闭作用域</strong></li>
+<li>查找名字时从栈顶向下搜索，天然满足“最近声明优先”规则</li>
+<li>进入新作用域时压栈，离开时弹栈</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ScopeManager</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __init__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.stack </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [{}]  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 全局作用域</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> enter_scope</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.stack.append({})</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> exit_scope</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.stack.pop()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> define</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name, info):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.stack[</span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">][name] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> info  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 只在当前作用域定义</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> lookup</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> reversed</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.stack):  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 从内向外（最近优先）</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table[name]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 不在任何开作用域中 → 不可见</span></span></code></pre>
+<p><a id="reference-符号表操作"></a></p>
+<h4 id="符号表操作">符号表操作</h4>
+<p><strong>插入（Insert）</strong>：在当前作用域添加新条目，同一作用域内重复定义报错。</p>
+<p><strong>查找（Lookup）</strong>：从当前作用域向外逐层查找，未找到则报“未定义名字”。</p>
+<p><strong>删除（Delete）</strong>：通常不显式删除单个条目，而是离开作用域时整体弹出。</p>
+<p>实现块结构作用域的常用方法：<strong>嵌套的符号表栈</strong>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>全局符号表</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>函数 f 的符号表</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>f 内的块级符号表</span></span></code></pre>
+<ul>
+<li><strong>进入新作用域</strong>：压入一张新的符号表</li>
+<li><strong>离开作用域</strong>：弹出当前符号表（该作用域的名字消失）</li>
+<li><strong>查找规则</strong>：从当前作用域向外逐层查找，<strong>最近优先</strong></li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ScopeManager</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> __init__</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.stack </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [{}]  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 全局作用域</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> enter_scope</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.stack.append({})</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> exit_scope</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.stack.pop()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> define</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name, info):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.stack[</span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">][name] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> info</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> lookup</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> reversed</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.stack):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">                return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> table[name]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> None</span></span></code></pre>
+<p><a id="reference-符号表操作-1"></a></p>
+<h4 id="符号表操作-1">符号表操作</h4>
+<p><strong>插入（Insert）</strong>：在当前作用域添加新条目，同一作用域内重复定义报错。</p>
+<p><strong>查找（Lookup）</strong>：从当前作用域向外逐层查找，未找到则报“未定义名字”。</p>
+<p><strong>删除（Delete）</strong>：通常不显式删除单个条目，而是离开作用域时整体弹出。</p>
+<p><a id="reference-静态语义分析"></a></p>
+<h2 id="静态语义分析">静态语义分析</h2>
+<p><em>静态语义分析</em>（Static Semantic Analysis）在编译时（不运行程序）检查程序语义的正确性，是语法分析之后、代码生成之前的重要阶段。</p>
+<blockquote>
+<p><strong>与动态语义的区别</strong>：静态语义在编译时检查（如类型错误），动态语义在运行时体现（如除零错误）。</p>
+</blockquote>
+<p><a id="reference-主要任务"></a></p>
+<h3 id="主要任务">主要任务</h3>
+<ol>
+<li><strong>声明检查</strong>：变量使用前是否已声明</li>
+<li><strong>类型检查</strong>：运算符的操作数类型是否相容，函数实参与形参类型是否匹配</li>
+<li><strong>控制流检查</strong>：<code>break</code>/<code>continue</code> 是否在循环内，函数是否有返回值</li>
+<li><strong>唯一性检查</strong>：同一作用域内是否有重复声明</li>
+<li><strong>作用域检查</strong>：名字的使用是否在其作用域内</li>
+</ol>
+<p><a id="reference-类型检查"></a></p>
+<h3 id="类型检查">类型检查</h3>
+<p><a id="reference-类型系统基础"></a></p>
+<h4 id="类型系统基础">类型系统基础</h4>
+<p>每个表达式都有一个<strong>类型</strong>，类型检查验证运算是否对类型合法。</p>
+<p><strong>类型相容</strong>（Type Compatibility）：某些不同类型之间可以<strong>隐式转换</strong>（Implicit Conversion / Coercion），例如：</p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>int</mtext><mo>+</mo><mtext>float</mtext><mo>⇒</mo><mtext>float</mtext></mrow><annotation encoding="application/x-tex">\text{int} + \text{float} \Rightarrow \text{float}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7512em;vertical-align:-0.0833em;"></span><span class="mord text"><span class="mord">int</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord text"><span class="mord">float</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⇒</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord text"><span class="mord">float</span></span></span></span></span>（int 自动提升为 float）</p>
+<p><strong>类型强制</strong>（Type Coercion）：编译器自动插入类型转换指令。</p>
+<p><a id="reference-表达式的类型推导"></a></p>
+<h4 id="表达式的类型推导">表达式的类型推导</h4>
+<p>对表达式 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>e</mi><mn>1</mn></msub><mtext> op </mtext><msub><mi>e</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">e_1\ \text{op}\ e_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace"> </span><span class="mord text"><span class="mord">op</span></span><span class="mspace"> </span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，类型检查规则：</p>
+<ol>
+<li>递归推导 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>e</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">e_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>e</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">e_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 的类型 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">T_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">T_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></li>
+<li>查类型相容表，确定结果类型 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span></span></span></span></li>
+<li>若 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">T_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">T_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 不相容，报类型错误</li>
+</ol>
+<blockquote>
+<p>示例：<code>a + b</code>，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi></mrow><annotation encoding="application/x-tex">a</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span></span></span></span> 为 <code>int</code>，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi></mrow><annotation encoding="application/x-tex">b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span></span></span></span> 为 <code>float</code></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>lookup("a") → type = int</span></span>
+<span class="line"><span>lookup("b") → type = float</span></span>
+<span class="line"><span>int + float → 将 a 强制转换为 float，结果类型 float</span></span></code></pre>
+</blockquote>
+<p><a id="reference-函数调用检查"></a></p>
+<h4 id="函数调用检查">函数调用检查</h4>
+<ul>
+<li>实参个数是否与形参个数一致</li>
+<li>各实参类型是否与对应形参类型相容</li>
+<li>非 <code>void</code> 函数是否有返回值</li>
+</ul>
+<p><a id="reference-常见类型错误"></a></p>
+<h4 id="常见类型错误">常见类型错误</h4>
+<table>
+<thead>
+<tr>
+<th>错误类型</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>操作数类型不匹配</td>
+<td><code>"hello" + 1</code>（字符串加整数）</td>
+</tr>
+<tr>
+<td>函数参数类型错误</td>
+<td><code>f(1, 2)</code> 但 <code>f</code> 只接受一个参数</td>
+</tr>
+<tr>
+<td>对非数组下标访问</td>
+<td><code>x[0]</code> 但 <code>x</code> 是 <code>int</code></td>
+</tr>
+<tr>
+<td>赋值类型不匹配</td>
+<td>将 <code>float</code> 赋给 <code>bool*</code> 指针</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-中间代码生成"></a></p>
+<h2 id="中间代码生成">中间代码生成</h2>
+<p><em>中间代码</em>（Intermediate Code）是编译器前端（分析）和后端（代码生成）之间的“通用表示”，<strong>与具体机器无关</strong>。</p>
+<p><strong>优点</strong>：</p>
+<ul>
+<li><strong>可移植</strong>：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">m</span></span></span></span> 种语言 × <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 种平台，只需 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>+</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">m+n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">m</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 个模块（而非 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>×</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">m\times n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">m</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>）</li>
+<li><strong>易优化</strong>：在中间代码层面做机器无关优化</li>
+<li><strong>模块化</strong>：前后端解耦</li>
+</ul>
+<p><a id="reference-常见的中间表示形式"></a></p>
+<h3 id="常见的中间表示形式">常见的中间表示形式</h3>
+<p><a id="reference-抽象语法树ast"></a></p>
+<h4 id="抽象语法树ast">抽象语法树（AST）</h4>
+<p><em>抽象语法树</em>（Abstract Syntax Tree）是语法树的精简版，去掉了所有不影响语义的成分（括号、分隔符等）。</p>
+<p><strong>与语法树的区别</strong>：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>语法树（分析树）</th>
+<th>抽象语法树（AST）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>节点</td>
+<td>包含所有文法符号</td>
+<td>只保留有语义意义的节点</td>
+</tr>
+<tr>
+<td>括号</td>
+<td>有</td>
+<td>无（通过树结构体现优先级）</td>
+</tr>
+<tr>
+<td>用途</td>
+<td>分析过程的中间产物</td>
+<td>语义分析和代码生成的基础</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>示例：表达式 <code>a + b * c</code></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>    +</span></span>
+<span class="line"><span>   / \</span></span>
+<span class="line"><span>  a   *</span></span>
+<span class="line"><span>     / \</span></span>
+<span class="line"><span>    b   c</span></span></code></pre>
+<p>树的结构已经体现了乘法优先于加法，不需要括号。</p>
+</blockquote>
+<p><a id="reference-有向无环图dag"></a></p>
+<h4 id="有向无环图dag">有向无环图（DAG）</h4>
+<p><em>DAG</em>（Directed Acyclic Graph）是 AST 的压缩形式——对<strong>公共子表达式</strong>共享节点，而不是重复创建。</p>
+<blockquote>
+<p>示例：<code>a + a * b + a * b</code></p>
+<p>AST 中 <code>a * b</code> 出现两次，各有一棵子树；DAG 中 <code>a * b</code> 只有一个节点，两处加法共享它。</p>
+</blockquote>
+<p>DAG 可以直接帮助识别公共子表达式，为后续优化做准备。</p>
+<p><a id="reference-三地址码"></a></p>
+<h4 id="三地址码">三地址码</h4>
+<p>详见下节。</p>
+<p><a id="reference-逆波兰表达式后缀表达式"></a></p>
+<h4 id="逆波兰表达式后缀表达式">逆波兰表达式（后缀表达式）</h4>
+<p>运算符写在操作数后面，不需要括号，用栈即可求值。</p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>+</mo><mi>b</mi><mo>∗</mo><mi>c</mi><mo>⇒</mo><mi>a</mi><mtext> </mtext><mi>b</mi><mtext> </mtext><mi>c</mi><mtext> </mtext><mo>∗</mo><mtext> </mtext><mo>+</mo></mrow><annotation encoding="application/x-tex">a + b * c \Rightarrow a\ b\ c\ *\ +</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">a</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">c</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">⇒</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">a</span><span class="mspace"> </span><span class="mord mathnormal">b</span><span class="mspace"> </span><span class="mord mathnormal">c</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord">+</span></span></span></span></p>
+<p>适合简单表达式翻译，实际编译器更多用三地址码。</p>
+<p><a id="reference-生成抽象语法树"></a></p>
+<h3 id="生成抽象语法树">生成抽象语法树</h3>
+<p><a id="reference-构造方法"></a></p>
+<h4 id="构造方法">构造方法</h4>
+<p>在语法分析的同时，通过<strong>语义动作</strong>构造 AST 节点：</p>
+<ul>
+<li>每个产生式归约时，创建对应的 AST 节点</li>
+<li>子节点来自子产生式的节点</li>
+<li>根节点就是整个 AST 的根</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>E → E₁ + T  { E.node = mknode('+', E₁.node, T.node) }</span></span>
+<span class="line"><span>E → T        { E.node = T.node }</span></span>
+<span class="line"><span>T → T₁ * F  { T.node = mknode('*', T₁.node, F.node) }</span></span>
+<span class="line"><span>T → F        { T.node = F.node }</span></span>
+<span class="line"><span>F → (E)      { F.node = E.node }</span></span>
+<span class="line"><span>F → id       { F.node = mkleaf(id, id.entry) }</span></span>
+<span class="line"><span>F → num      { F.node = mkleaf(num, num.val) }</span></span></code></pre>
+<p><a id="reference-示例"></a></p>
+<h4 id="示例">示例</h4>
+<blockquote>
+<p>输入 <code>a * b + c</code>，构造 AST：</p>
+</blockquote>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>归约 F→a  → 叶节点 a</span></span>
+<span class="line"><span>归约 T→F  → 节点 a</span></span>
+<span class="line"><span>归约 F→b  → 叶节点 b</span></span>
+<span class="line"><span>归约 T→T*F → mknode('*', a, b)</span></span>
+<span class="line"><span>归约 F→c  → 叶节点 c</span></span>
+<span class="line"><span>归约 T→F  → 节点 c</span></span>
+<span class="line"><span>归约 E→E+T → mknode('+', *, c)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>最终 AST：</span></span>
+<span class="line"><span>      +</span></span>
+<span class="line"><span>     / \</span></span>
+<span class="line"><span>    *   c</span></span>
+<span class="line"><span>   / \</span></span>
+<span class="line"><span>  a   b</span></span></code></pre>
+<p><a id="reference-生成三地址码"></a></p>
+<h3 id="生成三地址码">生成三地址码</h3>
+<p><a id="reference-什么是三地址码"></a></p>
+<h4 id="什么是三地址码">什么是三地址码</h4>
+<p>每条指令最多<strong>三个操作数</strong>，形如：</p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mi>y</mi><mtext> op </mtext><mi>z</mi></mrow><annotation encoding="application/x-tex">x = y\ \text{op}\ z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace"> </span><span class="mord text"><span class="mord">op</span></span><span class="mspace"> </span><span class="mord mathnormal" style="margin-right:0.044em;">z</span></span></span></span></p>
+<p>其中 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span>、<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>z</mi></mrow><annotation encoding="application/x-tex">z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.044em;">z</span></span></span></span> 是变量、常量或编译器生成的临时变量（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>t</mi><mn>2</mn></msub><mo separator="true">,</mo><mo>…</mo></mrow><annotation encoding="application/x-tex">t_1, t_2, \ldots</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8095em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span></span></span></span>）。</p>
+<p><a id="reference-三地址码的常见形式"></a></p>
+<h4 id="三地址码的常见形式">三地址码的常见形式</h4>
+<table>
+<thead>
+<tr>
+<th>形式</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mi>y</mi><mtext> op </mtext><mi>z</mi></mrow><annotation encoding="application/x-tex">x = y\ \text{op}\ z</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace"> </span><span class="mord text"><span class="mord">op</span></span><span class="mspace"> </span><span class="mord mathnormal" style="margin-right:0.044em;">z</span></span></span></span></td>
+<td>二元运算</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mtext>op </mtext><mi>y</mi></mrow><annotation encoding="application/x-tex">x = \text{op}\ y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord text"><span class="mord">op</span></span><span class="mspace"> </span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span></td>
+<td>一元运算（取反、类型转换）</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">x = y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span></td>
+<td>赋值</td>
+</tr>
+<tr>
+<td><code>goto</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi></mrow><annotation encoding="application/x-tex">L</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span></span></span></span></td>
+<td>无条件跳转</td>
+</tr>
+<tr>
+<td><code>if</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mtext> relop </mtext><mi>y</mi></mrow><annotation encoding="application/x-tex">x\ \text{relop}\ y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">x</span><span class="mspace"> </span><span class="mord text"><span class="mord">relop</span></span><span class="mspace"> </span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span> <code>goto</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi></mrow><annotation encoding="application/x-tex">L</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">L</span></span></span></span></td>
+<td>条件跳转</td>
+</tr>
+<tr>
+<td><code>param</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span>；<code>call</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo separator="true">,</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">p, n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span></span></span></span></td>
+<td>函数调用（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 个参数）</td>
+</tr>
+<tr>
+<td><code>return</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span></td>
+<td>函数返回</td>
+</tr>
+<tr>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mi>y</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">x = y[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span></span></span></span>；<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo>=</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">x[i] = y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">x</span><span class="mopen">[</span><span class="mord mathnormal">i</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span></span></span></span></td>
+<td>数组访问</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-四元式表示"></a></p>
+<h4 id="四元式表示">四元式表示</h4>
+<p>三地址码常用<strong>四元式</strong>（Quadruple）表示：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mtext>op</mtext><mo separator="true">,</mo><mtext> arg1</mtext><mo separator="true">,</mo><mtext> arg2</mtext><mo separator="true">,</mo><mtext> result</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(\text{op},\ \text{arg1},\ \text{arg2},\ \text{result})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord text"><span class="mord">op</span></span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">arg1</span></span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">arg2</span></span><span class="mpunct">,</span><span class="mspace"> </span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">result</span></span><span class="mclose">)</span></span></span></span></p>
+<p><a id="reference-四元式-op-速查表"></a></p>
+<h4 id="四元式-op-速查表">四元式 op 速查表</h4>
+<p><strong>算术运算</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>含义</th>
+<th>arg1</th>
+<th>arg2</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+</code></td>
+<td>加</td>
+<td>操作数1</td>
+<td>操作数2</td>
+<td>结果</td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>减</td>
+<td>操作数1</td>
+<td>操作数2</td>
+<td>结果</td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>乘</td>
+<td>操作数1</td>
+<td>操作数2</td>
+<td>结果</td>
+</tr>
+<tr>
+<td><code>/</code></td>
+<td>除</td>
+<td>操作数1</td>
+<td>操作数2</td>
+<td>结果</td>
+</tr>
+<tr>
+<td><code>uminus</code></td>
+<td>一元取负</td>
+<td>操作数</td>
+<td>—</td>
+<td>结果</td>
+</tr>
+</tbody>
+</table>
+<p><strong>赋值</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>含义</th>
+<th>arg1</th>
+<th>arg2</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>=</code></td>
+<td>赋值</td>
+<td>右值</td>
+<td>—</td>
+<td>左值变量</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关系运算（条件跳转）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>含义</th>
+<th>arg1</th>
+<th>arg2</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>j&lt;</code></td>
+<td>若 arg1 &lt; arg2 则跳转</td>
+<td>操作数1</td>
+<td>操作数2</td>
+<td>目标标号</td>
+</tr>
+<tr>
+<td><code>j&lt;=</code></td>
+<td>若 arg1 ≤ arg2 则跳转</td>
+<td>操作数1</td>
+<td>操作数2</td>
+<td>目标标号</td>
+</tr>
+<tr>
+<td><code>j&gt;</code></td>
+<td>若 arg1 &gt; arg2 则跳转</td>
+<td>操作数1</td>
+<td>操作数2</td>
+<td>目标标号</td>
+</tr>
+<tr>
+<td><code>j&gt;=</code></td>
+<td>若 arg1 ≥ arg2 则跳转</td>
+<td>操作数1</td>
+<td>操作数2</td>
+<td>目标标号</td>
+</tr>
+<tr>
+<td><code>j=</code></td>
+<td>若 arg1 = arg2 则跳转</td>
+<td>操作数1</td>
+<td>操作数2</td>
+<td>目标标号</td>
+</tr>
+<tr>
+<td><code>j&lt;&gt;</code></td>
+<td>若 arg1 ≠ arg2 则跳转</td>
+<td>操作数1</td>
+<td>操作数2</td>
+<td>目标标号</td>
+</tr>
+</tbody>
+</table>
+<p><strong>无条件跳转</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>含义</th>
+<th>arg1</th>
+<th>arg2</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>j</code></td>
+<td>无条件跳转</td>
+<td>—</td>
+<td>—</td>
+<td>目标标号</td>
+</tr>
+</tbody>
+</table>
+<p><strong>函数调用</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>含义</th>
+<th>arg1</th>
+<th>arg2</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>param</code></td>
+<td>压入参数</td>
+<td>参数值</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>call</code></td>
+<td>调用函数</td>
+<td>函数名</td>
+<td>参数个数</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>return</code></td>
+<td>函数返回</td>
+<td>返回值（可空）</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>数组操作</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>含义</th>
+<th>arg1</th>
+<th>arg2</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>=[]</code></td>
+<td>数组取值</td>
+<td>数组名</td>
+<td>下标</td>
+<td>结果变量</td>
+</tr>
+<tr>
+<td><code>[]=</code></td>
+<td>数组赋值</td>
+<td>右值</td>
+<td>下标</td>
+<td>数组名</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>记忆规律</strong>：</p>
+<ul>
+<li>条件跳转的 op = <code>j</code> + 关系符号，result 填跳转目标</li>
+<li>无条件跳转三个格全填 <code>—</code>，只有 result 是目标</li>
+<li>一元运算 arg2 填 <code>—</code>，赋值同理</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>翻译 <code>a = b * -c + b * -c</code>：</p>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>op</th>
+<th>arg1</th>
+<th>arg2</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(0)</td>
+<td><code>uminus</code></td>
+<td><code>c</code></td>
+<td>—</td>
+<td><code>t1</code></td>
+</tr>
+<tr>
+<td>(1)</td>
+<td><code>*</code></td>
+<td><code>b</code></td>
+<td><code>t1</code></td>
+<td><code>t2</code></td>
+</tr>
+<tr>
+<td>(2)</td>
+<td><code>uminus</code></td>
+<td><code>c</code></td>
+<td>—</td>
+<td><code>t3</code></td>
+</tr>
+<tr>
+<td>(3)</td>
+<td><code>*</code></td>
+<td><code>b</code></td>
+<td><code>t3</code></td>
+<td><code>t4</code></td>
+</tr>
+<tr>
+<td>(4)</td>
+<td><code>+</code></td>
+<td><code>t2</code></td>
+<td><code>t4</code></td>
+<td><code>t5</code></td>
+</tr>
+<tr>
+<td>(5)</td>
+<td><code>=</code></td>
+<td><code>t5</code></td>
+<td>—</td>
+<td><code>a</code></td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+<p><a id="reference-表达式的三地址码生成"></a></p>
+<h4 id="表达式的三地址码生成">表达式的三地址码生成</h4>
+<p>通过语义动作，在归约时调用 <code>newtemp()</code> 和 <code>emit()</code> 生成三地址码：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>E → E₁ + T  {</span></span>
+<span class="line"><span>    E.place = newtemp();</span></span>
+<span class="line"><span>    emit(E.place '=' E₁.place '+' T.place)</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span>E → T        { E.place = T.place }</span></span>
+<span class="line"><span>T → T₁ * F  {</span></span>
+<span class="line"><span>    T.place = newtemp();</span></span>
+<span class="line"><span>    emit(T.place '=' T₁.place '*' F.place)</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span>T → F        { T.place = F.place }</span></span>
+<span class="line"><span>F → (E)      { F.place = E.place }</span></span>
+<span class="line"><span>F → id       { F.place = id.name }</span></span></code></pre>
+<p><strong>辅助函数</strong>：</p>
+<ul>
+<li><code>newtemp()</code>：分配新的临时变量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">t_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></li>
+<li><code>emit(指令)</code>：输出一条三地址码</li>
+</ul>
+<p><a id="reference-控制流语句的三地址码生成"></a></p>
+<h4 id="控制流语句的三地址码生成">控制流语句的三地址码生成</h4>
+<p>赋值和算术表达式只需顺序生成，控制流需要生成<strong>跳转指令</strong>。</p>
+<p><strong>if-then-else</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>    生成 B 的代码（真跳 L1，假跳 L2）</span></span>
+<span class="line"><span>L1: 生成 S₁ 的代码</span></span>
+<span class="line"><span>    goto Lnext</span></span>
+<span class="line"><span>L2: 生成 S₂ 的代码</span></span>
+<span class="line"><span>Lnext: ...</span></span></code></pre>
+<p><strong>while</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Lbegin: 生成 B 的代码（真跳 Lbody，假跳 Lnext）</span></span>
+<span class="line"><span>Lbody:  生成 S 的代码</span></span>
+<span class="line"><span>        goto Lbegin</span></span>
+<span class="line"><span>Lnext:  ...</span></span></code></pre>
+<p><a id="reference-回填技术backpatching"></a></p>
+<h4 id="回填技术backpatching">回填技术（Backpatching）</h4>
+<p>单遍扫描时，生成跳转指令时目标地址尚未确定，用<strong>回填</strong>解决：</p>
+<ol>
+<li>生成跳转指令时暂时<strong>留空</strong>目标地址</li>
+<li>用链表记录所有<strong>待填写</strong>的跳转指令</li>
+<li>目标地址确定后，<strong>回头填写</strong>所有相关指令</li>
+</ol>
+<p><strong>关键属性</strong>：</p>
+<ul>
+<li><code>B.truelist</code>：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> 为真时待填目标的指令列表</li>
+<li><code>B.falselist</code>：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> 为假时待填目标的指令列表</li>
+</ul>
+<p><strong>辅助函数</strong>：</p>
+<ul>
+<li><code>makelist(i)</code>：创建只含指令 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span> 的列表</li>
+<li><code>merge(p1, p2)</code>：合并两个列表</li>
+<li><code>backpatch(p, i)</code>：将列表 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> 中所有指令的目标填为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span></li>
+</ul>
+<p><a id="reference-总结"></a></p>
+<h2 id="总结">总结</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>符号表</td>
+<td>存储名字属性，支持语义检查和代码生成</td>
+</tr>
+<tr>
+<td>作用域管理</td>
+<td>嵌套符号表栈，进/出作用域时压/弹，最近优先查找</td>
+</tr>
+<tr>
+<td>静态语义分析</td>
+<td>声明检查、类型检查、控制流检查</td>
+</tr>
+<tr>
+<td>类型检查</td>
+<td>推导表达式类型，检查相容性，插入类型转换</td>
+</tr>
+<tr>
+<td>AST</td>
+<td>语法树的精简版，去掉无语义意义的符号</td>
+</tr>
+<tr>
+<td>DAG</td>
+<td>AST 的压缩版，共享公共子表达式节点</td>
+</tr>
+<tr>
+<td>三地址码</td>
+<td>最多三个操作数，四元式表示，便于优化</td>
+</tr>
+<tr>
+<td>回填技术</td>
+<td>解决单遍扫描中跳转目标未知的问题</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-例题"></a></p>
+<h2 id="例题">例题</h2>
+<p><a id="reference-例-1写出表达式的三地址码"></a></p>
+<h3 id="例-1写出表达式的三地址码">例 1：写出表达式的三地址码</h3>
+<blockquote>
+<p><strong>题目</strong>：写出表达式 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>:</mo><mo>=</mo><mi>B</mi><mo>∗</mo><mo stretchy="false">(</mo><mo>−</mo><mi>C</mi><mo>+</mo><mi>D</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">A := B * (-C + D)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">:=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mclose">)</span></span></span></span> 的三地址码。</p>
+</blockquote>
+<p><a id="reference-分析"></a></p>
+<h4 id="分析">分析</h4>
+<p>按运算优先级，表达式的计算顺序为：</p>
+<ol>
+<li>先算一元取负：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mi>C</mi></mrow><annotation encoding="application/x-tex">-C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span></span></span></span></li>
+<li>再算加法：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mi>C</mi><mo>+</mo><mi>D</mi></mrow><annotation encoding="application/x-tex">-C + D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span></span></span></span></li>
+<li>再算乘法：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo>∗</mo><mo stretchy="false">(</mo><mo>−</mo><mi>C</mi><mo>+</mo><mi>D</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">B * (-C + D)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mclose">)</span></span></span></span></li>
+<li>最后赋值给 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span></span></span></span></li>
+</ol>
+<p>每步引入一个新的临时变量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">t_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。</p>
+<p><a id="reference-三地址码-1"></a></p>
+<h4 id="三地址码-1">三地址码</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>指令</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td><code>t1 = uminus C</code></td>
+<td>一元取负：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mn>1</mn></msub><mo>=</mo><mo>−</mo><mi>C</mi></mrow><annotation encoding="application/x-tex">t_1 = -C</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span></span></span></span></td>
+</tr>
+<tr>
+<td>(2)</td>
+<td><code>t2 = t1 + D</code></td>
+<td>加法：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mn>2</mn></msub><mo>=</mo><msub><mi>t</mi><mn>1</mn></msub><mo>+</mo><mi>D</mi><mo>=</mo><mo>−</mo><mi>C</mi><mo>+</mo><mi>D</mi></mrow><annotation encoding="application/x-tex">t_2 = t_1 + D = -C + D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span></span></span></span></td>
+</tr>
+<tr>
+<td>(3)</td>
+<td><code>t3 = B * t2</code></td>
+<td>乘法：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mn>3</mn></msub><mo>=</mo><mi>B</mi><mo>×</mo><msub><mi>t</mi><mn>2</mn></msub><mo>=</mo><mi>B</mi><mo>×</mo><mo stretchy="false">(</mo><mo>−</mo><mi>C</mi><mo>+</mo><mi>D</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">t_3 = B \times t_2 = B \times (-C+D)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">−</span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+<tr>
+<td>(4)</td>
+<td><code>A = t3</code></td>
+<td>赋值：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>:</mo><mo>=</mo><msub><mi>t</mi><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">A := t_3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">:=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7651em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-四元式表示-1"></a></p>
+<h4 id="四元式表示-1">四元式表示</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>op</th>
+<th>arg1</th>
+<th>arg2</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td><code>uminus</code></td>
+<td><code>C</code></td>
+<td>—</td>
+<td><code>t1</code></td>
+</tr>
+<tr>
+<td>(2)</td>
+<td><code>+</code></td>
+<td><code>t1</code></td>
+<td><code>D</code></td>
+<td><code>t2</code></td>
+</tr>
+<tr>
+<td>(3)</td>
+<td><code>*</code></td>
+<td><code>B</code></td>
+<td><code>t2</code></td>
+<td><code>t3</code></td>
+</tr>
+<tr>
+<td>(4)</td>
+<td><code>=</code></td>
+<td><code>t3</code></td>
+<td>—</td>
+<td><code>A</code></td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-对应的-ast"></a></p>
+<h4 id="对应的-ast">对应的 AST</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>        :=</span></span>
+<span class="line"><span>       /   \</span></span>
+<span class="line"><span>      A     *</span></span>
+<span class="line"><span>           / \</span></span>
+<span class="line"><span>          B   +</span></span>
+<span class="line"><span>             / \</span></span>
+<span class="line"><span>           uminus  D</span></span>
+<span class="line"><span>              |</span></span>
+<span class="line"><span>              C</span></span></code></pre>
+<p>计算时按<strong>后序遍历</strong>（左→右→根）处理 AST，对每个内部节点生成一条三地址码，恰好得到上述四条指令。</p>
+<p><a id="reference-例-2控制流语句翻译为四元式"></a></p>
+<h3 id="例-2控制流语句翻译为四元式">例 2：控制流语句翻译为四元式</h3>
+<blockquote>
+<p><strong>题目</strong>：将以下语句翻译成四元式：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>while A&lt;C and B&lt;D do</span></span>
+<span class="line"><span>  if A=1 then C:=C+1</span></span>
+<span class="line"><span>         else while A&lt;=D do A:=A+2</span></span></code></pre>
+</blockquote>
+<p><a id="reference-结构分析"></a></p>
+<h4 id="结构分析">结构分析</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>外层 while（条件：A&lt;C and B&lt;D）</span></span>
+<span class="line"><span>  └── if-else</span></span>
+<span class="line"><span>        ├── then：C := C+1</span></span>
+<span class="line"><span>        └── else：内层 while（条件：A&lt;=D）</span></span>
+<span class="line"><span>                    └── A := A+2</span></span></code></pre>
+<p><strong>布尔条件的翻译策略</strong>：</p>
+<ul>
+<li><code>A&lt;C and B&lt;D</code>：用<strong>短路求值</strong>翻译，<code>A&lt;C</code> 为假时直接跳出，不再计算 <code>B&lt;D</code></li>
+<li><code>if</code> 条件和 <code>while</code> 条件均生成条件跳转指令</li>
+</ul>
+<p><a id="reference-四元式"></a></p>
+<h4 id="四元式">四元式</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>op</th>
+<th>arg1</th>
+<th>arg2</th>
+<th>result</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td><code>j&lt;</code></td>
+<td><code>A</code></td>
+<td><code>C</code></td>
+<td><code>(3)</code></td>
+<td>A&lt;C 为真跳 (3)，继续判断 B&lt;D</td>
+</tr>
+<tr>
+<td>(2)</td>
+<td><code>j</code></td>
+<td>—</td>
+<td>—</td>
+<td><code>(15)</code></td>
+<td>A&lt;C 为假，短路，跳出外层 while</td>
+</tr>
+<tr>
+<td>(3)</td>
+<td><code>j&lt;</code></td>
+<td><code>B</code></td>
+<td><code>D</code></td>
+<td><code>(5)</code></td>
+<td>B&lt;D 为真跳 (5)，进入循环体</td>
+</tr>
+<tr>
+<td>(4)</td>
+<td><code>j</code></td>
+<td>—</td>
+<td>—</td>
+<td><code>(15)</code></td>
+<td>B&lt;D 为假，跳出外层 while</td>
+</tr>
+<tr>
+<td>(5)</td>
+<td><code>j=</code></td>
+<td><code>A</code></td>
+<td><code>1</code></td>
+<td><code>(7)</code></td>
+<td>A=1 为真，跳 then 分支</td>
+</tr>
+<tr>
+<td>(6)</td>
+<td><code>j</code></td>
+<td>—</td>
+<td>—</td>
+<td><code>(10)</code></td>
+<td>A≠1，跳 else 分支</td>
+</tr>
+<tr>
+<td>(7)</td>
+<td><code>+</code></td>
+<td><code>C</code></td>
+<td><code>1</code></td>
+<td><code>t1</code></td>
+<td>then：t1 = C+1</td>
+</tr>
+<tr>
+<td>(8)</td>
+<td><code>=</code></td>
+<td><code>t1</code></td>
+<td>—</td>
+<td><code>C</code></td>
+<td>C := t1</td>
+</tr>
+<tr>
+<td>(9)</td>
+<td><code>j</code></td>
+<td>—</td>
+<td>—</td>
+<td><code>(1)</code></td>
+<td>then 结束，回外层 while 头</td>
+</tr>
+<tr>
+<td>(10)</td>
+<td><code>j&lt;=</code></td>
+<td><code>A</code></td>
+<td><code>D</code></td>
+<td><code>(12)</code></td>
+<td>内层 while：A&lt;=D 为真进入体</td>
+</tr>
+<tr>
+<td>(11)</td>
+<td><code>j</code></td>
+<td>—</td>
+<td>—</td>
+<td><code>(1)</code></td>
+<td>A&lt;=D 为假，内层 while 结束，回外层 while 头</td>
+</tr>
+<tr>
+<td>(12)</td>
+<td><code>+</code></td>
+<td><code>A</code></td>
+<td><code>2</code></td>
+<td><code>t2</code></td>
+<td>内层 while 体：t2 = A+2</td>
+</tr>
+<tr>
+<td>(13)</td>
+<td><code>=</code></td>
+<td><code>t2</code></td>
+<td>—</td>
+<td><code>A</code></td>
+<td>A := t2</td>
+</tr>
+<tr>
+<td>(14)</td>
+<td><code>j</code></td>
+<td>—</td>
+<td>—</td>
+<td><code>(10)</code></td>
+<td>回内层 while 头</td>
+</tr>
+<tr>
+<td>(15)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>外层 while 出口</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-控制流图"></a></p>
+<h4 id="控制流图">控制流图</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>(1)(2)(3)(4) ← 外层 while 条件（and 短路）</span></span>
+<span class="line"><span>      ↓ 真（进入循环体）</span></span>
+<span class="line"><span>  (5)(6) ← if 条件</span></span>
+<span class="line"><span>  ↙ 真       ↘ 假</span></span>
+<span class="line"><span>(7)(8)(9)   (10)(11) ← 内层 while 条件</span></span>
+<span class="line"><span>  ↓               ↓ 真</span></span>
+<span class="line"><span>  │           (12)(13)(14)</span></span>
+<span class="line"><span>  │               ↓（回 10）</span></span>
+<span class="line"><span>  └──────┐</span></span>
+<span class="line"><span>         ↓</span></span>
+<span class="line"><span>       回 (1)（外层 while 头）</span></span>
+<span class="line"><span>         ↓ 假</span></span>
+<span class="line"><span>       (15) 出口</span></span></code></pre>
+<p><a id="reference-关键点说明"></a></p>
+<h4 id="关键点说明">关键点说明</h4>
+<ol>
+<li>
+<p><strong><code>and</code> 短路</strong>：(1)(2) 翻译 <code>A&lt;C</code>，为假直接跳 (15)；(3)(4) 翻译 <code>B&lt;D</code>，为假也跳 (15)，不需要计算完整布尔值。</p>
+</li>
+<li>
+<p><strong>then 分支结束后</strong>：(9) 无条件跳回 (1)，跳过 else 分支。</p>
+</li>
+<li>
+<p><strong>内层 while 退出</strong>：(11) 跳回 <strong>(1)</strong>（外层 while 头），而不是 (15)——内层 while 结束后继续执行外层 while 的下一次判断。</p>
+</li>
+<li>
+<p><strong>外层 while 出口 (15)</strong>：既是 <code>A&lt;C</code> 为假的出口，也是 <code>B&lt;D</code> 为假的出口。</p>
+</li>
+</ol>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>同名变量在不同作用域如何区分？三地址码中的临时变量与控制转移各解决什么问题？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#符号表">符号表</a></li><li style="--depth: 1"><a href="#符号表的作用">符号表的作用</a></li><li style="--depth: 1"><a href="#符号的常见属性">符号的常见属性</a></li><li style="--depth: 2"><a href="#变量常量">变量/常量</a></li><li style="--depth: 2"><a href="#函数过程">函数/过程</a></li><li style="--depth: 2"><a href="#类型定义结构体类">类型定义（结构体、类）</a></li><li style="--depth: 1"><a href="#符号表的表现">符号表的表现</a></li><li style="--depth: 2"><a href="#线性表">线性表</a></li><li style="--depth: 2"><a href="#散列表hash-table">散列表（Hash Table）</a></li><li style="--depth: 2"><a href="#二叉搜索树">二叉搜索树</a></li><li style="--depth: 1"><a href="#符号表体现作用域与可见性">符号表体现作用域与可见性</a></li><li style="--depth: 2"><a href="#作用域的概念">作用域的概念</a></li><li style="--depth: 2"><a href="#开作用域与闭作用域">开作用域与闭作用域</a></li><li style="--depth: 2"><a href="#可见性规则">可见性规则</a></li><li style="--depth: 2"><a href="#符号表对开闭作用域的实现">符号表对开/闭作用域的实现</a></li><li style="--depth: 2"><a href="#符号表操作">符号表操作</a></li><li style="--depth: 2"><a href="#符号表操作-1">符号表操作</a></li><li style="--depth: 0"><a href="#静态语义分析">静态语义分析</a></li><li style="--depth: 1"><a href="#主要任务">主要任务</a></li><li style="--depth: 1"><a href="#类型检查">类型检查</a></li><li style="--depth: 2"><a href="#类型系统基础">类型系统基础</a></li><li style="--depth: 2"><a href="#表达式的类型推导">表达式的类型推导</a></li><li style="--depth: 2"><a href="#函数调用检查">函数调用检查</a></li><li style="--depth: 2"><a href="#常见类型错误">常见类型错误</a></li><li style="--depth: 0"><a href="#中间代码生成">中间代码生成</a></li><li style="--depth: 1"><a href="#常见的中间表示形式">常见的中间表示形式</a></li><li style="--depth: 2"><a href="#抽象语法树ast">抽象语法树（AST）</a></li><li style="--depth: 2"><a href="#有向无环图dag">有向无环图（DAG）</a></li><li style="--depth: 2"><a href="#三地址码">三地址码</a></li><li style="--depth: 2"><a href="#逆波兰表达式后缀表达式">逆波兰表达式（后缀表达式）</a></li><li style="--depth: 1"><a href="#生成抽象语法树">生成抽象语法树</a></li><li style="--depth: 2"><a href="#构造方法">构造方法</a></li><li style="--depth: 2"><a href="#示例">示例</a></li><li style="--depth: 1"><a href="#生成三地址码">生成三地址码</a></li><li style="--depth: 2"><a href="#什么是三地址码">什么是三地址码</a></li><li style="--depth: 2"><a href="#三地址码的常见形式">三地址码的常见形式</a></li><li style="--depth: 2"><a href="#四元式表示">四元式表示</a></li><li style="--depth: 2"><a href="#四元式-op-速查表">四元式 op 速查表</a></li><li style="--depth: 2"><a href="#表达式的三地址码生成">表达式的三地址码生成</a></li><li style="--depth: 2"><a href="#控制流语句的三地址码生成">控制流语句的三地址码生成</a></li><li style="--depth: 2"><a href="#回填技术backpatching">回填技术（Backpatching）</a></li><li style="--depth: 0"><a href="#总结">总结</a></li><li style="--depth: 0"><a href="#例题">例题</a></li><li style="--depth: 1"><a href="#例-1写出表达式的三地址码">例 1：写出表达式的三地址码</a></li><li style="--depth: 2"><a href="#分析">分析</a></li><li style="--depth: 2"><a href="#三地址码-1">三地址码</a></li><li style="--depth: 2"><a href="#四元式表示-1">四元式表示</a></li><li style="--depth: 2"><a href="#对应的-ast">对应的 AST</a></li><li style="--depth: 1"><a href="#例-2控制流语句翻译为四元式">例 2：控制流语句翻译为四元式</a></li><li style="--depth: 2"><a href="#结构分析">结构分析</a></li><li style="--depth: 2"><a href="#四元式">四元式</a></li><li style="--depth: 2"><a href="#控制流图">控制流图</a></li><li style="--depth: 2"><a href="#关键点说明">关键点说明</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>E-R模型 · Musuyin&#39; Home</title><meta name="description" content="E-R 模型先表达现实对象、属性与联系，再转换成关系表。基数、参与约束和弱实体决定转换时的键与外键位置，不能只照图机械拆表。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/database/er-model/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="E-R模型 · Musuyin' Home"><meta property="og:description" content="E-R 模型先表达现实对象、属性与联系，再转换成关系表。基数、参与约束和弱实体决定转换时的键与外键位置，不能只照图机械拆表。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/database/er-model/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">E-R模型</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-12-01">2025-12-01</time></dd></div><div><dt>字数</dt><dd>6332</dd></div><div><dt>预计阅读</dt><dd>22 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a><a href="/tags/ER%E5%9B%BE/">#ER图</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>E-R模型</h1><time datetime="2025-12-01">2025-12-01</time><p class="tags"><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a><a href="/tags/ER%E5%9B%BE/">#ER图</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>E-R 模型先表达现实对象、属性与联系，再转换成关系表。基数、参与约束和弱实体决定转换时的键与外键位置，不能只照图机械拆表。</p>
+<p><a id="reference-设计过程"></a></p>
+<h2 id="设计过程">设计过程</h2>
+<p>数据库设计不仅确定表结构，还要考虑访问与更新程序，以及控制数据访问的安全模式。下面三个阶段逐步把现实需求转换成可实现的数据组织。</p>
+<ul>
+<li>概念设计阶段：构建实体-联系图</li>
+<li>逻辑设计阶段：将实体-联系图映射到关系模式</li>
+<li>物理设计阶段：指明数据库文件组织格式和索引结构</li>
+</ul>
+<p><a id="reference-实体-联系模型"></a></p>
+<h2 id="实体-联系模型">实体-联系模型</h2>
+<p>实体-联系（Entity-Relationship）模型：E-R 模型是一种语义模型，将现实世界事物的含义和相互关联映射到概念模式</p>
+<p>基本概念：</p>
+<ul>
+<li>实体集</li>
+<li>联系集</li>
+<li>属性</li>
+</ul>
+<p>一个数据库可以被建模为：</p>
+<ul>
+<li>实体的集合</li>
+<li>实体间的联系</li>
+</ul>
+<p><a id="reference-实体集"></a></p>
+<h3 id="实体集">实体集</h3>
+<ul>
+<li>实体是现实世界可<strong>区别于</strong>所有其他对象的一个“事物”或“对象”
+<ul>
+<li>实体有属性，它是实体集中每个成员所拥有的描述性性质</li>
+<li>每个实体的每个属性都有一个<strong>值</strong></li>
+</ul>
+</li>
+<li>实体集是<strong>相同类型</strong>，即具有相同性质（或属性）的一个实体集合</li>
+<li>实体集的外延是指属于实体集的实体的<strong>实际集合</strong></li>
+</ul>
+<p><a id="reference-联系集"></a></p>
+<h3 id="联系集">联系集</h3>
+<ul>
+<li>联系是指多个实体间的相互关联</li>
+<li>联系集是相同类型联系的集合</li>
+<li>联系集也可以有属性（用于描述联系，比如创建时间）</li>
+</ul>
+<p><a id="reference-角色"></a></p>
+<h4 id="角色">角色</h4>
+<ul>
+<li>实体在联系中扮演的功能称为实体的<strong>角色</strong></li>
+<li>角色是隐含的，通常不指定</li>
+<li>当同样的实体集参与一个联系集多于一次，这类联系集称作是<strong>递归联系集</strong>
+<ul>
+<li>此时需用<strong>角色</strong>指明实体是如何参与联系实例的</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-度"></a></p>
+<h4 id="度">度</h4>
+<p>参与联系集的<strong>实体集的数目</strong>称为联系集的度</p>
+<p>常见的多为二元联系集：</p>
+<ul>
+<li>涉及两个实体集（度为 2）</li>
+<li>数据库系统中大多数联系集都是二元的，涉及两个实体集以上的联系较少</li>
+</ul>
+<p><a id="reference-属性"></a></p>
+<h3 id="属性">属性</h3>
+<ul>
+<li>实体通过一组属性来表示，属性是实体集中每个成员所拥有的描述性性质</li>
+<li><strong>域</strong>：每个属性可取值的集合，也称<strong>值域</strong>
+<ul>
+<li>实体集的属性是将实体集映射到域的函数</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-属性类型"></a></p>
+<h4 id="属性类型">属性类型</h4>
+<ul>
+<li><strong>简单</strong>和<strong>复合</strong>属性</li>
+<li><strong>单值</strong>和<strong>多值</strong>属性</li>
+<li><strong>派生</strong>属性和<strong>基</strong>属性
+<ul>
+<li>派生属性可以从别的属性派生出来</li>
+<li>派生属性值不存储，而是在需要时计算出来</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-复合属性"></a></p>
+<h5 id="复合属性">复合属性</h5>
+<p>复合属性可以是有层次的</p>
+<p><img alt="IMG-20260908174131882" loading="lazy" decoding="async" width="997" height="343" src="/_astro/IMG-20260908174131882.B1gmhoWy_ZltLd3.webp"></p>
+<p><a id="reference-约束"></a></p>
+<h2 id="约束">约束</h2>
+<p><a id="reference-映射基数约束"></a></p>
+<h3 id="映射基数约束">映射基数约束</h3>
+<p><strong>映射基数（基数比率）</strong>：表示一个实体通过一个联系集能关联的实体类的个数</p>
+<p>对于二元联系集，映射基数必然是以下之一：</p>
+<ul>
+<li>一对一</li>
+<li>一对多</li>
+<li>多对一</li>
+<li>多对多</li>
+</ul>
+<p><img alt="IMG-20260908174131915" loading="lazy" decoding="async" width="1656" height="844" src="/_astro/IMG-20260908174131915.DIzkZ5pH_Z1wbHu2.webp"></p>
+<p><img alt="IMG-20260908174132126" loading="lazy" decoding="async" width="1650" height="861" src="/_astro/IMG-20260908174132126.CNckaUcX_29fjB5.webp"></p>
+<p>其中有些元素可能不能映射到另一集合</p>
+<p><a id="reference-参与约束"></a></p>
+<h4 id="参与约束">参与约束</h4>
+<ul>
+<li>如果实体集 E 中的<strong>每个实体</strong>都参与到联系集 R 的至少一个联系中，实体集 E 在联系集 R 中的参与称为<strong>全部</strong>（total）的</li>
+<li>如果实体集 E 中只有<strong>部分实体</strong>参与到 R 的联系中，实体集 E 在联系集 R 中的参与称为<strong>部分</strong>（partial）的</li>
+</ul>
+<p><a id="reference-码"></a></p>
+<h3 id="码">码</h3>
+<p><a id="reference-实体集的码"></a></p>
+<h4 id="实体集的码">实体集的码</h4>
+<ul>
+<li><strong>超码</strong>：一个或多个可以用来<strong>唯一地标识实体</strong>的属性（集）</li>
+<li><strong>候选码</strong>：最小的超码</li>
+<li><strong>主码</strong>：被选择用来区分实体的<strong>候选码</strong>
+<ul>
+<li>主码只有一个，但候选码可以有多个</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-联系集的码"></a></p>
+<h4 id="联系集的码">联系集的码</h4>
+<ul>
+<li>如果联系集 R <strong>没有</strong>属性，则以下属性集合描述集合 R 中的一个联系（即各个实体集的主码元组）：</li>
+</ul>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>primary-key(E1)</mtext><mo>∪</mo><mtext>primary-key(E2)</mtext><mo>∪</mo><mo>⋯</mo><mo>∪</mo><mtext>primary-key(En)</mtext></mrow><annotation encoding="application/x-tex">\text{primary-key(E1)}\cup\text{primary-key(E2)}\cup\dots\cup\text{primary-key(En)}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">primary-key(E1)</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">primary-key(E2)</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.5556em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">primary-key(En)</span></span></span></span></span></span></div>
+<p>如果联系集 R 有属性 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>2</mn></msub><mo>…</mo><msub><mi>a</mi><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">a_1,a_2\dots a_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，则以下属性集合描述集合 R 中的一个联系（在上面的基础上添加上属性）：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>primary-key(E1)</mtext><mo>∪</mo><mtext>primary-key(E2)</mtext><mo>∪</mo><mo>⋯</mo><mo>∪</mo><mtext>primary-key(En)</mtext><mo>∪</mo><mo stretchy="false">{</mo><msub><mi>a</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>a</mi><mn>2</mn></msub><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>a</mi><mi>m</mi></msub><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\text{primary-key(E1)}\cup\text{primary-key(E2)}\cup\dots\cup\text{primary-key(En)}\cup\{a_1,a_2,\dots, a_m\}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">primary-key(E1)</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">primary-key(E2)</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.5556em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">primary-key(En)</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">{</span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">m</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">}</span></span></span></span></span></div>
+<p><strong>相关的实体集的主码集合形成了联系集的超码</strong>，在以上的两种情况下，联系集的一个超码总是有以下属性集合构成：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>primary-key(E1)</mtext><mo>∪</mo><mtext>primary-key(E2)</mtext><mo>∪</mo><mo>⋯</mo><mo>∪</mo><mtext>primary-key(En)</mtext></mrow><annotation encoding="application/x-tex">\text{primary-key(E1)}\cup\text{primary-key(E2)}\cup\dots\cup\text{primary-key(En)}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">primary-key(E1)</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">primary-key(E2)</span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.5556em;"></span><span class="minner">⋯</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">primary-key(En)</span></span></span></span></span></span></div>
+<p><strong>一对实体集在一个特定的联系集中只能有一个联系</strong></p>
+<p><a id="reference-冗余属性"></a></p>
+<h3 id="冗余属性">冗余属性</h3>
+<blockquote>
+<p>假设有实体集：</p>
+<ul>
+<li>instructor 实体集，包含了 dept_name 属性</li>
+<li>department 实体集</li>
+</ul>
+<p>联系集：inst_dept，联系 instructor 和 department</p>
+</blockquote>
+<p>instructor 中的 <code>dept_name</code> 属性是冗余的，因为有一个明确的关系集 inst_dept 来联系 instructor 和 department；<code>dept_name</code> 属性重复了 inst_dept 联系中的信息，应该从 instructor 中除去</p>
+<p><a id="reference-实体-联系图"></a></p>
+<h2 id="实体-联系图">实体-联系图</h2>
+<p><a id="reference-基本图形"></a></p>
+<h3 id="基本图形">基本图形</h3>
+<p><img alt="IMG-20260908174132135" loading="lazy" decoding="async" width="906" height="238" src="/_astro/IMG-20260908174132135.DVjTbp-3_19qqG7.webp"></p>
+<ul>
+<li>矩形代表<strong>实体集</strong></li>
+<li>属性在<strong>实体矩阵</strong>中列出</li>
+<li>构成<strong>主码</strong>的属性以<strong>下划线</strong>标明</li>
+<li>菱形代表<strong>联系集</strong></li>
+</ul>
+<p><a id="reference-参与表示"></a></p>
+<h3 id="参与表示">参与表示</h3>
+<ul>
+<li>全部参与：实体集中每个实体都参与到联系集的至少一个联系中，使用两条线标识</li>
+</ul>
+<p><img alt="IMG-20260908174132367" loading="lazy" decoding="async" width="709" height="162" src="/_astro/IMG-20260908174132367.Bmtq9TNQ_Z21CkCV.webp"></p>
+<ul>
+<li>部分参与：某些实体不参与到联系集中的任何一个联系</li>
+</ul>
+<p><a id="reference-具有属性的联系集表示"></a></p>
+<h3 id="具有属性的联系集表示">具有属性的联系集表示</h3>
+<p>在原图基础上添加</p>
+<p><img alt="IMG-20260908174132592" loading="lazy" decoding="async" width="748" height="254" src="/_astro/IMG-20260908174132592.kW_xG6lH_22byRQ.webp"></p>
+<p><a id="reference-基数约束表示"></a></p>
+<h3 id="基数约束表示">基数约束表示</h3>
+<p>在联系集和实体集之间使用：</p>
+<ul>
+<li>箭头：表示一</li>
+<li>线段：表示多</li>
+</ul>
+<p><img alt="IMG-20260908174132834" loading="lazy" decoding="async" width="670" height="207" src="/_astro/IMG-20260908174132834.BJUBrwHV_200Kh0.webp"></p>
+<p><a id="reference-一对一"></a></p>
+<h4 id="一对一">一对一</h4>
+<p>使用两个箭头</p>
+<p><img alt="IMG-20260908174133041" loading="lazy" decoding="async" width="643" height="193" src="/_astro/IMG-20260908174133041.B5llNNTv_2uGg4B.webp"></p>
+<p><a id="reference-一对多"></a></p>
+<h4 id="一对多">一对多</h4>
+<p>一侧使用箭头，一侧使用线段</p>
+<p><img alt="IMG-20260908174133254" loading="lazy" decoding="async" width="646" height="188" src="/_astro/IMG-20260908174133254.tf7GRJ_9_Z2145Mi.webp"></p>
+<p><a id="reference-多对多"></a></p>
+<h4 id="多对多">多对多</h4>
+<p>两侧均使用线段</p>
+<p><img alt="IMG-20260908174133446" loading="lazy" decoding="async" width="696" height="189" src="/_astro/IMG-20260908174133446.Ty8UAS3o_DTCle.webp"></p>
+<p><a id="reference-参与约束表示"></a></p>
+<h4 id="参与约束表示">参与约束表示</h4>
+<p><img alt="IMG-20260908174133670" loading="lazy" decoding="async" width="739" height="276" src="/_astro/IMG-20260908174133670.CrKat6Qb_ZcV8VA.webp"></p>
+<p><a id="reference-复合多值派生属性表示"></a></p>
+<h3 id="复合多值派生属性表示">复合、多值、派生属性表示</h3>
+<p><img alt="IMG-20260908174133880" loading="lazy" decoding="async" width="226" height="477" src="/_astro/IMG-20260908174133880.CaJGWN7B_ZQre8x.webp"></p>
+<p><a id="reference-角色表示"></a></p>
+<h3 id="角色表示">角色表示</h3>
+<ul>
+<li>一个联系的实体集不需要唯一</li>
+<li>一个实体集中的元素每次出现都在关系中代表一个“角色”</li>
+</ul>
+<p><img alt="IMG-20260908174134270" loading="lazy" decoding="async" width="673" height="224" src="/_astro/IMG-20260908174134270.CrgRYSDl_Z2tKCKS.webp"></p>
+<p><a id="reference-三元关系表示"></a></p>
+<h3 id="三元关系表示">三元关系表示</h3>
+<p><img alt="IMG-20260908174134465" loading="lazy" decoding="async" width="757" height="317" src="/_astro/IMG-20260908174134465.B20eXzM8_Cw94.webp"></p>
+<ul>
+<li>只允许在一个三元（或三元以上）联系集外有一个箭头来表示基数约束</li>
+<li>如果有多于一个的箭头，那就会有两种解释，会混淆
+<ul>
+<li>A 对于 B 和 C 各有至多一个实体关联</li>
+<li>(A,B)对于 C 和(A,C)对于 B 各有至多一个实体关联</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-弱实体集表示"></a></p>
+<h3 id="弱实体集表示">弱实体集表示</h3>
+<ul>
+<li>一个没有足够的属性形成主码的实体集叫做<strong>弱实体集</strong></li>
+<li>弱实体集必须与<strong>标识</strong>或<strong>属主实体集</strong>（owner entity set）关联才有意义
+<ul>
+<li>弱实体集存在依赖于标识实体集</li>
+</ul>
+</li>
+<li>将弱实体集与其标识实体集相连的联系称为<strong>标识性联系</strong>
+<ul>
+<li>标识联系集以双边框的菱形表示</li>
+</ul>
+</li>
+<li>弱实体集通过一个<strong>全部参与的</strong>、多对一或一对一的联系集与标识实体集联系</li>
+<li>弱实体集的<strong>分辨符</strong>是区分弱实体集中实体的属性集合，也称为该弱实体集的<strong>部分码</strong></li>
+<li>弱实体集的主码由<strong>标识实体集的主码和该弱实体集的分辨符</strong>共同组成
+<ul>
+<li>强实体集的主码并不存储于弱实体集</li>
+</ul>
+</li>
+<li>弱实体集可以<strong>参与标识性联系以外的其他联系</strong>，也可能与<strong>不止一个</strong>标识实体集关联</li>
+</ul>
+<p><img alt="IMG-20260908174134609" loading="lazy" decoding="async" width="729" height="286" src="/_astro/IMG-20260908174134609.gxro_5VH_o975m.webp"></p>
+<p>section 的主码：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>c</mi><mi>o</mi><mi>u</mi><mi>r</mi><mi>s</mi><mi>e</mi><mi mathvariant="normal"><em></mi><mi>i</mi><mi>d</mi><mo separator="true">,</mo><mi>s</mi><mi>e</mi><mi>c</mi><mi mathvariant="normal"></em></mi><mi>i</mi><mi>d</mi><mo separator="true">,</mo><mi>s</mi><mi>e</mi><mi>m</mi><mi>e</mi><mi>s</mi><mi>t</mi><mi>e</mi><mi>r</mi><mo separator="true">,</mo><mi>y</mi><mi>e</mi><mi>a</mi><mi>r</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(course_id, sec_id, semester, year)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.06em;vertical-align:-0.31em;"></span><span class="mopen">(</span><span class="mord mathnormal">co</span><span class="mord mathnormal">u</span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mord mathnormal">se</span><span class="mord" style="margin-right:0.0278em;"><em></span><span class="mord mathnormal">i</span><span class="mord mathnormal">d</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">sec</span><span class="mord" style="margin-right:0.0278em;"></em></span><span class="mord mathnormal">i</span><span class="mord mathnormal">d</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">se</span><span class="mord mathnormal">m</span><span class="mord mathnormal">es</span><span class="mord mathnormal">t</span><span class="mord mathnormal" style="margin-right:0.0278em;">er</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mord mathnormal">e</span><span class="mord mathnormal">a</span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mclose">)</span></span></span></span></p>
+<ul>
+<li>弱实体集的分辨符用<strong>虚下划线</strong>表示</li>
+<li>标识联系集以<strong>双边框的菱形</strong>表示</li>
+</ul>
+<p>在某些情况下，数据库设计者会选择将一个弱实体集表示为属主实体集的一个（多值）<strong>复合属性</strong></p>
+<ul>
+<li>如果弱实体集<strong>只参与标识性联系</strong>，而且其<strong>属性不多</strong>，建模时更适合将其作为属性</li>
+<li>反之，更适合将其表示为弱实体集</li>
+</ul>
+<p><a id="reference-关系模式转换"></a></p>
+<h2 id="关系模式转换">关系模式转换</h2>
+<p>一个符合 E-R 模型的数据库可以表示为一些关系模式的集合</p>
+<ul>
+<li>实体集和联系集都可以用表示数据库内容的统一的关系模式来表示</li>
+<li>每个实体集和联系集都有一个特有的关系模式与其对应，并分配相应的名字</li>
+<li>每个关系模式都有一些列（通常对应属性），每个列都有唯一的名字</li>
+</ul>
+<p><a id="reference-实体集表示"></a></p>
+<h3 id="实体集表示">实体集表示</h3>
+<p><a id="reference-简单属性表示"></a></p>
+<h4 id="简单属性表示">简单属性表示</h4>
+<ul>
+<li>从强实体集转换而来的模式与强实体集具有<strong>相同属性、主码</strong></li>
+<li>从弱实体集转换的模式包含<strong>弱实体集的属性</strong>和<strong>标识强实体集的主码</strong></li>
+<li>该模式的主码由<strong>强实体集的主码</strong>与<strong>弱实体集的分辨符</strong>组合而成
+<ul>
+<li>并需要建立相应的<strong>外码约束</strong>和<strong>完整性约束</strong>（如级联删除）</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-复合属性表示"></a></p>
+<h4 id="复合属性表示">复合属性表示</h4>
+<ul>
+<li>复合属性为每个子属性创建单独的属性</li>
+</ul>
+<blockquote>
+<p>实体集 instructor 有复合属性 <code>name</code>：由 <code>first_name</code>、<code>middle_name</code> 和 <code>last_name</code> 构成</p>
+<p>转化关系模式后，该实体集具有 <code>name_first_name</code>、<code>name_middle_name</code> 和 <code>name_last_name</code></p>
+</blockquote>
+<p><a id="reference-多值属性表示"></a></p>
+<h4 id="多值属性表示">多值属性表示</h4>
+<ul>
+<li>实体集 E 的多值属性 M 用一个独立的模式 EM 表示</li>
+<li>模式 EM 包含对应于的 E 主码及多值属性 M 的属性</li>
+<li>多值属性的每个值映射到关系模式 EM 的每一个<strong>独立元组</strong></li>
+<li>在关系模式 EM 上建立参照实体集 E 关系模式主码的<strong>外码约束</strong></li>
+</ul>
+<blockquote>
+<p>例子：instructor 的多值属性 <code>phone_number</code> 在模式中表示为
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>n</mi><mi>s</mi><mi>t</mi><mi mathvariant="normal"><em></mi><mi>p</mi><mi>h</mi><mi>o</mi><mi>n</mi><mi>e</mi><mo>=</mo><mo stretchy="false">(</mo><mi>I</mi><mi>D</mi><mo separator="true">,</mo><mi>p</mi><mi>h</mi><mi>o</mi><mi>n</mi><mi>e</mi><mi mathvariant="normal"></em></mi><mi>n</mi><mi>u</mi><mi>m</mi><mi>b</mi><mi>e</mi><mi>r</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">inst_phone= ( ID, phone_number)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1.0044em;vertical-align:-0.31em;"></span><span class="mord mathnormal">in</span><span class="mord mathnormal">s</span><span class="mord mathnormal">t</span><span class="mord" style="margin-right:0.0278em;"><em></span><span class="mord mathnormal">p</span><span class="mord mathnormal">h</span><span class="mord mathnormal">o</span><span class="mord mathnormal">n</span><span class="mord mathnormal">e</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1.06em;vertical-align:-0.31em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0785em;">I</span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">p</span><span class="mord mathnormal">h</span><span class="mord mathnormal">o</span><span class="mord mathnormal">n</span><span class="mord mathnormal">e</span><span class="mord" style="margin-right:0.0278em;"></em></span><span class="mord mathnormal">n</span><span class="mord mathnormal">u</span><span class="mord mathnormal">mb</span><span class="mord mathnormal" style="margin-right:0.0278em;">er</span><span class="mclose">)</span></span></span></span></p>
+</blockquote>
+<p><img alt="IMG-20260908174134774" loading="lazy" decoding="async" width="641" height="205" src="/_astro/IMG-20260908174134774.CQq3hT_s_Z2oxJiE.webp"></p>
+<blockquote>
+<p>time_slot 实体除了主码外只有一个属性，同时该属性是多值属性</p>
+</blockquote>
+<ul>
+<li>不需要建立一个对应于实体集的模式，只需创建一个对应于多值属性的<strong>关系</strong>即可</li>
+<li>sec_time_slot 中的 <code>time_slot_id</code> 属性在这样处理后不能作为被参照的外码</li>
+</ul>
+<p><a id="reference-联系集表示"></a></p>
+<h3 id="联系集表示">联系集表示</h3>
+<ul>
+<li>主码选择</li>
+<li>属性选择</li>
+<li>需要为联系集的属性建立<strong>外码约束</strong></li>
+</ul>
+<p><a id="reference-合并模式冗余"></a></p>
+<h4 id="合并模式冗余">合并模式冗余</h4>
+<p>多对一和一对多的联系集的模式：</p>
+<ul>
+<li>如果“多”方参与是<strong>全部的</strong>，那么可以将“多”方实体集和联系集的模式合并成<strong>单个包含两个模式所有属性并集</strong>的关系模式（即将“一”合并入“多”）
+<ul>
+<li>合并后模式中加入原联系集的外码约束</li>
+</ul>
+</li>
+<li>如果“多”方参与是<strong>部分的</strong>，也可以通过使用<strong>空值</strong>来进行模式合并。转换为关系模式时，联系集中“一”方的相关属性应注意不能设为 <code>not null</code>（即“一” <code>left join</code> “多”）</li>
+</ul>
+<p>在一对一联系的情况下，联系集的关系模式可以跟参与联系的任何一个实体集的模式进行合并</p>
+<p>一般而言，连接弱实体集与其标识强实体集之间的标识性联系集转换出的模式是冗余的</p>
+<p><a id="reference-实体-联系设计问题"></a></p>
+<h2 id="实体-联系设计问题">实体-联系设计问题</h2>
+<p><a id="reference-常见错误"></a></p>
+<h3 id="常见错误">常见错误</h3>
+<ul>
+<li>用一个实体集的主码作为另一个实体集的属性</li>
+<li>将相关实体集的主码属性作为联系集的属性</li>
+</ul>
+<p><a id="reference-实体集和联系集选择"></a></p>
+<h3 id="实体集和联系集选择">实体集和联系集选择</h3>
+<p>当描述实体之间可能发生的<strong>行为</strong>时采用联系集</p>
+<p><a id="reference-二元和多元联系集"></a></p>
+<h3 id="二元和多元联系集">二元和多元联系集</h3>
+<p>所有非二元的联系集可以用多个二元联系集来表示，但有时 n 元的联系集能够更清楚的表示几个参与的实体集之间的联系</p>
+<p>有些联系使用二元联系集比使用非二元联系集更好</p>
+<blockquote>
+<p>三元联系集 parents ，联系孩子与其父母，最好表示为两个二元联系集， father 和 mother，使用二元联系集允许只有部分信息（例如，单亲家庭）</p>
+</blockquote>
+<p><a id="reference-联系属性的布局"></a></p>
+<h3 id="联系属性的布局">联系属性的布局</h3>
+<p>设计时将联系集的描述性属性作为联系集的属性还是实体集的属性这一选择，应由<strong>映射基数约束</strong>决定</p>
+<ul>
+<li>一对多联系集的属性仅可以放到参与联系的“多”方实体集中</li>
+<li>一对一联系集的属性可以放到任意一个参与联系的实体集中</li>
+<li>在多对多联系集中，当一个属性是由参与的实体集<strong>联合确定</strong>而不是由单独的某个实体集确定时，该属性就必须放到多对多联系集中</li>
+</ul>
+<p><a id="reference-扩展-e-r-特性"></a></p>
+<h2 id="扩展-e-r-特性">扩展 E-R 特性</h2>
+<p><a id="reference-特化和概化"></a></p>
+<h3 id="特化和概化">特化和概化</h3>
+<p><a id="reference-特化"></a></p>
+<h4 id="特化">特化</h4>
+<p>自顶向下设计</p>
+<p>特化（specialization）：在实体集内部进行分组的过程，类似于继承</p>
+<ul>
+<li>子集中的实体在某些方面区别于实体集中的其他实体</li>
+<li>这些子集成为了较低层的实体集，可能具有高层实体集不具有的属性、或者参与到高层实体集不参与的联系集中</li>
+<li>特化通过从特化实体指向另一个实体的空心箭头来表示</li>
+</ul>
+<p><img alt="IMG-20260908174134969" loading="lazy" decoding="async" width="603" height="437" src="/_astro/IMG-20260908174134969.jlp-VOHq_UMWr2.webp"></p>
+<p>高层和低层实体集可以形成超类-子类</p>
+<p><a id="reference-概化"></a></p>
+<h4 id="概化">概化</h4>
+<p>自底向上设计</p>
+<p>概化（generalization）：高层实体集与一个或多个低层实体集间的包含关系</p>
+<p><a id="reference-属性继承"></a></p>
+<h4 id="属性继承">属性继承</h4>
+<p>属性继承：低层实体集继承了与其相关联的高层实体集的所有属性，并且继承地参与到其高层实体所参与的联系集中</p>
+<p><a id="reference-设计约束"></a></p>
+<h4 id="设计约束">设计约束</h4>
+<p>成员资格判定约束：</p>
+<ul>
+<li>条件定义/属性定义的</li>
+<li>用户定义的：用户将实体指派给某个实体集</li>
+</ul>
+<p>实体是否可以属于同一概化中的多个低层实体集的约束：</p>
+<ul>
+<li>不相交
+<ul>
+<li>一个实体至多属于一个低层实体集</li>
+<li>E-R 图中用多个低层实体集连接到同一个空心箭头标明</li>
+</ul>
+</li>
+<li>重叠
+<ul>
+<li>同一实体可同时属于同一概化的多个低层实体集</li>
+</ul>
+</li>
+</ul>
+<p>完全性约束：定义高层实体集中的一个实体是否必须属于该概化的至少一个低层实体集</p>
+<ul>
+<li>全部（total）: 每个高层实体必须属于一个低层实体集</li>
+<li>部分（partial）: 允许一些高层实体不属于任何低层实体集</li>
+</ul>
+<p><a id="reference-聚集"></a></p>
+<h3 id="聚集">聚集</h3>
+<p><img alt="IMG-20260908174135171" loading="lazy" decoding="async" width="548" height="384" src="/_astro/IMG-20260908174135171.DBj6XJdv_uFmIF.webp"></p>
+<p>为不引入冗余，用聚集来表示 E-R 模型</p>
+<p><img alt="IMG-20260908174135413" loading="lazy" decoding="async" width="543" height="380" src="/_astro/IMG-20260908174135413.C0gsjQBU_Z22dL5N.webp"></p>
+<p><a id="reference-e-r-图总结"></a></p>
+<h2 id="e-r-图总结">E-R 图总结</h2>
+<p><img alt="IMG-20260908174135583" loading="lazy" decoding="async" width="736" height="427" src="/_astro/IMG-20260908174135583.DEyfV7k8_1i2nDU.webp"></p>
+<p><img alt="IMG-20260908174135779" loading="lazy" decoding="async" width="725" height="457" src="/_astro/IMG-20260908174135779.fmkHfi9i_2ww9YU.webp"></p>
+<p><a id="reference-uml"></a></p>
+<h2 id="uml">UML</h2>
+<p>UML（Unified Modeling Language）: 统一建模语言</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>联系属性应该放在哪张表？一对多联系的外键通常为什么放在多的一侧？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#设计过程">设计过程</a></li><li style="--depth: 0"><a href="#实体-联系模型">实体-联系模型</a></li><li style="--depth: 1"><a href="#实体集">实体集</a></li><li style="--depth: 1"><a href="#联系集">联系集</a></li><li style="--depth: 2"><a href="#角色">角色</a></li><li style="--depth: 2"><a href="#度">度</a></li><li style="--depth: 1"><a href="#属性">属性</a></li><li style="--depth: 2"><a href="#属性类型">属性类型</a></li><li style="--depth: 3"><a href="#复合属性">复合属性</a></li><li style="--depth: 0"><a href="#约束">约束</a></li><li style="--depth: 1"><a href="#映射基数约束">映射基数约束</a></li><li style="--depth: 2"><a href="#参与约束">参与约束</a></li><li style="--depth: 1"><a href="#码">码</a></li><li style="--depth: 2"><a href="#实体集的码">实体集的码</a></li><li style="--depth: 2"><a href="#联系集的码">联系集的码</a></li><li style="--depth: 1"><a href="#冗余属性">冗余属性</a></li><li style="--depth: 0"><a href="#实体-联系图">实体-联系图</a></li><li style="--depth: 1"><a href="#基本图形">基本图形</a></li><li style="--depth: 1"><a href="#参与表示">参与表示</a></li><li style="--depth: 1"><a href="#具有属性的联系集表示">具有属性的联系集表示</a></li><li style="--depth: 1"><a href="#基数约束表示">基数约束表示</a></li><li style="--depth: 2"><a href="#一对一">一对一</a></li><li style="--depth: 2"><a href="#一对多">一对多</a></li><li style="--depth: 2"><a href="#多对多">多对多</a></li><li style="--depth: 2"><a href="#参与约束表示">参与约束表示</a></li><li style="--depth: 1"><a href="#复合多值派生属性表示">复合、多值、派生属性表示</a></li><li style="--depth: 1"><a href="#角色表示">角色表示</a></li><li style="--depth: 1"><a href="#三元关系表示">三元关系表示</a></li><li style="--depth: 1"><a href="#弱实体集表示">弱实体集表示</a></li><li style="--depth: 0"><a href="#关系模式转换">关系模式转换</a></li><li style="--depth: 1"><a href="#实体集表示">实体集表示</a></li><li style="--depth: 2"><a href="#简单属性表示">简单属性表示</a></li><li style="--depth: 2"><a href="#复合属性表示">复合属性表示</a></li><li style="--depth: 2"><a href="#多值属性表示">多值属性表示</a></li><li style="--depth: 1"><a href="#联系集表示">联系集表示</a></li><li style="--depth: 2"><a href="#合并模式冗余">合并模式冗余</a></li><li style="--depth: 0"><a href="#实体-联系设计问题">实体-联系设计问题</a></li><li style="--depth: 1"><a href="#常见错误">常见错误</a></li><li style="--depth: 1"><a href="#实体集和联系集选择">实体集和联系集选择</a></li><li style="--depth: 1"><a href="#二元和多元联系集">二元和多元联系集</a></li><li style="--depth: 1"><a href="#联系属性的布局">联系属性的布局</a></li><li style="--depth: 0"><a href="#扩展-e-r-特性">扩展 E-R 特性</a></li><li style="--depth: 1"><a href="#特化和概化">特化和概化</a></li><li style="--depth: 2"><a href="#特化">特化</a></li><li style="--depth: 2"><a href="#概化">概化</a></li><li style="--depth: 2"><a href="#属性继承">属性继承</a></li><li style="--depth: 2"><a href="#设计约束">设计约束</a></li><li style="--depth: 1"><a href="#聚集">聚集</a></li><li style="--depth: 0"><a href="#e-r-图总结">E-R 图总结</a></li><li style="--depth: 0"><a href="#uml">UML</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

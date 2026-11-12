@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Jenkins-Trigger · Musuyin&#39; Home</title><meta name="description" content="Webhook 只通知事件发生；多分支扫描、发现规则和 Jenkinsfile 决定是否构建以及构建哪个 revision。理解失败时先定位是事件未到、Job 未发现，还是构建已经开始但执行失败。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/cicd/jenkins/jenkins-event-triggers/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Jenkins-Trigger · Musuyin' Home"><meta property="og:description" content="Webhook 只通知事件发生；多分支扫描、发现规则和 Jenkinsfile 决定是否构建以及构建哪个 revision。理解失败时先定位是事件未到、Job 未发现，还是构建已经开始但执行失败。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/cicd/jenkins/jenkins-event-triggers/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Jenkins-Trigger</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-31">2026-08-31</time></dd></div><div><dt>字数</dt><dd>2855</dd></div><div><dt>预计阅读</dt><dd>10 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%BE%85%E5%A4%84%E7%90%86/">#待处理</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Jenkins-Trigger</h1><time datetime="2026-08-31">2026-08-31</time><p class="tags"><a href="/tags/%E5%BE%85%E5%A4%84%E7%90%86/">#待处理</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>Webhook 只通知事件发生；多分支扫描、发现规则和 Jenkinsfile 决定是否构建以及构建哪个 revision。理解失败时先定位是事件未到、Job 未发现，还是构建已经开始但执行失败。</p>
+<p>Jenkins 本身不会持续盯着 Git 仓库的每个变化。通常是 Git 平台（GitHub、GitLab、Bitbucket 等）在发生事件后，主动通过 <strong>Webhook</strong> 通知 Jenkins；Jenkins 再根据 Job 的配置、分支规则和仓库中的 <code>Jenkinsfile</code> 决定是否创建一次构建、构建哪个提交、执行哪些步骤。</p>
+<p><a id="reference-一条-branch-push-并创建-pr-后的完整链路"></a></p>
+<h2 id="一条-branch-push-并创建-pr-后的完整链路">一条 branch push 并创建 PR 后的完整链路</h2>
+<p>假设开发者向 <code>feature/login</code> 推送代码，随后创建一个合并到 <code>main</code> 的 PR：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>开发者 git push / 创建 PR</span></span>
+<span class="line"><span>          │</span></span>
+<span class="line"><span>          ▼</span></span>
+<span class="line"><span>GitHub / GitLab 产生 push、pull_request（或 merge_request）事件</span></span>
+<span class="line"><span>          │  HTTP POST（Webhook）</span></span>
+<span class="line"><span>          ▼</span></span>
+<span class="line"><span>Jenkins 的 Webhook 接口</span></span>
+<span class="line"><span>          │</span></span>
+<span class="line"><span>          ▼</span></span>
+<span class="line"><span>Multibranch Pipeline / Organization Folder 接收事件并扫描仓库</span></span>
+<span class="line"><span>          │</span></span>
+<span class="line"><span>          ├─ 根据规则判断：这个分支或 PR 是否值得构建</span></span>
+<span class="line"><span>          ├─ 找到该版本中的 Jenkinsfile</span></span>
+<span class="line"><span>          └─ 为分支或 PR 对应的 Job 排队一次构建</span></span>
+<span class="line"><span>                    │</span></span>
+<span class="line"><span>                    ▼</span></span>
+<span class="line"><span>              Agent 拉取指定 revision，按 Jenkinsfile 执行</span></span>
+<span class="line"><span>                    │</span></span>
+<span class="line"><span>                    ▼</span></span>
+<span class="line"><span>        测试、构建、制品发布；结果回写到 PR / Commit（状态检查）</span></span></code></pre>
+<p><a id="reference-git-平台如何通知-jenkinswebhook"></a></p>
+<h3 id="git-平台如何通知-jenkinswebhook">Git 平台如何通知 Jenkins：Webhook</h3>
+<p>在 GitHub/GitLab 仓库设置中配置 Jenkins 的 Webhook 地址后，平台会对相关事件发起 HTTP 请求。常见事件包括：</p>
+<ul>
+<li><code>push</code>：向某分支推送了提交。</li>
+<li><code>pull_request</code>（GitHub）/ <code>merge_request</code>（GitLab）：PR/MR 被创建、更新源分支、关闭或重新打开。</li>
+<li>有些插件还能处理评论触发、标签创建等事件。</li>
+</ul>
+<p>Webhook 的价值是<strong>近实时且主动通知</strong>：无需 Jenkins 定时轮询仓库。请求通常会带签名密钥（Webhook secret），Jenkins 或插件用它验证请求确实来自 Git 平台。</p>
+<p>如果没有 Webhook，也可以配置“轮询 SCM”（例如每 5 分钟查一次仓库）或定时触发；但前者延迟更高、会产生无效请求，通常优先使用 Webhook。</p>
+<blockquote>
+<p>注意：Webhook 只负责“告诉 Jenkins 仓库有变化”，并不直接定义构建命令。构建逻辑来自 Jenkins Job 配置和 <code>Jenkinsfile</code>。</p>
+</blockquote>
+<p><a id="reference-jenkins-如何知道是哪个-jobjob-类型与仓库匹配"></a></p>
+<h3 id="jenkins-如何知道是哪个-jobjob-类型与仓库匹配">Jenkins 如何知道是哪个 Job：Job 类型与仓库匹配</h3>
+<p>最常用的做法是 <strong>Multibranch Pipeline（多分支流水线）</strong>。一个 Multibranch Pipeline 指向一个仓库，并配置 GitHub Branch Source、GitLab Branch Source 等“分支来源”插件。它会发现仓库中的分支和 PR，并为符合条件的对象自动创建子 Job，例如：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>my-service</span></span>
+<span class="line"><span>├── main</span></span>
+<span class="line"><span>├── feature%2Flogin</span></span>
+<span class="line"><span>└── PR-42</span></span></code></pre>
+<p>因此，同一个仓库里的 <code>main</code>、<code>feature/login</code> 和 PR #42 可以各自有独立构建记录和状态。Webhook 到达后，Jenkins 根据仓库 URL、组织/项目名等信息定位对应的 Multibranch Pipeline，再对相关分支/PR 做增量扫描。</p>
+<p>另一种较旧或较简单的方式是普通 Pipeline Job：它通常固定监听一个仓库/分支，借助 Git 插件、GitHub/GitLab 插件的触发器接收 Webhook。它适合固定分支构建；当分支和 PR 较多时，Multibranch Pipeline 的管理体验通常更好。</p>
+<p><a id="reference-jenkins-如何判断要不要构建"></a></p>
+<h3 id="jenkins-如何判断要不要构建">Jenkins 如何判断“要不要构建”</h3>
+<p>Webhook 到达并不等于每次都一定执行。以 Multibranch Pipeline 为例，Jenkins 会依据配置过滤和判断：</p>
+<ol>
+<li><strong>事件是否属于目标仓库</strong>：仓库来源、凭据和 Webhook 配置必须能够匹配。</li>
+<li><strong>分支是否被发现策略接受</strong>：例如仅构建 <code>main</code>、<code>release/*</code>，忽略已关闭或已合并 PR 的源分支。</li>
+<li><strong>PR 是否被发现策略接受</strong>：可选择构建 PR 的源分支 HEAD、与目标分支的模拟合并结果，或两者都构建。</li>
+<li><strong>对应 revision 是否已经构建过</strong>：如果扫描结果没有新的提交或 PR 版本，通常不会重复排队。</li>
+<li><strong>仓库该 revision 中是否有 <code>Jenkinsfile</code></strong>：没有时，默认不会有可执行的 Pipeline 定义（也可由 Job 使用固定脚本路径或内联脚本）。</li>
+<li><strong>Jenkinsfile 中的条件是否允许某个阶段执行</strong>：即使 Pipeline 已启动，某些 stage 仍可以按分支、PR、变更文件等条件跳过。</li>
+</ol>
+<p><a id="reference-pr-到底构建哪个代码版本"></a></p>
+<h3 id="pr-到底构建哪个代码版本">PR 到底构建哪个代码版本</h3>
+<p>这点很关键。PR #42 从 <code>feature/login</code> 合并到 <code>main</code> 时，常见策略有：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>Jenkins 检出的代码</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PR HEAD</td>
+<td><code>feature/login</code> 当前提交</td>
+<td>验证开发者实际推送的代码</td>
+</tr>
+<tr>
+<td>合并结果</td>
+<td>将 PR 临时与 <code>main</code> 合并后的结果</td>
+<td>提前发现与目标分支集成后的冲突或测试失败</td>
+</tr>
+<tr>
+<td>两者</td>
+<td>分别构建以上两个版本</td>
+<td>要求严格，但资源消耗更多</td>
+</tr>
+</tbody>
+</table>
+<p>“合并结果”往往是 Git 平台提供的临时 merge ref，或由插件在构建中生成。它不代表把代码真正合并进了 <code>main</code>。</p>
+<p>如果 PR 的源分支再次 <code>push</code>，Git 平台会再次发出 PR 更新事件（并通常也会有 push 事件）。Jenkins 识别到 PR 的新 revision 后，便会重新构建，并将最新结果回写为 PR 的状态检查。许多团队还会开启“新构建开始时取消旧构建”，避免过期提交占用构建资源。</p>
+<p><a id="reference-jenkinsfile-如何决定具体执行内容"></a></p>
+<h3 id="jenkinsfile-如何决定具体执行内容">Jenkinsfile 如何决定具体执行内容</h3>
+<p><code>Jenkinsfile</code> 是与代码一起版本管理的流水线定义，通常放在仓库根目录。Jenkins 找到它后，通过 Pipeline 引擎执行其中定义的阶段和命令。一个简化的声明式 Pipeline 如下：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="groovy"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">pipeline {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  agent any</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  options {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    disableConcurrentBuilds(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">abortPrevious</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  stages {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    stage(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'Checkout'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      steps {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        checkout scm</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    stage(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'Test'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      steps {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        sh </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'npm ci'</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        sh </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'npm test'</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    stage(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'Build image'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      when { branch </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'main'</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      steps {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        sh </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'docker build -t registry.example.com/my-service:${BUILD_NUMBER} .'</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    stage(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'Deploy production'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      when { branch </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'main'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">; not { changeRequest() } }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      steps {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        sh </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'./deploy-production.sh'</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>这里的行为是：所有被发现的分支/PR 都会跑测试；只有 <code>main</code> 才构建镜像和部署生产。<code>changeRequest()</code> 用来识别 PR/MR 构建，所以即便某些平台把 PR 显示为面向 <code>main</code> 的构建，也可明确阻止它部署生产。</p>
+<p>除了 <code>branch</code> 和 <code>changeRequest()</code>，声明式 Pipeline 还常用：</p>
+<ul>
+<li><code>when { changeset 'docs/**' }</code>：只有匹配文件发生变化时运行阶段。</li>
+<li><code>when { tag 'v*' }</code>：只在符合模式的 Git tag 构建中运行。</li>
+<li><code>when { expression { ... } }</code>：使用 Groovy 表达式实现更复杂判断。</li>
+<li><code>input</code>：在部署前等待人工确认。</li>
+</ul>
+<p><a id="reference-jenkins-的基本组成"></a></p>
+<h2 id="jenkins-的基本组成">Jenkins 的基本组成</h2>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Controller（控制器，旧称 Master）</td>
+<td>提供 Web UI、保存配置与构建记录、调度任务；不宜承担重型构建。</td>
+</tr>
+<tr>
+<td>Agent（执行节点）</td>
+<td>真正执行 checkout、测试、打包、部署等工作，可是虚拟机、容器或 Kubernetes Pod。</td>
+</tr>
+<tr>
+<td>Job</td>
+<td>Jenkins 中可执行任务的配置单位，如 Freestyle、Pipeline、Multibranch Pipeline。</td>
+</tr>
+<tr>
+<td>Pipeline</td>
+<td>把构建、测试、发布等过程编排为可追踪的步骤。</td>
+</tr>
+<tr>
+<td>Jenkinsfile</td>
+<td>Pipeline 的代码化定义，通常随业务代码放在仓库中。</td>
+</tr>
+<tr>
+<td>Stage / Step</td>
+<td>Stage 是展示给人的阶段（如 Test、Deploy）；Step 是具体动作（如 <code>sh</code>、<code>checkout</code>）。</td>
+</tr>
+<tr>
+<td>Plugin</td>
+<td>为 Jenkins 提供 Git 平台集成、凭据、容器、通知等能力；需控制数量并及时维护。</td>
+</tr>
+<tr>
+<td>Credential</td>
+<td>安全保存的 token、SSH key、密码、证书等；构建中通过 ID 引用，不能写死在仓库。</td>
+</tr>
+<tr>
+<td>Artifact</td>
+<td>构建产物，如 JAR、镜像、测试报告；可归档、上传至制品库或传给下游任务。</td>
+</tr>
+<tr>
+<td>Executor</td>
+<td>Agent 上可并行执行构建的槽位；槽位不足时构建会排队。</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-常见-job-类型"></a></p>
+<h2 id="常见-job-类型">常见 Job 类型</h2>
+<ul>
+<li><strong>Freestyle Project</strong>：在 UI 中配置源码、Shell、构建后操作等，入门简单，但复杂流程难以版本化。</li>
+<li><strong>Pipeline</strong>：用 Jenkinsfile 或 UI 中的 Pipeline Script 描述流程，适用于 CI/CD 的主流方式。</li>
+<li><strong>Multibranch Pipeline</strong>：自动发现仓库中含 Jenkinsfile 的分支和 PR，适合持续开发的 Git 仓库。</li>
+<li><strong>Organization Folder</strong>：扫描一个 GitHub Organization 或 GitLab Group 下多个仓库，为每个含 Jenkinsfile 的仓库创建 Multibranch Pipeline。</li>
+</ul>
+<p><a id="reference-一次构建的典型生命周期"></a></p>
+<h2 id="一次构建的典型生命周期">一次构建的典型生命周期</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>触发（Webhook / 定时 / 手动）</span></span>
+<span class="line"><span>  → 排队（等待合适的 Agent 和 Executor）</span></span>
+<span class="line"><span>  → 检出指定 commit 或 PR merge ref</span></span>
+<span class="line"><span>  → 依赖安装与静态检查</span></span>
+<span class="line"><span>  → 单元测试 / 集成测试</span></span>
+<span class="line"><span>  → 打包、构建镜像、归档制品</span></span>
+<span class="line"><span>  → 部署到测试或生产环境</span></span>
+<span class="line"><span>  → 上报结果（Git 平台、IM、邮件、制品库）</span></span></code></pre>
+<p>每一步的日志、耗时、失败位置和制品都可以在 Jenkins 的 Build 页面查看。Pipeline 支持失败后从某个 stage 重新执行（具体能力取决于脚本和插件），也支持并行 stage、条件执行和人工审批。</p>
+<p><a id="reference-与-github--gitlab-集成时的最低配置"></a></p>
+<h2 id="与-github--gitlab-集成时的最低配置">与 GitHub / GitLab 集成时的最低配置</h2>
+<p>以 Multibranch Pipeline 为例，需要准备：</p>
+<ol>
+<li><strong>安装并配置对应的分支来源插件</strong>：GitHub Branch Source 或 GitLab Branch Source 等。</li>
+<li><strong>Jenkins 中配置凭据</strong>：推荐使用权限最小化的 App / Project Access Token 或 token；至少应能读取仓库、读取 PR 信息、回写 commit/PR 状态。</li>
+<li><strong>创建 Multibranch Pipeline</strong>：配置仓库来源、仓库选择方式和凭据。</li>
+<li><strong>设置 Branch Sources 的发现行为</strong>：例如发现所有分支、仅发现未合并 PR、PR 使用合并结果构建等。</li>
+<li><strong>仓库设置 Webhook</strong>：指向 Jenkins 提供的地址，并订阅 push 与 PR/MR 事件；配置 secret。</li>
+<li><strong>将 Jenkinsfile 提交到仓库</strong>：路径一般为根目录 <code>Jenkinsfile</code>，也可在 Job 中改为其他路径。</li>
+<li><strong>首次 Scan / 索引仓库</strong>：让 Jenkins 建立已有分支和 PR 对应的子 Job；之后由 Webhook 增量更新。</li>
+</ol>
+<p>不同插件的 Webhook URL、事件名称和 UI 字段略有不同，因此应以团队实际使用的 Git 平台插件文档为准。</p>
+<p><a id="reference-为什么有时-push-了却没有运行排查顺序"></a></p>
+<h2 id="为什么有时-push-了却没有运行排查顺序">为什么有时 push 了却没有运行：排查顺序</h2>
+<ol>
+<li><strong>Git 平台的 Webhook delivery 是否成功</strong>：查看 HTTP 状态码、响应体与重试记录。</li>
+<li><strong>Jenkins 是否可被 Git 平台访问</strong>：公网地址、反向代理、TLS 证书、网络策略和 Jenkins URL 配置都可能影响回调。</li>
+<li><strong>Webhook 事件是否订阅正确</strong>：push 与 PR/MR 事件通常都需要。</li>
+<li><strong>Jenkins 系统日志和 Multibranch 扫描日志</strong>：确认插件是否收到并识别了事件。</li>
+<li><strong>Branch / PR discovery 规则</strong>：分支或 PR 可能被过滤，或已关闭、已合并。</li>
+<li><strong>Jenkinsfile 路径与语法</strong>：目标 revision 中是否存在文件、能否被读取和解析。</li>
+<li><strong>构建是否正在排队或被限流</strong>：检查 Agent 在线状态、label、executor、并发限制和 quiet period。</li>
+<li><strong>凭据权限</strong>：凭据可能只能读代码，不能读取 PR 元数据或回写检查结果。</li>
+</ol>
+<p><a id="reference-实践建议"></a></p>
+<h2 id="实践建议">实践建议</h2>
+<ul>
+<li>用 Multibranch Pipeline + Jenkinsfile 管理分支和 PR，避免为每个分支手工创建 Job。</li>
+<li>PR 默认只做校验；生产部署应限制在受保护的目标分支或 tag，并配合审批。</li>
+<li>构建明确检出触发事件对应的 revision，不要用“当前分支最新代码”替代，确保结果可复现。</li>
+<li>凭据使用 Jenkins Credentials 管理，按最小权限授权；不要把 token、密码写进 Jenkinsfile 或日志。</li>
+<li>对依赖、镜像和制品使用缓存与专门的制品仓库；构建机器尽量无状态。</li>
+<li>通过 Git 平台的 required status checks / merge checks，把 Jenkins 的成功结果作为 PR 合并条件。</li>
+<li>定期升级 Jenkins LTS 与插件，清理不再使用的插件，并给 Controller 做配置与构建记录备份。</li>
+</ul>
+<p><a id="reference-一句话总结"></a></p>
+<h2 id="一句话总结">一句话总结</h2>
+<p><strong>Git 平台的 Webhook 告诉 Jenkins“发生了什么”；Multibranch Pipeline 的发现规则决定“是否为这个分支或 PR 建构建”；Jenkinsfile 决定“这次构建具体执行什么”。</strong></p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>对一次 feature push 和 PR 事件逐步说明 Job 的创建与排队；检查重复构建是否来自多条触发路径。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>衔接相关实践：<a href="/notes/computer-science/cloud/cicd/github/github-event-triggers/">Github Trigger</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#一条-branch-push-并创建-pr-后的完整链路">一条 branch push 并创建 PR 后的完整链路</a></li><li style="--depth: 1"><a href="#git-平台如何通知-jenkinswebhook">Git 平台如何通知 Jenkins：Webhook</a></li><li style="--depth: 1"><a href="#jenkins-如何知道是哪个-jobjob-类型与仓库匹配">Jenkins 如何知道是哪个 Job：Job 类型与仓库匹配</a></li><li style="--depth: 1"><a href="#jenkins-如何判断要不要构建">Jenkins 如何判断“要不要构建”</a></li><li style="--depth: 1"><a href="#pr-到底构建哪个代码版本">PR 到底构建哪个代码版本</a></li><li style="--depth: 1"><a href="#jenkinsfile-如何决定具体执行内容">Jenkinsfile 如何决定具体执行内容</a></li><li style="--depth: 0"><a href="#jenkins-的基本组成">Jenkins 的基本组成</a></li><li style="--depth: 0"><a href="#常见-job-类型">常见 Job 类型</a></li><li style="--depth: 0"><a href="#一次构建的典型生命周期">一次构建的典型生命周期</a></li><li style="--depth: 0"><a href="#与-github--gitlab-集成时的最低配置">与 GitHub / GitLab 集成时的最低配置</a></li><li style="--depth: 0"><a href="#为什么有时-push-了却没有运行排查顺序">为什么有时 push 了却没有运行：排查顺序</a></li><li style="--depth: 0"><a href="#实践建议">实践建议</a></li><li style="--depth: 0"><a href="#一句话总结">一句话总结</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

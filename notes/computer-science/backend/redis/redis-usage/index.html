@@ -1,0 +1,769 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Redis 使用 · Musuyin&#39; Home</title><meta name="description" content="Redis 使用先看类型与命令，再看 Java 客户端连接和序列化。批量命令、Pipeline、事务与 Lua 分别解决不同问题；减少网络往返不等于获得整批原子性或失败回滚。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/redis/redis-usage/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Redis 使用 · Musuyin' Home"><meta property="og:description" content="Redis 使用先看类型与命令，再看 Java 客户端连接和序列化。批量命令、Pipeline、事务与 Lua 分别解决不同问题；减少网络往返不等于获得整批原子性或失败回滚。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/redis/redis-usage/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Redis 使用</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-09-30">2025-09-30</time></dd></div><div><dt>字数</dt><dd>5420</dd></div><div><dt>预计阅读</dt><dd>19 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%90%8E%E7%AB%AF/">#后端</a><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a><a href="/tags/Redis/">#Redis</a><a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Redis 使用</h1><time datetime="2025-09-30">2025-09-30</time><p class="tags"><a href="/tags/%E5%90%8E%E7%AB%AF/">#后端</a><a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a><a href="/tags/Redis/">#Redis</a><a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a></p></header><div class="prose"><p>Redis 使用先看类型与命令，再看 Java 客户端连接和序列化。批量命令、Pipeline、事务与 Lua 分别解决不同问题；减少网络往返不等于获得整批原子性或失败回滚。</p>
+<p><a id="reference-面试追问pipeline-与-mgetmset"></a></p>
+<h2 id="面试追问pipeline-与-mgetmset">面试追问：Pipeline 与 MGET/MSET</h2>
+<p><code>MGET/MSET</code> 是 Redis 为“多个 string key 的批量读/写”提供的具体命令：一次命令、一次服务端执行，语义简单且原子性以该命令为单位。Pipeline 是客户端把多条任意 Redis 命令连续写入 socket，再集中读取响应，核心收益是减少 RTT；其中每条命令仍按顺序由 Redis 执行，但整批不自动成为原子事务，也不保证失败后回滚。需要原子多步更新时用 MULTI/EXEC 或 Lua；批量太大又会占用连接缓冲与阻塞事件循环，应按负载分批。</p>
+<p><a id="reference-初识-redis"></a></p>
+<h2 id="初识-redis">初识 Redis</h2>
+<p>Redis 是一种键值型的 NoSql 数据库，这里有两个关键字：</p>
+<ul>
+<li>键值型</li>
+<li>NoSql</li>
+</ul>
+<p>其中<strong>键值型</strong>，是指 Redis 中存储的数据都是以 key、value 对的形式存储，而 value 的形式多种多样，可以是字符串、数值、甚至 json：</p>
+<p><img alt="image-20220502190959608" loading="lazy" decoding="async" width="1112" height="468" src="/_astro/IMG-20260907155634529.DzC5bG3F_O0bHB.webp"></p>
+<p>而 NoSql 则是相对于传统关系型数据库而言，有很大差异的一种数据库。</p>
+<p><a id="reference-认识-nosql"></a></p>
+<h3 id="认识-nosql">认识 NoSQL</h3>
+<p><strong>NoSql</strong> 可以翻译做 Not Only Sql（不仅仅是 SQL），或者是 No Sql（非 Sql 的）数据库。是相对于传统关系型数据库而言，有很大差异的一种特殊的数据库，因此也称之为<strong>非关系型数据库</strong>。</p>
+<p><a id="reference-结构化与非结构化"></a></p>
+<h4 id="结构化与非结构化">结构化与非结构化</h4>
+<p>传统关系型数据库是结构化数据，每一张表都有严格的约束信息：字段名、字段数据类型、字段约束等等信息，插入的数据必须遵守这些约束：</p>
+<p><img alt="" loading="lazy" decoding="async" width="707" height="372" src="/_astro/IMG-20260907155634564.DxYT9_PL_VcdD2.webp"></p>
+<p>而 NoSql 则对数据库格式没有严格约束，往往形式松散，自由。</p>
+<p>可以是键值型：</p>
+<p><img alt="" loading="lazy" decoding="async" width="267" height="244" src="/_astro/IMG-20260907155634593.Cn0CQvNP_K6Idw.webp"></p>
+<p>也可以是文档型：</p>
+<p><img alt="" loading="lazy" decoding="async" width="265" height="238" src="/_astro/IMG-20260907155634625.B69sordp_Z12mBIB.webp"></p>
+<p>甚至可以是图格式：</p>
+<p><img alt="" loading="lazy" decoding="async" width="357" height="307" src="/_astro/IMG-20260907155634659.BDn-sUce_ZiLUuR.webp"></p>
+<p><a id="reference-关联和非关联"></a></p>
+<h4 id="关联和非关联">关联和非关联</h4>
+<p>传统数据库的表与表之间往往存在关联，例如外键：</p>
+<p><img alt="" loading="lazy" decoding="async" width="757" height="405" src="/_astro/IMG-20260907155634708.C2Gx2n6b_Z1jmt1A.webp"></p>
+<p>而非关系型数据库不存在关联关系，要维护关系要么靠代码中的业务逻辑，要么靠数据之间的耦合：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">  id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"张三"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">  orders</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    {</span></span>
+<span class="line"><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">       id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">       item</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">	 id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">title</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"荣耀6"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">price</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">4999</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    },</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    {</span></span>
+<span class="line"><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">       id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">       item</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">	 id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">20</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">title</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"小米11"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#B31D28;--shiki-light-font-style:italic;--shiki-dark:#FDAEB7;--shiki-dark-font-style:italic">price</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3999</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  ]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>此处要维护“张三”的订单与商品“荣耀”和“小米 11”的关系，不得不冗余的将这两个商品保存在张三的订单文档中，不够优雅。还是建议用业务来维护关联关系。</p>
+<p><a id="reference-查询方式"></a></p>
+<h4 id="查询方式">查询方式</h4>
+<p>传统关系型数据库会基于 Sql 语句做查询，语法有统一标准；</p>
+<p>而不同的非关系数据库查询语法差异极大，五花八门各种各样。</p>
+<p><img alt="" loading="lazy" decoding="async" width="1031" height="416" src="/_astro/IMG-20260907155634748.rypOyWWf_1BcWhG.webp"></p>
+<p><a id="reference-事务"></a></p>
+<h4 id="事务">事务</h4>
+<p>传统关系型数据库能满足事务 ACID 的原则。</p>
+<p><img alt="" loading="lazy" decoding="async" width="596" height="483" src="/_astro/IMG-20260907155634775.Dba_2b07_Z1wL2hY.webp"></p>
+<p>而非关系型数据库往往不支持事务，或者不能严格保证 ACID 的特性，只能实现基本的一致性。</p>
+<p><a id="reference-总结"></a></p>
+<h4 id="总结">总结</h4>
+<p>除了上述四点以外，在存储方式、扩展性、查询性能上关系型与非关系型也都有着显著差异，总结如下：</p>
+<p><img alt="" loading="lazy" decoding="async" width="1606" height="780" src="/_astro/IMG-20260907155634808.DuDHTW4h_Z1A2iso.webp"></p>
+<ul>
+<li>存储方式
+<ul>
+<li>关系型数据库基于磁盘进行存储，会有大量的磁盘 IO，对性能有一定影响</li>
+<li>非关系型数据库，他们的操作更多的是依赖于内存来操作，内存的读写速度会非常快，性能自然会好一些</li>
+</ul>
+</li>
+<li>扩展性
+<ul>
+<li>关系型数据库集群模式一般是主从，主从数据一致，起到数据备份的作用，称为垂直扩展。</li>
+<li>非关系型数据库可以将数据拆分，存储在不同机器上，可以保存海量数据，解决内存大小有限的问题。称为水平扩展。</li>
+<li>关系型数据库因为表之间存在关联关系，如果做水平扩展会给数据查询带来很多麻烦</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-认识-redis"></a></p>
+<h3 id="认识-redis">认识 Redis</h3>
+<p>Redis 诞生于 2009 年，全称是 <strong>Re</strong>mote <strong>D</strong>ictionary <strong>S</strong>erver 远程词典服务器，是一个基于内存的键值型 NoSQL 数据库。</p>
+<p><strong>特征</strong>：</p>
+<ul>
+<li>键值（key-value）型，value 支持多种不同数据结构，功能丰富</li>
+<li>单线程，每个命令具备原子性</li>
+<li>低延迟，速度快（基于内存、IO 多路复用、良好的编码）。</li>
+<li>支持数据持久化</li>
+<li>支持主从集群、分片集群</li>
+<li>支持多语言客户端</li>
+</ul>
+<p><strong>作者</strong>：Antirez</p>
+<p>Redis 的官方网站地址：<a href="https://redis.io/">https://redis.io/</a></p>
+<p><a id="reference-安装-redis"></a></p>
+<h3 id="安装-redis">安装 Redis</h3>
+<p>大多数企业都是基于 Linux 服务器来部署项目，而且 Redis 官方也没有提供 Windows 版本的安装包。因此课程中会基于 Linux 系统来安装 Redis.</p>
+<p><a id="reference-依赖库"></a></p>
+<h4 id="依赖库">依赖库</h4>
+<p>Redis 是基于 C 语言编写的，因此首先需要安装 Redis 所需要的 gcc 依赖：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">yum</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> install</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -y</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> gcc</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> tcl</span></span></code></pre>
+<p><a id="reference-上传安装包并解压"></a></p>
+<h4 id="上传安装包并解压">上传安装包并解压</h4>
+<p>然后将课前资料提供的 Redis 安装包上传到虚拟机的任意目录：</p>
+<p><img alt="" loading="lazy" decoding="async" width="542" height="160" src="/_astro/IMG-20260907155634840.Bym6uXHj_29y2aP.webp"></p>
+<p>例如，放到了/usr/local/src 目录：</p>
+<p><img alt="" loading="lazy" decoding="async" width="593" height="259" src="/_astro/IMG-20260907155634873.oQO4L-na_Cknbo.webp"></p>
+<p>解压缩：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">tar</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -xzf</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> redis-6.2.6.tar.gz</span></span></code></pre>
+<p>解压后：</p>
+<p><img alt="image-20211211080339076" loading="lazy" decoding="async" width="600" height="291" src="/_astro/IMG-20260907155634901.B2xAmCB-_Z20an8w.webp"></p>
+<p>进入 redis 目录：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> redis-6.2.6</span></span></code></pre>
+<p>运行编译命令：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">make</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> &amp;&amp; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">make</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> install</span></span></code></pre>
+<p>如果没有出错，应该就安装成功了。</p>
+<p>默认的安装路径是在 <code>/usr/local/bin</code>​ 目录下</p>
+<p>该目录已经默认配置到环境变量，因此可以在任意目录下运行这些命令。其中：</p>
+<ul>
+<li>redis-cli：是 redis 提供的命令行客户端</li>
+<li>redis-server：是 redis 的服务端启动脚本</li>
+<li>redis-sentinel：是 redis 的哨兵启动脚本</li>
+</ul>
+<p><a id="reference-启动"></a></p>
+<h4 id="启动">启动</h4>
+<p>redis 的启动方式有很多种，例如：</p>
+<ul>
+<li>默认启动</li>
+<li>指定配置启动</li>
+<li>开机自启</li>
+</ul>
+<p><a id="reference-默认启动"></a></p>
+<h4 id="默认启动">默认启动</h4>
+<p>安装完成后，在任意目录输入 redis-server 命令即可启动 Redis：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">redis-server</span></span></code></pre>
+<p>如图：</p>
+<p><img alt="" loading="lazy" decoding="async" width="1179" height="609" src="/_astro/IMG-20260907155634927.B9ESg572_zCF8N.webp"></p>
+<p>这种启动属于 <code>前台启动</code>，会阻塞整个会话窗口，窗口关闭或者按下 <code>CTRL + C</code> 则 Redis 停止。不推荐使用。</p>
+<p><a id="reference-指定配置启动"></a></p>
+<h4 id="指定配置启动">指定配置启动</h4>
+<p>如果要让 Redis 以 <code>后台</code>​ 方式启动，则必须修改 Redis 配置文件，就在之前解压的 redis 安装包下（<code>/usr/local/src/redis-6.2.6</code>​），名字叫 redis.conf：</p>
+<p><img alt="image-20211211082225509" loading="lazy" decoding="async" width="1176" height="278" src="/_astro/IMG-20260907155634961.Czq9fyIE_ZxOwRb.webp"></p>
+<p>先将这个配置文件备份一份：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">cp</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> redis.conf</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> redis.conf.bck</span></span></code></pre>
+<p>然后修改 redis.conf 文件中的一些配置：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="properties"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 监听地址，默认是127.0.0.1，会导致只能在本地访问。修改为0.0.0.0则可以在任意IP访问，生产环境不要设置为0.0.0.0</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">bind 0.0.0.0</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 守护进程，修改为yes后即可后台运行</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">daemonize yes</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 密码，设置后访问Redis必须输入密码</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">requirepass 123321</span></span></code></pre>
+<p>Redis 的其它常见配置：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="properties"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 监听的端口</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">port 6379</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 工作目录，默认是当前目录，也就是运行redis-server时的命令，日志、持久化等文件会保存在这个目录</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">dir .</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 数据库数量，设置为1，代表只使用1个库，默认有16个库，编号0~15</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">databases 1</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 设置redis能够使用的最大内存</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">maxmemory 512mb</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 日志文件，默认为空，不记录日志，可以指定日志文件名</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">logfile </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"redis.log"</span></span></code></pre>
+<p>启动 Redis：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 进入redis安装目录</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /usr/local/src/redis-6.2.6</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 启动</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">redis-server</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> redis.conf</span></span></code></pre>
+<p>停止服务：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 利用redis-cli来执行 shutdown 命令，即可停止 Redis 服务，</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 因为之前配置了密码，因此需要通过 -u 来指定密码</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">redis-cli</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -u</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 123321</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> shutdown</span></span></code></pre>
+<p><a id="reference-开机自启"></a></p>
+<h4 id="开机自启">开机自启</h4>
+<p>也可以通过配置来实现开机自启。</p>
+<p>首先，新建一个系统服务文件：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">vim</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /etc/systemd/system/redis.service</span></span></code></pre>
+<p>内容如下：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>[Unit]</span></span>
+<span class="line"><span>Description=redis-server</span></span>
+<span class="line"><span>After=network.target</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>[Service]</span></span>
+<span class="line"><span>Type=forking</span></span>
+<span class="line"><span>ExecStart=/usr/local/bin/redis-server /usr/local/redis-7/redis.conf</span></span>
+<span class="line"><span>PrivateTmp=true</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>[Install]</span></span>
+<span class="line"><span>WantedBy=multi-user.target</span></span></code></pre>
+<p>然后重载系统服务：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">systemctl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> daemon-reload</span></span></code></pre>
+<p>现在，可以用下面这组命令来操作 redis 了：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 启动</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">systemctl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> start</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> redis</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 停止</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">systemctl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> stop</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> redis</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 重启</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">systemctl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> restart</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> redis</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 查看状态</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">systemctl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> status</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> redis</span></span></code></pre>
+<p>执行下面的命令，可以让 redis 开机自启：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">systemctl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> enable</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> redis</span></span></code></pre>
+<p><a id="reference-redis-桌面客户端"></a></p>
+<h3 id="redis-桌面客户端">Redis 桌面客户端</h3>
+<p>安装完成 Redis，就可以操作 Redis，实现数据的 CRUD 了。这需要用到 Redis 客户端，包括：</p>
+<ul>
+<li>命令行客户端</li>
+<li>图形化桌面客户端</li>
+<li>编程客户端</li>
+</ul>
+<p><a id="reference-redis-命令行客户端"></a></p>
+<h4 id="redis-命令行客户端">Redis 命令行客户端</h4>
+<p>Redis 安装完成后就自带了命令行客户端：redis-cli，使用方式如下：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">redis-cli</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [options] [commonds]</span></span></code></pre>
+<p>其中常见的 options 有：</p>
+<ul>
+<li><code>-h 127.0.0.1</code>：指定要连接的 redis 节点的 IP 地址，默认是 127.0.0.1</li>
+<li><code>-p 6379</code>：指定要连接的 redis 节点的端口，默认是 6379</li>
+<li><code>-a 123321</code>：指定 redis 的访问密码</li>
+</ul>
+<p>其中的 commonds 就是 Redis 的操作命令，例如：</p>
+<ul>
+<li><code>ping</code>：与 redis 服务端做心跳测试，服务端正常会返回 <code>pong</code></li>
+</ul>
+<p>不指定 commond 时，会进入 <code>redis-cli</code> 的交互控制台：</p>
+<p><img alt="" loading="lazy" decoding="async" width="1593" height="387" src="/_astro/IMG-20260907155634990.D4oZ-838_LO2vY.webp"></p>
+<p><a id="reference-图形化桌面客户端"></a></p>
+<h4 id="图形化桌面客户端">图形化桌面客户端</h4>
+<p>Redis 的图形化桌面客户端：<a href="https://github.com/uglide/RedisDesktopManager">https://github.com/uglide/RedisDesktopManager</a></p>
+<p>不过该仓库提供的是 RedisDesktopManager 的源码，并未提供 windows 安装包。</p>
+<p>在下面这个仓库可以找到安装包：<a href="https://github.com/lework/RedisDesktopManager-Windows/releases">https://github.com/lework/RedisDesktopManager-Windows/releases</a></p>
+<p><a id="reference-安装"></a></p>
+<h4 id="安装">安装</h4>
+<p>在课前资料中可以找到 Redis 的图形化桌面客户端：</p>
+<p><img alt="" loading="lazy" decoding="async" width="328" height="262" src="/_astro/IMG-20260907155635023.B8H_lejK_1YnWYi.webp"></p>
+<p>解压缩后，运行安装程序即可安装：</p>
+<p><img alt="" loading="lazy" decoding="async" width="537" height="88" src="/_astro/IMG-20260907155635062.BlKcc1F9_UIHD3.webp"></p>
+<p>安装完成后，在安装目录下找到 rdm.exe 文件：</p>
+<p><img alt="" loading="lazy" decoding="async" width="443" height="114" src="/_astro/IMG-20260907155635092.Bzte1YLT_Z2hlaUo.webp"></p>
+<p>双击即可运行：</p>
+<p><img alt="" loading="lazy" decoding="async" width="1025" height="539" src="/_astro/IMG-20260907155635119.BHqt04iC_Z2hDjDE.webp"></p>
+<p><a id="reference-建立连接"></a></p>
+<h4 id="建立连接">建立连接</h4>
+<p>点击左上角的 <code>连接到Redis服务器</code> 按钮：</p>
+<p><img alt="" loading="lazy" decoding="async" width="437" height="111" src="/_astro/IMG-20260907155635148.CBJoNe-h_2ogvcs.webp"></p>
+<p>在弹出的窗口中填写 Redis 服务信息：</p>
+<p><img alt="" loading="lazy" decoding="async" width="682" height="752" src="/_astro/IMG-20260907155635192.wlZgyGmk_23nf63.webp"></p>
+<p>点击确定后，在左侧菜单会出现这个链接：</p>
+<p><img alt="" loading="lazy" decoding="async" width="683" height="272" src="/_astro/IMG-20260907155635309.DuFj_3Rr_Z1iyUHx.webp"></p>
+<p>点击即可建立连接了。</p>
+<p><img alt="" loading="lazy" decoding="async" width="570" height="576" src="/_astro/IMG-20260907155635333.D3D6vR9G_aSURL.webp"></p>
+<p>Redis 默认有 16 个仓库，编号从 0 至 15. 通过配置文件可以设置仓库数量，但是不超过 16，并且不能自定义仓库名称。</p>
+<p>如果是基于 redis-cli 连接 Redis 服务，可以通过 select 命令来选择数据库：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 选择 0号库</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> 0</span></span></code></pre>
+<p><a id="reference-redis-常见命令"></a></p>
+<h2 id="redis-常见命令">Redis 常见命令</h2>
+<p>Redis 是典型的 key-value 数据库，key 一般是字符串，而 value 包含很多不同的数据类型：</p>
+<p><img alt="" loading="lazy" decoding="async" width="1299" height="673" src="/_astro/IMG-20260907155635359.DgFtzJi5_Z2oipqj.webp"></p>
+<p>Redis 为了方便学习，将操作不同数据类型的命令也做了分组，在官网（ <a href="https://redis.io/commands">https://redis.io/commands </a>）可以查看到不同的命令：</p>
+<p><img alt="" loading="lazy" decoding="async" width="770" height="653" src="/_astro/IMG-20260907155635383.BpBhzEil_Z11fm9A.webp"></p>
+<p>不同类型的命令称为一个 group，也可以通过 help 命令来查看各种不同 group 的命令：</p>
+<p><img alt="" loading="lazy" decoding="async" width="1064" height="582" src="/_astro/IMG-20260907155635407.D82pj23p_Z13BNn5.webp"></p>
+<p>接下来，就学习常见的五种基本数据类型的相关命令。</p>
+<p><a id="reference-redis-通用命令"></a></p>
+<h3 id="redis-通用命令">Redis 通用命令</h3>
+<p>通用指令是部分数据类型的，都可以使用的指令，常见的有：</p>
+<ul>
+<li>
+<p>KEYS：查看符合模板的所有 key，不建议在生产环境中使用，由于 Redis 是单线程实现，会造成阻塞</p>
+</li>
+<li>
+<p>DEL：删除一个指定的 key</p>
+</li>
+<li>
+<p>EXISTS：判断 key 是否存在</p>
+</li>
+<li>
+<p>EXPIRE：给一个 key 设置有效期，有效期到期时该 key 会被自动删除</p>
+</li>
+<li>
+<p>TTL：查看一个 KEY 的剩余有效期 (Second)</p>
+<ul>
+<li><code>-1</code>: 永久有效</li>
+<li><code>-2</code>: 已经过期</li>
+</ul>
+</li>
+</ul>
+<p>通过 <code>help [command]</code> 可以查看一个命令的具体用法，例如：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 查看keys命令的帮助信息：</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">127.0.0.1:6379</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; </span><span style="color:#032F62;--shiki-dark:#9ECBFF">help</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> keys</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">KEYS</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pattern</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">summary:</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> Find</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> all</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> keys</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> matching</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> the</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> given</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pattern</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">since:</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1.0.0</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">group:</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> generic</span></span></code></pre>
+<p><a id="reference-string-类型"></a></p>
+<h3 id="string-类型">String 类型</h3>
+<p>String 类型，也就是字符串类型，是 Redis 中最简单的存储类型。</p>
+<p>其 value 是字符串，不过根据字符串的格式不同，又可以分为 3 类：</p>
+<ul>
+<li>string：普通字符串</li>
+<li>int：整数类型，可以做自增、自减操作</li>
+<li>float：浮点类型，可以做自增、自减操作</li>
+</ul>
+<p>不管是哪种格式，底层都是字节数组形式存储，只不过是编码方式不同。字符串类型的最大空间不能超过 512m.</p>
+<p><img alt="" loading="lazy" decoding="async" width="1184" height="268" src="/_astro/IMG-20260907155635429.C4VOmiQN_ZeN20j.webp"></p>
+<p><a id="reference-string-的常见命令"></a></p>
+<h4 id="string-的常见命令">String 的常见命令</h4>
+<p>String 的常见命令有：</p>
+<ul>
+<li><code>SET</code>：添加或者修改已经存在的一个 String 类型的键值对
+<ul>
+<li><code>SETNX</code>：添加一个 String 类型的键值对，前提是这个 key 不存在，否则不执行
+<ul>
+<li>等同于<code>SET NX</code></li>
+</ul>
+</li>
+<li><code>SETEX</code>：添加一个 String 类型的键值对，并且指定有效期</li>
+</ul>
+</li>
+<li><code>GET</code>：根据 key 获取 String 类型的 value</li>
+<li><code>MSET</code>：批量添加多个 String 类型的键值对</li>
+<li><code>MGET</code>：根据多个 key 获取多个 String 类型的 value</li>
+<li><code>INCR</code>：让一个整型的 key 自增 1</li>
+<li><code>INCRBY</code>：让一个整型的 key 自增并指定步长，例如：incrby num 2 让 num 值自增 2</li>
+<li><code>INCRBYFLOAT</code>：让一个浮点类型的数字自增并指定步长</li>
+</ul>
+<p><a id="reference-key-结构"></a></p>
+<h4 id="key-结构">Key 结构</h4>
+<p>Redis 没有类似 MySQL 中的 Table 的概念，该如何区分不同类型的 key 呢？</p>
+<p>例如，需要存储用户、商品信息到 redis，有一个用户 id 是 1，有一个商品 id 恰好也是 1，此时如果使用 id 作为 key，那就会冲突了，该怎么办？</p>
+<p>可以通过给 key 添加前缀加以区分，不过这个前缀不是随便加的，有一定的规范：</p>
+<p>Redis 的 key 允许有多个单词形成层级结构，多个单词之间用’:’隔开，格式如下：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>项目名:业务名:类型:id</span></span></code></pre>
+<p>这个格式并非固定，也可以根据自己的需求来删除或添加词条。这样以来，就可以把不同类型的数据区分开了。从而避免了 key 的冲突问题。</p>
+<p>例如项目名称叫 heima，有 user 和 product 两种不同类型的数据，可以这样定义 key：</p>
+<ul>
+<li>user 相关的 key：<strong>heima:user:1</strong></li>
+<li>product 相关的 key：<strong>heima:product:1</strong></li>
+</ul>
+<p>如果 Value 是一个 Java 对象，例如一个 User 对象，则可以将对象序列化为 JSON 字符串后存储：</p>
+<table>
+<thead>
+<tr>
+<th><strong>KEY</strong></th>
+<th><strong>VALUE</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>heima:user:1</td>
+<td>{“id”:1, “name”: “Jack”, “age”: 21}</td>
+</tr>
+<tr>
+<td>heima:product:1</td>
+<td>{“id”:1, “name”: “小米 11”, “price”: 4999}</td>
+</tr>
+</tbody>
+</table>
+<p>并且，在 Redis 的桌面客户端中，还会以相同前缀作为层级结构，让数据看起来层次分明，关系清晰：</p>
+<p><img alt="" loading="lazy" decoding="async" width="941" height="279" src="/_astro/IMG-20260907155635450.CmdCMLmT_Z1U2df1.webp"></p>
+<p><a id="reference-hash-类型"></a></p>
+<h3 id="hash-类型">Hash 类型</h3>
+<p>Hash 类型，也叫散列，其 value 是一个无序字典，类似于 Java 中的 HashMap 结构。</p>
+<p>String 结构是将对象序列化为 JSON 字符串后存储，当需要修改对象某个字段时很不方便：</p>
+<p><img alt="" loading="lazy" decoding="async" width="692" height="135" src="/_astro/IMG-20260907155635475.BPtesmgd_Z2kPP1j.webp"></p>
+<p>Hash 结构可以将对象中的每个字段独立存储，可以针对单个字段做 CRUD：</p>
+<p><img alt="" loading="lazy" decoding="async" width="691" height="310" src="/_astro/IMG-20260907155635496.Dm7A9ujo_Zmj3z0.webp"></p>
+<p>Hash 的常见命令有：</p>
+<ul>
+<li><code>HSET key field value</code>：添加或者修改 hash 类型 key 的 field 的值</li>
+<li><code>HGET key field</code>：获取一个 hash 类型 key 的 field 的值</li>
+<li><code>HMSET</code>：批量添加多个 hash 类型 key 的 field 的值</li>
+<li><code>HMGET</code>：批量获取多个 hash 类型 key 的 field 的值</li>
+<li><code>HGETALL</code>：获取一个 hash 类型的 key 中的所有的 field 和 value</li>
+<li><code>HKEYS</code>：获取一个 hash 类型的 key 中的所有的 field</li>
+<li><code>HINCRBY</code>:让一个 hash 类型 key 的字段值自增并指定步长</li>
+<li><code>HSETNX</code>：添加一个 hash 类型的 key 的 field 值，前提是这个 field 不存在，否则不执行</li>
+</ul>
+<p><a id="reference-list-类型"></a></p>
+<h3 id="list-类型">List 类型</h3>
+<p>Redis 中的 List 类型与 Java 中的 LinkedList 类似，可以看做是一个双向链表结构。既可以支持正向检索和也可以支持反向检索。</p>
+<p>特征也与 LinkedList 类似：</p>
+<ul>
+<li>有序</li>
+<li>元素可以重复</li>
+<li>插入和删除快</li>
+<li>查询速度一般</li>
+</ul>
+<p>常用来存储一个有序数据，例如：朋友圈点赞列表，评论列表等。</p>
+<p>List 的常见命令有：</p>
+<ul>
+<li><code>LPUSH key element ... </code>：向列表左侧插入一个或多个元素</li>
+<li><code>LPOP key</code>：移除并返回列表左侧的第一个元素，没有则返回 nil</li>
+<li><code>RPUSH key element ...</code> ：向列表右侧插入一个或多个元素</li>
+<li><code>LPUSH key element ...</code></li>
+<li><code>RPOP key</code>：移除并返回列表右侧的第一个元素</li>
+<li><code>LPOP key</code></li>
+<li><code>LRANGE key start end</code>：返回一段角标范围内的所有元素</li>
+<li><code>BLPOP key timeout 和 BRPOP</code>：与 <code>LPOP</code> 和 <code>RPOP</code> 类似，只不过在没有元素时等待指定时间，而不是直接返回 nil</li>
+</ul>
+<p><a id="reference-set-类型"></a></p>
+<h3 id="set-类型">Set 类型</h3>
+<p>Redis 的 Set 结构与 Java 中的 HashSet 类似，可以看做是一个 value 为 null 的 HashMap。因为也是一个 hash 表，因此具备与 HashSet 类似的特征：</p>
+<ul>
+<li>无序</li>
+<li>元素不可重复</li>
+<li>查找快</li>
+<li>支持交集、并集、差集等功能</li>
+</ul>
+<p>Set 的常见命令有：</p>
+<ul>
+<li><code>SADD key member ...</code> ：向 set 中添加一个或多个元素</li>
+<li><code>SREM key member ... </code>: 移除 set 中的指定元素</li>
+<li><code>SCARD key</code>： 返回 set 中元素的个数</li>
+<li><code>SISMEMBER key member</code>：判断一个元素是否存在于 set 中</li>
+<li><code>SMEMBERS</code>：获取 set 中的所有元素</li>
+<li><code>SINTER key1 key2 ...</code> ：求 key1 与 key2 的交集</li>
+<li><code>SDIFF key1 key2 ... </code>：差集</li>
+<li><code>SUNION key1 key2 ... </code>：并集</li>
+</ul>
+<p>例如两个集合：s1 和 s2:</p>
+<p><img alt="" loading="lazy" decoding="async" width="867" height="347" src="/_astro/IMG-20260907155635523.CD5idLtC_Z1obmIK.webp"></p>
+<p>求交集：<code>SINTER s1 s2</code></p>
+<p>求 s1 与 s2 的不同：<code>SDIFF s1 s2</code>
+<img alt="" loading="lazy" decoding="async" width="839" height="470" src="/_astro/IMG-20260907155635549.Bomve48D_RisND.webp"></p>
+<p><a id="reference-sortedset-类型"></a></p>
+<h3 id="sortedset-类型">SortedSet 类型</h3>
+<p>Redis 的 SortedSet 是一个可排序的 set 集合，与 Java 中的 TreeSet 有些类似，但底层数据结构却差别很大。SortedSet 中的每一个元素都带有一个 score 属性，可以基于 score 属性对元素排序，底层的实现是一个跳表（SkipList）加 hash 表。</p>
+<p>SortedSet 具备下列特性：</p>
+<ul>
+<li>可排序</li>
+<li>元素不重复</li>
+<li>查询速度快</li>
+</ul>
+<p>因为 SortedSet 的可排序特性，经常被用来实现排行榜这样的功能。</p>
+<p>SortedSet 的常见命令有：</p>
+<ul>
+<li><code>ZADD key score member</code>：添加一个或多个元素到 sorted set ，如果已经存在则更新其 score 值</li>
+<li><code>ZREM key member</code>：删除 sorted set 中的一个指定元素</li>
+<li><code>ZSCORE key member</code> : 获取 sorted set 中的指定元素的 score 值</li>
+<li><code>ZRANK key member</code>：获取 sorted set 中的指定元素的排名</li>
+<li><code>ZCARD key</code>：获取 sorted set 中的元素个数</li>
+<li><code>ZCOUNT key min max</code>：统计 score 值在给定范围内的所有元素的个数</li>
+<li><code>ZINCRBY key increment member</code>：让 sorted set 中的指定元素自增，步长为指定的 increment 值 -<code> ZRANGE key min max</code>：按照 score 排序后，获取指定排名范围内的元素
+<ul>
+<li><code>ZREVRANGE key min max</code> ：逆序</li>
+</ul>
+</li>
+<li><code>ZRANGEBYSCORE key min max</code>：按照 score 排序后，获取指定 score 范围内的元素</li>
+<li><code>ZDIFF</code>、<code>ZINTER</code>、<code>ZUNION</code>：求差集、交集、并集</li>
+</ul>
+<p>注意：所有的排名默认都是升序，如果要降序则在命令的 Z 后面添加 REV 即可，例如：</p>
+<ul>
+<li><strong>升序</strong>获取 sorted set 中的指定元素的排名：ZRANK key member</li>
+<li><strong>降序</strong>获取 sorted set 中的指定元素的排名：ZREVRANK key memeber</li>
+</ul>
+<p><a id="reference-redis-的-java-客户端"></a></p>
+<h2 id="redis-的-java-客户端">Redis 的 Java 客户端</h2>
+<p>在 Redis 官网中提供了各种语言的客户端，地址：<a href="https://redis.io/docs/clients/">https://redis.io/docs/clients/</a></p>
+<p><img alt="" loading="lazy" decoding="async" width="873" height="424" src="/_astro/IMG-20260907155635567.BuEsqE-K_ZoSzxv.webp"></p>
+<p>其中 Java 客户端也包含很多：</p>
+<p><img alt="image-20220609102817435" loading="lazy" decoding="async" width="1169" height="762" src="/_astro/IMG-20260907155635591.DBIhL5HR_Z1md2UP.webp"></p>
+<p>标记为 <code>*</code> 的就是推荐使用的 java 客户端，包括：</p>
+<ul>
+<li>Jedis 和 Lettuce：这两个主要是提供了 Redis 命令对应的 API，方便操作 Redis，而 SpringDataRedis 又对这两种做了抽象和封装，因此后期会直接以 SpringDataRedis 来学习。</li>
+<li>Redisson：是在 Redis 基础上实现了分布式的可伸缩的 java 数据结构，例如 Map、Queue 等，而且支持跨进程的同步机制：Lock、Semaphore 等待，比较适合用来实现特殊的功能需求。</li>
+</ul>
+<p><a id="reference-jedis-客户端"></a></p>
+<h3 id="jedis-客户端">Jedis 客户端</h3>
+<p>Jedis 的官网地址： <a href="https://github.com/redis/jedis">https://github.com/redis/jedis</a></p>
+<p><a id="reference-快速入门"></a></p>
+<h4 id="快速入门">快速入门</h4>
+<p>1）引入依赖：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">&lt;!--jedis--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;redis.clients&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;jedis&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;3.7.0&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">&lt;!--单元测试--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.junit.jupiter&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;junit-jupiter&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;5.7.0&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">scope</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;test&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">scope</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p>2）建立连接</p>
+<p>新建一个单元测试类，内容如下：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Jedis jedis;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">BeforeEach</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> setUp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 1.建立连接</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // jedis = new Jedis("192.168.150.101", 6379);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    jedis </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> JedisConnectionFactory.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getJedis</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 2.设置密码</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    jedis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">auth</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"123321"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 3.选择库</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    jedis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">select</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>3）测试：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Test</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> testString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 存入数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    String result </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> jedis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">set</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Exusiai"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"result = "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 获取数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    String name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> jedis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"name = "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Test</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> testHash</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 插入hash数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    jedis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">hset</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user:1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"zephyrtoria"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    jedis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">hset</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user:1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"age"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"21"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 获取</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Map&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; map </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> jedis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">hgetAll</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user:1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(map);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>4）释放资源</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">AfterEach</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> tearDown</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (jedis </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        jedis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">close</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-连接池"></a></p>
+<h4 id="连接池">连接池</h4>
+<p>Jedis 本身是线程不安全的，并且频繁的创建和销毁连接会有性能损耗，因此推荐使用 Jedis 连接池代替 Jedis 的直连方式。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> com.heima.jedis.util;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> redis.clients.jedis.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> JedisConnectionFactory</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> JedisPool jedisPool;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    static</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 配置连接池</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        JedisPoolConfig poolConfig </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> JedisPoolConfig</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        poolConfig.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setMaxTotal</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        poolConfig.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setMaxIdle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        poolConfig.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setMinIdle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        poolConfig.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setMaxWaitMillis</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 创建连接池对象，参数：连接池配置、服务端ip、服务端端口、超时时间、密码</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        jedisPool </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> JedisPool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(poolConfig, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"192.168.150.101"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">6379</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"123456"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Jedis </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getJedis</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(){</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> jedisPool.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getResource</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-springdataredis-客户端"></a></p>
+<h3 id="springdataredis-客户端">SpringDataRedis 客户端</h3>
+<p>SpringData 是 Spring 中数据操作的模块，包含对各种数据库的集成，其中对 Redis 的集成模块就叫做 SpringDataRedis，官网地址：<a href="https://spring.io/projects/spring-data-redis">https://spring.io/projects/spring-data-redis</a></p>
+<ul>
+<li>提供了对不同 Redis 客户端的整合（Lettuce 和 Jedis）</li>
+<li>提供了 RedisTemplate 统一 API 来操作 Redis</li>
+<li>支持 Redis 的发布订阅模型</li>
+<li>支持 Redis 哨兵和 Redis 集群</li>
+<li>支持基于 Lettuce 的响应式编程</li>
+<li>支持基于 JDK、JSON、字符串、Spring 对象的数据序列化及反序列化</li>
+<li>支持基于 Redis 的 JDKCollection 实现</li>
+</ul>
+<p>SpringDataRedis 中提供了 RedisTemplate 工具类，其中封装了各种对 Redis 的操作。并且将不同数据类型的操作 API 封装到了不同的类型中：</p>
+<p><img alt="" loading="lazy" decoding="async" width="1117" height="381" src="/_astro/IMG-20260907155635611.Bsf6-3TC_OzVLX.webp"></p>
+<p><a id="reference-快速入门-1"></a></p>
+<h4 id="快速入门-1">快速入门</h4>
+<p>SpringBoot 已经提供了对 SpringDataRedis 的支持，使用非常简单。</p>
+<p>首先，新建一个 maven 项目，然后按照下面步骤执行：</p>
+<p><a id="reference-引入依赖"></a></p>
+<h5 id="引入依赖">引入依赖</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;?</span><span style="color:#22863A;--shiki-dark:#85E89D">xml</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1.0"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> encoding</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"UTF-8"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">?&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">project</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> xmlns</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://maven.apache.org/POM/4.0.0"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> xmlns:xsi</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://www.w3.org/2001/XMLSchema-instance"</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">         xsi:schemaLocation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">modelVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;4.0.0&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">modelVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-parent&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;2.5.7&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">relativePath</span><span style="color:#24292E;--shiki-dark:#E1E4E8">/&gt; </span><span style="color:#6A737D;--shiki-dark:#6A737D">&lt;!-- lookup parent from repository --&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;com.heima&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;redis-demo&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;0.0.1-SNAPSHOT&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;redis-demo&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">description</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;Demo project for Spring Boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">description</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">properties</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">java.version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;1.8&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">java.version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">properties</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependencies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        &lt;!--redis依赖--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-data-redis&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        &lt;!--common-pool--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.apache.commons&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;commons-pool2&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        &lt;!--Jackson依赖--&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;com.fasterxml.jackson.core&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;jackson-databind&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.projectlombok&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;lombok&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">optional</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;true&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">optional</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-test&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">scope</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;test&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">scope</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependencies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">plugins</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">plugin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-maven-plugin&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">configuration</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">excludes</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">exclude</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.projectlombok&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                            &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;lombok&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">exclude</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">excludes</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">configuration</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">plugin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">plugins</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">build</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">project</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<p><a id="reference-配置-redis"></a></p>
+<h5 id="配置-redis">配置 Redis</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  data</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    redis</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      host</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">127.0.0.1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">6379</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      password</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">123456</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      lettuce</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        pool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          max-active</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          max-idle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          min-idle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          max-wait</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">100</span></span></code></pre>
+<p><a id="reference-注入-redistemplate"></a></p>
+<h5 id="注入-redistemplate">注入 RedisTemplate</h5>
+<p>因为有了 SpringBoot 的自动装配，可以拿来就用：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">SpringBootTest</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> RedisStringTests</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> RedisTemplate redisTemplate;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-编写测试"></a></p>
+<h5 id="编写测试">编写测试</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">SpringBootTest</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> RedisStringTests</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> RedisTemplate edisTemplate;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Test</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> testString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 写入一条String数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        redisTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">opsForValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">set</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"虎哥"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 获取string数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Object name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> stringRedisTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">opsForValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"name = "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-序列化"></a></p>
+<h4 id="序列化">序列化</h4>
+<p><a id="reference-自定义序列化"></a></p>
+<h5 id="自定义序列化">自定义序列化</h5>
+<p>RedisTemplate 可以接收<strong>任意 Object</strong> 作为值写入 Redis：</p>
+<p><img alt="" loading="lazy" decoding="async" width="1024" height="243" src="/_astro/IMG-20260907155635636.BhxdBcco_ZFFnzQ.webp"></p>
+<p>只不过写入前会把 Object 序列化为<strong>字节形式</strong>，默认是采用 JDK 序列化，得到的结果是这样的：</p>
+<p><img alt="" loading="lazy" decoding="async" width="1117" height="255" src="/_astro/IMG-20260907155635659.DZ8Pk7EP_Z1KBIF2.webp"></p>
+<p>缺点：</p>
+<ul>
+<li>可读性差</li>
+<li>内存占用较大</li>
+</ul>
+<p>可以自定义 RedisTemplate 的序列化方式，代码如下：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Configuration</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> RedisConfig</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> RedisTemplate&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">Object</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; </span><span style="color:#6F42C1;--shiki-dark:#B392F0">redisTemplate</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(RedisConnectionFactory </span><span style="color:#E36209;--shiki-dark:#FFAB70">connectionFactory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">){</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 创建RedisTemplate对象</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        RedisTemplate&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">Object</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; template </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> RedisTemplate&lt;&gt;();</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 设置连接工厂</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        template.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setConnectionFactory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(connectionFactory);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 创建JSON序列化工具</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        GenericJackson2JsonRedisSerializer jsonRedisSerializer </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            							new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> GenericJackson2JsonRedisSerializer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 设置Key的序列化</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        template.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setKeySerializer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(RedisSerializer.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        template.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setHashKeySerializer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(RedisSerializer.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 设置Value的序列化</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        template.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setValueSerializer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(jsonRedisSerializer);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        template.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setHashValueSerializer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(jsonRedisSerializer);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 返回</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> template;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>这里采用了 JSON 序列化来代替默认的 JDK 序列化方式。最终结果如图：</p>
+<p><img alt="" loading="lazy" decoding="async" width="718" height="245" src="/_astro/IMG-20260907155635680.Dwun3ijm_ZfA8Oo.webp"></p>
+<p>整体可读性有了很大提升，并且能将 Java 对象自动的序列化为 JSON 字符串，并且查询时能自动把 JSON 反序列化为 Java 对象。不过，其中记录了序列化时对应的 class 名称，目的是为了查询时实现自动反序列化。这会带来额外的内存开销。</p>
+<p><a id="reference-stringredistemplate"></a></p>
+<h5 id="stringredistemplate">StringRedisTemplate</h5>
+<p>为了节省内存空间，可以不使用 JSON 序列化器来处理 value，而是统一使用 String 序列化器，要求只能存储 String 类型的 key 和 value。当需要存储 Java 对象时，手动完成对象的序列化和反序列化。</p>
+<p>注：如果在存储空间中多出这样的数据无伤大雅，但是内存空间宝贵</p>
+<p><img alt="" loading="lazy" decoding="async" width="1213" height="442" src="/_astro/IMG-20260907155635808.3LoVSOAK_XsA3I.webp"></p>
+<p>因为存入和读取时的序列化及反序列化都是自己实现的，SpringDataRedis 就不会将 class 信息写入 Redis 了。</p>
+<p>这种用法比较普遍，因此 SpringDataRedis 就提供了 RedisTemplate 的子类：StringRedisTemplate，它的 key 和 value 的序列化方式默认就是 String 方式。</p>
+<p><img alt="" loading="lazy" decoding="async" width="1185" height="485" src="/_astro/IMG-20260907155635830.DrkQjA2H_1VEFMX.webp"></p>
+<p>省去了自定义 RedisTemplate 的序列化方式的步骤，而是直接使用：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> StringRedisTemplate stringRedisTemplate;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// JSON序列化工具</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">private</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> final</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ObjectMapper mapper </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ObjectMapper</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Test</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> testSaveUser</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() throws JsonProcessingException {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 创建对象</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    User user </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> User</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"虎哥"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">21</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 手动序列化</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    String json </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> mapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">writeValueAsString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(user);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 写入数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    stringRedisTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">opsForValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">set</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user:200"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, json);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 获取数据</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    String jsonUser </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> stringRedisTemplate.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">opsForValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user:200"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 手动反序列化</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    User user1 </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> mapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">readValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(jsonUser, User.class);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user1 = "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> user1);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<blockquote>
+<p>发现</p>
+</blockquote>
+<p><code>RedisTemplate&lt;String, String&gt;</code> 只是编译期泛型声明，实际字节编码仍由序列化器决定；需要显式配置对应序列化器，或使用 StringRedisTemplate。</p>
+<p>‍</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>Pipeline 为什么不能替代 Lua 的多步原子判断？</li>
+<li>RedisTemplate 泛型为什么不能单独决定序列化器？</li>
+<li>key 的层次命名怎样帮助业务隔离与清理？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#面试追问pipeline-与-mgetmset">面试追问：Pipeline 与 MGET/MSET</a></li><li style="--depth: 0"><a href="#初识-redis">初识 Redis</a></li><li style="--depth: 1"><a href="#认识-nosql">认识 NoSQL</a></li><li style="--depth: 2"><a href="#结构化与非结构化">结构化与非结构化</a></li><li style="--depth: 2"><a href="#关联和非关联">关联和非关联</a></li><li style="--depth: 2"><a href="#查询方式">查询方式</a></li><li style="--depth: 2"><a href="#事务">事务</a></li><li style="--depth: 2"><a href="#总结">总结</a></li><li style="--depth: 1"><a href="#认识-redis">认识 Redis</a></li><li style="--depth: 1"><a href="#安装-redis">安装 Redis</a></li><li style="--depth: 2"><a href="#依赖库">依赖库</a></li><li style="--depth: 2"><a href="#上传安装包并解压">上传安装包并解压</a></li><li style="--depth: 2"><a href="#启动">启动</a></li><li style="--depth: 2"><a href="#默认启动">默认启动</a></li><li style="--depth: 2"><a href="#指定配置启动">指定配置启动</a></li><li style="--depth: 2"><a href="#开机自启">开机自启</a></li><li style="--depth: 1"><a href="#redis-桌面客户端">Redis 桌面客户端</a></li><li style="--depth: 2"><a href="#redis-命令行客户端">Redis 命令行客户端</a></li><li style="--depth: 2"><a href="#图形化桌面客户端">图形化桌面客户端</a></li><li style="--depth: 2"><a href="#安装">安装</a></li><li style="--depth: 2"><a href="#建立连接">建立连接</a></li><li style="--depth: 0"><a href="#redis-常见命令">Redis 常见命令</a></li><li style="--depth: 1"><a href="#redis-通用命令">Redis 通用命令</a></li><li style="--depth: 1"><a href="#string-类型">String 类型</a></li><li style="--depth: 2"><a href="#string-的常见命令">String 的常见命令</a></li><li style="--depth: 2"><a href="#key-结构">Key 结构</a></li><li style="--depth: 1"><a href="#hash-类型">Hash 类型</a></li><li style="--depth: 1"><a href="#list-类型">List 类型</a></li><li style="--depth: 1"><a href="#set-类型">Set 类型</a></li><li style="--depth: 1"><a href="#sortedset-类型">SortedSet 类型</a></li><li style="--depth: 0"><a href="#redis-的-java-客户端">Redis 的 Java 客户端</a></li><li style="--depth: 1"><a href="#jedis-客户端">Jedis 客户端</a></li><li style="--depth: 2"><a href="#快速入门">快速入门</a></li><li style="--depth: 2"><a href="#连接池">连接池</a></li><li style="--depth: 1"><a href="#springdataredis-客户端">SpringDataRedis 客户端</a></li><li style="--depth: 2"><a href="#快速入门-1">快速入门</a></li><li style="--depth: 3"><a href="#引入依赖">引入依赖</a></li><li style="--depth: 3"><a href="#配置-redis">配置 Redis</a></li><li style="--depth: 3"><a href="#注入-redistemplate">注入 RedisTemplate</a></li><li style="--depth: 3"><a href="#编写测试">编写测试</a></li><li style="--depth: 2"><a href="#序列化">序列化</a></li><li style="--depth: 3"><a href="#自定义序列化">自定义序列化</a></li><li style="--depth: 3"><a href="#stringredistemplate">StringRedisTemplate</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

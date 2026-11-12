@@ -1,0 +1,193 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Go Modules · Musuyin&#39; Home</title><meta name="description" content="Go Modules 用模块路径和版本描述依赖，go.mod 声明需求，go.sum 记录校验信息。先理解模块与包的区别，再配置下载路径、私有模块和校验策略。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/go/golang/go-modules/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Go Modules · Musuyin' Home"><meta property="og:description" content="Go Modules 用模块路径和版本描述依赖，go.mod 声明需求，go.sum 记录校验信息。先理解模块与包的区别，再配置下载路径、私有模块和校验策略。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/go/golang/go-modules/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Go Modules</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-02-25">2025-02-25</time></dd></div><div><dt>字数</dt><dd>1580</dd></div><div><dt>预计阅读</dt><dd>6 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Go/">#Go</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Go Modules</h1><time datetime="2025-02-25">2025-02-25</time><p class="tags"><a href="/tags/Go/">#Go</a></p></header><div class="prose"><p>Go Modules 用模块路径和版本描述依赖，<code>go.mod</code> 声明需求，<code>go.sum</code> 记录校验信息。先理解模块与包的区别，再配置下载路径、私有模块和校验策略。</p>
+<p>Go Modules 是 Go 的模块依赖管理机制，可类比 Maven 的依赖管理职责，但模块解析规则与构建模型不同。</p>
+<p><a id="reference-gopath-工作模式"></a></p>
+<h2 id="gopath-工作模式">GOPATH 工作模式</h2>
+<ol>
+<li>无版本库控制概念</li>
+<li>无法同步一致第三方版本号</li>
+<li>无法指定当前项目引用的第三方版本号</li>
+</ol>
+<p><a id="reference-指令"></a></p>
+<h2 id="指令">指令</h2>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>download</td>
+<td>download modules to local cache</td>
+</tr>
+<tr>
+<td>edit</td>
+<td>go. mod from tools or scripts</td>
+</tr>
+<tr>
+<td>graph</td>
+<td>print module requirement graph</td>
+</tr>
+<tr>
+<td>init</td>
+<td>initialize new module in current directory</td>
+</tr>
+<tr>
+<td>tidy</td>
+<td>add missing and remove unused modules</td>
+</tr>
+<tr>
+<td>vendor</td>
+<td>make vendored copy of dependencies</td>
+</tr>
+<tr>
+<td>verify</td>
+<td>verify dependencies have expected content</td>
+</tr>
+<tr>
+<td>why</td>
+<td>explain why packages or modules are needed</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-环境变量"></a></p>
+<h2 id="环境变量">环境变量</h2>
+<p>go mod 环境变量可以通过 go env 命令来进行查看</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">$</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> env</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">GO111MODULE</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"auto"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">GOPROXY</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"https://proxy.golang.org,direct"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">GONOPROXY</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">GOSUMDB</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"sum.golang.org"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">GONOSUMDB</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">GOPRIVATE</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">...</span></span></code></pre>
+<p><a id="reference-go111module"></a></p>
+<h3 id="go111module">GO111MODULE</h3>
+<p>Go 语言提供了 <code>GO111MODULE</code> ​ 这个环境变量来作为 Go modules 的开关，其允许设置以下参数：</p>
+<ul>
+<li>auto：只要项目包含了 go. mod 文件的话启用 Go modules，目前在 Go1.11 至 Go1.14 中仍然是默认值。</li>
+<li>on：启用 Go modules，推荐设置，这是早期版本说明；现代工具链的模块默认行为请以 <a href="https://go.dev/ref/mod">Go Modules 参考</a> 为准。</li>
+<li>off：禁用 Go modules，不推荐设置。</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> env</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -w</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> GO111MODULE=on</span></span></code></pre>
+<p><a id="reference-goproxy"></a></p>
+<h3 id="goproxy">GOPROXY</h3>
+<p>这个环境变量主要是用于设置 Go 模块代理（Go module proxy）, 其作用是用于使 Go 在后续拉取模块版本时直接通过镜像站点来快速拉取。
+GOPROXY 的默认值是：<code>https://proxy.golang.org, direct</code> ​
+​ <code>proxy. golang. org</code> ​ 国内访问不了, 需要设置国内的代理.
+阿里云 <a href="https://mirrors.aliyun.com/goproxy/">https://mirrors.aliyun.com/goproxy/</a>
+七牛云 <a href="https://goproxy.cn">https://goproxy.cn</a>, direct</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> env</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -w</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> GOPROXY=https://goproxy.cn,direct</span></span></code></pre>
+<p>GOPROXY 的值是一个以英文逗号 “,” 分割的 Go 模块代理列表，允许设置多个模块代理，假设不想使用，也可以将其设置为 “off” ，这将会禁止 Go 在后续操作中使用任何 Go 模块代理。</p>
+<blockquote>
+<p>direct</p>
+</blockquote>
+<p>“direct” 是一个特殊指示符，用于指示 Go 回源到模块版本的源地址去抓取（比如 GitHub 等），场景如下：当值列表中上一个 Go 模块代理返回 404 或 410 错误时，Go 自动尝试列表中的下一个，遇见 “direct” 时回源，也就是回到源地址去抓取，而遇见 EOF 时终止并抛出类似 “invalid version: unknown revision…” 的错误。</p>
+<p><a id="reference-gosumdb"></a></p>
+<h3 id="gosumdb">GOSUMDB</h3>
+<p>它的值是一个 Go checksum database，用于在拉取模块版本时（无论是从源站拉取还是通过 Go module proxy 拉取）保证拉取到的模块版本数据未经过篡改，若发现不一致，也就是可能存在篡改，将会立即中止。
+GOSUMDB 的默认值为：<code>sum. golang. org</code> ​，在国内也是无法访问的，但是 GOSUMDB 可以被 Go 模块代理所代理（详见：Proxying a Checksum Database）。
+因此我们可以通过设置 GOPROXY 来解决，而先前我们所设置的模块代理 <code>goproxy. cn</code> ​ 就能支持代理 <code>sum. golang. org</code> ​，所以这一个问题在设置 GOPROXY 后，你可以不需要过度关心。
+另外若对 GOSUMDB 的值有自定义需求，其支持如下格式：</p>
+<ul>
+<li>格式 1：<code>&lt;SUMDB_NAME&gt;+&lt;PUBLIC_KEY&gt;</code> ​。</li>
+<li>格式 2：<code>&lt;SUMDB_NAME&gt;+&lt;PUBLIC_KEY&gt; &lt;SUMDB_URL&gt;</code> ​。</li>
+</ul>
+<p>也可以将其设置为“off”，也就是禁止 Go 在后续操作中校验模块版本。</p>
+<p><a id="reference-gonoproxygonosumdbgoprivate"></a></p>
+<h3 id="gonoproxygonosumdbgoprivate">GONOPROXY/GONOSUMDB/GOPRIVATE</h3>
+<p>这三个环境变量都是用在当前项目依赖了私有模块，例如像是你公司的私有 git 仓库，又或是 github 中的私有库，都是属于私有模块，都是要进行设置的，否则会拉取失败。
+更细致来讲，就是依赖了由 GOPROXY 指定的 Go 模块代理或由 GOSUMDB 指定 Go checksum database 都无法访问到的模块时的场景。
+而一般<strong>建议直接设置 GOPRIVATE，它的值将作为 GONOPROXY 和 GONOSUMDB 的默认值，所以建议的最佳姿势是直接使用 GOPRIVATE</strong>。
+并且它们的值都是一个以英文逗号 “,” 分割的模块路径前缀，也就是可以设置多个，例如：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> env</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -w</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> GOPRIVATE="git.example.com,github.com/eddycjy/mquote"</span></span></code></pre>
+<p>设置后，前缀为 git. xxx. com 和 github. com/eddycjy/mquote 的模块都会被认为是私有模块。
+如果不想每次都重新设置，我们也可以利用通配符，例如：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> env</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -w</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> GOPRIVATE="*.example.com"</span></span></code></pre>
+<p>这样子设置的话，所有模块路径为 example. com 的子域名（例如：git. example. com）都将不经过 Go module proxy 和 Go checksum database，<strong>需要注意的是不包括 example. com 本身</strong>。</p>
+<p><a id="reference-初始化项目"></a></p>
+<h2 id="初始化项目">初始化项目</h2>
+<p><a id="reference-开启-go-modules"></a></p>
+<h3 id="开启-go-modules">开启 GO Modules</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> env</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -w</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> GO111MODULE=on</span></span></code></pre>
+<p>或是可以通过直接设置系统环境变量（写入对应的~/. bash_profile 文件亦可）来实现这个目的：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">export</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> GO111MODULE</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">on</span></span></code></pre>
+<p><a id="reference-初始化"></a></p>
+<h3 id="初始化">初始化</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> mod</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> init</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> github.com/Zephyrtora/xxx</span></span></code></pre>
+<p>在执行 <code>go mod init</code> ​ 命令时，我们指定了模块导入路径为 <code>github. com/Zephyrtora/xxx</code> ​。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">fmt</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">github.com/aceld/zinx/znet</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">github.com/aceld/zinx/ziface</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p>当前的 main. go 依赖 <code>github. com/aceld/zinx</code> ​ 库</p>
+<p><a id="reference-手动下载-go-get-"></a></p>
+<h3 id="手动下载-go-get-">手动下载 <code>go get</code> ​</h3>
+<p>需要在本项目的根目录执行</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">$</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> github.com/aceld/zinx/znet</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go:</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> downloading</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> github.com/aceld/zinx</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> v0.0.0-20200221135252-8a8954e75100</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go:</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> found</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> github.com/aceld/zinx/znet</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> in</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> github.com/aceld/zinx</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> v0.0.0-20200221135252-8a8954e75100</span></span></code></pre>
+<p>会看到 <code>go. mod</code> ​ 被修改, 同时多了一个 <code>go. sum</code> ​ 文件</p>
+<blockquote>
+<p>go. mod</p>
+</blockquote>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">module github.com</span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">Zephyrtoria</span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">Communication</span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#24292E;--shiki-dark:#E1E4E8">System</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">go</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1.18</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">require (</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	github.com</span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">aceld</span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">zinx v1.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2.6</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // indirect</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<ul>
+<li>
+<p>​ <code>indirect</code> ​ ​ 表示间接依赖</p>
+<ul>
+<li>因为上面用到的 znet 和 ziface 都是 zinx 的子包</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>go. sum</p>
+</blockquote>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">github.com</span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">aceld</span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">zinx v1.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2.6</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> h1:NYlcQ5OzjhxYXOsVNUzjCchry5A8fjCDHVrI9jMX7jk</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">github.com</span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">aceld</span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">zinx v1.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2.6</span><span style="color:#D73A49;--shiki-dark:#F97583">/go</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.mod h1:agiZ6AuWONUDr</span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">M</span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#24292E;--shiki-dark:#E1E4E8">Rla9wQ9gP1vPvLacHLisBx0Cw7g</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span></span></code></pre>
+<p>罗列当前项目直接或间接依赖的所有模块版本，保证版本不会被篡改</p>
+<ul>
+<li>
+<p>h1: hash</p>
+<ul>
+<li>表示整体项目的 zip 文件打开之后的全部文件的校验和</li>
+<li>如果不存在，可能表示依赖的库用不上</li>
+</ul>
+</li>
+<li>
+<p>xx/go. mod h1: 哈希</p>
+<ul>
+<li>只对 go. mod 文件进行了哈希</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-自动下载-go-mod-tidy-"></a></p>
+<h3 id="自动下载-go-mod-tidy-">自动下载 <code>go mod tidy</code> ​</h3>
+<p>根据源码导入与测试等使用关系，补齐缺少的依赖并清除不再需要的需求；并非下载任意全部模块。</p>
+<p><a id="reference-管理版本"></a></p>
+<h2 id="管理版本">管理版本</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> mod</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> edit</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -replace=依赖@版本</span></span></code></pre>
+<p>类似于重定向</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>代理与校验数据库分别负责什么？</li>
+<li><code>GOPRIVATE</code> 为什么适用于私有模块？</li>
+<li><code>go mod tidy</code> 与安装一个命令行工具有什么不同？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#gopath-工作模式">GOPATH 工作模式</a></li><li style="--depth: 0"><a href="#指令">指令</a></li><li style="--depth: 0"><a href="#环境变量">环境变量</a></li><li style="--depth: 1"><a href="#go111module">GO111MODULE</a></li><li style="--depth: 1"><a href="#goproxy">GOPROXY</a></li><li style="--depth: 1"><a href="#gosumdb">GOSUMDB</a></li><li style="--depth: 1"><a href="#gonoproxygonosumdbgoprivate">GONOPROXY/GONOSUMDB/GOPRIVATE</a></li><li style="--depth: 0"><a href="#初始化项目">初始化项目</a></li><li style="--depth: 1"><a href="#开启-go-modules">开启 GO Modules</a></li><li style="--depth: 1"><a href="#初始化">初始化</a></li><li style="--depth: 1"><a href="#手动下载-go-get-">手动下载 go get ​</a></li><li style="--depth: 1"><a href="#自动下载-go-mod-tidy-">自动下载 go mod tidy ​</a></li><li style="--depth: 0"><a href="#管理版本">管理版本</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

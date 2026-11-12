@@ -1,0 +1,832 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>代码优化和目标代码生成 · Musuyin&#39; Home</title><meta name="description" content="优化必须在保持程序语义的前提下减少成本。先划分基本块与控制流，再分析表达式、变量活跃性和循环，最后结合指令选择与寄存器分配生成目标代码。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/compiler-theory/optimization-and-codegen/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="代码优化和目标代码生成 · Musuyin' Home"><meta property="og:description" content="优化必须在保持程序语义的前提下减少成本。先划分基本块与控制流，再分析表达式、变量活跃性和循环，最后结合指令选择与寄存器分配生成目标代码。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/compiler-theory/optimization-and-codegen/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">代码优化和目标代码生成</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-05-22">2026-05-22</time></dd></div><div><dt>字数</dt><dd>12541</dd></div><div><dt>预计阅读</dt><dd>42 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/">#编译原理</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>代码优化和目标代码生成</h1><time datetime="2026-05-22">2026-05-22</time><p class="tags"><a href="/tags/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/">#编译原理</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>优化必须在保持程序语义的前提下减少成本。先划分基本块与控制流，再分析表达式、变量活跃性和循环，最后结合指令选择与寄存器分配生成目标代码。</p>
+<p><a id="reference-代码优化概述"></a></p>
+<h2 id="代码优化概述">代码优化概述</h2>
+<p><em>代码优化</em>（Code Optimization）是对中间代码或目标代码进行等价变换，使生成的程序<strong>运行更快</strong>或<strong>占用更少资源</strong>，同时<strong>保持语义不变</strong>。</p>
+<blockquote>
+<p><strong>原则</strong>：优化前后程序的输出结果必须完全相同——只是变得更快或更小。</p>
+</blockquote>
+<p><a id="reference-优化的分类"></a></p>
+<h3 id="优化的分类">优化的分类</h3>
+<p><a id="reference-按优化范围"></a></p>
+<h4 id="按优化范围">按优化范围</h4>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>范围</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>局部优化</strong>（Local）</td>
+<td>单个基本块内</td>
+<td>常量折叠、窥孔优化</td>
+</tr>
+<tr>
+<td><strong>全局优化</strong>（Global）</td>
+<td>整个函数/过程</td>
+<td>公共子表达式消除、活跃变量分析</td>
+</tr>
+<tr>
+<td><strong>过程间优化</strong>（Interprocedural）</td>
+<td>跨函数</td>
+<td>内联展开、过程间别名分析</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-按优化对象"></a></p>
+<h4 id="按优化对象">按优化对象</h4>
+<ul>
+<li><strong>机器无关优化</strong>：在中间代码层面，与目标机器无关</li>
+<li><strong>机器相关优化</strong>：针对特定 CPU 的指令集、寄存器、流水线特性</li>
+</ul>
+<p><a id="reference-优化的基本原则"></a></p>
+<h3 id="优化的基本原则">优化的基本原则</h3>
+<ol>
+<li><strong>等价性</strong>：优化不改变程序语义</li>
+<li><strong>有效性</strong>：优化能真正提升性能</li>
+<li><strong>合理代价</strong>：编译时间不能过长</li>
+</ol>
+<p><a id="reference-基本块与流图"></a></p>
+<h2 id="基本块与流图">基本块与流图</h2>
+<p><a id="reference-基本块basic-block"></a></p>
+<h3 id="基本块basic-block">基本块（Basic Block）</h3>
+<p><em>基本块</em>（Basic Block）是一段<strong>顺序执行</strong>的代码序列：</p>
+<ul>
+<li>只有<strong>一个入口</strong>（从第一条指令进入）</li>
+<li>只有<strong>一个出口</strong>（最后一条指令跳出）</li>
+<li>内部不含跳转（除了最后一条）和跳转目标</li>
+</ul>
+<blockquote>
+<p>基本块内部的代码要么全部执行，要么全不执行——这为局部优化提供了安全保证。</p>
+</blockquote>
+<p><a id="reference-划分基本块的算法"></a></p>
+<h4 id="划分基本块的算法">划分基本块的算法</h4>
+<ol>
+<li>找出所有<strong>首指令</strong>（Leader）：
+<ul>
+<li>第一条指令</li>
+<li>任何跳转指令的<strong>目标</strong>指令</li>
+<li>紧跟在跳转指令<strong>后面</strong>的指令</li>
+</ul>
+</li>
+<li>每个首指令到下一个首指令之前（不含）构成一个基本块</li>
+</ol>
+<blockquote>
+<p>示例：对以下三地址码划分基本块：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>(1)  i = 1</span></span>
+<span class="line"><span>(2)  j = 1</span></span>
+<span class="line"><span>(3)  t1 = 10 * i</span></span>
+<span class="line"><span>(4)  t2 = t1 + j</span></span>
+<span class="line"><span>(5)  t3 = 8 * t2</span></span>
+<span class="line"><span>(6)  t4 = t3 - 88</span></span>
+<span class="line"><span>(7)  a[t4] = 0.0</span></span>
+<span class="line"><span>(8)  j = j + 1</span></span>
+<span class="line"><span>(9)  if j &lt;= 10 goto (4)</span></span>
+<span class="line"><span>(10) i = i + 1</span></span>
+<span class="line"><span>(11) t5 = i * 10</span></span>
+<span class="line"><span>(12) if i &lt;= 10 goto (3)</span></span>
+<span class="line"><span>(13) ...</span></span></code></pre>
+</blockquote>
+<p><strong>第一步：找出所有首指令</strong></p>
+<p>逐条扫描，按三条规则标记：</p>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>成为首指令的原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td>规则①：程序第一条指令</td>
+</tr>
+<tr>
+<td>(3)</td>
+<td>规则②：(12) 中 <code>goto (3)</code> 的<strong>目标</strong></td>
+</tr>
+<tr>
+<td>(4)</td>
+<td>规则②：(9) 中 <code>goto (4)</code> 的<strong>目标</strong></td>
+</tr>
+<tr>
+<td>(10)</td>
+<td>规则③：跳转指令 (9) 的<strong>后续指令</strong></td>
+</tr>
+<tr>
+<td>(13)</td>
+<td>规则③：跳转指令 (12) 的<strong>后续指令</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>注意</strong>：(2) 不是首指令，虽然紧跟在 (1) 后面，但 (1) 不是跳转指令，规则③不适用。</p>
+</blockquote>
+<p><strong>第二步：按首指令边界划分基本块</strong></p>
+<p>每个首指令开始，到下一个首指令之前（不含）结束：</p>
+<table>
+<thead>
+<tr>
+<th>基本块</th>
+<th>指令范围</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B1</td>
+<td>(1) ~ (2)</td>
+<td>从首指令 (1) 到下一首指令 (3) 前</td>
+</tr>
+<tr>
+<td>B2</td>
+<td>(3) ~ (3)</td>
+<td>从首指令 (3) 到下一首指令 (4) 前</td>
+</tr>
+<tr>
+<td>B3</td>
+<td>(4) ~ (9)</td>
+<td>从首指令 (4) 到下一首指令 (10) 前</td>
+</tr>
+<tr>
+<td>B4</td>
+<td>(10) ~ (12)</td>
+<td>从首指令 (10) 到下一首指令 (13) 前</td>
+</tr>
+<tr>
+<td>B5</td>
+<td>(13) ~ …</td>
+<td>从首指令 (13) 到结尾</td>
+</tr>
+</tbody>
+</table>
+<p><strong>控制流图（CFG）</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>B1 → B2 → B3 ──→ B4 → B5</span></span>
+<span class="line"><span>          ↑  ↘    │</span></span>
+<span class="line"><span>          └───B3  └──→ B2（goto(3)）</span></span>
+<span class="line"><span>               ↑</span></span>
+<span class="line"><span>           (9) if j&lt;=10 goto (4) 条件为真时回到 B3 自身头部</span></span></code></pre>
+<p>更清晰地：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>B1 → B2 → B3</span></span>
+<span class="line"><span>           │  ← if j&lt;=10 goto(4) 为真时，跳回 B3 自身（循环）</span></span>
+<span class="line"><span>           │  ← if j&lt;=10 为假时，顺序到 B4</span></span>
+<span class="line"><span>     ↑         ↑</span></span>
+<span class="line"><span>     └─ B4 ────┘  ← if i&lt;=10 goto(3) 为真时，跳回 B2</span></span>
+<span class="line"><span>B4 → B5  ← if i&lt;=10 为假时，顺序到 B5</span></span></code></pre>
+<p><a id="reference-控制流图control-flow-graphcfg"></a></p>
+<h3 id="控制流图control-flow-graphcfg">控制流图（Control Flow Graph，CFG）</h3>
+<p>以基本块为节点，跳转关系为边，构成<em>控制流图</em>（CFG）。CFG 是<strong>全局优化</strong>的基础数据结构——全局优化在 CFG 上进行数据流分析。</p>
+<p><a id="reference-常量折叠constant-folding"></a></p>
+<h3 id="常量折叠constant-folding">常量折叠（Constant Folding）</h3>
+<p>在编译时<strong>直接计算</strong>常量表达式的值，不生成运行时计算代码。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>x = 2 + 3    →    x = 5</span></span>
+<span class="line"><span>y = 3.14 * 2 →    y = 6.28</span></span></code></pre>
+<p>若 <code>a = 2</code>、<code>b = 3</code> 均为已知常量：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>c = a * b    →    c = 6</span></span></code></pre>
+<p><a id="reference-常量传播constant-propagation"></a></p>
+<h3 id="常量传播constant-propagation">常量传播（Constant Propagation）</h3>
+<p>跟踪变量是否为常量，若是则用常量值替换变量的使用。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>x = 5</span></span>
+<span class="line"><span>y = x + 3    →    y = 8    (将 x=5 代入)</span></span></code></pre>
+<p><a id="reference-代数化简algebraic-simplification"></a></p>
+<h3 id="代数化简algebraic-simplification">代数化简（Algebraic Simplification）</h3>
+<p>利用代数恒等式简化表达式：</p>
+<table>
+<thead>
+<tr>
+<th>原表达式</th>
+<th>化简后</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>x + 0</code></td>
+<td><code>x</code></td>
+</tr>
+<tr>
+<td><code>x * 1</code></td>
+<td><code>x</code></td>
+</tr>
+<tr>
+<td><code>x * 0</code></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>x * 2</code></td>
+<td><code>x + x</code> 或 <code>x &lt;&lt; 1</code></td>
+</tr>
+<tr>
+<td><code>x ** 2</code></td>
+<td><code>x * x</code></td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-基本块的-dag-优化"></a></p>
+<h2 id="基本块的-dag-优化">基本块的 DAG 优化</h2>
+<p><em>DAG</em>（Directed Acyclic Graph，有向无环图）是<strong>对基本块内三地址码的图形表示</strong>，用于发现和消除块内的冗余计算。</p>
+<p><a id="reference-dag-的构造规则"></a></p>
+<h3 id="dag-的构造规则">DAG 的构造规则</h3>
+<p>DAG 中每个节点代表一次计算，叶节点是变量或常量，内部节点是运算符。<strong>多个变量可以附着在同一个节点上</strong>，表示它们的值相同。</p>
+<p>构造步骤：对基本块内每条三地址码 <code>x = y op z</code>，按以下规则处理：</p>
+<ol>
+<li>为 <code>y</code>、<code>z</code> 找到（或创建）对应节点</li>
+<li>查找是否已有一个 <code>op</code> 节点以 <code>y</code>、<code>z</code> 的节点为子节点——若有，<strong>复用该节点</strong>（公共子表达式）；若无，新建一个 <code>op</code> 节点</li>
+<li>将变量 <code>x</code> <strong>附着</strong>到该节点上（若 <code>x</code> 已附着在其他节点上，则先从那里移除）</li>
+<li>对 <code>x = y</code>（赋值）：直接将 <code>x</code> 附着到 <code>y</code> 的节点</li>
+</ol>
+<p><a id="reference-dag-能发现的优化"></a></p>
+<h3 id="dag-能发现的优化">DAG 能发现的优化</h3>
+<table>
+<thead>
+<tr>
+<th>优化类型</th>
+<th>发现方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>公共子表达式消除</strong></td>
+<td>构造时发现已有相同运算节点，直接复用</td>
+</tr>
+<tr>
+<td><strong>死代码消除</strong></td>
+<td>构造完成后，没有变量附着的内部节点无需生成代码</td>
+</tr>
+<tr>
+<td><strong>常量折叠</strong></td>
+<td>子节点都是常量时，直接计算出结果</td>
+</tr>
+<tr>
+<td><strong>复制传播</strong></td>
+<td><code>x = y</code> 直接把 <code>x</code> 附着到 <code>y</code> 的节点，消除中间赋值</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-示例构造-dag"></a></p>
+<h3 id="示例构造-dag">示例：构造 DAG</h3>
+<blockquote>
+<p>基本块：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>(1) t1 = a + b</span></span>
+<span class="line"><span>(2) t2 = a + b</span></span>
+<span class="line"><span>(3) t3 = t1 * t2</span></span>
+<span class="line"><span>(4) a  = t3</span></span>
+<span class="line"><span>(5) t4 = a + b</span></span></code></pre>
+</blockquote>
+<p><strong>逐步构造</strong>：</p>
+<p><strong>指令 (1)</strong> <code>t1 = a + b</code>：</p>
+<ul>
+<li>创建叶节点 <code>a</code>、<code>b</code></li>
+<li>无已有 <code>+</code> 节点，新建 <code>n1: + (a, b)</code></li>
+<li><code>t1</code> 附着到 <code>n1</code></li>
+</ul>
+<p><strong>指令 (2)</strong> <code>t2 = a + b</code>：</p>
+<ul>
+<li><code>a</code>、<code>b</code> 节点已存在</li>
+<li>已有 <code>+</code> 节点 <code>n1</code>，<strong>复用</strong>（公共子表达式）</li>
+<li><code>t2</code> 附着到 <code>n1</code></li>
+</ul>
+<blockquote>
+<p>此时 <code>n1</code> 上附着了 <code>t1</code> 和 <code>t2</code>，说明 <code>t1 = t2</code>。</p>
+</blockquote>
+<p><strong>指令 (3)</strong> <code>t3 = t1 * t2</code>：</p>
+<ul>
+<li><code>t1</code>、<code>t2</code> 都在 <code>n1</code> 上（值相同）</li>
+<li>新建 <code>n2: * (n1, n1)</code></li>
+<li><code>t3</code> 附着到 <code>n2</code></li>
+</ul>
+<p><strong>指令 (4)</strong> <code>a = t3</code>：</p>
+<ul>
+<li>赋值，<code>a</code> 从叶节点移除，附着到 <code>n2</code></li>
+<li>注意：原来的叶节点 <code>a</code> 现在没有变量名附着了（被覆盖）</li>
+</ul>
+<p><strong>指令 (5)</strong> <code>t4 = a + b</code>：</p>
+<ul>
+<li><code>a</code> 现在在 <code>n2</code>，<code>b</code> 在叶节点</li>
+<li>查找是否有 <code>+ (n2, b)</code> 节点——没有，新建 <code>n3: + (n2, b)</code></li>
+<li><code>t4</code> 附着到 <code>n3</code></li>
+</ul>
+<p><strong>注意</strong>：(5) 中的 <code>a + b</code> <strong>不等于</strong> (1) 中的 <code>a + b</code>，因为 <code>a</code> 的值已被 (4) 修改！DAG 正确区分了这两次 <code>a + b</code>，不会错误地复用。</p>
+<p><strong>最终 DAG</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>  叶节点：a₀（原始 a）、b</span></span>
+<span class="line"><span>  n1: + (a₀, b)    ← t1, t2 附着</span></span>
+<span class="line"><span>  n2: * (n1, n1)   ← t3, a 附着</span></span>
+<span class="line"><span>  n3: + (n2, b)    ← t4 附着</span></span></code></pre>
+<p><a id="reference-从-dag-重新生成代码"></a></p>
+<h3 id="从-dag-重新生成代码">从 DAG 重新生成代码</h3>
+<p>按拓扑序遍历 DAG，只为有变量附着的节点生成指令：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>t1 = a + b      (生成 n1，赋给 t1；t2 不再需要单独生成)</span></span>
+<span class="line"><span>t3 = t1 * t1    (生成 n2，t1 和 t2 值相同，复用 t1)</span></span>
+<span class="line"><span>a  = t3</span></span>
+<span class="line"><span>t4 = a + b      (生成 n3)</span></span></code></pre>
+<p>原来 5 条指令缩减为 4 条，消除了 <code>t2 = a + b</code> 这条冗余计算。</p>
+<p><a id="reference-全局优化"></a></p>
+<h2 id="全局优化">全局优化</h2>
+<p><a id="reference-公共子表达式消除common-subexpression-eliminationcse"></a></p>
+<h3 id="公共子表达式消除common-subexpression-eliminationcse">公共子表达式消除（Common Subexpression Elimination，CSE）</h3>
+<p>若同一个表达式在多处出现，且其操作数在两次计算之间<strong>没有被修改</strong>，则只计算一次，其他地方复用结果。</p>
+<blockquote>
+<p>示例：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>t1 = a + b        t1 = a + b</span></span>
+<span class="line"><span>t2 = a + b   →    t2 = t1     (复用 t1)</span></span>
+<span class="line"><span>c = t1 + t2       c = t1 + t2</span></span></code></pre>
+</blockquote>
+<p><strong>局部 CSE</strong>：在单个基本块内
+<strong>全局 CSE</strong>：跨基本块（需要数据流分析）</p>
+<p><a id="reference-死代码消除dead-code-elimination"></a></p>
+<h3 id="死代码消除dead-code-elimination">死代码消除（Dead Code Elimination）</h3>
+<p>删除<strong>永远不会被执行</strong>或<strong>结果永远不被使用</strong>的代码：</p>
+<ol>
+<li>
+<p><strong>不可达代码</strong>（Unreachable Code）：无法被执行的代码</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) { ... }</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // 条件永为假</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> x;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">y </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span><span style="color:#6A737D;--shiki-dark:#6A737D">                // return 后的代码永不可达</span></span></code></pre>
+</li>
+<li>
+<p><strong>无用代码</strong>（Dead Code）：计算了值但结果从未被使用</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>t1 = a * b    // 若 t1 此后从未被使用，则这条指令无用</span></span></code></pre>
+<p>通过<strong>活跃变量分析</strong>识别。</p>
+</li>
+</ol>
+<p><a id="reference-复制传播copy-propagation"></a></p>
+<h3 id="复制传播copy-propagation">复制传播（Copy Propagation）</h3>
+<p>赋值 <code>x = y</code> 之后，若 <code>x</code> 未被修改，则将后续对 <code>x</code> 的使用替换为 <code>y</code>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>x = y</span></span>
+<span class="line"><span>...          →    a = y + z   (用 y 替换 x)</span></span>
+<span class="line"><span>a = x + z</span></span></code></pre>
+<p>复制传播常与死代码消除配合：传播后原赋值语句变为无用代码，可以被删除。</p>
+<p><a id="reference-循环优化"></a></p>
+<h2 id="循环优化">循环优化</h2>
+<p>循环是程序中执行次数最多的地方，对循环优化收益最大。要识别循环，需要先理解必经结点集和回边。</p>
+<p><a id="reference-必经结点集dominators"></a></p>
+<h3 id="必经结点集dominators">必经结点集（Dominators）</h3>
+<p><a id="reference-定义"></a></p>
+<h4 id="定义">定义</h4>
+<p>对于 CFG 中的节点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>，节点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> <strong>必经</strong>（Dominates）<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>，记作 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mtext> dom </mtext><mi>n</mi></mrow><annotation encoding="application/x-tex">d\ \text{dom}\ n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span><span class="mspace"> </span><span class="mord text"><span class="mord">dom</span></span><span class="mspace"> </span><span class="mord mathnormal">n</span></span></span></span>，当且仅当：</p>
+<blockquote>
+<p><strong>从入口节点到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 的每条路径都经过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span></strong>。</p>
+</blockquote>
+<p>每个节点都必经自身，即 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mtext> dom </mtext><mi>n</mi></mrow><annotation encoding="application/x-tex">n\ \text{dom}\ n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">n</span><span class="mspace"> </span><span class="mord text"><span class="mord">dom</span></span><span class="mspace"> </span><span class="mord mathnormal">n</span></span></span></span>。</p>
+<p>节点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 的<strong>必经结点集</strong> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">D(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span> 是所有必经 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 的节点的集合。</p>
+<blockquote>
+<p><strong>直觉</strong>：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>∈</mo><mi>D</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d \in D(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7335em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span> 意味着“要到达 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>，必须先经过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span>”——<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> 卡在了所有通往 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 的路上。</p>
+</blockquote>
+<p><a id="reference-计算方法"></a></p>
+<h4 id="计算方法">计算方法</h4>
+<p>用数据流方程迭代求解（前向分析）：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mtext>入口</mtext><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">{</mo><mtext>入口</mtext><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">D(\text{入口}) = \{\text{入口}\}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord text"><span class="mord cjk_fallback">入口</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">{</span><span class="mord text"><span class="mord cjk_fallback">入口</span></span><span class="mclose">}</span></span></span></span></span></div>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">{</mo><mi>n</mi><mo stretchy="false">}</mo><mo>∪</mo><munder><mo>⋂</mo><mrow><mi>p</mi><mo>∈</mo><mtext>pred</mtext><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow></munder><mi>D</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo><mspace width="1em"/><mo stretchy="false">(</mo><mi>n</mi><mo mathvariant="normal">≠</mo><mtext>入口</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">D(n) = \{n\} \cup \bigcap_{p \in \text{pred}(n)} D(p) \quad (n \neq \text{入口})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">{</span><span class="mord mathnormal">n</span><span class="mclose">}</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:2.566em;vertical-align:-1.516em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.809em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span><span class="mrel mtight">∈</span><span class="mord text mtight"><span class="mord mtight">pred</span></span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">n</span><span class="mclose mtight">)</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">⋂</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.516em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal">p</span><span class="mclose">)</span><span class="mspace" style="margin-right:1em;"></span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel"><span class="mrel"><span class="mord katex-vbox"><span class="katex-thinbox"><span class="rlap"><span class="katex-strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="katex-inner"><span class="mord"><span class="mrel"></span></span></span><span class="katex-fix"></span></span></span></span></span><span class="mspace nobreak"></span><span class="mrel">=</span></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord cjk_fallback">入口</span></span><span class="mclose">)</span></span></span></span></span></div>
+<p><strong>算法</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>初始化：</span></span>
+<span class="line"><span>    D(入口) = {入口}</span></span>
+<span class="line"><span>    对所有其他节点 n：D(n) = 所有节点的全集</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>repeat:</span></span>
+<span class="line"><span>    for each 非入口节点 n:</span></span>
+<span class="line"><span>        D(n) = {n} ∪ (所有前驱的 D 集合的交集)</span></span>
+<span class="line"><span>until 所有 D(n) 不再变化</span></span></code></pre>
+<p><a id="reference-示例"></a></p>
+<h4 id="示例">示例</h4>
+<blockquote>
+<p>CFG（节点 1 为入口）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>1 → 2 → 3 → 4 → 5 → 6</span></span>
+<span class="line"><span>        ↑           │</span></span>
+<span class="line"><span>        └───────────┘（6 → 3，回边）</span></span>
+<span class="line"><span>2 → 6（直接跳）</span></span></code></pre>
+</blockquote>
+<p>逐轮计算（省略过程，给出结果）：</p>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>必经结点集 D(n)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>{1}</td>
+</tr>
+<tr>
+<td>2</td>
+<td>{1, 2}</td>
+</tr>
+<tr>
+<td>3</td>
+<td>{1, 2, 3}</td>
+</tr>
+<tr>
+<td>4</td>
+<td>{1, 2, 3, 4}</td>
+</tr>
+<tr>
+<td>5</td>
+<td>{1, 2, 3, 4, 5}</td>
+</tr>
+<tr>
+<td>6</td>
+<td>{1, 2, 6} 或 {1, 2, 3, 6}（取决于 CFG 具体结构）</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-回边back-edge"></a></p>
+<h3 id="回边back-edge">回边（Back Edge）</h3>
+<p><a id="reference-定义-1"></a></p>
+<h4 id="定义-1">定义</h4>
+<p>CFG 中的边 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>→</mo><mi>d</mi></mrow><annotation encoding="application/x-tex">n \rightarrow d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span>，若 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> 必经 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span>（即 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>∈</mo><mi>D</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d \in D(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7335em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>），则称这条边为<strong>回边</strong>（Back Edge）。</p>
+<blockquote>
+<p>回边表示“从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 跳回到 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 的必经结点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span>”——这正是循环的特征。</p>
+</blockquote>
+<p><a id="reference-识别方法"></a></p>
+<h4 id="识别方法">识别方法</h4>
+<p>对 CFG 进行<strong>深度优先遍历</strong>，在遍历过程中遇到的“已在当前路径上的祖先节点”方向的边就是回边。</p>
+<p>也可以直接查必经结点集：对每条边 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>→</mo><mi>d</mi></mrow><annotation encoding="application/x-tex">n \rightarrow d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span>，检查 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>∈</mo><mi>D</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d \in D(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7335em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span> 是否成立。</p>
+<p><a id="reference-循环loop"></a></p>
+<h3 id="循环loop">循环（Loop）</h3>
+<p><a id="reference-自然循环的定义"></a></p>
+<h4 id="自然循环的定义">自然循环的定义</h4>
+<p>由回边 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>→</mo><mi>d</mi></mrow><annotation encoding="application/x-tex">n \rightarrow d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> 定义的<strong>自然循环</strong>（Natural Loop）包含：</p>
+<ul>
+<li>循环头（Header）：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span>，是循环的唯一入口</li>
+<li>循环体：所有<strong>不经过 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> 就能到达 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span></strong> 的节点，加上 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 本身</li>
+</ul>
+<p><a id="reference-循环的识别步骤"></a></p>
+<h4 id="循环的识别步骤">循环的识别步骤</h4>
+<p><strong>第一步</strong>：计算所有节点的必经结点集 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">D(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></p>
+<p><strong>第二步</strong>：找出所有回边</p>
+<p>对每条 CFG 边 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>→</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">a \rightarrow b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span></span></span></span>，检查 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi><mo>∈</mo><mi>D</mi><mo stretchy="false">(</mo><mi>a</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">b \in D(a)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7335em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">b</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord mathnormal">a</span><span class="mclose">)</span></span></span></span>——若成立，则 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>→</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">a \rightarrow b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span></span></span></span> 是回边，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>b</mi></mrow><annotation encoding="application/x-tex">b</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">b</span></span></span></span> 是循环头。</p>
+<p><strong>第三步</strong>：对每条回边构造自然循环</p>
+<p>从 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span> 出发，在<strong>不经过循环头 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span></strong> 的前提下，能反向到达（沿 CFG 逆向走）的所有节点 + <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi></mrow><annotation encoding="application/x-tex">d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span></span></span></span> 本身，构成该循环。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>loop = {d, n}</span></span>
+<span class="line"><span>worklist = {n}</span></span>
+<span class="line"><span>while worklist 非空:</span></span>
+<span class="line"><span>    取出节点 m</span></span>
+<span class="line"><span>    for each m 的前驱 p（在 CFG 中）:</span></span>
+<span class="line"><span>        if p 不在 loop 中:</span></span>
+<span class="line"><span>            loop.add(p)</span></span>
+<span class="line"><span>            worklist.add(p)</span></span></code></pre>
+<p><a id="reference-完整示例"></a></p>
+<h4 id="完整示例">完整示例</h4>
+<blockquote>
+<p>CFG（节点编号为基本块）：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>    1</span></span>
+<span class="line"><span>    ↓</span></span>
+<span class="line"><span>    2</span></span>
+<span class="line"><span>   ↙ ↘</span></span>
+<span class="line"><span>  3   4</span></span>
+<span class="line"><span>   ↘ ↙</span></span>
+<span class="line"><span>    5</span></span>
+<span class="line"><span>    ↓</span></span>
+<span class="line"><span>    6</span></span>
+<span class="line"><span>    │</span></span>
+<span class="line"><span>    └──→ 2（回边：6 → 2）</span></span></code></pre>
+</blockquote>
+<p><strong>第一步：计算必经结点集</strong></p>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>D(n)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>{1}</td>
+</tr>
+<tr>
+<td>2</td>
+<td>{1, 2}</td>
+</tr>
+<tr>
+<td>3</td>
+<td>{1, 2, 3}</td>
+</tr>
+<tr>
+<td>4</td>
+<td>{1, 2, 4}</td>
+</tr>
+<tr>
+<td>5</td>
+<td>{1, 2, 5}</td>
+</tr>
+<tr>
+<td>6</td>
+<td>{1, 2, 5, 6}</td>
+</tr>
+</tbody>
+</table>
+<p><strong>第二步：找回边</strong></p>
+<p>检查所有边：</p>
+<table>
+<thead>
+<tr>
+<th>边</th>
+<th>是否回边</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1→2</td>
+<td>否</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo mathvariant="normal">∉</mo><mi>D</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">{</mo><mn>1</mn><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">2 \notin D(1) = {1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel"><span class="mord"><span class="mrel">∈</span></span><span class="mord katex-vbox"><span class="katex-thinbox"><span class="llap"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="katex-inner"><span class="mord"><span class="mord">/</span><span class="mspace" style="margin-right:0.0556em;"></span></span></span><span class="katex-fix"></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">{</span><span class="mord">1</span><span class="mclose">}</span></span></span></span></td>
+</tr>
+<tr>
+<td>2→3</td>
+<td>否</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn><mo mathvariant="normal">∉</mo><mi>D</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">3 \notin D(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel"><span class="mord"><span class="mrel">∈</span></span><span class="mord katex-vbox"><span class="katex-thinbox"><span class="llap"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="katex-inner"><span class="mord"><span class="mord">/</span><span class="mspace" style="margin-right:0.0556em;"></span></span></span><span class="katex-fix"></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+<tr>
+<td>2→4</td>
+<td>否</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4</mn><mo mathvariant="normal">∉</mo><mi>D</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">4 \notin D(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel"><span class="mord"><span class="mrel">∈</span></span><span class="mord katex-vbox"><span class="katex-thinbox"><span class="llap"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="katex-inner"><span class="mord"><span class="mord">/</span><span class="mspace" style="margin-right:0.0556em;"></span></span></span><span class="katex-fix"></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+<tr>
+<td>3→5</td>
+<td>否</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn><mo mathvariant="normal">∉</mo><mi>D</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">5 \notin D(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">5</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel"><span class="mord"><span class="mrel">∈</span></span><span class="mord katex-vbox"><span class="katex-thinbox"><span class="llap"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="katex-inner"><span class="mord"><span class="mord">/</span><span class="mspace" style="margin-right:0.0556em;"></span></span></span><span class="katex-fix"></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+<tr>
+<td>4→5</td>
+<td>否</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn><mo mathvariant="normal">∉</mo><mi>D</mi><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">5 \notin D(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">5</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel"><span class="mord"><span class="mrel">∈</span></span><span class="mord katex-vbox"><span class="katex-thinbox"><span class="llap"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="katex-inner"><span class="mord"><span class="mord">/</span><span class="mspace" style="margin-right:0.0556em;"></span></span></span><span class="katex-fix"></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+<tr>
+<td>5→6</td>
+<td>否</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn><mo mathvariant="normal">∉</mo><mi>D</mi><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">6 \notin D(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">6</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel"><span class="mord"><span class="mrel">∈</span></span><span class="mord katex-vbox"><span class="katex-thinbox"><span class="llap"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="katex-inner"><span class="mord"><span class="mord">/</span><span class="mspace" style="margin-right:0.0556em;"></span></span></span><span class="katex-fix"></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></td>
+</tr>
+<tr>
+<td><strong>6→2</strong></td>
+<td><strong>是</strong></td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo>∈</mo><mi>D</mi><mo stretchy="false">(</mo><mn>6</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">{</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>5</mn><mo separator="true">,</mo><mn>6</mn><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">2 \in D(6) = {1,2,5,6}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6835em;vertical-align:-0.0391em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">D</span><span class="mopen">(</span><span class="mord">6</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">{</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">5</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">6</span><span class="mclose">}</span></span></span></span> ✓</td>
+</tr>
+</tbody>
+</table>
+<p><strong>第三步：构造自然循环</strong></p>
+<p>回边 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn><mo>→</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">6 \rightarrow 2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">6</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>，循环头 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">d=2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal">d</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>，起点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>6</mn></mrow><annotation encoding="application/x-tex">n=6</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">6</span></span></span></span>。</p>
+<p>从 6 反向搜索（不经过 2）：</p>
+<ul>
+<li>6 的前驱是 5，5 加入循环</li>
+<li>5 的前驱是 3 和 4，均加入循环</li>
+<li>3 的前驱是 2（循环头，停止）</li>
+<li>4 的前驱是 2（循环头，停止）</li>
+</ul>
+<p><strong>自然循环 = {2, 3, 4, 5, 6}</strong>，循环头为 2。</p>
+<p><a id="reference-代码外提loop-invariant-code-motionlicm"></a></p>
+<h3 id="代码外提loop-invariant-code-motionlicm">代码外提（Loop-Invariant Code Motion，LICM）</h3>
+<p>将循环体内<strong>每次迭代结果都相同</strong>的计算移到循环外。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 优化前</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">; i </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> n; i</span><span style="color:#D73A49;--shiki-dark:#F97583">++</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    a</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[i] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#E36209;--shiki-dark:#FFAB70"> b</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[i] </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> d;</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // c*d 每次都一样</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 优化后</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> t </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> d;</span><span style="color:#6A737D;--shiki-dark:#6A737D">              // 提到循环外</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">; i </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> n; i</span><span style="color:#D73A49;--shiki-dark:#F97583">++</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    a</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[i] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#E36209;--shiki-dark:#FFAB70"> b</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[i] </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> t;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>条件</strong>：表达式中所有变量在循环体内均未被修改。</p>
+<p><a id="reference-强度削减strength-reduction"></a></p>
+<h3 id="强度削减strength-reduction">强度削减（Strength Reduction）</h3>
+<p>用<strong>代价更低</strong>的运算替代代价更高的运算：</p>
+<ul>
+<li>乘法 → 加法</li>
+<li>除法 → 乘以倒数</li>
+<li>乘以 2 的幂 → 位移</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>// 优化前（循环中的乘法）</span></span>
+<span class="line"><span>for (int i = 0; i &lt; n; i++) {</span></span>
+<span class="line"><span>    t = i * 4;    // 每次乘法</span></span>
+<span class="line"><span>    a[t] = ...;</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>// 优化后（递推加法）</span></span>
+<span class="line"><span>t = 0;</span></span>
+<span class="line"><span>for (int i = 0; i &lt; n; i++) {</span></span>
+<span class="line"><span>    a[t] = ...;</span></span>
+<span class="line"><span>    t = t + 4;    // 加法代替乘法</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p><a id="reference-归纳变量消除induction-variable-elimination"></a></p>
+<h3 id="归纳变量消除induction-variable-elimination">归纳变量消除（Induction Variable Elimination）</h3>
+<p><em>归纳变量</em>（Induction Variable）是循环中每次迭代<strong>线性递增/递减</strong>的变量（如循环控制变量 <code>i</code>）。</p>
+<p>若循环中有与归纳变量相关的计算（如 <code>j = 4*i + 3</code>，<code>j</code> 也是归纳变量），可以：</p>
+<ol>
+<li>用强度削减将 <code>j = 4*i+3</code> 替换为递推加法</li>
+<li>若原循环变量 <code>i</code> 只用于计算 <code>j</code>，可以<strong>消除 <code>i</code></strong>，改用 <code>j</code> 作为循环控制</li>
+</ol>
+<p><a id="reference-数据流分析"></a></p>
+<h2 id="数据流分析">数据流分析</h2>
+<p><em>数据流分析</em>（Data Flow Analysis）是在 CFG 上<strong>传播信息</strong>的技术，为全局优化提供依据。</p>
+<p><a id="reference-基本框架"></a></p>
+<h3 id="基本框架">基本框架</h3>
+<p>每个基本块有两个方程：</p>
+<ul>
+<li><strong>gen[B]</strong>：基本块 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> <strong>生成</strong>的信息（新产生的定义、活跃的使用等）</li>
+<li><strong>kill[B]</strong>：基本块 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> <strong>销毁</strong>的信息（被覆盖的定义等）</li>
+</ul>
+<p>数据流方程（以前向分析为例）：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>OUT</mtext><mo stretchy="false">[</mo><mi>B</mi><mo stretchy="false">]</mo><mo>=</mo><mtext>gen</mtext><mo stretchy="false">[</mo><mi>B</mi><mo stretchy="false">]</mo><mo>∪</mo><mo stretchy="false">(</mo><mtext>IN</mtext><mo stretchy="false">[</mo><mi>B</mi><mo stretchy="false">]</mo><mo>−</mo><mtext>kill</mtext><mo stretchy="false">[</mo><mi>B</mi><mo stretchy="false">]</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{OUT}[B] = \text{gen}[B] \cup (\text{IN}[B] - \text{kill}[B])</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">OUT</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">gen</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord text"><span class="mord">IN</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">kill</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mclose">])</span></span></span></span></span></div>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>IN</mtext><mo stretchy="false">[</mo><mi>B</mi><mo stretchy="false">]</mo><mo>=</mo><munder><mo>⋃</mo><mrow><mi>P</mi><mo>∈</mo><mtext>pred</mtext><mo stretchy="false">(</mo><mi>B</mi><mo stretchy="false">)</mo></mrow></munder><mtext>OUT</mtext><mo stretchy="false">[</mo><mi>P</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">\text{IN}[B] = \bigcup_{P \in \text{pred}(B)} \text{OUT}[P]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">IN</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:2.566em;vertical-align:-1.516em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.809em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.1389em;">P</span><span class="mrel mtight">∈</span><span class="mord text mtight"><span class="mord mtight">pred</span></span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.0502em;">B</span><span class="mclose mtight">)</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">⋃</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.516em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">OUT</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.1389em;">P</span><span class="mclose">]</span></span></span></span></span></div>
+<p>通过<strong>迭代</strong>求解，直到不动点（IN/OUT 集合不再变化）。</p>
+<p><a id="reference-到达定义分析reaching-definitions"></a></p>
+<h3 id="到达定义分析reaching-definitions">到达定义分析（Reaching Definitions）</h3>
+<p><strong>问题</strong>：对于程序中每一点，哪些变量的定义（赋值）可能“到达”这里（中间没有被重定义）？</p>
+<p><strong>用途</strong>：公共子表达式消除、常量传播</p>
+<p><strong>方向</strong>：前向（Forward）</p>
+<p><strong>定义</strong>：</p>
+<ul>
+<li><strong>gen[B]</strong>：基本块 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> 中<strong>最后一次</strong>对每个变量的定义</li>
+<li><strong>kill[B]</strong>：被 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> 中定义所<strong>覆盖</strong>的其他基本块的定义</li>
+</ul>
+<blockquote>
+<p>示例：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>B1: d1: x = 1      gen = {d1, d2}</span></span>
+<span class="line"><span>    d2: y = 2      kill = {d3}（若 d3 也是 x 的定义）</span></span></code></pre>
+</blockquote>
+<p><a id="reference-活跃变量分析live-variable-analysis"></a></p>
+<h3 id="活跃变量分析live-variable-analysis">活跃变量分析（Live Variable Analysis）</h3>
+<p><strong>问题</strong>：在程序中每一点，哪些变量的值在<strong>未来某条路径上会被使用</strong>（即活跃的）？</p>
+<p><strong>用途</strong>：死代码消除、寄存器分配（活跃的变量需要保留在寄存器中）</p>
+<p><strong>方向</strong>：后向（Backward）</p>
+<p><strong>定义</strong>：</p>
+<ul>
+<li><strong>use[B]</strong>：基本块 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> 中在<strong>定义之前</strong>被使用的变量</li>
+<li><strong>def[B]</strong>：基本块 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi></mrow><annotation encoding="application/x-tex">B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> 中被定义（赋值）的变量</li>
+</ul>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>IN</mtext><mo stretchy="false">[</mo><mi>B</mi><mo stretchy="false">]</mo><mo>=</mo><mtext>use</mtext><mo stretchy="false">[</mo><mi>B</mi><mo stretchy="false">]</mo><mo>∪</mo><mo stretchy="false">(</mo><mtext>OUT</mtext><mo stretchy="false">[</mo><mi>B</mi><mo stretchy="false">]</mo><mo>−</mo><mtext>def</mtext><mo stretchy="false">[</mo><mi>B</mi><mo stretchy="false">]</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{IN}[B] = \text{use}[B] \cup (\text{OUT}[B] - \text{def}[B])</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">IN</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">use</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∪</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord text"><span class="mord">OUT</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">def</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mclose">])</span></span></span></span></span></div>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>OUT</mtext><mo stretchy="false">[</mo><mi>B</mi><mo stretchy="false">]</mo><mo>=</mo><munder><mo>⋃</mo><mrow><mi>S</mi><mo>∈</mo><mtext>succ</mtext><mo stretchy="false">(</mo><mi>B</mi><mo stretchy="false">)</mo></mrow></munder><mtext>IN</mtext><mo stretchy="false">[</mo><mi>S</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">\text{OUT}[B] = \bigcup_{S \in \text{succ}(B)} \text{IN}[S]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">OUT</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mclose">]</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:2.566em;vertical-align:-1.516em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.05em;"><span style="top:-1.809em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0576em;">S</span><span class="mrel mtight">∈</span><span class="mord text mtight"><span class="mord mtight">succ</span></span><span class="mopen mtight">(</span><span class="mord mathnormal mtight" style="margin-right:0.0502em;">B</span><span class="mclose mtight">)</span></span></span></span><span style="top:-3.05em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">⋃</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.516em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord text"><span class="mord">IN</span></span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right:0.0576em;">S</span><span class="mclose">]</span></span></span></span></span></div>
+<blockquote>
+<p>若在某点 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> 变量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 不活跃（后续不再使用），则 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">p</span></span></span></span> 处对 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> 的赋值是<strong>死代码</strong>，可以删除。</p>
+</blockquote>
+<p><a id="reference-目标代码生成"></a></p>
+<h2 id="目标代码生成">目标代码生成</h2>
+<p><em>目标代码生成</em>（Code Generation）将中间代码翻译为<strong>目标机器的汇编/机器指令</strong>，需要解决：</p>
+<ol>
+<li><strong>指令选择</strong>：选择哪条指令来实现中间代码操作</li>
+<li><strong>寄存器分配</strong>：有限的寄存器如何分配给众多变量</li>
+<li><strong>指令调度</strong>：安排指令顺序以充分利用 CPU 流水线</li>
+</ol>
+<p><a id="reference-指令选择instruction-selection"></a></p>
+<h3 id="指令选择instruction-selection">指令选择（Instruction Selection）</h3>
+<p>将中间代码的操作<strong>映射</strong>到目标机器指令。</p>
+<blockquote>
+<p>示例：三地址码 <code>x = y + z</code> 在 x86 上可以生成：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">mov</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> rax</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, [y]    </span><span style="color:#6A737D;--shiki-dark:#6A737D">; 加载 y</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">add</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> rax</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, [z]    </span><span style="color:#6A737D;--shiki-dark:#6A737D">; 加 z</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">mov</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [x], </span><span style="color:#005CC5;--shiki-dark:#79B8FF">rax</span><span style="color:#6A737D;--shiki-dark:#6A737D">    ; 存入 x</span></span></code></pre>
+<p>但如果 <code>y</code> 已经在某个寄存器 <code>r1</code> 中，则可以省略第一条 <code>mov</code>。</p>
+</blockquote>
+<p><strong>指令选择的复杂性</strong>：同一个操作可能有多种实现，代价不同（指令数、延迟、字节数）。</p>
+<p>常用方法：<strong>树模式匹配</strong>——将中间代码表示为树，用机器指令模板匹配子树。</p>
+<p><a id="reference-寄存器分配register-allocation"></a></p>
+<h3 id="寄存器分配register-allocation">寄存器分配（Register Allocation）</h3>
+<p>寄存器是 CPU 中最快的存储，但数量有限（x86-64 有 16 个通用寄存器）。</p>
+<p><strong>目标</strong>：尽量让<strong>频繁使用的变量</strong>保存在寄存器中，减少内存访问。</p>
+<p><strong>溢出</strong>（Spill）：当寄存器不够用时，将某些变量临时存回内存。</p>
+<p><a id="reference-图着色寄存器分配"></a></p>
+<h4 id="图着色寄存器分配">图着色寄存器分配</h4>
+<ol>
+<li>构建<strong>冲突图</strong>（Interference Graph）：节点是变量，若两个变量在某个程序点<strong>同时活跃</strong>，连一条边（它们不能分配同一寄存器）</li>
+<li>对冲突图进行 <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span>-着色</strong>（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span> = 可用寄存器数）：相邻节点颜色不同</li>
+<li>若图不能 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span>-着色，选择某些变量<strong>溢出</strong>到内存</li>
+</ol>
+<blockquote>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.0315em;">k</span></span></span></span>-着色是 NP 完全问题，实际编译器使用启发式算法。</p>
+</blockquote>
+<p><a id="reference-简单的寄存器分配基本块内"></a></p>
+<h4 id="简单的寄存器分配基本块内">简单的寄存器分配（基本块内）</h4>
+<p>对基本块，用<strong>下次使用信息</strong>（Next-Use）贪心分配：</p>
+<ul>
+<li>若变量不活跃（不再使用），其寄存器可立即释放</li>
+<li>若需要新寄存器但已满，选<strong>下次使用最远</strong>的变量溢出</li>
+</ul>
+<p><a id="reference-窥孔优化"></a></p>
+<h2 id="窥孔优化">窥孔优化</h2>
+<p><em>窥孔优化</em>（Peephole Optimization）在目标代码上<strong>用一个小窗口</strong>（窥孔，通常 2~5 条指令）滑动扫描，发现并替换低效的指令序列。</p>
+<p><a id="reference-常见优化模式"></a></p>
+<h3 id="常见优化模式">常见优化模式</h3>
+<p><a id="reference-冗余-loadstore-消除"></a></p>
+<h4 id="冗余-loadstore-消除">冗余 load/store 消除</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">; 优化前</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">mov</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [x], </span><span style="color:#005CC5;--shiki-dark:#79B8FF">rax</span><span style="color:#6A737D;--shiki-dark:#6A737D">      ; store</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">mov</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> rax</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, [x]      </span><span style="color:#6A737D;--shiki-dark:#6A737D">; load（紧跟在 store 后，冗余！）</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">; 优化后</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">mov</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [x], </span><span style="color:#005CC5;--shiki-dark:#79B8FF">rax</span><span style="color:#6A737D;--shiki-dark:#6A737D">      ; 删除 load</span></span></code></pre>
+<p><a id="reference-不可达代码"></a></p>
+<h4 id="不可达代码">不可达代码</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">jmp</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> L1            </span><span style="color:#6A737D;--shiki-dark:#6A737D">; 无条件跳转</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">mov</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> rax</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D">        ; 这条永远不会执行，删除</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">L1:</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ...</span></span></code></pre>
+<p><a id="reference-跳转到跳转"></a></p>
+<h4 id="跳转到跳转">跳转到跳转</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">; 优化前</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">jmp</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> L1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">...</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">L1:</span><span style="color:#D73A49;--shiki-dark:#F97583"> jmp</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> L2        </span><span style="color:#6A737D;--shiki-dark:#6A737D">; 跳到 L1 只是为了再跳到 L2</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">; 优化后</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">jmp</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> L2            </span><span style="color:#6A737D;--shiki-dark:#6A737D">; 直接跳到最终目标</span></span></code></pre>
+<p><a id="reference-代数化简"></a></p>
+<h4 id="代数化简">代数化简</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="asm"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">add</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> rax</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#6A737D;--shiki-dark:#6A737D">        ; 加 0 无效，删除</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">imul</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> rax</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#6A737D;--shiki-dark:#6A737D">       ; 乘 1 无效，删除</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">imul</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> rax</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#6A737D;--shiki-dark:#6A737D">       ; 替换为 add rax, rax（或左移）</span></span></code></pre>
+<p><a id="reference-总结"></a></p>
+<h2 id="总结">总结</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>源程序</span></span>
+<span class="line"><span>  → 词法/语法分析</span></span>
+<span class="line"><span>  → 中间代码（三地址码）</span></span>
+<span class="line"><span>  → 机器无关优化</span></span>
+<span class="line"><span>      - 常量折叠/传播</span></span>
+<span class="line"><span>      - 公共子表达式消除</span></span>
+<span class="line"><span>      - 死代码消除</span></span>
+<span class="line"><span>      - 循环优化（代码外提、强度削减）</span></span>
+<span class="line"><span>  → 目标代码生成</span></span>
+<span class="line"><span>      - 指令选择</span></span>
+<span class="line"><span>      - 寄存器分配（图着色）</span></span>
+<span class="line"><span>      - 指令调度</span></span>
+<span class="line"><span>  → 机器相关优化</span></span>
+<span class="line"><span>      - 窥孔优化</span></span>
+<span class="line"><span>  → 目标代码</span></span></code></pre>
+<table>
+<thead>
+<tr>
+<th>优化技术</th>
+<th>作用范围</th>
+<th>核心思想</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>常量折叠</td>
+<td>局部</td>
+<td>编译时计算常量表达式</td>
+</tr>
+<tr>
+<td>CSE</td>
+<td>局部/全局</td>
+<td>避免重复计算相同表达式</td>
+</tr>
+<tr>
+<td>死代码消除</td>
+<td>全局</td>
+<td>删除无用计算（活跃变量分析）</td>
+</tr>
+<tr>
+<td>代码外提</td>
+<td>循环</td>
+<td>循环不变量移到循环外</td>
+</tr>
+<tr>
+<td>强度削减</td>
+<td>循环</td>
+<td>乘法变加法等低代价运算</td>
+</tr>
+<tr>
+<td>窥孔优化</td>
+<td>局部（目标码）</td>
+<td>小窗口扫描替换低效指令序列</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>数据流分析</th>
+<th>方向</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>到达定义</td>
+<td>前向</td>
+<td>CSE、常量传播</td>
+</tr>
+<tr>
+<td>活跃变量</td>
+<td>后向</td>
+<td>死代码消除、寄存器分配</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>基本块的入口如何确定？公共子表达式消除前必须确认哪些操作数没有改变？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#代码优化概述">代码优化概述</a></li><li style="--depth: 1"><a href="#优化的分类">优化的分类</a></li><li style="--depth: 2"><a href="#按优化范围">按优化范围</a></li><li style="--depth: 2"><a href="#按优化对象">按优化对象</a></li><li style="--depth: 1"><a href="#优化的基本原则">优化的基本原则</a></li><li style="--depth: 0"><a href="#基本块与流图">基本块与流图</a></li><li style="--depth: 1"><a href="#基本块basic-block">基本块（Basic Block）</a></li><li style="--depth: 2"><a href="#划分基本块的算法">划分基本块的算法</a></li><li style="--depth: 1"><a href="#控制流图control-flow-graphcfg">控制流图（Control Flow Graph，CFG）</a></li><li style="--depth: 1"><a href="#常量折叠constant-folding">常量折叠（Constant Folding）</a></li><li style="--depth: 1"><a href="#常量传播constant-propagation">常量传播（Constant Propagation）</a></li><li style="--depth: 1"><a href="#代数化简algebraic-simplification">代数化简（Algebraic Simplification）</a></li><li style="--depth: 0"><a href="#基本块的-dag-优化">基本块的 DAG 优化</a></li><li style="--depth: 1"><a href="#dag-的构造规则">DAG 的构造规则</a></li><li style="--depth: 1"><a href="#dag-能发现的优化">DAG 能发现的优化</a></li><li style="--depth: 1"><a href="#示例构造-dag">示例：构造 DAG</a></li><li style="--depth: 1"><a href="#从-dag-重新生成代码">从 DAG 重新生成代码</a></li><li style="--depth: 0"><a href="#全局优化">全局优化</a></li><li style="--depth: 1"><a href="#公共子表达式消除common-subexpression-eliminationcse">公共子表达式消除（Common Subexpression Elimination，CSE）</a></li><li style="--depth: 1"><a href="#死代码消除dead-code-elimination">死代码消除（Dead Code Elimination）</a></li><li style="--depth: 1"><a href="#复制传播copy-propagation">复制传播（Copy Propagation）</a></li><li style="--depth: 0"><a href="#循环优化">循环优化</a></li><li style="--depth: 1"><a href="#必经结点集dominators">必经结点集（Dominators）</a></li><li style="--depth: 2"><a href="#定义">定义</a></li><li style="--depth: 2"><a href="#计算方法">计算方法</a></li><li style="--depth: 2"><a href="#示例">示例</a></li><li style="--depth: 1"><a href="#回边back-edge">回边（Back Edge）</a></li><li style="--depth: 2"><a href="#定义-1">定义</a></li><li style="--depth: 2"><a href="#识别方法">识别方法</a></li><li style="--depth: 1"><a href="#循环loop">循环（Loop）</a></li><li style="--depth: 2"><a href="#自然循环的定义">自然循环的定义</a></li><li style="--depth: 2"><a href="#循环的识别步骤">循环的识别步骤</a></li><li style="--depth: 2"><a href="#完整示例">完整示例</a></li><li style="--depth: 1"><a href="#代码外提loop-invariant-code-motionlicm">代码外提（Loop-Invariant Code Motion，LICM）</a></li><li style="--depth: 1"><a href="#强度削减strength-reduction">强度削减（Strength Reduction）</a></li><li style="--depth: 1"><a href="#归纳变量消除induction-variable-elimination">归纳变量消除（Induction Variable Elimination）</a></li><li style="--depth: 0"><a href="#数据流分析">数据流分析</a></li><li style="--depth: 1"><a href="#基本框架">基本框架</a></li><li style="--depth: 1"><a href="#到达定义分析reaching-definitions">到达定义分析（Reaching Definitions）</a></li><li style="--depth: 1"><a href="#活跃变量分析live-variable-analysis">活跃变量分析（Live Variable Analysis）</a></li><li style="--depth: 0"><a href="#目标代码生成">目标代码生成</a></li><li style="--depth: 1"><a href="#指令选择instruction-selection">指令选择（Instruction Selection）</a></li><li style="--depth: 1"><a href="#寄存器分配register-allocation">寄存器分配（Register Allocation）</a></li><li style="--depth: 2"><a href="#图着色寄存器分配">图着色寄存器分配</a></li><li style="--depth: 2"><a href="#简单的寄存器分配基本块内">简单的寄存器分配（基本块内）</a></li><li style="--depth: 0"><a href="#窥孔优化">窥孔优化</a></li><li style="--depth: 1"><a href="#常见优化模式">常见优化模式</a></li><li style="--depth: 2"><a href="#冗余-loadstore-消除">冗余 load/store 消除</a></li><li style="--depth: 2"><a href="#不可达代码">不可达代码</a></li><li style="--depth: 2"><a href="#跳转到跳转">跳转到跳转</a></li><li style="--depth: 2"><a href="#代数化简">代数化简</a></li><li style="--depth: 0"><a href="#总结">总结</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

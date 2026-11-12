@@ -1,0 +1,167 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Sandbox · Musuyin&#39; Home</title><meta name="description" content="并行目录隔离解决覆盖冲突，操作系统沙箱解决越权访问，两者目标不同。多用户场景还需要考虑身份、凭据、共享对象库和进程资源。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/agent-sandbox-boundaries/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Sandbox · Musuyin' Home"><meta property="og:description" content="并行目录隔离解决覆盖冲突，操作系统沙箱解决越权访问，两者目标不同。多用户场景还需要考虑身份、凭据、共享对象库和进程资源。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/agent-sandbox-boundaries/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Sandbox</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-07-22">2026-07-22</time></dd></div><div><dt>字数</dt><dd>955</dd></div><div><dt>预计阅读</dt><dd>4 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Sandbox</h1><time datetime="2026-07-22">2026-07-22</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>并行目录隔离解决覆盖冲突，操作系统沙箱解决越权访问，两者目标不同。多用户场景还需要考虑身份、凭据、共享对象库和进程资源。</p>
+<p><a id="reference-sandbox-隔离方案笔记"></a></p>
+<h2 id="sandbox-隔离方案笔记">Sandbox 隔离方案笔记</h2>
+<p><a id="reference-背景从-worktree-到真正的-sandbox"></a></p>
+<h3 id="背景从-worktree-到真正的-sandbox">背景：从 worktree 到真正的 sandbox</h3>
+<p>讨论起点是 s18 worktree isolation 章节。worktree 本质上是 git 的多工作目录特性，每个目录对应一个独立分支。对于多用户 Agent 平台，可以将每个用户 session 绑定一个 worktree，实现文件写冲突隔离。</p>
+<p><a id="reference-worktree-的隔离能力与限制"></a></p>
+<h3 id="worktree-的隔离能力与限制">worktree 的隔离能力与限制</h3>
+<p><strong>能做到的：</strong></p>
+<ul>
+<li>文件写冲突隔离（用户 A 和用户 B 写同名文件互不覆盖）</li>
+<li>每用户独立 git 分支和历史</li>
+<li>session 结束后 <code>git worktree remove</code> 干净清理</li>
+</ul>
+<p><strong>做不到的：</strong></p>
+<ul>
+<li>Agent 可以通过 bash 工具 <code>cd</code> 到 worktree 之外的任意目录，读写其他用户文件</li>
+<li>所有 worktree 共用同一个 <code>.git</code> 对象库，git refs 操作存在并发干扰风险</li>
+<li>不是真正的进程隔离，所有用户 Agent 在同一进程内运行</li>
+</ul>
+<p><strong>结论：</strong> worktree 是弱沙箱，可以通过在 bash 工具层加路径白名单增强隔离性，但仍存在绕过风险。</p>
+<p><a id="reference-docker-强沙箱方案"></a></p>
+<h3 id="docker-强沙箱方案">Docker 强沙箱方案</h3>
+<p><a id="reference-核心原则"></a></p>
+<h4 id="核心原则">核心原则</h4>
+<p>隔离在 Harness 层透明实现，Agent 不需要知道 Docker 的存在。Agent 调用 <code>bash("ls /")</code> 时，Harness 自动将命令路由到专属容器，Agent 以为在跑普通 bash。</p>
+<p><a id="reference-架构"></a></p>
+<h4 id="架构">架构</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>用户请求</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>Harness（持有 session → container_id 的 map）</span></span>
+<span class="line"><span>   ↓ 工具调用时自动注入 docker exec</span></span>
+<span class="line"><span>Agent（以为自己在跑普通 bash）</span></span>
+<span class="line"><span>   ↓</span></span>
+<span class="line"><span>docker exec &lt;container_id&gt; sh -c "&lt;command&gt;"</span></span></code></pre>
+<p><a id="reference-map-管理"></a></p>
+<h4 id="map-管理">Map 管理</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># session_id → container_id，由 Harness 维护，Agent 无法读写</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">session_containers: dict[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> create_session</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(session_id: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    result </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> subprocess.run(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"docker"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"run"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"-d"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"--rm"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">         "--memory=512m"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"--cpus=0.5"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">         "--network=none"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,           </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 默认无网络</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">         "--read-only"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,              </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 根文件系统只读</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">         "--tmpfs=/tmp"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,             </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 只有 /tmp 可写</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">         "sandbox-image"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">        capture_output</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">text</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">True</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    container_id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result.stdout.strip()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    session_containers[session_id] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> container_id</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> container_id</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> destroy_session</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(session_id: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    container_id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> session_containers.pop(session_id, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">None</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> container_id:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        subprocess.run([</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"docker"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"rm"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"-f"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, container_id])</span></span></code></pre>
+<p><a id="reference-工具层透明代理"></a></p>
+<h4 id="工具层透明代理">工具层透明代理</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> make_bash_tool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(session_id: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> bash</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(command: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        container_id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> session_containers.get(session_id)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> container_id:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Error: session has no bound container"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        result </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> subprocess.run(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"docker"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"exec"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, container_id, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"sh"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"-c"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, command],</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">            capture_output</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">text</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">timeout</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">30</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        )</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result.stdout </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> result.stderr</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> bash</span></span></code></pre>
+<p>每个 session 启动时动态生成一套工具，bash/read/write 全部通过闭包绑定 <code>session_id</code>。Agent 拿到的工具签名没有任何 Docker 相关参数，无法感知也无法操控容器管理逻辑。</p>
+<p><a id="reference-安全边界"></a></p>
+<h4 id="安全边界">安全边界</h4>
+<table>
+<thead>
+<tr>
+<th>攻击面</th>
+<th>防御手段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent 尝试操作其他容器</td>
+<td>Agent 工具集里根本没有 docker 命令</td>
+</tr>
+<tr>
+<td>Agent 读其他用户文件</td>
+<td>容器文件系统完全独立</td>
+</tr>
+<tr>
+<td>Agent 耗尽资源</td>
+<td><code>--memory</code> / <code>--cpus</code> 硬限制</td>
+</tr>
+<tr>
+<td>Agent 发起网络请求</td>
+<td><code>--network=none</code> 或白名单网络策略</td>
+</tr>
+<tr>
+<td>容器逃逸漏洞</td>
+<td>依赖 Docker/内核自身；可加 gVisor 加固</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-与-worktree-的本质区别"></a></p>
+<h4 id="与-worktree-的本质区别">与 worktree 的本质区别</h4>
+<p>worktree 是共享进程内的目录切换，Agent 依然在同一进程里，只是 cwd 不同。Docker 方案是真正的进程隔离——即使 Agent 执行了 <code>rm -rf /</code>，删的也是容器内的文件系统，宿主机和其他用户完全不受影响。</p>
+<p><a id="reference-进一步加固"></a></p>
+<h4 id="进一步加固">进一步加固</h4>
+<p>对完全不受信任的用户（公共 SaaS），可以加 gVisor（<code>--runtime=runsc</code>）沙箱化系统调用，代价是性能损失约 10-20%。</p>
+<p><a id="reference-方案对比"></a></p>
+<h3 id="方案对比">方案对比</h3>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>隔离强度</th>
+<th>实现复杂度</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>worktree</td>
+<td>弱（文件级）</td>
+<td>低</td>
+<td>受信任用户，防误操作</td>
+</tr>
+<tr>
+<td>worktree + 路径白名单</td>
+<td>中</td>
+<td>中</td>
+<td>受信任用户，增强防护</td>
+</tr>
+<tr>
+<td>Docker</td>
+<td>强（进程级）</td>
+<td>中</td>
+<td>多租户平台，半受信任用户</td>
+</tr>
+<tr>
+<td>Docker + gVisor</td>
+<td>极强</td>
+<td>高</td>
+<td>公共平台，完全不受信任用户</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>用“Bash 切到别人的目录”反例检查 Worktree 的边界，再说明容器化后仍需检查的挂载与权限。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续理解相关机制：<a href="/notes/computer-science/agent/framework/dbci-agent-sandbox/">DBCI Agent 沙箱环境实现</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#sandbox-隔离方案笔记">Sandbox 隔离方案笔记</a></li><li style="--depth: 1"><a href="#背景从-worktree-到真正的-sandbox">背景：从 worktree 到真正的 sandbox</a></li><li style="--depth: 1"><a href="#worktree-的隔离能力与限制">worktree 的隔离能力与限制</a></li><li style="--depth: 1"><a href="#docker-强沙箱方案">Docker 强沙箱方案</a></li><li style="--depth: 2"><a href="#核心原则">核心原则</a></li><li style="--depth: 2"><a href="#架构">架构</a></li><li style="--depth: 2"><a href="#map-管理">Map 管理</a></li><li style="--depth: 2"><a href="#工具层透明代理">工具层透明代理</a></li><li style="--depth: 2"><a href="#安全边界">安全边界</a></li><li style="--depth: 2"><a href="#与-worktree-的本质区别">与 worktree 的本质区别</a></li><li style="--depth: 2"><a href="#进一步加固">进一步加固</a></li><li style="--depth: 1"><a href="#方案对比">方案对比</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

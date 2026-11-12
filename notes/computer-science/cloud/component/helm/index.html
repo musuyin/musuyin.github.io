@@ -1,0 +1,640 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Helm · Musuyin&#39; Home</title><meta name="description" content="Helm 把模板与 values 渲染为资源，并按 Release 管理安装、升级与回滚。Chart、values、渲染结果和运行中的资源是四种不同对象；排障时逐层核对，不能只看 values 文件。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/component/helm/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Helm · Musuyin' Home"><meta property="og:description" content="Helm 把模板与 values 渲染为资源，并按 Release 管理安装、升级与回滚。Chart、values、渲染结果和运行中的资源是四种不同对象；排障时逐层核对，不能只看 values 文件。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/component/helm/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Helm</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-12">2026-08-12</time></dd></div><div><dt>字数</dt><dd>4521</dd></div><div><dt>预计阅读</dt><dd>16 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/Helm/">#Helm</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Helm</h1><time datetime="2026-08-12">2026-08-12</time><p class="tags"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/Helm/">#Helm</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>Helm 把模板与 values 渲染为资源，并按 Release 管理安装、升级与回滚。Chart、values、渲染结果和运行中的资源是四种不同对象；排障时逐层核对，不能只看 values 文件。</p>
+<p><a id="reference-helm-的工作主线"></a></p>
+<h2 id="helm-的工作主线">Helm 的工作主线</h2>
+<p>Helm 将 Chart 模板和配置值转换为 Kubernetes 资源，并管理安装、升级和回滚。Flux 等 GitOps 工具持续获取期望配置，再调用 Helm 或直接应用渲染结果。</p>
+<p>GitOps 把期望部署状态保存在版本化来源中，由控制器持续调谐。调谐是读取期望状态、检查实际状态、执行必要变更的循环。</p>
+<pre class="mermaid">flowchart TD
+    A[Chart 模板与依赖] --&gt; C[Helm 渲染]
+    B[默认值与环境 Values] --&gt; C
+    C --&gt; D[Kubernetes 资源清单]
+    D --&gt; E[Helm 安装或升级]
+    E --&gt; F[Kubernetes API]
+    E --&gt; G[Release 历史记录]
+    F --&gt; H[Deployment 等控制器]
+    H --&gt; I[Pod 与应用]</pre>
+<p>Helm 不调度 Pod，也不构建应用镜像。Kubernetes 控制器、调度器和节点组件执行资源对应的运行行为。</p>
+<p>本文的独立 Helm 行为以 Helm 3 为基线，Flux 示例使用 HelmRelease <code>v2</code>。不同版本的参数和功能需对照已安装版本。<a href="/notes/computer-science/cloud/component/flux/">Flux</a> 笔记介绍 Flux 的整体结构。</p>
+<p><a id="reference-什么是-helm"></a></p>
+<h2 id="什么是-helm">什么是 Helm</h2>
+<p>Helm 是 <strong>Kubernetes 的包管理器</strong>，类比关系：</p>
+<table>
+<thead>
+<tr>
+<th>生态</th>
+<th>包管理器</th>
+<th>包</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linux</td>
+<td>apt / yum</td>
+<td>.deb / .rpm</td>
+</tr>
+<tr>
+<td>Node.js</td>
+<td>npm</td>
+<td>package</td>
+</tr>
+<tr>
+<td><strong>Kubernetes</strong></td>
+<td><strong>Helm</strong></td>
+<td><strong>Chart</strong></td>
+</tr>
+</tbody>
+</table>
+<p>没有 Helm 时，部署一个应用需要手动维护多个 YAML 文件（Deployment、Service、Ingress、ConfigMap…），版本升级、多环境配置、回滚都很繁琐。Helm 把这些文件打包成一个 <strong>Chart</strong>，一条命令完成安装/升级/回滚。</p>
+<p><a id="reference-核心概念"></a></p>
+<h2 id="核心概念">核心概念</h2>
+<p><a id="reference-chart"></a></p>
+<h3 id="chart">Chart</h3>
+<p>Chart 是 Helm 的<strong>包</strong>，包含一组描述 K8s 资源的模板文件。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>mychart/</span></span>
+<span class="line"><span>├── Chart.yaml          # Chart 元信息（名称、版本、描述）</span></span>
+<span class="line"><span>├── values.yaml         # 默认配置值</span></span>
+<span class="line"><span>├── templates/          # K8s YAML 模板（用 Go template 语法）</span></span>
+<span class="line"><span>│   ├── deployment.yaml</span></span>
+<span class="line"><span>│   ├── service.yaml</span></span>
+<span class="line"><span>│   ├── ingress.yaml</span></span>
+<span class="line"><span>│   └── _helpers.tpl    # 公共模板片段</span></span>
+<span class="line"><span>└── charts/             # 依赖的子 Chart</span></span></code></pre>
+<p><a id="reference-values"></a></p>
+<h3 id="values">Values</h3>
+<p><code>values.yaml</code> 存放 Chart 的<strong>默认配置</strong>，模板中通过 <code>{{ .Values.xxx }}</code> 引用。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># values.yaml</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">replicaCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  repository</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">nginx</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  tag</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1.25"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">service</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ClusterIP</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">80</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># templates/deployment.yaml（模板引用）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  replicas</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {{ </span><span style="color:#032F62;--shiki-dark:#9ECBFF">.Values.replicaCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }}</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  containers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    - </span><span style="color:#22863A;--shiki-dark:#85E89D">image</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {{ </span><span style="color:#032F62;--shiki-dark:#9ECBFF">.Values.image.repository</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">:{{ .Values.image.tag }}</span></span></code></pre>
+<p>部署时可通过 <code>--set</code> 或 <code>-f</code> 覆盖默认值，实现多环境配置复用。</p>
+<p><a id="reference-release"></a></p>
+<h3 id="release">Release</h3>
+<p>每次 <code>helm install</code> 都会创建一个 <strong>Release</strong>，即 Chart 在集群中的一次<strong>具体部署实例</strong>。</p>
+<ul>
+<li>同一个 Chart 可以安装多次，每次是不同的 Release（不同名称）</li>
+<li>Release 记录了安装历史，支持版本回滚</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Chart + 合并后的 Values → Kubernetes 资源清单</span></span>
+<span class="line"><span>Helm 安装或升级这些资源，并记录 Release 与 revision</span></span></code></pre>
+<p><a id="reference-repository"></a></p>
+<h3 id="repository">Repository</h3>
+<p>存放 Chart 的远程仓库，类似 npm registry 或 Docker Hub。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> repo</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> add</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> bitnami</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> https://charts.bitnami.com/bitnami</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> repo</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> update</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> search</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> repo</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> bitnami/mysql</span></span></code></pre>
+<p><a id="reference-核心命令"></a></p>
+<h2 id="核心命令">核心命令</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 安装</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> install</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">release-nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">char</span><span style="color:#24292E;--shiki-dark:#E1E4E8">t</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [-f </span><span style="color:#032F62;--shiki-dark:#9ECBFF">values.yaml]</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [--set </span><span style="color:#032F62;--shiki-dark:#9ECBFF">key=value]</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> install</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> student-mgmt</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./mychart</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> prod-values.yaml</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 升级（Chart 或 Values 变更时）</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> upgrade</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">release-nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">char</span><span style="color:#24292E;--shiki-dark:#E1E4E8">t</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [-f </span><span style="color:#032F62;--shiki-dark:#9ECBFF">values.yaml]</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> upgrade</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> student-mgmt</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./mychart</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --set</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> image.tag=v2.0</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 回滚</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rollback</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">release-nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [revision]</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rollback</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> student-mgmt</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#6A737D;--shiki-dark:#6A737D">        # 回滚到第 1 个版本</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 查看</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> list</span><span style="color:#6A737D;--shiki-dark:#6A737D">                            # 列出所有 Release</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> status</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">release-nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6A737D;--shiki-dark:#6A737D">          # 查看 Release 状态</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> history</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">release-nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#6A737D;--shiki-dark:#6A737D">         # 查看版本历史</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 卸载</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> uninstall</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">release-nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 渲染模板（不实际部署，用于调试）</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> template</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">release-nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">char</span><span style="color:#24292E;--shiki-dark:#E1E4E8">t</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [-f </span><span style="color:#032F62;--shiki-dark:#9ECBFF">values.yaml]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 打包</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> package</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./mychart</span><span style="color:#6A737D;--shiki-dark:#6A737D">               # 生成 mychart-0.1.0.tgz</span></span></code></pre>
+<p><a id="reference-多环境配置实践"></a></p>
+<h2 id="多环境配置实践">多环境配置实践</h2>
+<p>Helm 最大的价值之一：<strong>同一套模板，不同环境用不同 Values</strong>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>mychart/</span></span>
+<span class="line"><span>├── values.yaml           # 默认值（通用）</span></span>
+<span class="line"><span>├── values-dev.yaml       # 开发环境覆盖</span></span>
+<span class="line"><span>└── values-prod.yaml      # 生产环境覆盖</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># values-prod.yaml</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">replicaCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">5</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  limits</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"512Mi"</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> install</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> student-mgmt</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./mychart</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> values-prod.yaml</span></span></code></pre>
+<p><a id="reference-helm-vs-直接-kubectl-apply"></a></p>
+<h2 id="helm-vs-直接-kubectl-apply">Helm vs 直接 kubectl apply</h2>
+<table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>kubectl apply</th>
+<th>Helm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>配置管理</td>
+<td>多个独立 YAML，难以统一管理</td>
+<td>一个 Chart，Values 集中管理</td>
+</tr>
+<tr>
+<td>多环境</td>
+<td>可结合 Kustomize overlays 管理</td>
+<td>用 Values 文件覆盖默认配置</td>
+</tr>
+<tr>
+<td>升级/回滚</td>
+<td>无应用级 Release 历史；Deployment 有自己的 rollout 历史</td>
+<td><code>helm upgrade</code> / <code>helm rollback</code></td>
+</tr>
+<tr>
+<td>依赖管理</td>
+<td>无</td>
+<td>Chart 可声明依赖其他 Chart</td>
+</tr>
+<tr>
+<td>复用性</td>
+<td>可复用清单或 Kustomize bases</td>
+<td>Chart 可发布到仓库供他人使用</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-面试高频问题"></a></p>
+<h2 id="面试高频问题">面试高频问题</h2>
+<p><strong>Q：Helm 是什么？解决了什么问题？</strong>
+Helm 是 K8s 的包管理器。解决了手动维护多个 YAML 文件繁琐、多环境配置复用困难、无法追踪版本历史和回滚的问题。</p>
+<p><strong>Q：Chart、Release、Repository 的关系？</strong>
+Chart 是模板包（含 YAML 模板 + 默认 Values），Repository 是存放 Chart 的远端仓库，Release 是 Chart 安装到集群后的具体运行实例。同一个 Chart 可创建多个 Release（不同配置）。</p>
+<p><strong>Q：如何实现多环境部署？</strong>
+同一套 Chart 模板，为每个环境维护一个 Values 文件（values-dev.yaml、values-prod.yaml），通过 <code>helm install -f values-prod.yaml</code> 覆盖默认值，无需修改模板本身。</p>
+<p><strong>Q：Helm upgrade 和 helm rollback 怎么工作？</strong>
+<code>helm upgrade</code> 渲染新的 Chart 和 Values，并更新已有 Release 的资源。Deployment 的 Pod 模板变化后，Kubernetes 才按更新策略替换 Pod；只改 ConfigMap 不一定触发重启。升级尝试通常产生新的 revision 记录，失败状态也可能写入历史。<code>helm rollback</code> 根据历史 revision 恢复资源配置，并产生新的 revision。</p>
+<p><strong>Q：Helm 和 Spring Boot 配置体系的类比？</strong></p>
+<p>两者设计思路高度一致：</p>
+<table>
+<thead>
+<tr>
+<th>Spring Boot</th>
+<th>Helm</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>application.yaml</code></td>
+<td><code>values.yaml</code></td>
+<td>默认配置</td>
+</tr>
+<tr>
+<td><code>application-dev.yaml</code></td>
+<td><code>values-dev.yaml</code></td>
+<td>环境特定覆盖</td>
+</tr>
+<tr>
+<td><code>--spring.profiles.active=prod</code></td>
+<td><code>-f values-prod.yaml</code></td>
+<td>启动时选择配置</td>
+</tr>
+<tr>
+<td><code>@Value("${xxx}")</code> / <code>@ConfigurationProperties</code></td>
+<td><code>{{ .Values.xxx }}</code></td>
+<td>将配置值注入到目标</td>
+</tr>
+<tr>
+<td>Java 类字段（JVM 运行时）</td>
+<td>K8s YAML 模板（部署资源定义）</td>
+<td>被注入的目标</td>
+</tr>
+</tbody>
+</table>
+<p>核心相同点：<strong>配置与代码/模板分离</strong>，同一套模板，通过切换配置文件适配不同环境。</p>
+<p>差异点：Spring Boot 注入发生在<strong>程序运行时</strong>（JVM 加载），注入目标是内存中的字段值；Helm 注入发生在<strong>部署阶段</strong>（<code>helm install</code> 渲染模板），注入目标是 K8s 资源的 YAML 定义，渲染完成后才提交给 K8s。</p>
+<p><strong>Q：实践中应该改 Helm values.yaml 还是 Spring Boot application.yaml？</strong></p>
+<p>一种常见做法是让 <code>application.yaml</code> 保持通用，把环境差异交给部署配置。下面用<strong>环境变量</strong>作为 Helm 与应用之间的配置传递方式。</p>
+<p>完整的配置流转链路是：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Helm values.yaml</span></span>
+<span class="line"><span>      │</span></span>
+<span class="line"><span>      ▼ helm install 渲染</span></span>
+<span class="line"><span>K8s ConfigMap / Secret</span></span>
+<span class="line"><span>      │</span></span>
+<span class="line"><span>      ▼ K8s 注入到 Pod</span></span>
+<span class="line"><span>环境变量（env vars）</span></span>
+<span class="line"><span>      │</span></span>
+<span class="line"><span>      ▼ Spring Boot 读取</span></span>
+<span class="line"><span>application.yaml 中的 ${ENV_VAR} 占位符</span></span>
+<span class="line"><span>      │</span></span>
+<span class="line"><span>      ▼</span></span>
+<span class="line"><span>JVM 运行时字段</span></span></code></pre>
+<p><strong>各层职责划分：</strong></p>
+<table>
+<thead>
+<tr>
+<th>配置层</th>
+<th>放什么</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>application.yaml</code></td>
+<td>应用级固定配置、结构定义、用 <code>${}</code> 占位</td>
+<td>连接池大小、日志格式、超时时间默认值</td>
+</tr>
+<tr>
+<td>Helm <code>values.yaml</code></td>
+<td>环境差异化的部署参数</td>
+<td>副本数、镜像 tag、数据库地址、资源限制</td>
+</tr>
+<tr>
+<td>K8s ConfigMap/Secret</td>
+<td>由 Helm 渲染生成，注入到 Pod 环境变量</td>
+<td>DB_URL、REDIS_HOST、API_KEY</td>
+</tr>
+</tbody>
+</table>
+<p><strong>实际代码示例：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># application.yaml（固定，随代码一起打包进镜像）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spring</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  datasource</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    url</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">${DB_URL}</span><span style="color:#6A737D;--shiki-dark:#6A737D">           # 占位符，从环境变量读取</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    username</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">${DB_USER}</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  redis</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    host</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">${REDIS_HOST:localhost}</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 冒号后是本地开发默认值</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">server</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  port</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8080</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">logging</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  level</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    root</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">INFO</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Helm values-prod.yaml（环境差异，不进镜像）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">env</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  DB_URL</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">jdbc:mysql://prod-db.internal:3306/student</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  DB_USER</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">prod_user</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  REDIS_HOST</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">prod-redis.internal</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Helm Deployment 模板片段（渲染后才是普通 Kubernetes YAML）</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">env</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">DB_URL</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {{ </span><span style="color:#032F62;--shiki-dark:#9ECBFF">.Values.env.DB_URL</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> }}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">DB_USER</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    valueFrom</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      secretKeyRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:           </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 敏感值从 Secret 读取</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">db-secret</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">username</span></span></code></pre>
+<p><strong>核心原则：</strong></p>
+<ul>
+<li>建议让 <code>application.yaml</code> 保存结构和默认值，将环境差异放在部署时提供的配置中</li>
+<li>环境配置可通过环境变量、挂载文件或外部配置服务提供；敏感值宜引用已有 Secret，避免写入普通 Values 或 Git</li>
+<li>这样镜像本身是<strong>环境无关的</strong>，同一个镜像可以部署到 dev/staging/prod，只换 Helm values</li>
+</ul>
+<p><a id="reference-helm-一次部署内部发生什么"></a></p>
+<h2 id="helm-一次部署内部发生什么">Helm 一次部署内部发生什么</h2>
+<p>以 <code>helm upgrade --install student-mgmt ./mychart -n apps -f values-prod.yaml</code> 为例：</p>
+<ol>
+<li>Helm 使用当前 kubeconfig 连接 Kubernetes API。<code>--install</code> 表示 Release 不存在时执行安装。</li>
+<li>Helm 读取 Chart、子 Chart 和默认 Values。需要的依赖应先通过 <code>helm dependency build</code> 准备。</li>
+<li>Helm 合并配置：Chart 默认值、各个 <code>-f</code> 文件、<code>--set</code> 参数。相同键通常由后面的配置覆盖，列表通常整体替换。</li>
+<li>Helm 用 Go template 渲染 <code>templates/</code>，产生 Deployment、Service 等资源清单。</li>
+<li>Helm 执行适用的安装或升级 Hook，并创建、更新或删除相应资源。普通资源变更不构成数据库式原子事务。</li>
+<li>Helm 保存 Release 记录，包括 Chart、配置、清单、revision 和操作状态。Helm 3 默认把记录保存为 Release 所在命名空间内的 Secret。</li>
+<li>Kubernetes 根据新资源状态启动、更新或终止 Pod。Helm 是否等待就绪，取决于命令参数和操作类型。</li>
+</ol>
+<p>Helm 3 的 CLI 自身执行上述操作，不需要集群内的 Tiller 服务。Release 是部署及其历史记录，不等于某一个 Pod。</p>
+<p>Chart <code>version</code> 是包版本；<code>appVersion</code> 是描述性应用版本，不会自动指定镜像。镜像版本由模板读取的 Values 或模板内容决定。Release <code>revision</code> 则是该安装实例的操作历史编号。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 本地检查，不连接集群执行部署</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> dependency</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> build</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./mychart</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> lint</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./mychart</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> values-prod.yaml</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> template</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> student-mgmt</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./mychart</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> apps</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> values-prod.yaml</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Helm 3：部署并等待常见工作负载就绪；失败时尝试清理或回滚</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> upgrade</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --install</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> student-mgmt</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./mychart</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> apps</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --create-namespace</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> values-prod.yaml</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --wait</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --atomic</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --timeout</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 5m</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 查看声明、实际使用的配置及历史</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> manifest</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> student-mgmt</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> apps</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> values</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> student-mgmt</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> apps</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --all</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> history</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> student-mgmt</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> apps</span></span></code></pre>
+<p><code>helm template</code> 只渲染清单，不创建 Release 历史，也不能单独证明集群会接受资源。<code>--wait</code> 检查部分 Kubernetes 就绪条件，不证明业务请求成功。</p>
+<p><code>--atomic</code> 不能撤销数据库迁移或外部系统变更。Helm 回滚恢复历史资源配置，不恢复数据库、持久卷数据或已发生的外部副作用。</p>
+<p>Helm 默认不持续运行。命令结束后，人工修改资源不会自动触发 Helm 再次部署。Chart 中 <code>crds/</code> 的自定义资源定义也有特殊生命周期：Helm 通常安装缺失定义，但不自动升级或删除它们，需要另行规划。</p>
+<p><a id="reference-pull-模式到底拉取什么"></a></p>
+<h2 id="pull-模式到底拉取什么">Pull 模式到底拉取什么</h2>
+<p>Pull 模式描述的是<strong>部署控制器主动获取期望状态</strong>。控制器通常运行在目标集群内；CI 不必直接调用目标集群 API。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>开发者 → CI 测试、构建镜像 → 推送镜像到 Registry</span></span>
+<span class="line"><span>开发者或自动化 → 更新配置 Git 中的镜像引用 → 审核并合并</span></span>
+<span class="line"><span>Flux → 拉取配置 Git 和 Chart 来源 → 调用 Kubernetes API</span></span>
+<span class="line"><span>节点容器运行时 → 拉取应用镜像 → 启动容器</span></span></code></pre>
+<p>这里有三个独立的获取过程：Flux 拉取部署配置，source-controller 获取 Chart，节点拉取应用镜像。Git 更新、Chart 更新和镜像更新不是同一件事。</p>
+<p>仅推送新镜像不会自动部署。如果 Git 仍引用旧版本，Flux 继续维护旧版本。使用可变标签可能让不同 Pod 获取不同内容；生产环境宜固定明确版本或镜像摘要。</p>
+<p>CI 可以只持有镜像仓库写权限和配置 Git 写权限。Flux 需要来源读取凭证及 Kubernetes 写权限，节点需要镜像读取权限。Pull 改变凭证位置，不自动限制权限；仍需配置角色访问控制（RBAC）和 Git 审核规则。首次安装 Flux 与创建同步入口仍需要有集群权限的操作者。</p>
+<p><a id="reference-flux-如何驱动-helm"></a></p>
+<h2 id="flux-如何驱动-helm">Flux 如何驱动 Helm</h2>
+<p>Flux 使用自定义资源定义（CRD）扩展 Kubernetes API。<code>HelmRelease</code> 是声明期望部署的自定义资源；它与 Helm 保存的 Release 记录是两个对象。</p>
+<table>
+<thead>
+<tr>
+<th>对象或组件</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GitRepository</code></td>
+<td>声明部署配置所在的 Git 来源，source-controller 拉取并生成带版本的 artifact（制品）</td>
+</tr>
+<tr>
+<td>Flux <code>Kustomization</code></td>
+<td>从 Git artifact 的指定目录构建并应用资源，包括 HelmRelease 和 Chart 来源对象</td>
+</tr>
+<tr>
+<td><code>HelmRepository</code></td>
+<td>声明传统 HTTP Helm 仓库；source-controller 获取仓库索引</td>
+</tr>
+<tr>
+<td><code>HelmChart</code></td>
+<td>声明要获取或打包的 Chart，source-controller 生成 Chart artifact</td>
+</tr>
+<tr>
+<td><code>OCIRepository</code></td>
+<td>从开放容器倡议（OCI）Registry 获取 artifact，也可承载 Chart</td>
+</tr>
+<tr>
+<td><code>helm-controller</code></td>
+<td>消费 HelmRelease 与 Chart artifact，通过 Helm SDK 执行安装、升级及配置的失败处理</td>
+</tr>
+</tbody>
+</table>
+<p>Flux <code>Kustomization</code> 是 Kubernetes 对象；目录内的 <code>kustomization.yaml</code> 是 Kustomize 的组合配置。两者用途不同。</p>
+<pre class="mermaid">flowchart TD
+    G[配置 Git] --&gt; S[source-controller]
+    S --&gt; A[Git artifact]
+    A --&gt; K[kustomize-controller]
+    K --&gt; R[HelmRelease]
+    K --&gt; P[HelmRepository]
+    P --&gt; S
+    R --&gt; C[生成 HelmChart 对象]
+    C --&gt; S
+    H[Chart 仓库] --&gt; S
+    S --&gt; T[Chart artifact]
+    T --&gt; HC[helm-controller 使用 Helm SDK]
+    R --&gt; HC
+    HC --&gt; API[Kubernetes API 与 Release 历史]
+    API --&gt; W[Kubernetes 控制器与 Pod]</pre>
+<p>上图使用传统 HelmRepository 路径。现代 Flux 还支持通过 <code>HelmRelease.spec.chartRef</code> 直接引用 <code>OCIRepository</code> 或 <code>HelmChart</code>，具体能力取决于已安装的 CRD 和控制器版本。</p>
+<p>一次 Values 变更的过程：</p>
+<ol>
+<li>开发者在 Git 的 HelmRelease 中把 <code>replicaCount</code> 从 <code>2</code> 改为 <code>3</code>，审核后合并。</li>
+<li>source-controller 定期检查 Git，或收到通知后提前拉取，生成新的 Git artifact。</li>
+<li>kustomize-controller 应用新 HelmRelease。Chart 来源与版本没有变化时，可以复用已有 Chart artifact。</li>
+<li>helm-controller 读取新 Values，用 Helm SDK 渲染并升级对应 Release。它不需要执行本机的 <code>helm</code> CLI。</li>
+<li>Kubernetes 更新 Deployment，创建第三个 Pod。helm-controller 按配置检查结果并写入状态条件。</li>
+<li>后续调谐处理新的配置变化、可用的 Chart 更新，以及启用后的资源漂移检测。</li>
+</ol>
+<p>Source 和 HelmRelease 各有自己的 <code>interval</code>。来源新 artifact 和对象变更可以提前触发调谐，所以间隔不是固定部署延迟，也不保证在该时间内完成部署。Webhook 只负责加速触发，控制器仍主动拉取内容。</p>
+<p><a id="reference-flux-与-helm-的最小配置示例"></a></p>
+<h2 id="flux-与-helm-的最小配置示例">Flux 与 Helm 的最小配置示例</h2>
+<p>以下示例仅用于说明关系，未在集群运行。假设 Flux 的 source、kustomize、helm 控制器及相应 CRD 已安装，并有权限创建示例资源。Git URL 是占位地址，必须替换。</p>
+<p>配置仓库结构：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>platform-config/</span></span>
+<span class="line"><span>└── apps/</span></span>
+<span class="line"><span>    └── podinfo/</span></span>
+<span class="line"><span>        ├── kustomization.yaml</span></span>
+<span class="line"><span>        ├── repository.yaml</span></span>
+<span class="line"><span>        └── release.yaml</span></span></code></pre>
+<p>由已有 bootstrap 入口管理下面的 GitRepository 与 Flux Kustomization，或者先由有权限的操作者创建它们。只把文件提交到尚未被 Flux 同步的目录，不会启动同步。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># GitRepository：配置来源</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">source.toolkit.fluxcd.io/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">GitRepository</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">platform-config</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">flux-system</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  interval</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">1m</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  url</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">https://github.com/example/platform-config</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  ref</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    branch</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">main</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Flux Kustomization：从配置来源应用指定目录</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">kustomize.toolkit.fluxcd.io/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Kustomization</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">podinfo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">flux-system</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  interval</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">5m</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  path</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">./apps/podinfo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  prune</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  wait</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  timeout</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">5m</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  sourceRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">GitRepository</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">platform-config</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># apps/podinfo/kustomization.yaml：普通 Kustomize 文件</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">kustomize.config.k8s.io/v1beta1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Kustomization</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">resources</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">repository.yaml</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">release.yaml</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># apps/podinfo/repository.yaml：Chart 来源</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">source.toolkit.fluxcd.io/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">HelmRepository</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">podinfo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">flux-system</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  interval</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">5m</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  url</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">https://stefanprodan.github.io/podinfo</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># apps/podinfo/release.yaml：安装目标与配置</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">helm.toolkit.fluxcd.io/v2</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">HelmRelease</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">podinfo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">flux-system</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  interval</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">5m</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  timeout</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">5m</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  releaseName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">podinfo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  targetNamespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">apps</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  chart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      chart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">podinfo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'6.9.2'</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      sourceRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">HelmRepository</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">podinfo</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">flux-system</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      interval</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">5m</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  install</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    createNamespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    remediation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      retries</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  upgrade</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    remediation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      retries</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      strategy</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">rollback</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  driftDetection</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    mode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">enabled</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  values</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    replicaCount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span></span></code></pre>
+<p><code>version</code> 固定示例 Chart 版本，使用前应确认仓库仍提供它及其兼容性。<code>targetNamespace</code> 是工作负载目标命名空间。此例未设置 <code>storageNamespace</code>，Helm Release 历史默认保存在 HelmRelease 所在的 <code>flux-system</code>，不是 <code>apps</code>。</p>
+<p>将 <code>values.replicaCount</code> 改为 <code>3</code> 并提交 Git，Flux 会升级 Release。也可通过 <code>valuesFrom</code> 引用 HelmRelease 同命名空间内的 ConfigMap 或 Secret；这些来源依次合并，内联 <code>values</code> 通常最后覆盖，<code>targetPath</code> 有特殊覆盖行为。需要即时响应引用对象变更时，按 Flux 文档配置 watch 标签。</p>
+<p>示例显式启用 <code>driftDetection.mode: enabled</code>，用于检查并纠正实际资源相对 Helm 保存清单的漂移。持续调谐 HelmRelease 本身，不等于默认持续修复所有 Helm 工作负载的人工修改。若水平自动扩缩容器（HPA）管理副本数，应避免同时由 Chart 强制管理该字段，或配置漂移忽略规则。</p>
+<p><a id="reference-版本更新失败与回滚"></a></p>
+<h2 id="版本更新失败与回滚">版本更新、失败与回滚</h2>
+<table>
+<thead>
+<tr>
+<th>变更或故障</th>
+<th>Flux 与 Helm 的行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>修改 HelmRelease Values</td>
+<td>helm-controller 使用新配置执行升级</td>
+</tr>
+<tr>
+<td>修改固定 Chart 版本</td>
+<td>source-controller 获取对应 Chart，helm-controller 执行升级</td>
+</tr>
+<tr>
+<td>使用 Chart 版本范围，如 <code>6.x</code></td>
+<td>新匹配版本可能触发升级，即使配置 Git 没有新提交</td>
+</tr>
+<tr>
+<td>Chart 存在 Git 内且只改模板</td>
+<td>使用 GitRepository 来源时，检查 <code>reconcileStrategy: Revision</code>；默认 <code>ChartVersion</code> 策略通常需要增加 Chart 版本</td>
+</tr>
+<tr>
+<td>人工改 Deployment</td>
+<td>启用 HelmRelease 漂移检测后，controller 可恢复受管字段</td>
+</tr>
+<tr>
+<td>仓库临时不可访问</td>
+<td>新版本同步失败；已有 Pod 通常继续运行，不能据此确认新的期望状态已部署</td>
+</tr>
+<tr>
+<td>安装或升级失败</td>
+<td>状态条件和事件记录错误；重试、卸载或回滚取决于 remediation 配置，不是所有错误都会无限重试</td>
+</tr>
+<tr>
+<td>Git 删除 HelmRelease</td>
+<td>上层 Kustomization 启用 prune 后可删除对象，helm-controller 通常通过 finalizer 卸载 Release；保留规则和特殊资源生命周期仍需检查</td>
+</tr>
+</tbody>
+</table>
+<p>长期回滚应把 Git 中的 Chart 版本或 Values 恢复到已知可用配置。Helm 的失败自动回滚是即时恢复措施，不能替代修正仍然失败的 Git 期望状态。</p>
+<p>不要长期同时用人工 Helm 命令和 Flux 管理同一个 Release。人工回滚后，Flux 后续升级可能再次应用 Git 声明的版本。紧急操作可以先暂停 HelmRelease，再修正 Git 并恢复调谐。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">flux</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> suspend</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> helmrelease</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> podinfo</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> flux-system</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 处理故障并将期望配置修正到 Git 后恢复</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">flux</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> resume</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> helmrelease</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> podinfo</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> flux-system</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">flux</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> reconcile</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> helmrelease</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> podinfo</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> flux-system</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --with-source</span></span></code></pre>
+<p>暂停 HelmRelease 不会暂停上层 Kustomization。若 Git 明确声明 <code>spec.suspend: false</code>，上层可能重新应用它；持久暂停也应纳入 Git 管理。</p>
+<p><a id="reference-argo-cd-等组件如何使用-helm"></a></p>
+<h2 id="argo-cd-等组件如何使用-helm">Argo CD 等组件如何使用 Helm</h2>
+<table>
+<thead>
+<tr>
+<th>使用方式</th>
+<th>谁获取配置</th>
+<th>Helm 的角色</th>
+<th>谁管理应用生命周期与漂移</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本机或 CI 执行 Helm</td>
+<td>操作者或 CI</td>
+<td>渲染、安装、升级，保存 Helm Release 历史</td>
+<td>Helm 只在命令运行时操作；不持续检查漂移</td>
+</tr>
+<tr>
+<td>Flux HelmRelease</td>
+<td>source-controller 获取 Git 与 Chart artifact</td>
+<td>helm-controller 通过 Helm SDK 管理真实 Release</td>
+<td>Flux 持续调谐；Helm 资源漂移修复需相应配置</td>
+</tr>
+<tr>
+<td>Argo CD Application 使用 Helm Chart</td>
+<td>Argo CD 获取 Git 或 Chart 来源</td>
+<td>通常运行 <code>helm template</code> 生成清单</td>
+<td>Argo CD 应用与跟踪资源；自动纠偏需启用 <code>selfHeal</code></td>
+</tr>
+<tr>
+<td>Flux 应用预先渲染的 YAML</td>
+<td>Flux 获取 Git 中的静态清单</td>
+<td>Helm 只在生成文件时使用</td>
+<td>kustomize-controller 管理资源，不创建 Helm Release 历史</td>
+</tr>
+</tbody>
+</table>
+<p>Argo CD 通常不执行 <code>helm install</code> 或 <code>helm upgrade</code>，所以 <code>helm list</code> 不会显示这类 Application 的 Helm Release。它的同步历史、健康状态和回滚由 Argo CD 管理。</p>
+<p>Argo CD 可自动拉取并比较来源，但应用新状态需要手动同步或启用 automated sync。恢复人工修改需要 <code>selfHeal: true</code>，删除已移除的受管资源需要 <code>prune: true</code>。Pull 并不等于默认开启所有自动化行为。</p>
+<p>Argo Workflows 与 Argo CD 是不同组件。Argo Workflows 执行提交的任务 DAG（有向无环图），可在步骤中调用 Helm；它本身不是持续拉取并调谐 Git 的部署控制器。</p>
+<p><a id="reference-如何确认部署成功"></a></p>
+<h2 id="如何确认部署成功">如何确认部署成功</h2>
+<p>沿依赖方向检查，避免把“已拉取”误判为“业务成功”：</p>
+<ol>
+<li>确认 GitRepository 的 revision 是目标 commit，Chart 来源可用。</li>
+<li>确认 Kustomization 已应用对应 revision。</li>
+<li>确认 HelmRelease 状态对应最新对象 generation，实际 Chart 版本与 Values 符合预期。</li>
+<li>确认 Deployment 的更新完成，Pod 镜像与就绪探针符合预期。</li>
+<li>执行一条真实业务请求，检查结果及必要的下游状态。</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">flux</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> sources</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> git</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">flux</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> sources</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> helm</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">flux</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> sources</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> chart</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">flux</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> kustomizations</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">flux</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> helmreleases</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> helmrelease</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> podinfo</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> flux-system</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">flux</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --level=error</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 本例的 Release 存储命名空间为 flux-system</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> status</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> podinfo</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> flux-system</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> values</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> podinfo</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> flux-system</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --all</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">helm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> history</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> podinfo</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> flux-system</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rollout</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> status</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> deployment/podinfo</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> apps</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --timeout=5m</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pods</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> apps</span></span></code></pre>
+<p>Ready 是控制器定义的检查结果。它不能替代业务验收，也不能保证数据库迁移、外部权限或依赖服务均正确。</p>
+<p><a id="reference-官方参考"></a></p>
+<h2 id="官方参考">官方参考</h2>
+<ul>
+<li><a href="https://helm.sh/docs/topics/charts/">Helm Chart 结构与 Values</a></li>
+<li><a href="https://helm.sh/docs/v3/topics/advanced/">Helm 3 Release 存储与高级用法</a></li>
+<li><a href="https://helm.sh/docs/v3/helm/helm_upgrade/">Helm 3 upgrade 参数</a></li>
+<li><a href="https://helm.sh/docs/chart_best_practices/custom_resource_definitions/">Helm CRD 生命周期</a></li>
+<li><a href="https://fluxcd.io/flux/components/helm/helmreleases/">Flux HelmRelease：Chart 引用、漂移检测与失败处理</a></li>
+<li><a href="https://fluxcd.io/flux/components/source/helmcharts/">Flux HelmChart：来源与 reconcileStrategy</a></li>
+<li><a href="https://fluxcd.io/flux/components/kustomize/kustomizations/">Flux Kustomization</a></li>
+<li><a href="https://argo-cd.readthedocs.io/en/stable/user-guide/helm/">Argo CD 如何使用 Helm</a></li>
+<li><a href="https://argo-cd.readthedocs.io/en/stable/user-guide/auto_sync/">Argo CD 自动同步、selfHeal 与 prune</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>对一次升级比较模板、最终 YAML、Release 状态和 Pod 状态；再解释 GitOps 控制器为什么还要持续调谐。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>衔接机制或实践：<a href="/notes/computer-science/cloud/component/flux/">Flux</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+<script src="/note-runtime/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,securityLevel:"strict",theme:"neutral"});document.querySelectorAll(".mermaid").forEach(node=>mermaid.run({nodes:[node]}).catch(()=>{}));</script>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#helm-的工作主线">Helm 的工作主线</a></li><li style="--depth: 0"><a href="#什么是-helm">什么是 Helm</a></li><li style="--depth: 0"><a href="#核心概念">核心概念</a></li><li style="--depth: 1"><a href="#chart">Chart</a></li><li style="--depth: 1"><a href="#values">Values</a></li><li style="--depth: 1"><a href="#release">Release</a></li><li style="--depth: 1"><a href="#repository">Repository</a></li><li style="--depth: 0"><a href="#核心命令">核心命令</a></li><li style="--depth: 0"><a href="#多环境配置实践">多环境配置实践</a></li><li style="--depth: 0"><a href="#helm-vs-直接-kubectl-apply">Helm vs 直接 kubectl apply</a></li><li style="--depth: 0"><a href="#面试高频问题">面试高频问题</a></li><li style="--depth: 0"><a href="#helm-一次部署内部发生什么">Helm 一次部署内部发生什么</a></li><li style="--depth: 0"><a href="#pull-模式到底拉取什么">Pull 模式到底拉取什么</a></li><li style="--depth: 0"><a href="#flux-如何驱动-helm">Flux 如何驱动 Helm</a></li><li style="--depth: 0"><a href="#flux-与-helm-的最小配置示例">Flux 与 Helm 的最小配置示例</a></li><li style="--depth: 0"><a href="#版本更新失败与回滚">版本更新、失败与回滚</a></li><li style="--depth: 0"><a href="#argo-cd-等组件如何使用-helm">Argo CD 等组件如何使用 Helm</a></li><li style="--depth: 0"><a href="#如何确认部署成功">如何确认部署成功</a></li><li style="--depth: 0"><a href="#官方参考">官方参考</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

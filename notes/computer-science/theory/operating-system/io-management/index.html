@@ -1,0 +1,604 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>输入输出管理 · Musuyin&#39; Home</title><meta name="description" content="I/O 管理从设备与控制器进入驱动、设备独立性层和缓冲调度。中断、DMA 与多路复用解决不同层次的等待或搬运问题，不能仅按“更快”排列。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/operating-system/io-management/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="输入输出管理 · Musuyin' Home"><meta property="og:description" content="I/O 管理从设备与控制器进入驱动、设备独立性层和缓冲调度。中断、DMA 与多路复用解决不同层次的等待或搬运问题，不能仅按“更快”排列。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/operating-system/io-management/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">输入输出管理</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-06-07">2025-06-07</time></dd></div><div><dt>字数</dt><dd>10879</dd></div><div><dt>预计阅读</dt><dd>37 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">#操作系统</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>输入输出管理</h1><time datetime="2025-06-07">2025-06-07</time><p class="tags"><a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">#操作系统</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>I/O 管理从设备与控制器进入驱动、设备独立性层和缓冲调度。中断、DMA 与多路复用解决不同层次的等待或搬运问题，不能仅按“更快”排列。</p>
+<p><a id="reference-面试追问io-多路复用与-epoll"></a></p>
+<h2 id="面试追问io-多路复用与-epoll">面试追问：IO 多路复用与 epoll</h2>
+<p><a id="reference-什么是-io-多路复用优势是什么"></a></p>
+<h3 id="什么是-io-多路复用优势是什么">什么是 IO 多路复用，优势是什么</h3>
+<p>一个线程把很多文件描述符注册给 <code>select/poll/epoll</code>，内核只在其中某些就绪时通知它；线程随后对就绪 fd 执行非阻塞读写。相比“一个连接一个阻塞线程”，它显著减少线程、栈内存和上下文切换，并让少量线程服务海量连接。它不让单次 I/O 变快，CPU 密集回调仍须线程池/任务池处理。</p>
+<p><a id="reference-epoll-的实现原理"></a></p>
+<h4 id="epoll-的实现原理">epoll 的实现原理</h4>
+<p><code>epoll_ctl</code> 把感兴趣 fd 登记到内核的兴趣列表，Linux 用红黑树按 fd 查找、增删，<code>epoll_wait</code> 从就绪链表取已就绪事件。设备/协议栈状态改变时，通过回调把对应 epitem 放入 ready list 并唤醒等待者；因此等待阶段不必每次遍历全部 fd。LT（水平触发）只要仍可读写便持续通知，易用；ET（边缘触发）只在状态变化时通知，必须非阻塞循环读到 <code>EAGAIN</code>，以免遗漏事件。</p>
+<p>红黑树并非因为哈希表不能做：epoll 需要稳定的有序/可管理节点、较低内存与可预测的 <code>O(log n)</code> 操作；哈希表平均 <code>O(1)</code>，但扩容、冲突、遍历/内存局部性和内核实现复杂度是权衡。面试应说这是 Linux 的工程选择，不是“哈希表一定不可用”。</p>
+<p><a id="reference-进入内核态慢在哪里"></a></p>
+<h4 id="进入内核态慢在哪里">进入内核态慢在哪里</h4>
+<p>系统调用需要执行特权级切换、保存/恢复寄存器、切换内核栈、参数校验和安全检查；若发生阻塞，还会排队、上下文切换、调度和缓存/TLB 扰动。真正昂贵的往往是后续 I/O 等待、锁竞争、缺页或设备访问，不应把所有延迟都归因于“进内核”。</p>
+<p><a id="reference-io-设备"></a></p>
+<h2 id="io-设备">I/O 设备</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="932" height="377" src="/_astro/IMG-20260722152425293.5tZfsKeb_2j88zt.webp"></p>
+<p><a id="reference-基本概念"></a></p>
+<h3 id="基本概念">基本概念</h3>
+<p>I/O 设备：可以将数据输入到计算机，或者可以接收计算机输出数据的外部设备，属于计算机中的硬件部件</p>
+<p>UNIX 系统将外部设备抽象为文件，可以使用与文件操作相同的方式来操作外部设备</p>
+<p><a id="reference-分类"></a></p>
+<h3 id="分类">分类</h3>
+<p><a id="reference-使用特性"></a></p>
+<h4 id="使用特性">使用特性</h4>
+<ul>
+<li>人机交互类外部设备：数据传输速度慢</li>
+<li>存储设备：数据传输速度快</li>
+<li>网络通信设备：两者之间</li>
+</ul>
+<p><a id="reference-传输速率"></a></p>
+<h4 id="传输速率">传输速率</h4>
+<ul>
+<li>低速设备</li>
+<li>中速设备</li>
+<li>高速设备</li>
+</ul>
+<p><a id="reference-信息交换的单位"></a></p>
+<h4 id="信息交换的单位">信息交换的单位</h4>
+<ul>
+<li>块设备：传输基本单位为块，传输速率较高，可寻址，可随机读/写任一块</li>
+<li>字符设备：传输基本单位为字符，传输速率较慢，不可寻址，在输入/输出时常采用中断驱动方式</li>
+</ul>
+<p><a id="reference-io-控制器"></a></p>
+<h2 id="io-控制器">I/O 控制器</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1236" height="602" src="/_astro/IMG-20260722152425420.CL5sE36o_OvB1I.webp"></p>
+<p>I/O 设备由机械部件和电子部件（I/O 控制器、设备控制器）组成</p>
+<ul>
+<li>机械部件：执行具体 I/O 操作</li>
+<li>电子部件：作为 CPU 和 I/O 设备机械部件之间的中介，用于实现 CPU 对设备的控</li>
+</ul>
+<p><a id="reference-功能"></a></p>
+<h3 id="功能">功能</h3>
+<ul>
+<li>
+<p>接收和识别 CPU 发出的命令</p>
+<ul>
+<li>read/write，I/O 控制器中有相应的<strong>控制寄存器</strong>来存放命令和参数</li>
+</ul>
+</li>
+<li>
+<p>向 CPU 报告设备的状态</p>
+<ul>
+<li><strong>状态寄存器</strong>记录设备当前状态</li>
+</ul>
+</li>
+<li>
+<p>数据交换</p>
+<ul>
+<li>输出时，<strong>数据寄存器</strong>暂存 CPU 发来数据，控制器传送给设备</li>
+<li>输入时，暂存设备发来数据，CPU 取走</li>
+</ul>
+</li>
+<li>
+<p>地址识别</p>
+<ul>
+<li>I/O 控制器通过 CPU 提供的地址来判断读写的哪个寄存器</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-组成"></a></p>
+<h3 id="组成">组成</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1137" height="630" src="/_astro/IMG-20260722152425465.Bg4P_pZO_Z2s4fy0.webp"></p>
+<ol>
+<li>一个 I/O 控制器可能会对应多个设备；</li>
+<li><strong>数据寄存器、控制寄存器、状态寄存器</strong>可能有多个（如：每个控制/状态寄存器对应一个具体的设备），且这些寄存器都要有相应的地址，才能方便 CPU 操作。</li>
+</ol>
+<p><a id="reference-寄存器编址方式"></a></p>
+<h3 id="寄存器编址方式">寄存器编址方式</h3>
+<ol>
+<li>有的计算机会让这些寄存器占用内存地址的一部分，称为<strong>内存映像 I/O</strong></li>
+<li>另一些计算机则采用 I/O 专用地址，即<strong>寄存器独立编址</strong></li>
+</ol>
+<p><img alt="image" loading="lazy" decoding="async" width="1127" height="602" src="/_astro/IMG-20260722152425488.By56zkJD_yY6qW.webp"></p>
+<ul>
+<li>内存映射 I/O：简化了指令。可以采用对内存进行操作的指令来对控制器进行操作</li>
+<li>寄存器独立编址：需要设置专门的指令来实现对控制器的操作，不仅要指明<strong>寄存器的地址</strong>，还要指明<strong>控制器的编号</strong></li>
+</ul>
+<p><a id="reference-io-控制方式"></a></p>
+<h2 id="io-控制方式">I/O 控制方式</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1012" height="480" src="/_astro/IMG-20260722152425627.Bw4S0ySy_2iv3VU.webp"></p>
+<p>考虑：</p>
+<ol>
+<li>完成一次读/写操作的流程</li>
+<li>CPU 干预的频率</li>
+<li>数据传送的单位</li>
+<li>数据的流向</li>
+<li>主要缺点和主要优点</li>
+</ol>
+<p><a id="reference-程序直接控制方式"></a></p>
+<h3 id="程序直接控制方式">程序直接控制方式</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1174" height="637" src="/_astro/IMG-20260722152425651.C0URXmIT_ZPxJhj.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="468" height="628" src="/_astro/IMG-20260722152425680.BXS1s4si_ZkmOW8.webp"></p>
+<ol>
+<li>
+<p>完成一次读/写操作的流程（轮询）</p>
+</li>
+<li>
+<p>CPU 干预的频率：很频繁，I/O 操作开始之前、完成之后需要 CPU 介入，并且在等待 I/O 完成的过程中 CPU 需要不断地轮询检查。</p>
+</li>
+<li>
+<p>数据传送的单位：每次读/写一个字</p>
+</li>
+<li>
+<p>数据的流向</p>
+<ol start="5">
+<li>读操作（数据输入）：I/O 设备-&gt;CPU-&gt; 内存</li>
+<li>写操作（数据输出）：内存-&gt;CPU-&gt;I/O 设备每个字的读/写都需要 CPU 的帮助</li>
+</ol>
+</li>
+<li>
+<p>主要缺点和主要优点</p>
+<ol start="8">
+<li>优点：实现简单。在读/写指令之后，加上实现循环检查的一系列指令即可（因此才称为“程序直接控制方式”）</li>
+<li>缺点：CPU 和 I/O 设备只能串行工作，CPU 需要一直轮询检查，长期处于“忙等”状态 ，CPU 利用率低</li>
+</ol>
+</li>
+</ol>
+<p><a id="reference-中断驱动方式"></a></p>
+<h3 id="中断驱动方式">中断驱动方式</h3>
+<p>引入<strong>中断机制</strong></p>
+<ul>
+<li>由于 I/O 设备速度很慢，因此在 CPU 发出读/写命令后，可将<strong>等待 I/O 的进程阻塞</strong>，先切换到别的进程执行</li>
+<li>当 I/O 完成后，控制器会向 CPU 发出一个中断信号，CPU 检测到中断信号后，会保存当前进程的运行环境信息，转去执行中断处理程序处理该中断</li>
+<li>处理中断的过程中，CPU 从 I/O 控制器读一个字的数据传送到 CPU 寄存器，再写入主存。接着，CPU 恢复等待 I/O 的进程（或其他进程）的运行环境，然后继续执行</li>
+</ul>
+<ol>
+<li>CPU 会在每个指令周期的末尾检查中断</li>
+<li>中断处理过程中需要保存、恢复进程的运行环境，这个过程是需要一定时间开销的。可见，如果中断发生的频率太高，也会降低系统性能</li>
+</ol>
+<p><img alt="image" loading="lazy" decoding="async" width="470" height="743" src="/_astro/IMG-20260722152425821.BhQo4ksR_Z1xwd1W.webp"></p>
+<ol>
+<li>
+<p>完成一次读/写操作的流程（中断）</p>
+</li>
+<li>
+<p>CPU 干预的频率</p>
+<ol start="3">
+<li>每次 I/O 操作开始之前、完成之后需要 CPU 介入。</li>
+<li>等待 I/O 完成的过程中 CPU 可以切换到别的进程执行。</li>
+</ol>
+</li>
+<li>
+<p>数据传送的单位：每次读/写一个字</p>
+</li>
+<li>
+<p>数据的流向</p>
+<ol start="7">
+<li>读操作（数据输入）：I/O 设备-&gt;CPU-&gt; 内存</li>
+<li>写操作（数据输出）：内存-&gt;CPU-&gt;I/O 设备</li>
+</ol>
+</li>
+<li>
+<p>主要缺点和主要优点</p>
+<ol start="10">
+<li>优点：与“程序直接控制方式”相比，在“中断驱动方式”中，I/O 控制器<strong>会通过中断信号主动报告 I/O 已完成</strong>，CPU 不再需要不停地轮询。CPU 和 I/O 设备可并行工作，CPU 利用率得到明显提升</li>
+<li>缺点：每个字在 I/O 设备与内存之间的传输，都需要经过 CPU。而<strong>频繁的中断处理会消耗较多的 CPU 时间</strong></li>
+</ol>
+</li>
+</ol>
+<p><a id="reference-dma-方式"></a></p>
+<h3 id="dma-方式">DMA 方式</h3>
+<p>DMA 方式（ Direct Memory Access，直接存储器存取），主要用于块设备的 I/O 控制</p>
+<p><img alt="image" loading="lazy" decoding="async" width="990" height="364" src="/_astro/IMG-20260722152425847.CJbaKh07_2sIxLc.webp"></p>
+<ol>
+<li>数据的传送单位是“块”。不再是一个字、一个字的传送</li>
+<li>数据的流向是从设备直接放入内存，或者从内存直接到设备。不再需要 CPU 进行传送</li>
+<li>仅在传送一个或多个数据块的开始和结束时，才需要 CPU 干预</li>
+</ol>
+<p><img alt="image" loading="lazy" decoding="async" width="1062" height="535" src="/_astro/IMG-20260722152425888.Bx9z9sxz_Z24HcPO.webp"></p>
+<ul>
+<li>DR （Data Register，数据寄存器）：暂存从设备到内存，或从内存到设备的数据。</li>
+<li>MAR （Memory Address Register，内存地址寄存器）：在输入时，MAR 表示数据应放到内存中的什么位置；输出时 MAR 表示要输出的数据放在内存中的什么位置。</li>
+<li>DC （Data Counter，数据计数器）：表示剩余要读/写的字节数。</li>
+<li>CR（Command Register，命令/状态寄存器）：用于存放 CPU 发来的 I/O 命令，或设备的状态信息</li>
+</ul>
+<ol>
+<li>
+<p>完成一次读/写操作的流程</p>
+<p><img alt="image" loading="lazy" decoding="async" width="388" height="345" src="/_astro/IMG-20260722152425912.CgACa_es_1KfLb5.webp"></p>
+</li>
+<li>
+<p>CPU 干预的频率：仅在传送一个或多个数据块的开始和结束时，才需要 CPU 干预。</p>
+</li>
+<li>
+<p>数据传送的单位：每次读/写一个或多个块（注意：每次读写的只能是连续的多个块，且这些块读入内存后在内存中也必须是连续的）</p>
+</li>
+<li>
+<p>数据的流向（不再需要经过 CPU）</p>
+<ol start="5">
+<li>读操作（数据输入）：I/O 设备-&gt; 内存</li>
+<li>写操作（数据输出）：内存-&gt;I/O 设备</li>
+</ol>
+</li>
+<li>
+<p>主要缺点和主要优点</p>
+<ol start="8">
+<li>优点：数据传输以“块”为单位，CPU 介入频率进一步降低。数据的传输不再需要先经过 CPU 再写入内存，数据传输效率进一步增加。CPU 和 I/O 设备的并行性得到提升</li>
+<li>缺点：CPU 每发出一条 I/O 指令，只能读/写一个或多个<strong>连续的数据块</strong>。如果要读/写多个离散存储的数据块，或者要将数据分别写到不同的内存区域时，CPU 要分别发出<strong>多条 I/O 指令</strong>，进行多次中断处理才能完成</li>
+</ol>
+</li>
+</ol>
+<p><a id="reference-通道控制方式"></a></p>
+<h3 id="通道控制方式">通道控制方式</h3>
+<p>通道：一种<strong>硬件</strong>，可以识别并执行一系列<strong>通道指令</strong></p>
+<p>与 CPU 相比，通道可以执行的指令很单一，并且通道程序是放在主机内存中的，也就是说<strong>通道与 CPU 共享内存</strong></p>
+<p><img alt="image" loading="lazy" decoding="async" width="1125" height="489" src="/_astro/IMG-20260722152426040.CNhaTZyo_egxhs.webp"></p>
+<ol>
+<li>
+<p>完成一次读/写操作的流程</p>
+<p><img alt="image" loading="lazy" decoding="async" width="369" height="302" src="/_astro/IMG-20260722152426074.Dd_TdLcF_Z1K5AFG.webp"></p>
+</li>
+<li>
+<p>CPU 干预的频率：极低，通道会根据 CPU 的指示执行相应的通道程序，只有完成一组数据块的读/写后才需要发出中断信号，请求 CPU 干预。</p>
+</li>
+<li>
+<p>数据传送的单位：每次读/写一组数据块</p>
+</li>
+<li>
+<p>数据的流向（在通道的控制下进行）</p>
+<ol start="5">
+<li>读操作（数据输入）：I/O 设备-&gt; 内存</li>
+<li>写操作（数据输出）：内存-&gt;I/O 设备</li>
+</ol>
+</li>
+<li>
+<p>主要缺点和主要优点</p>
+<ol start="8">
+<li>缺点：实现复杂，需要专门的通道硬件支持</li>
+<li>优点：CPU、通道、I/O 设备可并行工作，资源利用率很高</li>
+</ol>
+</li>
+</ol>
+<p><a id="reference-io-软件层次结构"></a></p>
+<h2 id="io-软件层次结构">I/O 软件层次结构</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1065" height="440" src="/_astro/IMG-20260722152426103.D8KwqF-P_Zr2cIV.webp"></p>
+<p><a id="reference-用户层软件"></a></p>
+<h3 id="用户层软件">用户层软件</h3>
+<ul>
+<li>用户层软件实现了与用户交互的接口，用户可直接使用该层提供的、与 I/O 操作相关的库函数对设备进行操作</li>
+<li>用户层软件将用户请求翻译成格式化的 I/O 请求，并通过“系统调用”请求操作系统内核的服务</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="510" height="327" src="/_astro/IMG-20260722152426226.dEogl07N_1OuPWO.webp"></p>
+<p><a id="reference-设备独立性软件"></a></p>
+<h3 id="设备独立性软件">设备独立性软件</h3>
+<p><strong>设备独立性软件</strong>，又称<strong>设备无关性软件</strong>。与设备的硬件特性无关的功能几乎都在这一层实现：</p>
+<ul>
+<li>
+<p>向上层提供统一的<strong>调用接口</strong>（如 read/write 系统调用）</p>
+</li>
+<li>
+<p>设备的<strong>保护</strong></p>
+<ul>
+<li>原理类似与文件保护。设备被看做是一种特殊的文件，不同用户对各个文件的访问权限是不一样的，同理，对设备的访问权限也不一样</li>
+</ul>
+</li>
+<li>
+<p><strong>差错处理</strong></p>
+</li>
+<li>
+<p>设备的<strong>分配与回收</strong></p>
+</li>
+<li>
+<p><strong>数据缓冲区</strong>管理</p>
+</li>
+<li>
+<p>建立<strong>逻辑设备名到物理设备名</strong>的映射关系</p>
+<ul>
+<li>
+<p>操作系统系统可以采用两种方式管理<strong>逻辑设备表（LUT）</strong></p>
+<ol>
+<li>整个系统只设置一张 LUT，这就意味着所有用户不能使用相同的逻辑设备名，因此这种方式只适用于单用户操作系统</li>
+<li>为每个用户设置一张 LUT，各个用户使用的逻辑设备名可以重复，适用于多用户操作系统。系统会在用户登录时为其建立一个用户管理进程，而 LUT 就存放在用户管理进程的 PCB 中</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>
+<p>根据设备类型选择调用相应的<strong>驱动程序</strong></p>
+</li>
+</ul>
+<p><a id="reference-设备驱动程序"></a></p>
+<h3 id="设备驱动程序">设备驱动程序</h3>
+<ul>
+<li>主要负责对硬件设备的具体控制，将上层发出的一系列命令（如 read/write）转化成特定设备“能听得懂”的一系列操作。包括设置设备寄存器；检查设备状态等</li>
+<li>不同的 I/O 设备有不同的硬件特性，厂家需要根据设备的硬件特性设计并提供相应的驱动程序</li>
+</ul>
+<p><a id="reference-中断处理程序"></a></p>
+<h3 id="中断处理程序">中断处理程序</h3>
+<ul>
+<li>当 I/O 任务完成时，I/O 控制器会发送一个中断信号，系统会根据中断信号类型找到相应的中断处理程序并执行</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1120" height="365" src="/_astro/IMG-20260722152426260.D8WK_Qwa_Z2qTSCP.webp"></p>
+<p><a id="reference-io-核心子系统"></a></p>
+<h2 id="io-核心子系统">I/O 核心子系统</h2>
+<p>I/O 核心子系统要实现的功能其实就是中间三层要实现的功能（但是包括假脱机技术）</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1110" height="345" src="/_astro/IMG-20260722152426293.C5z6T8UE_Qni1a.webp"></p>
+<p><a id="reference-假脱机技术-spooling"></a></p>
+<h3 id="假脱机技术-spooling">假脱机技术 SPOOLing</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="882" height="284" src="/_astro/IMG-20260722152426431.GMfoax5A_1ATPJG.webp"></p>
+<p>脱机技术：缓解了 CPU 与慢速 I/O 设备的速度矛盾。另一方面，即使 CPU 在忙碌，也可以<strong>提前将数据输入</strong>到磁带；即使慢速的输出设备正在忙碌，也可以提前将数据输出到磁带。</p>
+<p>假脱机技术，又称“SPOOLing 技术”是用软件的方式模拟脱机技术</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1008" height="411" src="/_astro/IMG-20260722152426469.CApf2NEF_9EPfJ.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="834" height="414" src="/_astro/IMG-20260722152426512.CzIZMLKw_ZGInm.webp"></p>
+<p>要实现 SPOOLing 技术，必须要有<strong>多道程序技术</strong>的支持。系统会建立 “输入进程”和 “输出进程”。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1039" height="494" src="/_astro/IMG-20260722152426538.BiLi0jAg_Z2nFhY7.webp"></p>
+<p><a id="reference-共享式打印机"></a></p>
+<h4 id="共享式打印机">共享式打印机</h4>
+<ul>
+<li>独占式设备——只允许各个进程串行使用的设备。一段时间内只能满足一个进程的请求</li>
+<li>共享设备——允许多个进程“同时”使用的设备（宏观上同时使用，微观上可能是交替使用）。可以同时满足多个进程的使用请求</li>
+</ul>
+<p>打印机是种“独占式设备”，但是可以用 SPOOLing 技术改造成“共享设备”</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1016" height="358" src="/_astro/IMG-20260722152426681.B4TicXsw_Z1uESGk.webp"></p>
+<p>当多个用户进程提出输出打印的请求时，系统会答应它们的请求，但是并不是真正把打印机分配给他们，而是由假脱机管理进程为每个进程做两件事：</p>
+<ol>
+<li>在磁盘输出井中为进程申请一个<strong>空闲缓冲区</strong>（也就是说，这个缓冲区是在磁盘上的），并将要打印的数据送入其中</li>
+<li>为用户进程申请一张<strong>空白的打印请求表</strong>，并将用户的打印请求填入表中（其实就是用来说明用户的打印数据存放位置等信息的），再将该表挂到<strong>假脱机文件队列</strong>上。当打印机空闲时，输出进程会从文件队列的队头取出一张打印请求表，并根据表中的要求将要打印的数据从输出井传送到输出缓冲区，再输出到打印机进行打印。用这种方式可依次处理完全部的打印任务</li>
+</ol>
+<p>虽然系统中只有一个台打印机，但每个进程提出打印请求时，系统都会为在输出井中为其分配一个存储区（相当于分配了一个逻辑设备），使每个用户进程都觉得自己在独占一台打印机，从而实现对打印机的共享。</p>
+<p>SPOOLing 技术可以把一台物理设备虚拟成逻辑上的多台设备，可将独占式设备改造成共享设备。</p>
+<p><a id="reference-设备的分配与回收"></a></p>
+<h3 id="设备的分配与回收">设备的分配与回收</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="1175" height="525" src="/_astro/IMG-20260722152426755.DzTkLqEL_Z1LYDu7.webp"></p>
+<p><a id="reference-设备分配考虑因素"></a></p>
+<h4 id="设备分配考虑因素">设备分配考虑因素</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="641" height="173" src="/_astro/IMG-20260722152426791.DGdXhGdL_29APSn.webp"></p>
+<ul>
+<li>
+<p>设备的固有属性</p>
+<ul>
+<li>独占设备：一个时段只能分配给一个进程（如打印机）</li>
+<li>共享设备：可同时分配给多个进程使用（如磁盘），各进程往往是宏观上同时共享使用设备，而微观上交替使用。</li>
+<li>虚拟设备：采用 SPOOLing 技术将独占设备改造成虚拟的共享设备，可同时分配给多个进程使用（如采用 SPOOLing 技术实现的共享打印机）</li>
+</ul>
+</li>
+<li>
+<p>设备分配算法：先来先服务、优先级高者优先、短任务优先</p>
+</li>
+<li>
+<p>设备分配中的安全性</p>
+<ul>
+<li>
+<p>安全分配方式：为进程分配一个设备后就<strong>将进程阻塞</strong>，本次 I/O 完成后才将进程唤醒。（eg：考虑进程请求打印机打印输出的例子）</p>
+<ul>
+<li>一个时段内每个进程只能使用一个设备</li>
+<li>优点：破坏了“请求和保持”条件，不会死锁</li>
+<li>缺点：对于一个进程来说，CPU 和 I/O 设备只能串行工作</li>
+</ul>
+</li>
+<li>
+<p>不安全分配方式：进程发出 I/O 请求后，系统为其分配 I/O 设备，进程可继续执行，之后还可以发出新的 I/O 请求。只有某个 I/O 请求得不到满足时才将进程阻塞。</p>
+<ul>
+<li>一个进程可以同时使用多个设备</li>
+<li>优点：进程的计算任务和 I/O 任务可以并行处理，使进程迅速推进</li>
+<li>缺点：有可能发生死锁（死锁避免、死锁的检测和解除）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-静态分配和动态分配"></a></p>
+<h4 id="静态分配和动态分配">静态分配和动态分配</h4>
+<ul>
+<li>静态分配：进程运行前为其分配全部所需资源（破坏请求和保持条件），运行结束后归还资源</li>
+<li>动态分配：进程运行过程中动态申请设备资源</li>
+</ul>
+<p><a id="reference-设备分配管理中的数据结构"></a></p>
+<h4 id="设备分配管理中的数据结构">设备分配管理中的数据结构</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="711" height="294" src="/_astro/IMG-20260722152426916.DknrmWoV_Z1Kt3qD.webp"></p>
+<p>一个通道可控制多个设备控制器，每个设备控制器可控制多个设备</p>
+<p><a id="reference-设备控制表-dct"></a></p>
+<h5 id="设备控制表-dct">设备控制表 DCT</h5>
+<p>设备控制表（DCT）：系统为每个设备配置一张 DCT，用于记录设备情况</p>
+<p><img alt="image" loading="lazy" decoding="async" width="965" height="299" src="/_astro/IMG-20260722152426959.Cmcr35vs_2jbRsu.webp"></p>
+<p><a id="reference-控制器控制表-coct"></a></p>
+<h5 id="控制器控制表-coct">控制器控制表 COCT</h5>
+<p>控制器控制表（COCT）：每个设备控制器都会对应一张 COCT。操作系统根据 COCT 的信息对控制器进行操作和管理。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="933" height="254" src="/_astro/IMG-20260722152426987.zWJk7UMY_1PzYVW.webp"></p>
+<p><a id="reference-通道控制表-chct"></a></p>
+<h5 id="通道控制表-chct">通道控制表 CHCT</h5>
+<p>通道控制表（CHCT）：每个通道都会对应一张 CHCT。操作系统根据 CHCT 的信息对通道进行操作和管理</p>
+<p><img alt="image" loading="lazy" decoding="async" width="954" height="234" src="/_astro/IMG-20260722152427125.BqRqNkJ7_E9468.webp"></p>
+<p><a id="reference-系统设备表-sdt"></a></p>
+<h5 id="系统设备表-sdt">系统设备表 SDT</h5>
+<p>系统设备表（SDT）：记录了系统中<strong>全部设备</strong>的情况，每个设备对应一个表目。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="865" height="252" src="/_astro/IMG-20260722152427160.tdMM1Y_b_13PBe7.webp"></p>
+<p><a id="reference-设备分配的步骤"></a></p>
+<h4 id="设备分配的步骤">设备分配的步骤</h4>
+<ol>
+<li>
+<p>根据进程请求的物理设备名查找 SDT（注：物理设备名是进程请求分配设备时提供的参数）</p>
+<p><img alt="image" loading="lazy" decoding="async" width="799" height="240" src="/_astro/IMG-20260722152427183.D2IfwWy7_Z2tUc43.webp"></p>
+</li>
+<li>
+<p>根据 SDT 找到 DCT，若设备忙碌则将进程 PCB 挂到设备等待队列中，不忙碌则将设备分配给进程。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="971" height="296" src="/_astro/IMG-20260722152427225.C_5JjMkj_Z15YQOx.webp"></p>
+</li>
+<li>
+<p>根据 DCT 找到 COCT，若控制器忙碌则将进程 PCB 挂到控制器等待队列中，不忙碌则将控制器分配给进程。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="921" height="248" src="/_astro/IMG-20260722152427340.BoPzyBf3_1raBME.webp"></p>
+</li>
+<li>
+<p>根据 COCT 找到 CHCT，若通道忙碌则将进程 PCB 挂到通道等待队列中，不忙碌则将通道分配给进程。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="954" height="258" src="/_astro/IMG-20260722152427375.1RiTROWZ_Z1oLIJT.webp"></p>
+</li>
+</ol>
+<p>只有<strong>设备、控制器、通道</strong>三者都分配成功时，这次设备分配才算成功，之后便可启动 I/O 设备进行数据传送</p>
+<p>缺点：</p>
+<ol>
+<li>用户编程时必须使用“<strong>物理设备名</strong>”，底层细节对用户不透明，不方便编程</li>
+<li>若换了一个物理设备，则程序无法运行</li>
+<li>若进程请求的物理设备正在忙碌，则即使系统中还有同类型的设备，进程也必须阻塞等待</li>
+</ol>
+<p><a id="reference-改进"></a></p>
+<h5 id="改进">改进</h5>
+<ol>
+<li>根据进程请求的<strong>逻辑设备名</strong>查找 SDT（注：用户编程时提供的逻辑设备名其实就是“设备类型”）</li>
+<li>查找 SDT，找到用户进程指定类型的、并且空闲的设备，将其分配给该进程。操作系统<strong>在逻辑设备表（LUT）中新增一个表项</strong>。</li>
+</ol>
+<p>逻辑设备表：</p>
+<ul>
+<li>逻辑设备表（LUT）建立了逻辑设备名与物理设备名之间的映射关系。</li>
+<li>某用户进程第一次使用设备时使用逻辑设备名向操作系统发出请求，操作系统根据用户进程指定的设备类型（逻辑设备名）查找系统设备表，找到一个空闲设备分配给进程，并在 LUT 中增加相应表项。</li>
+<li>如果之后用户进程再次通过相同的逻辑设备名请求使用设备，则操作系统通过 LUT 表即可知道用户进程实际要使用的是哪个物理设备了，并且也能知道该设备的驱动程序入口地址。</li>
+</ul>
+<p><a id="reference-缓冲区管理"></a></p>
+<h3 id="缓冲区管理">缓冲区管理</h3>
+<p><a id="reference-缓冲区"></a></p>
+<h4 id="缓冲区">缓冲区</h4>
+<ul>
+<li>缓冲区是一个存储区域，可以由专门的硬件寄存器组成，也可利用内存作为缓冲区。</li>
+<li>使用硬件作为缓冲区的成本较高，容量也较小，一般仅用在对速度要求非常高的场合（如存储器管理中所用的联想寄存器，由于对页表的访问频率极高，因此使用速度很快的联想寄存器来存放页表项的副本）</li>
+<li>一般情况下，更多的是<strong>利用内存作为缓冲区</strong>，“设备独立性软件”的缓冲区管理就是要组织管理好这些缓冲区</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="818" height="200" src="/_astro/IMG-20260722152427399.Cgd3Q4wZ_Z12ADNQ.webp"></p>
+<p><a id="reference-单缓冲"></a></p>
+<h4 id="单缓冲">单缓冲</h4>
+<p><img alt="image" loading="lazy" decoding="async" width="1060" height="405" src="/_astro/IMG-20260722152427527.9nlE6nhc_t5cOU.webp"></p>
+<ul>
+<li>假设某用户进程请求某种块设备读入若干块的数据。若采用单缓冲的策略，操作系统会在主存中为其分配一个缓冲区（若题目中没有特别说明，一个缓冲区的大小就是一个块）。</li>
+<li>当缓冲区数据非空时，不能往缓冲区冲入数据，只能从缓冲区把数据传出（可以把冲入数据看成一次性充满缓冲区，传出数据是一个一个传出）</li>
+<li>当缓冲区为空时，可以往缓冲区冲入数据，但必须把缓冲区充满以后，才能从缓冲区把数据传出</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1119" height="366" src="/_astro/IMG-20260722152427570.CklUJWe5_2vzsGh.webp"></p>
+<p>采用单缓冲策略，处理一块数据平均耗时 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>max</mi><mo>⁡</mo><mo stretchy="false">{</mo><mi>C</mi><mo separator="true">,</mo><mi>T</mi><mo stretchy="false">}</mo><mo>+</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">\max {C, T}+M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">max</span><span class="mopen">{</span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mclose">}</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span></p>
+<p><a id="reference-双缓冲"></a></p>
+<h4 id="双缓冲">双缓冲</h4>
+<p>假设某用户进程请求某种块设备读入若干块的数据。若采用双缓冲的策略，操作系统会在主存中为其分配<strong>两个缓冲区</strong>（若题目中没有特别说明，一个缓冲区的大小就是一个块）</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1164" height="468" src="/_astro/IMG-20260722152427596.BgY581xb_Z1DmuQd.webp"></p>
+<p><img alt="image" loading="lazy" decoding="async" width="1036" height="458" src="/_astro/IMG-20260722152427741.Cydhxixq_sjiFd.webp"></p>
+<p>采用双缓冲策略，处理一个数据块的平均耗时为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>max</mi><mo>⁡</mo><mo stretchy="false">{</mo><mi>T</mi><mo separator="true">,</mo><mi>C</mi><mo>+</mo><mi>M</mi><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">\max {T, C+M}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">max</span><span class="mopen">{</span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.0715em;">C</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mclose">}</span></span></span></span></p>
+<p><a id="reference-循环缓冲"></a></p>
+<h4 id="循环缓冲">循环缓冲</h4>
+<p><a id="reference-缓冲池"></a></p>
+<h4 id="缓冲池">缓冲池</h4>
+<p><a id="reference-磁盘的结构"></a></p>
+<h2 id="磁盘的结构">磁盘的结构</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1199" height="592" src="/_astro/IMG-20260722152427767.B8J1pnwB_Z24bwWS.webp"></p>
+<p><a id="reference-磁盘磁道扇区"></a></p>
+<h3 id="磁盘磁道扇区">磁盘、磁道、扇区</h3>
+<ul>
+<li>磁盘的表面由一些磁性物质组成，可以用这些磁性物质来记录二进制数据</li>
+<li>磁盘的盘面被划分成一个个磁道。这样的一个“圈”就是一个磁道</li>
+<li>一个磁道又被划分成一个个扇区，每个扇区就是一个“磁盘块”。各个扇区存放的数据量相同（如 1KB）</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="464" height="396" src="/_astro/IMG-20260722152427801.MpZBjD_n_nbXFY.webp"></p>
+<p><a id="reference-盘面柱面"></a></p>
+<h3 id="盘面柱面">盘面、柱面</h3>
+<p><img alt="image" loading="lazy" decoding="async" width="772" height="564" src="/_astro/IMG-20260722152427843.ChM-L7us_1sYl6g.webp"></p>
+<p>可用 <code>(柱面号, 盘面号, 扇区号)</code>  来定位任意一个“磁盘块”。</p>
+<p>在“文件的物理结构”小节中，我们经常提到文件数据存放在外存中的几号块，这个块号就可以转换成 <code>(柱面号, 盘面号, 扇区号)</code>  的地址形式</p>
+<p><a id="reference-磁盘的分类"></a></p>
+<h3 id="磁盘的分类">磁盘的分类</h3>
+<ul>
+<li>磁头可以移动的称为<strong>活动头磁盘</strong>。磁臂可以来回伸缩来带动磁头定位磁道</li>
+<li>磁头不可移动的称为<strong>固定头磁盘</strong>。这种磁盘中每个磁道有一个磁头</li>
+</ul>
+<p><img alt="image" loading="lazy" decoding="async" width="1128" height="597" src="/_astro/IMG-20260722152427878.V17yr-Q1_Z1uUez0.webp"></p>
+<ul>
+<li>盘片可以更换的称为<strong>可换盘磁盘</strong></li>
+<li>盘片不可更换的称为<strong>固定盘磁盘</strong></li>
+</ul>
+<p><a id="reference-磁盘调度"></a></p>
+<h2 id="磁盘调度">磁盘调度</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1234" height="550" src="/_astro/IMG-20260722152427910.rE3dcuNx_Z1CT9gk.webp"></p>
+<p><a id="reference-效率分析"></a></p>
+<h3 id="效率分析">效率分析</h3>
+<p><a id="reference-寻道时间"></a></p>
+<h4 id="寻道时间">寻道时间</h4>
+<p>寻找时间（寻道时间）<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>S</mi></msub></mrow><annotation encoding="application/x-tex">T_S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0576em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>：在读/写数据前，将磁头移动到指定磁道所花的时间。</p>
+<ol>
+<li><strong>启动磁头臂</strong>是需要时间的。假设耗时为 s</li>
+<li><strong>移动磁头</strong>也是需要时间的。假设磁头匀速移动，每跨越一个磁道耗时为 m，总共需要跨越 n 条磁道</li>
+</ol>
+<p>则：寻道时间 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>S</mi></msub><mo>=</mo><mi>s</mi><mo>+</mo><mi>m</mi><mo>∗</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">T_S = s + m*n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0576em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6667em;vertical-align:-0.0833em;"></span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4653em;"></span><span class="mord mathnormal">m</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">n</span></span></span></span></p>
+<p><a id="reference-延迟时间"></a></p>
+<h4 id="延迟时间">延迟时间</h4>
+<p>延迟时间 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">T_{R}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0077em;">R</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>：通过旋转磁盘，使磁头定位到目标扇区所需要的时间</p>
+<p>设磁盘转速为 r （单位：转/秒，或 转/分），则平均所需的延迟时间 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>R</mi></msub><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mi mathvariant="normal">/</mi><mn>2</mn><mo stretchy="false">)</mo><mo>∗</mo><mo stretchy="false">(</mo><mn>1</mn><mi mathvariant="normal">/</mi><mi>r</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><mn>2</mn><mi>r</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">T_{R} = (1/2)*(1/r) = 1/(2r)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0077em;">R</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1/2</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1/</span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1/</span><span class="mopen">(</span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mclose">)</span></span></span></span></p>
+<p><a id="reference-传输时间"></a></p>
+<h4 id="传输时间">传输时间</h4>
+<p>传输时间 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">T_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>：从磁盘读出或向磁盘写入数据所经历的时间</p>
+<p>设磁盘转速为 r，此次读/写的字节数为 b，每个磁道上的字节数为 N。</p>
+<p>传输时间 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>t</mi></msub><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mi mathvariant="normal">/</mi><mi>r</mi><mo stretchy="false">)</mo><mo>∗</mo><mo stretchy="false">(</mo><mi>b</mi><mi mathvariant="normal">/</mi><mi>N</mi><mo stretchy="false">)</mo><mo>=</mo><mi>b</mi><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><mi>r</mi><mi>N</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">T_t = (1/r) * (b/N) = b/(rN)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">1/</span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">b</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">b</span><span class="mord">/</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span><span class="mclose">)</span></span></span></span></p>
+<p>总的平均存取时间：</p>
+<div class="note-equation"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>T</mi><mi>a</mi></msub><mo>=</mo><msub><mi>T</mi><mi>S</mi></msub><mo>+</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>r</mi></mrow></mfrac><mo>+</mo><mfrac><mi>b</mi><mrow><mi>r</mi><mi>N</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">T_{a}=T_{S}+\frac{1}{2r}+\frac{b}{rN}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">a</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.0576em;">S</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:2.0074em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3214em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.0278em;">r</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:2.0574em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3714em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0278em;">r</span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">b</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></div>
+<p>第二项和第三项受磁盘物理性质影响，所以考虑使用算法优化 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>S</mi></msub></mrow><annotation encoding="application/x-tex">T_S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="katex-sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0576em;">S</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></p>
+<p><a id="reference-磁盘调度算法"></a></p>
+<h3 id="磁盘调度算法">磁盘调度算法</h3>
+<p>默认 SCAN 使用 Lock，CSCAN 使用 CLock</p>
+<p><a id="reference-先来先服务-fcfs"></a></p>
+<h4 id="先来先服务-fcfs">先来先服务 FCFS</h4>
+<p>根据进程请求访问磁盘的先后顺序进行调度</p>
+<p><img alt="image" loading="lazy" decoding="async" width="982" height="406" src="/_astro/IMG-20260722152427943.F1K88qeL_zClUR.webp"></p>
+<ul>
+<li>优点：公平；如果请求访问的磁道比较集中的话，算法性能还算过的去</li>
+<li>缺点：如果有大量进程竞争使用磁盘，请求访问的磁道很分散，则 FCFS 在性能上很差，寻道时间长</li>
+</ul>
+<p><a id="reference-最短寻找时间优先-sstf"></a></p>
+<h4 id="最短寻找时间优先-sstf">最短寻找时间优先 SSTF</h4>
+<p>SSTF 算法会优先处理的磁道是与当前磁头最近的磁道。可以保证每次的寻道时间最短，但是并不能保证总的寻道时间最短</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1012" height="348" src="/_astro/IMG-20260722152427972.zP1CNGGq_1PeRyr.webp"></p>
+<p><a id="reference-扫描算法-scan"></a></p>
+<h4 id="扫描算法-scan">扫描算法 SCAN</h4>
+<p>只有磁头移动到最外侧磁道的时候才能往内移动，移动到最内侧磁道的时候才能往外移动。这就是扫描算法（SCAN）的思想。由于磁头移动的方式很像电梯，因此也叫电梯算法</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1013" height="450" src="/_astro/IMG-20260722152428010.HSP0tp6__Z1nfwoY.webp"></p>
+<p><a id="reference-lock-调度算法"></a></p>
+<h4 id="lock-调度算法">Lock 调度算法</h4>
+<p>如果在磁头移动方向上已经没有别的请求，就可以立即改变磁头移动方向。（边移动边观察，因此叫 LOOK）就只是在 SCAN 算法的基础上提前返回</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1015" height="407" src="/_astro/IMG-20260722152428032.BBa_TlRT_Z2wO0Dk.webp"></p>
+<p><a id="reference-循环扫描算法-cscan"></a></p>
+<h4 id="循环扫描算法-cscan">循环扫描算法 CSCAN</h4>
+<p>SCAN 算法对于各个位置磁道的响应频率不平均，而 CSCAN 算法就是为了解决这个问题。规定只有<strong>磁头朝某个特定方向移动</strong>时才处理磁道访问请求，而<strong>返回时直接快速移动至起始端而不处理任何请求</strong></p>
+<p><img alt="image" loading="lazy" decoding="async" width="1051" height="417" src="/_astro/IMG-20260722152428060.BSZ5ghIM_2aHK2u.webp"></p>
+<p><a id="reference-clock-调度算法"></a></p>
+<h4 id="clock-调度算法">CLock 调度算法</h4>
+<p>如果磁头移动的方向上已经没有磁道访问请求了，就可以立即让磁头返回，并且磁头只需要返回到有磁道访问请求的位置即可。</p>
+<p><img alt="image" loading="lazy" decoding="async" width="1079" height="390" src="/_astro/IMG-20260722152428102.Dzyxi0Q4_Z1iFJL0.webp"></p>
+<p><a id="reference-磁盘管理"></a></p>
+<h2 id="磁盘管理">磁盘管理</h2>
+<p><img alt="image" loading="lazy" decoding="async" width="1236" height="453" src="/_astro/IMG-20260722152428126.CmeQ34y2_x4a2k.webp"></p>
+<p><a id="reference-磁盘初始化"></a></p>
+<h3 id="磁盘初始化">磁盘初始化</h3>
+<ol>
+<li>进行低级格式化（物理格式化），将磁盘的各个磁道划分为扇区。一个扇区通常可分为<strong>头、数据区域（如 512B 大小）、尾</strong>三个部分组成。管理扇区所需要的各种数据结构一般存放在头、尾两个部分，包括扇区校验码（如奇偶校验、CRC 循环冗余校验码等，校验码用于校验扇区中的数据是否发生错误）</li>
+<li>将磁盘分区，每个分区由若干柱面组成（即分为我们熟悉的 C 盘、D 盘、E 盘）</li>
+<li>进行逻辑格式化，创建文件系统。包括创建文件系统的根目录、初始化存储空间管理所用的数据结构（如 位示图、空闲分区表</li>
+</ol>
+<p><a id="reference-引导块"></a></p>
+<h3 id="引导块">引导块</h3>
+<p>计算机开机时需要进行一系列初始化的工作，这些初始化工作是通过执行<strong>初始化程序（自举程序）</strong> 完成的</p>
+<ul>
+<li>
+<p>ROM 中只存放很小的“自举装入程序”：开机时计算机先运行“自举装入程序”，通过执行该程序就可找到引导块，并将完整的“自举程序”读入内存，完成初始化</p>
+</li>
+<li>
+<p>完整的自举程序放在磁盘的启动块（即引导块/启动分区）上，启动块位于磁盘的固定位置</p>
+<ul>
+<li>拥有启动分区的磁盘称为启动磁盘或系统磁盘</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-坏块的管理"></a></p>
+<h3 id="坏块的管理">坏块的管理</h3>
+<p>坏了、无法正常使用的扇区就是“坏块”。这属于硬件故障，操作系统是无法修复的。应该将坏块标记出来，以免错误地使用到它</p>
+<ul>
+<li>对于简单的磁盘，可以在<strong>逻辑格式化</strong>时（建立文件系统时）对整个磁盘进行坏块检查，标明哪些扇区是坏扇区，比如：在 FAT 表上标明。（在这种方式中，坏块对操作系统不透明）</li>
+<li>对于复杂的磁盘，磁盘控制器（磁盘设备内部的一个硬件部件）会维护一个<strong>坏块链表</strong>。在磁盘出厂前进行<strong>低级格式化</strong>（物理格式化）时就将坏块链进行初始化。会保留一些“备用扇区”，用于替换坏块。这种方案称为扇区备用。且这种处理方式中，坏块对操作系统透明。</li>
+</ul>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>DMA 是否意味着 CPU 不参与设置和完成处理？epoll 就绪事件是否保证后续读取不会阻塞？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#面试追问io-多路复用与-epoll">面试追问：IO 多路复用与 epoll</a></li><li style="--depth: 1"><a href="#什么是-io-多路复用优势是什么">什么是 IO 多路复用，优势是什么</a></li><li style="--depth: 2"><a href="#epoll-的实现原理">epoll 的实现原理</a></li><li style="--depth: 2"><a href="#进入内核态慢在哪里">进入内核态慢在哪里</a></li><li style="--depth: 0"><a href="#io-设备">I/O 设备</a></li><li style="--depth: 1"><a href="#基本概念">基本概念</a></li><li style="--depth: 1"><a href="#分类">分类</a></li><li style="--depth: 2"><a href="#使用特性">使用特性</a></li><li style="--depth: 2"><a href="#传输速率">传输速率</a></li><li style="--depth: 2"><a href="#信息交换的单位">信息交换的单位</a></li><li style="--depth: 0"><a href="#io-控制器">I/O 控制器</a></li><li style="--depth: 1"><a href="#功能">功能</a></li><li style="--depth: 1"><a href="#组成">组成</a></li><li style="--depth: 1"><a href="#寄存器编址方式">寄存器编址方式</a></li><li style="--depth: 0"><a href="#io-控制方式">I/O 控制方式</a></li><li style="--depth: 1"><a href="#程序直接控制方式">程序直接控制方式</a></li><li style="--depth: 1"><a href="#中断驱动方式">中断驱动方式</a></li><li style="--depth: 1"><a href="#dma-方式">DMA 方式</a></li><li style="--depth: 1"><a href="#通道控制方式">通道控制方式</a></li><li style="--depth: 0"><a href="#io-软件层次结构">I/O 软件层次结构</a></li><li style="--depth: 1"><a href="#用户层软件">用户层软件</a></li><li style="--depth: 1"><a href="#设备独立性软件">设备独立性软件</a></li><li style="--depth: 1"><a href="#设备驱动程序">设备驱动程序</a></li><li style="--depth: 1"><a href="#中断处理程序">中断处理程序</a></li><li style="--depth: 0"><a href="#io-核心子系统">I/O 核心子系统</a></li><li style="--depth: 1"><a href="#假脱机技术-spooling">假脱机技术 SPOOLing</a></li><li style="--depth: 2"><a href="#共享式打印机">共享式打印机</a></li><li style="--depth: 1"><a href="#设备的分配与回收">设备的分配与回收</a></li><li style="--depth: 2"><a href="#设备分配考虑因素">设备分配考虑因素</a></li><li style="--depth: 2"><a href="#静态分配和动态分配">静态分配和动态分配</a></li><li style="--depth: 2"><a href="#设备分配管理中的数据结构">设备分配管理中的数据结构</a></li><li style="--depth: 3"><a href="#设备控制表-dct">设备控制表 DCT</a></li><li style="--depth: 3"><a href="#控制器控制表-coct">控制器控制表 COCT</a></li><li style="--depth: 3"><a href="#通道控制表-chct">通道控制表 CHCT</a></li><li style="--depth: 3"><a href="#系统设备表-sdt">系统设备表 SDT</a></li><li style="--depth: 2"><a href="#设备分配的步骤">设备分配的步骤</a></li><li style="--depth: 3"><a href="#改进">改进</a></li><li style="--depth: 1"><a href="#缓冲区管理">缓冲区管理</a></li><li style="--depth: 2"><a href="#缓冲区">缓冲区</a></li><li style="--depth: 2"><a href="#单缓冲">单缓冲</a></li><li style="--depth: 2"><a href="#双缓冲">双缓冲</a></li><li style="--depth: 2"><a href="#循环缓冲">循环缓冲</a></li><li style="--depth: 2"><a href="#缓冲池">缓冲池</a></li><li style="--depth: 0"><a href="#磁盘的结构">磁盘的结构</a></li><li style="--depth: 1"><a href="#磁盘磁道扇区">磁盘、磁道、扇区</a></li><li style="--depth: 1"><a href="#盘面柱面">盘面、柱面</a></li><li style="--depth: 1"><a href="#磁盘的分类">磁盘的分类</a></li><li style="--depth: 0"><a href="#磁盘调度">磁盘调度</a></li><li style="--depth: 1"><a href="#效率分析">效率分析</a></li><li style="--depth: 2"><a href="#寻道时间">寻道时间</a></li><li style="--depth: 2"><a href="#延迟时间">延迟时间</a></li><li style="--depth: 2"><a href="#传输时间">传输时间</a></li><li style="--depth: 1"><a href="#磁盘调度算法">磁盘调度算法</a></li><li style="--depth: 2"><a href="#先来先服务-fcfs">先来先服务 FCFS</a></li><li style="--depth: 2"><a href="#最短寻找时间优先-sstf">最短寻找时间优先 SSTF</a></li><li style="--depth: 2"><a href="#扫描算法-scan">扫描算法 SCAN</a></li><li style="--depth: 2"><a href="#lock-调度算法">Lock 调度算法</a></li><li style="--depth: 2"><a href="#循环扫描算法-cscan">循环扫描算法 CSCAN</a></li><li style="--depth: 2"><a href="#clock-调度算法">CLock 调度算法</a></li><li style="--depth: 0"><a href="#磁盘管理">磁盘管理</a></li><li style="--depth: 1"><a href="#磁盘初始化">磁盘初始化</a></li><li style="--depth: 1"><a href="#引导块">引导块</a></li><li style="--depth: 1"><a href="#坏块的管理">坏块的管理</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

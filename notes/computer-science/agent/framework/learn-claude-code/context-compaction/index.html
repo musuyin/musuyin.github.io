@@ -1,0 +1,382 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Context Compact · Musuyin&#39; Home</title><meta name="description" content="上下文压缩按成本分层：先裁剪和占位，再把大结果落盘，最后才用模型总结历史。每次压缩都要追踪被删信息是否仍能通过文件、索引或摘要找回。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/context-compaction/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Context Compact · Musuyin' Home"><meta property="og:description" content="上下文压缩按成本分层：先裁剪和占位，再把大结果落盘，最后才用模型总结历史。每次压缩都要追踪被删信息是否仍能通过文件、索引或摘要找回。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/context-compaction/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Context Compact</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-07-21">2026-07-21</time></dd></div><div><dt>字数</dt><dd>2827</dd></div><div><dt>预计阅读</dt><dd>10 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Context Compact</h1><time datetime="2026-07-21">2026-07-21</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>上下文压缩按成本分层：先裁剪和占位，再把大结果落盘，最后才用模型总结历史。每次压缩都要追踪被删信息是否仍能通过文件、索引或摘要找回。</p>
+<p><a id="reference-context-compact--上下文总会满要有办法腾地方"></a></p>
+<h2 id="context-compact--上下文总会满要有办法腾地方">Context Compact — 上下文总会满，要有办法腾地方</h2>
+<blockquote>
+<p><em>“上下文总会满，要有办法腾地方”</em> — 四层压缩策略，便宜的先跑贵的后跑。</p>
+<p><strong>Harness 层</strong>：压缩——干净的记忆，无限的会话。</p>
+</blockquote>
+<p><a id="reference-问题"></a></p>
+<h3 id="问题">问题</h3>
+<p>Agent 跑着跑着，不动了。</p>
+<p>手里有 bash、有 read、有 write，能力是够的。但它读了一个 1000 行的文件（~4000 token），又读了 30 个文件，跑了 20 条命令。每条命令的输出、每个文件的内容，全都堆在 <code>messages</code> 列表里。</p>
+<p>上下文窗口是有限的。满了之后，API 直接拒绝：<code>prompt_too_long</code>。</p>
+<p>不压缩，Agent 根本没法在大项目里干活。</p>
+<p><a id="reference-解决方案"></a></p>
+<h3 id="解决方案">解决方案</h3>
+<p><img alt="IMG-20260928133931306" loading="lazy" decoding="async" width="820" height="520" src="/_astro/IMG-20260928133931306.Cry9cv58_Z246Deu.svg"></p>
+<p>保留 s07 的 hook 结构、技能加载、子 Agent 等骨架，省略部分工具细节以聚焦压缩。核心变动：每轮 LLM 调用前插入三层预处理器（0 API），token 仍超阈值时触发 LLM 摘要（1 API），API 报错时应急裁剪。</p>
+<p>核心设计：便宜的先跑，贵的后跑。</p>
+<p><a id="reference-工作原理"></a></p>
+<h3 id="工作原理">工作原理</h3>
+<p><img alt="IMG-20260928133931447" loading="lazy" decoding="async" width="760" height="590" src="/_astro/IMG-20260928133931447.xtUzTf-f_Z2cz1Kp.svg"></p>
+<p><a id="reference-l1-snip_compact--裁掉无关的旧对话"></a></p>
+<h4 id="l1-snip_compact--裁掉无关的旧对话">L1: snip_compact — 裁掉无关的旧对话</h4>
+<p>Agent 跑了 80 轮对话，<code>messages</code> 攒了 160 条。最前面的“帮我创建 hello.py”和当前工作几乎无关了，但全占着位置。</p>
+<p>消息数超过 50 条 → 保留头部 3 条（初始上下文）和尾部 47 条（当前工作），中间裁掉；唯一额外边界条件是，不能把 <code>assistant(tool_use)</code> 和后面的 <code>user(tool_result)</code> 拆开：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> snip_compact</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages, max_messages</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">50</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages) </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> max_messages:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> messages</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    head_end, tail_start </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages) </span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (max_messages </span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> head_end </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _message_has_tool_use(messages[head_end </span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        while</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> head_end </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages) </span><span style="color:#D73A49;--shiki-dark:#F97583">and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _is_tool_result_message(messages[head_end]):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            head_end </span><span style="color:#D73A49;--shiki-dark:#F97583">+=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (tail_start </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tail_start </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _is_tool_result_message(messages[tail_start])</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _message_has_tool_use(messages[tail_start </span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">])):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        tail_start </span><span style="color:#D73A49;--shiki-dark:#F97583">-=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    snipped </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tail_start </span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> head_end</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    placeholder </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"[snipped </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">snipped</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> messages from conversation middle]"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> messages[:head_end] </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [placeholder] </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> messages[tail_start:]</span></span></code></pre>
+<p>裁掉的是消息本身，只是在切口处多做一步保护；剩下的消息里 <code>tool_result</code> 内容仍在累积——第 34 条消息里可能躺着 30KB 的旧文件内容。→ L2。</p>
+<p><a id="reference-l2-micro_compact--旧工具结果占位"></a></p>
+<h4 id="l2-micro_compact--旧工具结果占位">L2: micro_compact — 旧工具结果占位</h4>
+<p><img alt="IMG-20260928133931679" loading="lazy" decoding="async" width="720" height="300" src="/_astro/IMG-20260928133931679.BLAlv8gw_286cKe.svg"></p>
+<p>Agent 连续读了 10 个文件。第 1-7 次的完整内容还躺在上下文里，早就不需要了，但占着大量空间。</p>
+<p>只保留最近 3 条 <code>tool_result</code> 的完整内容，更旧的替换为一行占位符：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">KEEP_RECENT_TOOL_RESULTS</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> micro_compact</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    tool_results </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> collect_tool_result_blocks(messages)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(tool_results) </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> KEEP_RECENT_TOOL_RESULTS</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> messages</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, _, block </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tool_results[:</span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">KEEP_RECENT_TOOL_RESULTS</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(block.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)) </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 120</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            block[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "[Earlier tool result compacted. Re-run if needed.]"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> messages</span></span></code></pre>
+<p>旧结果清掉了，但单条新结果可能就有 500KB——一个 <code>cat</code> 大文件的输出就能打满上下文。→ L3。</p>
+<p><a id="reference-l3-tool_result_budget--大结果落盘"></a></p>
+<h4 id="l3-tool_result_budget--大结果落盘">L3: tool_result_budget — 大结果落盘</h4>
+<p><img alt="IMG-20260928133931842" loading="lazy" decoding="async" width="720" height="356" src="/_astro/IMG-20260928133931842.BsKFu2Qm_Z1nU2i9.svg"></p>
+<p>模型一次读了 5 个大文件，单条 user 消息里所有 <code>tool_result</code> 加起来 500KB。</p>
+<p>统计最后一条 user 消息里所有 <code>tool_result</code> 的总大小。超过 200KB → 按大小排序，从最大的开始落盘到 <code>.task_outputs/tool-results/</code>，上下文里只留 <code>&lt;persisted-output&gt;</code> 标记 + 前 2000 字符预览。模型看到标记后知道完整内容在磁盘上，需要时可以重新读。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> tool_result_budget</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages, max_bytes</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">200_000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    last </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> messages[</span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    blocks </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [(i, b) </span><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i, b </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> enumerate</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(last[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">])</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">              if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> b.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"type"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "tool_result"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    total </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> sum</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(b.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))) </span><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, b </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> blocks)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> total </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> max_bytes:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> messages</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ranked </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> sorted</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(blocks, </span><span style="color:#E36209;--shiki-dark:#FFAB70">key</span><span style="color:#D73A49;--shiki-dark:#F97583">=lambda</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(p[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">].get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))), </span><span style="color:#E36209;--shiki-dark:#FFAB70">reverse</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> idx, block </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ranked:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> total </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> max_bytes:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            break</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        block[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> persist_large_output(block[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"tool_use_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">], </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(block[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        total </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> recalculate_total(blocks)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> messages</span></span></code></pre>
+<p>前三层都是纯文本/结构操作，0 API 调用，但也无法“理解”对话内容。上下文可能仍然太大。→ L4。</p>
+<p><a id="reference-l4-compact_history--llm-全量摘要"></a></p>
+<h4 id="l4-compact_history--llm-全量摘要">L4: compact_history — LLM 全量摘要</h4>
+<p><img alt="IMG-20260928133931878" loading="lazy" decoding="async" width="720" height="400" src="/_astro/IMG-20260928133931878.BeqkoVGl_ZWXxu1.svg"></p>
+<p>前三层全跑完了，但在超大项目中连续工作 30 分钟后，token 仍然超过阈值。</p>
+<p>三步流程：</p>
+<ol>
+<li><strong>保存 transcript</strong>：完整对话写入 <code>.transcripts/</code>，JSONL 格式。transcript 保留了可恢复记录，但模型的活跃上下文里只剩摘要。对模型当下推理来说，细节已经不在上下文中了。教学代码没有提供 transcript 检索工具。</li>
+<li><strong>LLM 生成摘要</strong>：把对话历史发给 LLM，要求保留当前目标、重要发现、已改文件、剩余工作、用户约束等关键信息。</li>
+<li><strong>替换消息列表</strong>：所有旧消息被替换为一条摘要。教学版只保留摘要；真实 Claude Code 会在 compact 后重新附加部分最近文件、计划、agent/skill/tool 等上下文。</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> compact_history</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    transcript_path </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> write_transcript(messages)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 先保存完整对话</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    summary </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> summarize_history(messages)          </span><span style="color:#6A737D;--shiki-dark:#6A737D"># LLM 生成摘要</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">             "content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"[Compacted]</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n\n{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">summary</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}]</span></span></code></pre>
+<p><strong>熔断器</strong>：连续失败 3 次后停止重试，防止死循环浪费 API 调用。</p>
+<p><a id="reference-应急-reactive_compact"></a></p>
+<h4 id="应急-reactive_compact">应急: reactive_compact</h4>
+<p>有时候 API 还是返回 <code>prompt_too_long</code>（413），上下文增长速度快于压缩触发速度时。</p>
+<p>这时触发 <strong>reactive_compact</strong>：比 compact_history 更激进，从尾部回退，但仍要避免留下孤立 <code>tool_result</code>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> reactive_compact</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    transcript </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> write_transcript(messages)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    tail_start </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> max</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages) </span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 5</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (tail_start </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#D73A49;--shiki-dark:#F97583"> and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tail_start </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(messages)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _is_tool_result_message(messages[tail_start])</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            and</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _message_has_tool_use(messages[tail_start </span><span style="color:#D73A49;--shiki-dark:#F97583">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">])):</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        tail_start </span><span style="color:#D73A49;--shiki-dark:#F97583">-=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    summary </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> summarize_history(messages[:tail_start])</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">             "content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"[Reactive compact]</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n\n{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">summary</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}, </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">messages[tail_start:]]</span></span></code></pre>
+<p>reactive compact 有重试上限（默认 1 次）。再失败就抛出异常，不无限循环。完整的错误恢复逻辑留给 s11。</p>
+<p><a id="reference-合起来跑"></a></p>
+<h4 id="合起来跑">合起来跑</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>def agent_loop(messages):</span></span>
+<span class="line"><span>    reactive_retries = 0</span></span>
+<span class="line"><span>    while True:</span></span>
+<span class="line"><span>        # 三个预处理器（0 API 调用）</span></span>
+<span class="line"><span>        # 顺序：budget 先跑，确保大内容落盘后再做占位和裁剪</span></span>
+<span class="line"><span>        messages[:] = tool_result_budget(messages)    # L3: 大结果落盘</span></span>
+<span class="line"><span>        messages[:] = snip_compact(messages)          # L1: 裁中间</span></span>
+<span class="line"><span>        messages[:] = micro_compact(messages)         # L2: 旧结果占位</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>        # 还不够？LLM 摘要（1 API 调用）</span></span>
+<span class="line"><span>        if estimate_token_count(messages) &gt; THRESHOLD:</span></span>
+<span class="line"><span>            messages[:] = compact_history(messages)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>        try:</span></span>
+<span class="line"><span>            response = client.messages.create(...)</span></span>
+<span class="line"><span>        except PromptTooLongError:</span></span>
+<span class="line"><span>            if reactive_retries &lt; MAX_REACTIVE_RETRIES:</span></span>
+<span class="line"><span>                messages[:] = reactive_compact(messages)  # 应急</span></span>
+<span class="line"><span>                reactive_retries += 1</span></span>
+<span class="line"><span>                continue</span></span>
+<span class="line"><span>            raise  # 超过重试上限，抛出异常</span></span>
+<span class="line"><span>        # ... 工具执行 ...</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>        # compact 工具：模型主动调用时触发 compact_history</span></span>
+<span class="line"><span>        if block.name == "compact":</span></span>
+<span class="line"><span>            messages[:] = compact_history(messages)</span></span>
+<span class="line"><span>            results.append({..., "content": "[Compacted. History summarized.]"})</span></span>
+<span class="line"><span>            messages.append({"role": "user", "content": results})</span></span>
+<span class="line"><span>            break  # 结束当前 turn，用压缩后的上下文开始新一轮</span></span></code></pre>
+<p><strong>顺序不能换。</strong> L3（budget）在 L2（micro）前面，因为 micro 会把旧的大 tool_result 替换成一行占位符，budget 必须在那之前把完整内容落盘。这也是为什么 CC 源码把 <code>applyToolResultBudget</code> 放在最前面。</p>
+<p><a id="reference-相对-s07-的变更"></a></p>
+<h3 id="相对-s07-的变更">相对 S07 的变更</h3>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s07)</th>
+<th>之后 (s08)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>上下文管理</td>
+<td>无（上下文无限膨胀）</td>
+<td>四层压缩管线 + 应急</td>
+</tr>
+<tr>
+<td>新函数</td>
+<td>—</td>
+<td>snip_compact, micro_compact, tool_result_budget, compact_history, reactive_compact</td>
+</tr>
+<tr>
+<td>工具</td>
+<td>bash, read, write, edit, glob, todo_write, task, load_skill (8)</td>
+<td>8 + compact (9)</td>
+</tr>
+<tr>
+<td>循环</td>
+<td>LLM 调用 → 工具执行</td>
+<td>每轮前跑三层预处理器 + 阈值触发 compact_history</td>
+</tr>
+<tr>
+<td>设计原则</td>
+<td>—</td>
+<td>便宜的先跑，贵的后跑</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-试一下"></a></p>
+<h3 id="试一下">试一下</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> learn-claude-code</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">python</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> s08_context_compact/code.py</span></span></code></pre>
+<p>试试这些 prompt：</p>
+<ol>
+<li><code>Read the file README.md, then read code.py, then read s01_agent_loop/README.md</code>（连续读多个文件，观察 L2 压缩旧结果）</li>
+<li><code>Read every file in s08_context_compact/</code>（一次性读大量内容，观察 L3 落盘）</li>
+<li>反复对话 20+ 轮，观察是否出现 <code>[auto compact]</code> 或 <code>[reactive compact]</code></li>
+</ol>
+<p>观察重点：每次工具执行后，旧 tool_result 是否被压缩？连续对话后 token 超阈值时，是否自动触发了摘要？</p>
+<p><a id="reference-接下来"></a></p>
+<h3 id="接下来">接下来</h3>
+<p>上下文压缩让 Agent 能跑很久不会崩。但每次压缩后，用户之前告诉它的偏好、约束也跟着丢了。能不能让 Agent 有选择地记住重要的事？</p>
+<p>S09 Memory → 三个子系统：选择记什么、提取关键信息、整理巩固。跨压缩、跨会话。</p>
+<p><a id="reference-claude-code"></a></p>
+<h2 id="claude-code">Claude Code</h2>
+<blockquote>
+<p>以下基于 CC 源码 <code>compact.ts</code>、<code>autoCompact.ts</code>、<code>microCompact.ts</code>、<code>query.ts</code> 的分析。</p>
+</blockquote>
+<p><a id="reference-执行顺序对照"></a></p>
+<h3 id="执行顺序对照">执行顺序对照</h3>
+<p>教学版为了讲解方便按 L1/L2/L3/L4 编号，但实际执行顺序和编号不完全对应：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>教学版</th>
+<th>Claude Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>执行顺序</td>
+<td>budget → snip → micro → auto</td>
+<td>budget → snip → micro → collapse → auto（<code>query.ts:379-468</code>）</td>
+</tr>
+<tr>
+<td>snip_compact</td>
+<td>保留头 3 + 尾 47</td>
+<td>CC 仅主线程启用；实现不在开源仓库中（<code>HISTORY_SNIP</code> feature gate），但接口可见：<code>snipCompactIfNeeded(messages)</code> → <code>{ messages, tokensFreed, boundaryMessage? }</code>，还暴露了 <code>SnipTool</code> 工具让模型主动调用。教学版的 3/47 是简化参数</td>
+</tr>
+<tr>
+<td>micro_compact</td>
+<td>文本占位符替换</td>
+<td>两条路径：time-based 直接清内容，cached 走 API <code>cache_edits</code>（legacy path 已移除）</td>
+</tr>
+<tr>
+<td>micro_compact 白名单</td>
+<td>按位置（最近 3 条）</td>
+<td>time-based 按时间阈值触发；cached 按计数触发（<code>microCompact.ts</code>）</td>
+</tr>
+<tr>
+<td>tool_result_budget</td>
+<td>200KB 字符</td>
+<td>200,000 字符（<code>toolLimits.ts:49</code>）</td>
+</tr>
+<tr>
+<td>compact_history 阈值</td>
+<td>字符数估算</td>
+<td>精确 token：<code>contextWindow - maxOutputTokens - 13_000</code></td>
+</tr>
+<tr>
+<td>摘要要求</td>
+<td>5 类信息</td>
+<td>9 个部分 + <code>&lt;analysis&gt;</code>/<code>&lt;summary&gt;</code> 双标签</td>
+</tr>
+<tr>
+<td>压缩 prompt</td>
+<td>简单 prompt</td>
+<td>首尾双重防呆禁止调工具</td>
+</tr>
+<tr>
+<td>PTL retry</td>
+<td>有（简化）</td>
+<td><code>truncateHeadForPTLRetry()</code> 按消息组回退（<code>compact.ts:243-290</code>）</td>
+</tr>
+<tr>
+<td>后压缩恢复</td>
+<td>无（教学版只保留摘要）</td>
+<td>自动重新读取最近文件、计划、agent/skill/tool 等</td>
+</tr>
+<tr>
+<td>熔断器</td>
+<td>3 次</td>
+<td>3 次（<code>autoCompact.ts:70</code>）</td>
+</tr>
+<tr>
+<td>reactive 重试</td>
+<td>1 次</td>
+<td>CC 有更精细的分级重试</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-执行顺序详解"></a></p>
+<h4 id="执行顺序详解">执行顺序详解</h4>
+<p>CC 源码 <code>query.ts</code> 中的真实顺序：</p>
+<ol>
+<li><code>applyToolResultBudget</code>（L379）：先处理大结果，确保完整内容落盘</li>
+<li><code>snipCompact</code>（L403）：裁中间消息</li>
+<li><code>microcompact</code>（L414）：旧结果占位</li>
+<li><code>contextCollapse</code>（L441）：独立的上下文管理系统（教学版无）</li>
+<li><code>autoCompact</code>（L454）：LLM 全量摘要</li>
+</ol>
+<p>教学版的 budget → snip → micro 顺序与此一致。教学版没有 contextCollapse 机制。</p>
+<p><a id="reference-read_file-的取舍"></a></p>
+<h4 id="read_file-的取舍">read_file 的取舍</h4>
+<p>教学版的 <code>micro_compact</code> 会把旧 <code>tool_result</code> 统一替换成占位符，包括 <code>read_file</code>。这通常不影响功能正确性：如果后续还需要文件内容，模型可以重新读一次。代价是可能多一次工具调用，也可能降低 prompt cache 命中率。</p>
+<p>Claude Code 没有用教学版这种简单规则解决这个问题。它把 <code>Read</code> 也放进可 microcompact 的工具集合，但同时维护 <code>readFileState</code>：重复读取未变化文件时返回 <code>FILE_UNCHANGED_STUB</code>，compact 后再按预算恢复最近读过的文件内容（例如最多 5 个文件、每个 5K token、总预算 50K token）。这是生产级实现里的缓存和恢复机制，教学版不展开，保留“压缩旧结果，必要时重新读取”的简单 trade-off。</p>
+<p><a id="reference-完整常量参考"></a></p>
+<h4 id="完整常量参考">完整常量参考</h4>
+<table>
+<thead>
+<tr>
+<th>常量</th>
+<th>值</th>
+<th>源文件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AUTOCOMPACT_BUFFER_TOKENS</code></td>
+<td>13,000</td>
+<td><code>autoCompact.ts:62</code></td>
+</tr>
+<tr>
+<td><code>MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES</code></td>
+<td>3</td>
+<td><code>autoCompact.ts:70</code></td>
+</tr>
+<tr>
+<td><code>MAX_OUTPUT_TOKENS_FOR_SUMMARY</code></td>
+<td>20,000</td>
+<td><code>autoCompact.ts:30</code></td>
+</tr>
+<tr>
+<td><code>POST_COMPACT_TOKEN_BUDGET</code></td>
+<td>50,000</td>
+<td><code>compact.ts:123</code></td>
+</tr>
+<tr>
+<td><code>POST_COMPACT_MAX_FILES_TO_RESTORE</code></td>
+<td>5</td>
+<td><code>compact.ts:122</code></td>
+</tr>
+<tr>
+<td><code>POST_COMPACT_MAX_TOKENS_PER_FILE</code></td>
+<td>5,000</td>
+<td><code>compact.ts:124</code></td>
+</tr>
+<tr>
+<td>时间 micro_compact 间隔</td>
+<td>60 分钟</td>
+<td><code>timeBasedMCConfig.ts</code></td>
+</tr>
+<tr>
+<td><code>MAX_COMPACT_STREAMING_RETRIES</code></td>
+<td>2</td>
+<td><code>compact.ts:131</code></td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-contextcollapse-和-sessionmemorycompact"></a></p>
+<h4 id="contextcollapse-和-sessionmemorycompact">contextCollapse 和 sessionMemoryCompact</h4>
+<p>CC 源码中还有两个机制本教学版没有展开：</p>
+<ul>
+<li><strong>contextCollapse</strong>：独立的上下文管理系统，启用时抑制 proactive autocompact（<code>autoCompact.ts:215-222</code>），由 collapse 的 commit/blocking 流程接管上下文管理。但 manual <code>/compact</code> 和 reactive fallback 仍是独立路径，不受 contextCollapse 影响。</li>
+<li><strong>sessionMemoryCompact</strong>：compact_history 之前，CC 会先尝试用已有的 session memory（s09 会讲到）做轻量摘要，不调 LLM。这个机制等学完 s09 之后回头看会更清楚。</li>
+</ul>
+<p><a id="reference-压缩-prompt-长什么样"></a></p>
+<h4 id="压缩-prompt-长什么样">压缩 prompt 长什么样？</h4>
+<p>CC 的压缩 prompt 有两个硬性要求：</p>
+<ol>
+<li><strong>绝对禁止调用工具</strong>：开头就是 <code>CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.</code>，末尾还会再 REMINDER 一次</li>
+<li><strong>先分析再总结</strong>：模型需要先在 <code>&lt;analysis&gt;</code> 标签里理清思路，然后在 <code>&lt;summary&gt;</code> 标签里输出正式摘要。analysis 在格式化时被剥离</li>
+</ol>
+<p><a id="reference-教学版的简化是刻意的"></a></p>
+<h4 id="教学版的简化是刻意的">教学版的简化是刻意的</h4>
+<ul>
+<li>micro_compact 用文本占位 → 我们没有 API 层的 <code>cache_edits</code> 权限</li>
+<li>read_file 不特殊处理 → 教学版接受必要时重新读取，避免引入 readFileState 和后压缩恢复机制</li>
+<li>token 用字符数估算 → 精确 tokenizer 不在教学范围内</li>
+<li>后压缩恢复省略 → 教学版只保留摘要，不自动重新附加文件</li>
+<li>两个辅助机制不展开 → 属于 10% 的细节</li>
+</ul>
+<p>核心设计思想，便宜的先跑贵的后跑，完整保留。</p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>用一次大文件读取比较工具结果落盘和全量摘要；说明预算限制、恢复路径和压缩失真分别由什么机制处理。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续理解相关机制：<a href="/notes/computer-science/agent/framework/learn-claude-code/agent-file-memory/">S09-Memory</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#context-compact--上下文总会满要有办法腾地方">Context Compact — 上下文总会满，要有办法腾地方</a></li><li style="--depth: 1"><a href="#问题">问题</a></li><li style="--depth: 1"><a href="#解决方案">解决方案</a></li><li style="--depth: 1"><a href="#工作原理">工作原理</a></li><li style="--depth: 2"><a href="#l1-snip_compact--裁掉无关的旧对话">L1: snip_compact — 裁掉无关的旧对话</a></li><li style="--depth: 2"><a href="#l2-micro_compact--旧工具结果占位">L2: micro_compact — 旧工具结果占位</a></li><li style="--depth: 2"><a href="#l3-tool_result_budget--大结果落盘">L3: tool_result_budget — 大结果落盘</a></li><li style="--depth: 2"><a href="#l4-compact_history--llm-全量摘要">L4: compact_history — LLM 全量摘要</a></li><li style="--depth: 2"><a href="#应急-reactive_compact">应急: reactive_compact</a></li><li style="--depth: 2"><a href="#合起来跑">合起来跑</a></li><li style="--depth: 1"><a href="#相对-s07-的变更">相对 S07 的变更</a></li><li style="--depth: 1"><a href="#试一下">试一下</a></li><li style="--depth: 1"><a href="#接下来">接下来</a></li><li style="--depth: 0"><a href="#claude-code">Claude Code</a></li><li style="--depth: 1"><a href="#执行顺序对照">执行顺序对照</a></li><li style="--depth: 2"><a href="#执行顺序详解">执行顺序详解</a></li><li style="--depth: 2"><a href="#read_file-的取舍">read_file 的取舍</a></li><li style="--depth: 2"><a href="#完整常量参考">完整常量参考</a></li><li style="--depth: 2"><a href="#contextcollapse-和-sessionmemorycompact">contextCollapse 和 sessionMemoryCompact</a></li><li style="--depth: 2"><a href="#压缩-prompt-长什么样">压缩 prompt 长什么样？</a></li><li style="--depth: 2"><a href="#教学版的简化是刻意的">教学版的简化是刻意的</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>系统控制 · Musuyin&#39; Home</title><meta name="description" content="系统控制把复位、时钟、电源和中断组织为处理器运行的基础条件。先确定复位源与时钟来源，再理解低功耗模式和中断屏蔽如何改变执行行为。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/embedded-system/system-control/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="系统控制 · Musuyin' Home"><meta property="og:description" content="系统控制把复位、时钟、电源和中断组织为处理器运行的基础条件。先确定复位源与时钟来源，再理解低功耗模式和中断屏蔽如何改变执行行为。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/embedded-system/system-control/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">系统控制</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-01-09">2026-01-09</time></dd></div><div><dt>字数</dt><dd>4179</dd></div><div><dt>预计阅读</dt><dd>14 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>系统控制</h1><time datetime="2026-01-09">2026-01-09</time><p class="tags"><a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a></p></header><div class="prose"><p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>系统控制把复位、时钟、电源和中断组织为处理器运行的基础条件。先确定复位源与时钟来源，再理解低功耗模式和中断屏蔽如何改变执行行为。</p>
+<p><a id="reference-功能组件"></a></p>
+<h2 id="功能组件">功能组件</h2>
+<p><a id="reference-复位控制"></a></p>
+<h3 id="复位控制">复位控制</h3>
+<p>复位 Reset：用手动或自动的方法发信号给硬件特定接口，使软件恢复到特定的程序段运行</p>
+<p><a id="reference-复位源"></a></p>
+<h4 id="复位源">复位源</h4>
+<p>不同的嵌入式系统有不同的复位源，按照复位源的不同可以将复位分为<strong>系统复位、电源复位</strong></p>
+<p><img alt="IMG-20260722152301882" loading="lazy" decoding="async" width="873" height="189" src="/_astro/IMG-20260722152301882.C1lTsI8-_Z1hwjay.webp"></p>
+<p>一般系统存在多个复位源：</p>
+<ul>
+<li>外部复位引脚</li>
+<li>内部看门狗复位</li>
+<li>通过 NVIC（嵌套向量中断控制器）产生的软件复位</li>
+<li>上电/掉电复位</li>
+<li>低电压检测电路产生的复位信号</li>
+</ul>
+<p><a id="reference-系统复位"></a></p>
+<h4 id="系统复位">系统复位</h4>
+<p><a id="reference-外部复位"></a></p>
+<h5 id="外部复位">外部复位</h5>
+<p>如果应用程序仅使用内部上电复位（POR）电路，那么 RESET 输入端必须通过一个可选的上拉电阻（1 ～ 100kΩ）连接到电源（VDD）</p>
+<p><img alt="IMG-20260722152301909" loading="lazy" decoding="async" width="326" height="266" src="/_astro/IMG-20260722152301909.DPLEneBJ_1CiCjc.webp"></p>
+<p><a id="reference-看门狗复位"></a></p>
+<h5 id="看门狗复位">看门狗复位</h5>
+<ul>
+<li>在看门狗计数器发生溢出时，可以事先设定程序下一步的去向，避免溢出时程序运行的不确定性，增加程序的可靠性</li>
+<li>看门狗计数发生溢出时仅将程序计数器清零，而不是像上电复位那样，将所有的寄存器都要清零</li>
+</ul>
+<p><a id="reference-软件复位"></a></p>
+<h5 id="软件复位">软件复位</h5>
+<ul>
+<li>软件复位则是通过软件触发让 MCU 自己对自己进行复位，软件复位是一种通过执行某个指令来触发 MCU 复位的系统复位</li>
+<li>软件复位可以复位某个特定的外设或者复位整个微控制器，包括内核在内的整个微控制器，均可以通过设置中断和复位控制寄存器的相应位实现复位</li>
+</ul>
+<p><a id="reference-电源复位"></a></p>
+<h4 id="电源复位">电源复位</h4>
+<p><a id="reference-上电复位"></a></p>
+<h5 id="上电复位">上电复位</h5>
+<p><img alt="IMG-20260722152301940" loading="lazy" decoding="async" width="622" height="337" src="/_astro/IMG-20260722152301940.c5wNeSMr_ZMIOiz.webp"></p>
+<p><a id="reference-掉电复位"></a></p>
+<h5 id="掉电复位">掉电复位</h5>
+<ul>
+<li>如果嵌入式系统在运行过程中电源电压突然发生跌落，会导致程序运行的不确定，所以此时需要将硬件板复位，使其处于一个确定的状态</li>
+<li>当电压跌落到一定的阈值以下时内部的掉电复位控制器中的条件检测位（BOR）就会被置为 1，表示将执行掉电复位程序</li>
+</ul>
+<p><a id="reference-时钟控制"></a></p>
+<h3 id="时钟控制">时钟控制</h3>
+<ul>
+<li>硬件板上电路的时钟越快，功耗越大，且其抗电磁干扰能力也会减弱，所以不可能一味地提高时钟频率来满足各种设备的需求</li>
+<li>因此较为复杂的 MCU 一般都采取多时钟源的方法来解决这个问题</li>
+</ul>
+<p><a id="reference-输入时钟"></a></p>
+<h4 id="输入时钟">输入时钟</h4>
+<ul>
+<li>从时钟源频率分为<strong>高速时钟</strong>和<strong>低速时钟</strong>
+<ul>
+<li>高速外部时钟和高速内部时钟都属于高速时钟</li>
+<li>低速外部时钟和低速内部时钟都属于低速时钟</li>
+</ul>
+</li>
+<li>从芯片角度分为片内时钟和片外时钟
+<ul>
+<li>片内时钟由芯片<strong>内部 RC 振荡器</strong>产生，具有起振较快的优点，因此在系统刚刚启动的时候默认采用内部高速时钟</li>
+<li>片外时钟通常由<strong>外部晶体振荡器</strong>输入，在精度和稳定性上都具有较大的优势。上电后通过软件配置的方式将系统时钟转而采用高速外部时钟信号</li>
+</ul>
+</li>
+</ul>
+<p>时钟使用：</p>
+<ul>
+<li>高速外部时钟
+<ul>
+<li>高速外部时钟通常以外部晶体作为时钟源，常用的晶体频率根据芯片的不同而发生变化</li>
+</ul>
+</li>
+<li>高速内部时钟
+<ul>
+<li>高速内部时钟由芯片内 RC 电阻、电容时钟振荡器产生，常见频率参数有 5MHz，8MHz 等，虽然不稳定，但是它的启动时间比 HSE 晶体振荡器短</li>
+<li>然而，即使在校准之后它的时钟频率精度仍较差，Cortex-M4 从上电开始即采用 HIS 作为初始的系统时钟</li>
+</ul>
+</li>
+<li>低速外部时钟
+<ul>
+<li>低速外部时钟通常以外部晶振作为时钟源，晶体一般选择一个低速外部晶体或陶瓷谐振器</li>
+<li>常见频率参数有 32.768kHz，11.0592kHz 等</li>
+<li>它为实时时钟或者其他定时功能提供一个低功耗且精确的时钟源。</li>
+</ul>
+</li>
+<li>低速内部时钟
+<ul>
+<li>低速内部时钟由片内 RC 电阻、电容时钟振荡器产生，LSI RC 担当一个低功耗时钟源的角色</li>
+<li>常见频率参数有 10kHz、32.768kHz、128kHz 等</li>
+<li>可以提供给实时时钟模块和看门狗模块</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-系统时钟"></a></p>
+<h4 id="系统时钟">系统时钟</h4>
+<ul>
+<li>系统时钟 SYSCLK 由多路选择器 SW 根据用户设置来选择 PLLCLK、HSE 或者 HIS 中的一路作为输出而得，SYSCLK 是片上大部分部件的时钟来源。</li>
+<li>为了让用户能够实时检测系统时钟是否运行正常， Cortex-M4 系列的微控制器专门提供了引脚 MCO。用户可以通过软件编程的方式，选择 SYSCLK、PLLCLK、 HSE 或者 HIS 中的一路在 MCO 上输出以供检测</li>
+</ul>
+<p><a id="reference-系统时钟分频得到其他时钟"></a></p>
+<h4 id="系统时钟分频得到其他时钟">系统时钟分频得到其他时钟</h4>
+<ul>
+<li>HCLK：HCLK 是高速总线 AHB 时钟，AHB 主要用于高性能模块，如 CPU、DMA 和 DSP 等之间的连接。</li>
+<li>FCLK：Cortex-M4 内核的“自由运行”时钟，同样由系统时钟 SYSCLK 经过 AHB 预分频器分频后直接得到，并且与 HCLK 互相同步。</li>
+<li>PCLK1：外设时钟，由系统时钟 SYSCLK 经过 AHB 预分频器，再经过 APB1 预分频器分频后得到。其主要作用是为挂载在 APB1 总线上的时钟提供时钟信号</li>
+</ul>
+<p><a id="reference-电源控制"></a></p>
+<h3 id="电源控制">电源控制</h3>
+<p>微控制器依靠低功耗模式降低处理器功耗，常见的低功耗模式包括：</p>
+<ul>
+<li>睡眠模式</li>
+<li>停机模式</li>
+<li>待机模式</li>
+</ul>
+<p><a id="reference-睡眠模式"></a></p>
+<h4 id="睡眠模式">睡眠模式</h4>
+<ul>
+<li>状态：Cortex 的内核停止工作，但<strong>外设还在继续工作</strong></li>
+<li>进入：执行了 WFE 或 WFI 指令</li>
+<li>退出：某个外设产生事件或者中断请求，内核才会被唤醒，从而退出睡眠模式</li>
+</ul>
+<p><a id="reference-停机模式"></a></p>
+<h4 id="停机模式">停机模式</h4>
+<ul>
+<li>状态：内核和外设均停止工作</li>
+<li>进入：电源控制寄存器中的相应位清零时，遇到 WFE 或 WFI 指令，就会进入停机模式</li>
+<li>退出：任意一个外部中断/事件控制（EXTI）信号唤醒</li>
+</ul>
+<p><a id="reference-待机模式"></a></p>
+<h4 id="待机模式">待机模式</h4>
+<ul>
+<li>状态：内核和外设都停止工作，而且内部的电压调压器也被关闭</li>
+<li>进入：电源控制寄存器中的相应位置位时，遇到 WFE 或 WFI 指令，就会进入待机模式</li>
+<li>退出：/RESET 引脚上的外部复位信号或者 RTC 的闹钟事件。</li>
+</ul>
+<p><a id="reference-中断控制"></a></p>
+<h3 id="中断控制">中断控制</h3>
+<p><a id="reference-嵌套向量中断控制器"></a></p>
+<h4 id="嵌套向量中断控制器">嵌套向量中断控制器</h4>
+<p>嵌套向量中断控制器（Nested Vectored Interrupt Controller, NVIC），控制着整个芯片中断相关的功能，它跟内核紧密耦合</p>
+<p><a id="reference-中断"></a></p>
+<h4 id="中断">中断</h4>
+<p>当出现了某个特殊事件时， CPU 会终止当前程序的执行，转而去执行该事件的处理程序（中断服务程序），待中断服务程序执行完毕，在返回断点继续执行原来的程序，这个过程称为中断</p>
+<p><a id="reference-中断源"></a></p>
+<h4 id="中断源">中断源</h4>
+<p>能引发中断的事件称为中断源。</p>
+<p>通常一个微控制器系统上，中断源可以是由微处理器异常引发的系统异常中断，也可以由外设引发的外部中断。</p>
+<p>系统异常中断因素包括非屏蔽中断、存储器管理、总线故障等，外部中断因素包括定时器溢出、串口收到数据等</p>
+<p><a id="reference-中断屏蔽"></a></p>
+<h4 id="中断屏蔽">中断屏蔽</h4>
+<p>在微控制器中，程序员可以通过设置相应的中断屏蔽位，禁止 CPU 响应某个中断，从而实现中断屏蔽。</p>
+<p>一个中断源能否被响应，一般由<strong>总中断允许控制位</strong>和该中断<strong>自身的中断允许控制位</strong>共同决定，这两个中断控制位中的任何一个被关闭，该中断就无法被响应</p>
+<p><a id="reference-中断处理过程"></a></p>
+<h4 id="中断处理过程">中断处理过程</h4>
+<p><a id="reference-中断响应"></a></p>
+<h5 id="中断响应">中断响应</h5>
+<ul>
+<li>保护现场：保护现场是为了在中断处理完成后，可以返回断点处继续执行下去而必须做的操作，微处理器系统保护现场通常是通过将 CPU 寄存器的值进栈实现的</li>
+<li>查找中断服务程序地址：中断发生后，CPU 根据中断向量表准确地找到这个中断对应的处理程序</li>
+<li>中断向量表：按中断号从小到大依次存放着所有中断处理程序的入口地址</li>
+</ul>
+<p><a id="reference-执行中断服务程序"></a></p>
+<h5 id="执行中断服务程序">执行中断服务程序</h5>
+<p>每个中断都有自己的对应的中断服务程序，用来处理中断，CPU 响应中断后转而执行对应的中断服务程序，通常中断服务程序又称为中断服务函数，由用户根据具体的应用使用汇编语言或 C 语言编写，用来实现对中断真正的处理操作</p>
+<p><a id="reference-中断返回"></a></p>
+<h5 id="中断返回">中断返回</h5>
+<p>CPU 执行中断服务程序完毕后，通过恢复现场，即 CPU 关键寄存器出栈实现中断返回，从断点处继续执行源程序</p>
+<p><a id="reference-中断优先级"></a></p>
+<h4 id="中断优先级">中断优先级</h4>
+<p>中断的优先级是根据中断实时性、重要性、软件处理的方便性预先设定的。当同时有多个中断请求产生时，CPU 会优先响应优先级较高的中断请求</p>
+<p><a id="reference-中断嵌套"></a></p>
+<h5 id="中断嵌套">中断嵌套</h5>
+<p>中断优先级不仅用于并发中断，还用于嵌套中断。</p>
+<p>中断嵌套是指当系统正在执行一个中断服务时，又有新的中断事件发生而产生了新的中断请求。当新发生的中断的优先级高于正在处理的中断时，CPU 可以<strong>终止执行优先级低的当前中断处理程序</strong>，转去执行新发生的、优先级较高的中断，处理完毕后才返回原来的中断处理程序继续执行</p>
+<p><a id="reference-中断原理"></a></p>
+<h4 id="中断原理">中断原理</h4>
+<p><img alt="IMG-20260722152301978" loading="lazy" decoding="async" width="759" height="215" src="/_astro/IMG-20260722152301978.BwwA012h_1Qs2qb.webp"></p>
+<p><a id="reference-中断配置"></a></p>
+<h4 id="中断配置">中断配置</h4>
+<ul>
+<li>建立中断向量表
+<ul>
+<li>中断向量表的建立必须在用户应用程序执行前完成，用户可以根据应用需求，选择在 Flash 或在 RAM 中建立中断向量表</li>
+</ul>
+</li>
+<li>分配栈空间并初始化
+<ul>
+<li>栈的初始化工作通常是在微处理器上电复位后执行复位程序完成的。栈空间的分配通常位于启动代码的起始位置</li>
+</ul>
+</li>
+<li>设置中断优先级
+<ul>
+<li>设置中断优先级是用户在应用程序中编写代码配置 NVIC 实现的，首先设置中断优先级的分组位数，然后设置中断的抢占优先级和子优先级</li>
+</ul>
+</li>
+<li>使能中断
+<ul>
+<li>在设置完中断的优先级后，通过失效前面提及的中断屏蔽寄存器中的总中断屏蔽位，可以使能对应的中断</li>
+</ul>
+</li>
+<li>编写对应的中断服务代码
+<ul>
+<li>具体内容由用户根据需求编写，实现对中断的具体处理</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-dma-控制"></a></p>
+<h3 id="dma-控制">DMA 控制</h3>
+<p><a id="reference-传输要求"></a></p>
+<h4 id="传输要求">传输要求</h4>
+<ul>
+<li>传输源： DMA 传输的数据来源</li>
+<li>传输目标： DMA 数据传输的目标地址</li>
+<li>传输单位和需要传输的数据量</li>
+<li>触发信号： 用于触发一次数据传输的动作，可以用来控制数据传输的时机</li>
+</ul>
+<p><a id="reference-传输过程"></a></p>
+<h4 id="传输过程">传输过程</h4>
+<ul>
+<li>DMA 请求，CPU 初始化 DMA 控制器，外设 I/O 接口向 DMA 控制器发出 DMA 请求</li>
+<li>DMA 响应，DMA 控制器判断 DMA 请求的优先级，决定是否屏蔽 DMA 请求，如果接受请求则向总线仲裁器提出总线请求。当 CPU 执行完当前总线周期时，可释放总线控制权。此时，总线仲裁器输出总线应答，表示 DMA 已经响应，DMA 控制器从 CPU 接管对总线的控制，并通知外设开始 DMA 传输</li>
+<li>DMA 传输，DMA 数据以规定的传输单位，通常是字进行传输。每个单位的数据传送完成后，DMA 控制器修改地址，并对数据量的传送单位个数进行计数，继而开始下一个单位数据的传送。如此循环往复，直至达到预先设定的传送单位数量为止</li>
+<li>DMA 结束，当规定数量的 DMA 数据传输完成后， DMA 控制器通知外设停止传输，并向 CPU 发送一个信号，例如，产生中断或事件，报告 DMA 数据传输操作结束，同时释放总线控制权</li>
+</ul>
+<p><a id="reference-传输模式"></a></p>
+<h4 id="传输模式">传输模式</h4>
+<ul>
+<li>停止 CPU 访问内存</li>
+<li>周期挪用
+<ul>
+<li>当 I/O 设备没有 DMA 请求、CPU 按程序要求访问内存时，一旦 I/O 设备有 DMA 请求，则由 I/O 设备挪用一个或几个内存周期，这就是周期挪用方式</li>
+<li>周期挪用的方法既实现了 I/O 传送，又较好地发挥了内存和 CPU 的效率，是一种更为广泛采用的方法</li>
+<li>周期挪用的方法适用于 I/O 设备读写周期大于内存存储周期的情况</li>
+</ul>
+</li>
+<li>DMA 与 CPU 交替访内存
+<ul>
+<li>如果 CPU 的工作周期比内存存取周期长很多，此 时采用交替访内的方法可以使 DMA 传送和 CPU 同时 发挥最高的效率</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-工作原理"></a></p>
+<h4 id="工作原理">工作原理</h4>
+<ul>
+<li>触发通道
+<ul>
+<li>微控制器有两个 DMA，每个 DMA 有不同数量的触发通道</li>
+</ul>
+</li>
+<li>优先级
+<ul>
+<li>与中断的中断源类似，对于 DMA 的每个通道也可以赋予优先级。</li>
+<li>在每个 DMA 中，DMA 的仲裁器根据通道请求的优先级来启动外设/存储器的访问，同一时刻一个 DMA 的多个通道可以同时发起 DMA 传送请求，但对于一个 DMA 控制器来说只能允许有一个请求有效</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-dma-特点及应用"></a></p>
+<h4 id="dma-特点及应用">DMA 特点及应用</h4>
+<ul>
+<li>DMA 优点
+<ul>
+<li>减轻了 CPU 的负担</li>
+<li>提高了数据传输的效率</li>
+<li>减少了用户开发的代码量</li>
+</ul>
+</li>
+<li>DMA 使用场合
+<ul>
+<li>实时性较强的嵌入式系统</li>
+<li>需要高速传送成组数据的系统</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-初始化配置"></a></p>
+<h2 id="初始化配置">初始化配置</h2>
+<p><a id="reference-片级初始化"></a></p>
+<h3 id="片级初始化">片级初始化</h3>
+<ul>
+<li>完成嵌入式微处理器的初始化</li>
+<li>将默认状态逐步设置成系统所要求的工作状态</li>
+<li>纯硬件的初始化过程</li>
+</ul>
+<p><a id="reference-板级初始化"></a></p>
+<h3 id="板级初始化">板级初始化</h3>
+<ul>
+<li>初始化其他硬件设备</li>
+<li>设置某些软件的数据结构和参数</li>
+<li>包含软件和硬件的初始化过程</li>
+</ul>
+<p><a id="reference-系统初始化"></a></p>
+<h3 id="系统初始化">系统初始化</h3>
+<p>系统初始化过程以软件初始化为主，主要进行操作系统的初始化。初始化代码完成的操作与具有的硬件平台相关，但大都包括以下内容：</p>
+<ul>
+<li>初始化中断向量表</li>
+<li>初始化存储器系统</li>
+<li>存储器类型、时序和总线宽度的配置</li>
+<li>存储器地址的配置和重映射</li>
+</ul>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>中断优先级与中断屏蔽分别控制什么？低功耗模式为何需要明确唤醒来源？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#功能组件">功能组件</a></li><li style="--depth: 1"><a href="#复位控制">复位控制</a></li><li style="--depth: 2"><a href="#复位源">复位源</a></li><li style="--depth: 2"><a href="#系统复位">系统复位</a></li><li style="--depth: 3"><a href="#外部复位">外部复位</a></li><li style="--depth: 3"><a href="#看门狗复位">看门狗复位</a></li><li style="--depth: 3"><a href="#软件复位">软件复位</a></li><li style="--depth: 2"><a href="#电源复位">电源复位</a></li><li style="--depth: 3"><a href="#上电复位">上电复位</a></li><li style="--depth: 3"><a href="#掉电复位">掉电复位</a></li><li style="--depth: 1"><a href="#时钟控制">时钟控制</a></li><li style="--depth: 2"><a href="#输入时钟">输入时钟</a></li><li style="--depth: 2"><a href="#系统时钟">系统时钟</a></li><li style="--depth: 2"><a href="#系统时钟分频得到其他时钟">系统时钟分频得到其他时钟</a></li><li style="--depth: 1"><a href="#电源控制">电源控制</a></li><li style="--depth: 2"><a href="#睡眠模式">睡眠模式</a></li><li style="--depth: 2"><a href="#停机模式">停机模式</a></li><li style="--depth: 2"><a href="#待机模式">待机模式</a></li><li style="--depth: 1"><a href="#中断控制">中断控制</a></li><li style="--depth: 2"><a href="#嵌套向量中断控制器">嵌套向量中断控制器</a></li><li style="--depth: 2"><a href="#中断">中断</a></li><li style="--depth: 2"><a href="#中断源">中断源</a></li><li style="--depth: 2"><a href="#中断屏蔽">中断屏蔽</a></li><li style="--depth: 2"><a href="#中断处理过程">中断处理过程</a></li><li style="--depth: 3"><a href="#中断响应">中断响应</a></li><li style="--depth: 3"><a href="#执行中断服务程序">执行中断服务程序</a></li><li style="--depth: 3"><a href="#中断返回">中断返回</a></li><li style="--depth: 2"><a href="#中断优先级">中断优先级</a></li><li style="--depth: 3"><a href="#中断嵌套">中断嵌套</a></li><li style="--depth: 2"><a href="#中断原理">中断原理</a></li><li style="--depth: 2"><a href="#中断配置">中断配置</a></li><li style="--depth: 1"><a href="#dma-控制">DMA 控制</a></li><li style="--depth: 2"><a href="#传输要求">传输要求</a></li><li style="--depth: 2"><a href="#传输过程">传输过程</a></li><li style="--depth: 2"><a href="#传输模式">传输模式</a></li><li style="--depth: 2"><a href="#工作原理">工作原理</a></li><li style="--depth: 2"><a href="#dma-特点及应用">DMA 特点及应用</a></li><li style="--depth: 0"><a href="#初始化配置">初始化配置</a></li><li style="--depth: 1"><a href="#片级初始化">片级初始化</a></li><li style="--depth: 1"><a href="#板级初始化">板级初始化</a></li><li style="--depth: 1"><a href="#系统初始化">系统初始化</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

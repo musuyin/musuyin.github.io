@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ARM处理器 · Musuyin&#39; Home</title><meta name="description" content="ARM 处理器先按应用领域理解 Cortex 系列，再进入具体处理器的寄存器、运行模式和特权级。本文寄存器与异常相关内容应结合 Cortex-M 语境阅读。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/theory/embedded-system/arm-processors/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="ARM处理器 · Musuyin' Home"><meta property="og:description" content="ARM 处理器先按应用领域理解 Cortex 系列，再进入具体处理器的寄存器、运行模式和特权级。本文寄存器与异常相关内容应结合 Cortex-M 语境阅读。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/theory/embedded-system/arm-processors/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">ARM处理器</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-10-31">2025-10-31</time></dd></div><div><dt>字数</dt><dd>1947</dd></div><div><dt>预计阅读</dt><dd>7 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>ARM处理器</h1><time datetime="2025-10-31">2025-10-31</time><p class="tags"><a href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a></p></header><div class="prose"><p><a id="reference-阅读线索"></a></p>
+<h2 id="阅读线索">阅读线索</h2>
+<p>ARM 处理器先按应用领域理解 Cortex 系列，再进入具体处理器的寄存器、运行模式和特权级。本文寄存器与异常相关内容应结合 Cortex-M 语境阅读。</p>
+<p><a id="reference-arm-处理器概述"></a></p>
+<h2 id="arm-处理器概述">ARM 处理器概述</h2>
+<ul>
+<li>ARM（Advanced RISC Machine）既是对一类微处理器的统称，也是一个公司的名字，还是一类技术的名称</li>
+<li>ARM 处理器采用 RISC（精简指令集）架构，RISC 处理器简化了处理器结构、减少了复杂功能的指令，同时支持处理器扩展</li>
+</ul>
+<p><a id="reference-特点"></a></p>
+<h3 id="特点">特点</h3>
+<ul>
+<li>小体积、低功耗、低成本、高性能</li>
+<li>支持 Thumb（16bit）/ ARM（32bit）双指令集，能很好地兼顾性能与代码密度</li>
+<li>大量使用寄存器，指令执行速度更快</li>
+<li>大多数数据操作都在寄存器中完成，更多单周期指令，便于指令流水线执行</li>
+<li>寻址方式灵活简单，执行效率高</li>
+<li>指令长度固定</li>
+</ul>
+<p><a id="reference-发展历史"></a></p>
+<h3 id="发展历史">发展历史</h3>
+<ul>
+<li>架构是“设计蓝图” ：定义了指令集、编程模型等基础规则</li>
+<li>处理器是“具体产品”：基于某一版本架构实现的具体硬件内核</li>
+</ul>
+<p><img alt="" loading="lazy" decoding="async" width="1261" height="623" src="/_astro/IMG-20260722152301515.CHIu1dQW_1enI4B.webp"></p>
+<ul>
+<li>ARMv4：嵌入式时代的基石
+<ul>
+<li>首个被广泛采用的架构。其标志性创新是引入了 <strong>Thumb 指令集</strong>，它允许处理器在 16 位和 32 位指令之间切换。</li>
+<li>在多数情况下，使用 16 位 Thumb 指令可以显著提高代码密度（节省约 30%的存储空间），这对成本敏感的嵌入式设备至关重要</li>
+</ul>
+</li>
+<li>ARMv7：现代 Cortex 系列的开端
+<ul>
+<li>从 v7 开始，ARM 将架构与处理器内核的命名清晰地分开，并确立了三大系列：
+<ul>
+<li><strong>Cortex-A</strong>：面向<strong>高性能</strong>应用，支持复杂操作系统如 Linux 和 Android。</li>
+<li><strong>Cortex-R</strong>：专为需要<strong>高实时性和高可靠性</strong>的场景设计。</li>
+<li><strong>Cortex-M</strong>：主打<strong>微控制器</strong>市场，以极低的功耗和成本为特点</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>ARMv8：迈入 64 位时代
+<ul>
+<li>这是 ARM 近 20 年来最大的一次架构变革。它引入了全新的 AArch64 执行状态和 A64 指令集，不仅带来了 64 位寻址能力，还重新设计了指令集以提升效率。</li>
+<li>更重要的是，它保持了与原有 ARMv7 AArch32 状态的兼容，确保了平滑过渡</li>
+</ul>
+</li>
+<li>ARMv9：面向未来的计算
+<ul>
+<li>ARMv9 在 v8 的基础上，重点增强了人工智能（AI）、数字信号处理（DSP）和安全性。其核心特性 SVE2 可以更灵活地处理数据，显著提升机器学习和多媒体处理的效率</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-cortex-系列处理器"></a></p>
+<h2 id="cortex-系列处理器">Cortex 系列处理器</h2>
+<p><a id="reference-cortex-a"></a></p>
+<h3 id="cortex-a">Cortex-A</h3>
+<ul>
+<li>用于<strong>复杂操作系统</strong>和用户应用程序，追求高时钟频率、<strong>高性能</strong>、合理功耗</li>
+<li>主要处理器：Cortex-A5 、Cortex-A8 、Cortex-A9 、Cortex-A53 等</li>
+</ul>
+<p><a id="reference-cortex-r"></a></p>
+<h3 id="cortex-r">Cortex-R</h3>
+<ul>
+<li>追求<strong>实时性</strong></li>
+<li>高性能：与高时钟频率相结合的快速处理能力</li>
+<li>实时：不仅要求任务响应要实时，而且要求在规定的时间内完成事件的处理</li>
+</ul>
+<p><a id="reference-cortex-m"></a></p>
+<h3 id="cortex-m">Cortex-M</h3>
+<ul>
+<li>追求<strong>最低成本、极低功耗</strong></li>
+<li>针对低成本应用优化的微控制器，可为超低功耗的嵌入式计算应用提供最佳解决方案</li>
+<li>比 Cortex-R 处理器更加精简，有更短的流水线、更简单的指令集、更少的运算单元和调试单元</li>
+<li>主要处理器：Cortex-M0/M0+、Cortex-M3、Cortex-M4、Cortex-M7、Cortex-M23、Cortex-M33、Cortex-M55、Cortex-M85</li>
+</ul>
+<p><a id="reference-工作模式和特权级别"></a></p>
+<h2 id="工作模式和特权级别">工作模式和特权级别</h2>
+<p><a id="reference-处理器状态"></a></p>
+<h3 id="处理器状态">处理器状态</h3>
+<p>ARM Cortex 处理器有 2 种操作状态：</p>
+<ul>
+<li><strong>调试状态</strong>：当处理器由于<strong>触发断点</strong>等原因被暂停后，进入调试状态并停止指令执行。</li>
+<li><strong>Thumb 状态</strong>：若处理器在<strong>执行程序代码</strong>（Thumb 指令），则会处于此状态</li>
+</ul>
+<p><a id="reference-处理器模式"></a></p>
+<h3 id="处理器模式">处理器模式</h3>
+<p>ARM Cortex 处理器有 2 种处理器模式：</p>
+<ul>
+<li><strong>线程模式</strong>：用于执行应用程序软件。</li>
+<li><strong>处理模式</strong>：<strong>处理异常</strong>时工作于处理模式，完成异常处理后返回线程模式。</li>
+</ul>
+<p><a id="reference-处理器特权级别"></a></p>
+<h3 id="处理器特权级别">处理器特权级别</h3>
+<ul>
+<li><strong>非特权级</strong>（也称为用户级）
+<ul>
+<li>有限访问 MSR 和 MRS 指令，并且不能使用 CPS 指令；</li>
+<li>可以访问系统定时器、NVIC 或者系统控制块；</li>
+<li>有对存储器或外设的限制访问。</li>
+</ul>
+</li>
+<li><strong>特权级</strong>
+<ul>
+<li>非特权状态可以使用 SVC（Supervisor Calls）指令产生一个系统调用，把控制权转移到特权状态。</li>
+<li>只有特权状态可以在线程模式下通过写控制寄存器来改变状态执行的特权等级。</li>
+</ul>
+</li>
+</ul>
+<p><img alt="" loading="lazy" decoding="async" width="559" height="347" src="/_astro/IMG-20260722152301541.DfnZMfyX_Z1cGoAF.webp"></p>
+<p><a id="reference-寄存器"></a></p>
+<h2 id="寄存器">寄存器</h2>
+<p>寄存器是 CPU（Central Processing Unit，中央处理器）内有限存储容量的高速存储部件，用来暂时存放参与运算的数据和运算结果。</p>
+<p>ARM Cortex-M4 有 7 种 32 位主要寄存器</p>
+<p><img alt="" loading="lazy" decoding="async" width="599" height="872" src="/_astro/IMG-20260722152301574.DByj12K1_2t0CQJ.webp"></p>
+<p><a id="reference-通用寄存器的四种角色"></a></p>
+<h3 id="通用寄存器的四种角色">通用寄存器的四种角色</h3>
+<p><a id="reference-低组寄存器-low-register"></a></p>
+<h4 id="低组寄存器-low-register">低组寄存器 Low Register</h4>
+<p>R0-R7：低组寄存器（Low Register）</p>
+<ul>
+<li>所有访问通用寄存器的指令都可以访问</li>
+</ul>
+<p><a id="reference-高组寄存器-high-register"></a></p>
+<h4 id="高组寄存器-high-register">高组寄存器 High Register</h4>
+<p>R8-R12：高组寄存器（High Register）</p>
+<ul>
+<li>所有 32 位通用寄存器指令都可以访问</li>
+<li>但是所有的 16 位指令都不能访问</li>
+</ul>
+<p><a id="reference-堆栈指针寄存器-sp"></a></p>
+<h4 id="堆栈指针寄存器-sp">堆栈指针寄存器 SP</h4>
+<p>R13（SP）：堆栈指针寄存器</p>
+<ul>
+<li>用于访问堆栈</li>
+<li>包括两个物理寄存器
+<ul>
+<li><strong>主堆栈指针（Main Stack Pointer，MSP）寄存器</strong></li>
+<li><strong>进程堆栈指针（Process Stack Pointer，PSP）寄存器</strong></li>
+</ul>
+</li>
+<li>系统可以同时支持这两个堆栈寄存器。</li>
+</ul>
+<p><a id="reference-链接寄存器-lr"></a></p>
+<h4 id="链接寄存器-lr">链接寄存器 LR</h4>
+<p>R14（LR）：链接寄存器</p>
+<ul>
+<li>链接寄存器（LR）在执行分支（<code>B</code>）和链接（<code>BL</code>）指令或带有交换分支（<code>BX</code>）和链接指令（<code>BLX</code>）时，PC 的返回地址自动保存进 LR。</li>
+</ul>
+<p><a id="reference-程序计数寄存器-pc"></a></p>
+<h4 id="程序计数寄存器-pc">程序计数寄存器 PC</h4>
+<p>R15（PC）：程序计数寄存器</p>
+<ul>
+<li>指向当前程序执行指令的地址程序，可以直接对寄存器进行操作，从而改变程序流程。</li>
+<li>若用 <code>BL</code> 指令来进行跳转，会更新 LR 和 PC 寄存器。</li>
+<li>用 <code>MOV</code>（move，数据传送）指令来操作 PC 实现跳转时，不更新 LR。</li>
+<li>由于 Cortex-M4 内部采用指令流水线技术，所以读 PC 时返回值是当前指令的地址+4。</li>
+</ul>
+<p><a id="reference-特殊功能寄存器的三种类型"></a></p>
+<h3 id="特殊功能寄存器的三种类型">特殊功能寄存器的三种类型</h3>
+<p><a id="reference-程序状态寄存器-psr"></a></p>
+<h4 id="程序状态寄存器-psr">程序状态寄存器 PSR</h4>
+<p>xPSR：程序状态寄存器</p>
+<ul>
+<li>应用状态寄存器（APSR）</li>
+<li>中断状态寄存器（IPSR）</li>
+<li>执行状态寄存器（EPSR）</li>
+<li>3 种状态寄存器组合构成 32 位寄存器（xPSR）</li>
+</ul>
+<p><img alt="" loading="lazy" decoding="async" width="1259" height="241" src="/_astro/IMG-20260722152301598.DU9Ad18m_Z2rnVhd.webp"></p>
+<p><a id="reference-中断屏蔽寄存器-primask"></a></p>
+<h4 id="中断屏蔽寄存器-primask">中断屏蔽寄存器 PRIMASK</h4>
+<p>中断屏蔽寄存器分为 3 组，分别是 PRIMASK、FAULTMASK 和 BASEPRI。</p>
+<p><img alt="" loading="lazy" decoding="async" width="1255" height="345" src="/_astro/IMG-20260722152301618.Disp-5AB_HLUjT.webp"></p>
+<p><a id="reference-控制寄存器-control"></a></p>
+<h4 id="控制寄存器-control">控制寄存器 CONTROL</h4>
+<p><img alt="" loading="lazy" decoding="async" width="1240" height="145" src="/_astro/IMG-20260722152301633.CAKCmOAp_YBsSK.webp"></p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<p>SP、LR、PC 分别保存什么？线程模式与处理器特权级为什么要分开描述？</p>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/theory/">理论基础学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#阅读线索">阅读线索</a></li><li style="--depth: 0"><a href="#arm-处理器概述">ARM 处理器概述</a></li><li style="--depth: 1"><a href="#特点">特点</a></li><li style="--depth: 1"><a href="#发展历史">发展历史</a></li><li style="--depth: 0"><a href="#cortex-系列处理器">Cortex 系列处理器</a></li><li style="--depth: 1"><a href="#cortex-a">Cortex-A</a></li><li style="--depth: 1"><a href="#cortex-r">Cortex-R</a></li><li style="--depth: 1"><a href="#cortex-m">Cortex-M</a></li><li style="--depth: 0"><a href="#工作模式和特权级别">工作模式和特权级别</a></li><li style="--depth: 1"><a href="#处理器状态">处理器状态</a></li><li style="--depth: 1"><a href="#处理器模式">处理器模式</a></li><li style="--depth: 1"><a href="#处理器特权级别">处理器特权级别</a></li><li style="--depth: 0"><a href="#寄存器">寄存器</a></li><li style="--depth: 1"><a href="#通用寄存器的四种角色">通用寄存器的四种角色</a></li><li style="--depth: 2"><a href="#低组寄存器-low-register">低组寄存器 Low Register</a></li><li style="--depth: 2"><a href="#高组寄存器-high-register">高组寄存器 High Register</a></li><li style="--depth: 2"><a href="#堆栈指针寄存器-sp">堆栈指针寄存器 SP</a></li><li style="--depth: 2"><a href="#链接寄存器-lr">链接寄存器 LR</a></li><li style="--depth: 2"><a href="#程序计数寄存器-pc">程序计数寄存器 PC</a></li><li style="--depth: 1"><a href="#特殊功能寄存器的三种类型">特殊功能寄存器的三种类型</a></li><li style="--depth: 2"><a href="#程序状态寄存器-psr">程序状态寄存器 PSR</a></li><li style="--depth: 2"><a href="#中断屏蔽寄存器-primask">中断屏蔽寄存器 PRIMASK</a></li><li style="--depth: 2"><a href="#控制寄存器-control">控制寄存器 CONTROL</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

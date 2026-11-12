@@ -1,0 +1,471 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Java集合 · Musuyin&#39; Home</title><meta name="description" content="集合选型先看元素是否有序、是否允许重复、查询与更新模式，再看并发要求。List、Set、Map 是语义接口；扩容、链表和树化是具体实现，不能把某一种实现的规则推广给整个接口。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/java/interview/java-collections/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Java集合 · Musuyin' Home"><meta property="og:description" content="集合选型先看元素是否有序、是否允许重复、查询与更新模式，再看并发要求。List、Set、Map 是语义接口；扩容、链表和树化是具体实现，不能把某一种实现的规则推广给整个接口。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/java/interview/java-collections/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Java集合</p><dl><div><dt>发布日期</dt><dd><time datetime="2025-10-19">2025-10-19</time></dd></div><div><dt>字数</dt><dd>6288</dd></div><div><dt>预计阅读</dt><dd>21 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%90%8E%E7%AB%AF/">#后端</a><a href="/tags/Java/">#Java</a><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a><a href="/tags/List/">#List</a><a href="/tags/Set/">#Set</a><a href="/tags/Map/">#Map</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Java集合</h1><time datetime="2025-10-19">2025-10-19</time><p class="tags"><a href="/tags/%E5%90%8E%E7%AB%AF/">#后端</a><a href="/tags/Java/">#Java</a><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a><a href="/tags/List/">#List</a><a href="/tags/Set/">#Set</a><a href="/tags/Map/">#Map</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p>集合选型先看元素是否有序、是否允许重复、查询与更新模式，再看并发要求。List、Set、Map 是语义接口；扩容、链表和树化是具体实现，不能把某一种实现的规则推广给整个接口。</p>
+<p><a id="reference-集合"></a></p>
+<h2 id="集合">集合</h2>
+<p><a id="reference-集合与数组"></a></p>
+<h3 id="集合与数组">集合与数组</h3>
+<ul>
+<li>数组是固定长度的数据结构，一旦创建长度就无法改变，而集合是动态长度的数据结构，可以根据需要动态增加或减少元素。</li>
+<li>数组可以包含基本数据类型和对象，而集合只能包含对象。</li>
+<li>数组用下标访问；集合按接口提供访问方式，例如 List.get 支持按索引访问，Map.get 按键访问。</li>
+</ul>
+<p><a id="reference-常用集合"></a></p>
+<h3 id="常用集合">常用集合</h3>
+<p><img alt="" loading="lazy" decoding="async" width="877" height="450" src="/_astro/IMG-20260804174731028.COaEfidz_14KQOi.webp"></p>
+<ul>
+<li>ArrayList：动态数组，实现了 List 接口，支持动态增长。</li>
+<li>LinkedList：双向链表，也实现了 List 接口，支持快速的插入和删除操作。</li>
+<li>HashMap：基于哈希表的 Map 实现，存储键值对，通过键快速查找值。</li>
+<li>HashSet：基于 HashMap 实现的 Set 集合，用于存储唯一元素。</li>
+<li>TreeMap：基于红黑树实现的有序 Map 集合，可以按照键的顺序进行排序。</li>
+<li>LinkedHashMap：基于哈希表和双向链表实现的 Map 集合，保持插入顺序或访问顺序。</li>
+<li>PriorityQueue：优先队列，可以按照比较器或元素的自然顺序进行排序。</li>
+</ul>
+<p><a id="reference-线程安全的集合"></a></p>
+<h3 id="线程安全的集合">线程安全的集合</h3>
+<p><a id="reference-util-包"></a></p>
+<h4 id="util-包">util 包</h4>
+<ul>
+<li><strong>Vector</strong>：线程安全的动态数组，其内部方法基本都经过 <code>synchronized</code> 修饰，如果不需要线程安全，并不建议选择，存在同步的额外开销。Vector 内部是使用对象数组来保存数据，可以根据需要自动的增加容量，当数组已满时，会创建新的数组，并拷贝原有数组数据。</li>
+<li><strong>Hashtable</strong>：线程安全的哈希表，HashTable 的加锁方法是给每个方法加上 <code>synchronized</code> 关键字，这样锁住的是整个 Table 对象，不支持 null 键和值，由于同步导致的性能开销，所以已经很少被推荐使用，如果要保证线程安全的哈希表，可以用 ConcurrentHashMap。</li>
+</ul>
+<p><a id="reference-concurrent-包"></a></p>
+<h4 id="concurrent-包">concurrent 包</h4>
+<p>并发 Map：</p>
+<ul>
+<li><strong>ConcurrentHashMap</strong>：它与 HashTable 的主要区别是二者加锁粒度的不同
+<ul>
+<li>在<strong>JDK1.7</strong>，ConcurrentHashMap 加的是<strong>分段锁</strong>，也就是 Segment 锁，每个 Segment 含有整个 table 的一部分，这样不同分段之间的并发操作就互不影响。</li>
+<li>在<strong>JDK 1.8</strong>，取消了 Segment 字段，直接在 table 元素上加锁，实现对每一行进行加锁，进一步减小了并发冲突的概率。
+<ul>
+<li>对于 <code>put</code> 操作，如果 Key 对应的数组元素为 <code>null</code>，则通过 CAS 操作（Compare and Swap）将其设置为当前值。如果 Key 对应的数组元素（也即链表表头或者树的根元素）不为 <code>null</code>，则对该元素使用 <code>synchronized</code> 关键字申请锁，然后进行操作。如果该 <code>put</code> 操作使得当前链表长度超过一定阈值，则<strong>将该链表转换为红黑树</strong>，从而提高寻址效率。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>ConcurrentSkipListMap</strong>：实现了一个基于 SkipList（跳表）算法的可排序的并发集合，SkipList 是一种可以在对数预期时间内完成搜索、插入、删除等操作的数据结构，通过维护多个指向其他元素的“跳跃”链接来实现高效查找。</li>
+</ul>
+<p>并发 Set：</p>
+<ul>
+<li><strong>ConcurrentSkipListSet</strong>：是线程安全的有序的集合。底层是使用 ConcurrentSkipListMap 实现。</li>
+<li><strong>CopyOnWriteArraySet</strong>：是线程安全的 Set 实现，它是线程安全的无序的集合，可以将它理解成线程安全的 HashSet。
+<ul>
+<li>CopyOnWriteArraySet 和 HashSet 虽然都继承于共同的父类 AbstractSet；但是，HashSet 是通过“散列表”实现的，而 CopyOnWriteArraySet 则是通过“动态数组(CopyOnWriteArrayList)”实现的，并不是散列表。</li>
+</ul>
+</li>
+</ul>
+<p>并发 List：</p>
+<ul>
+<li><strong>CopyOnWriteArrayList</strong>：它是 ArrayList 的线程安全的变体，其中所有写操作（add，set 等）都通过对底层数组进行全新复制来实现，允许存储 <code>null</code> 元素。即当对象进行写操作时，使用了 Lock 锁做同步处理，内部拷贝了原数组，并在新数组上进行添加操作，最后将新数组替换掉旧数组；若进行的读操作，则直接返回结果，操作过程中不需要进行同步。</li>
+</ul>
+<p>并发 Queue：</p>
+<ul>
+<li><strong>ConcurrentLinkedQueue</strong>：是一个适用于高并发场景下的队列，它通过无锁的方式(CAS)，实现了高并发状态下的高性能。通常，ConcurrentLinkedQueue 的性能要好于 BlockingQueue 。</li>
+<li><strong>BlockingQueue</strong>：与 ConcurrentLinkedQueue 的使用场景不同，BlockingQueue 的主要功能并不是在于提升高并发时的队列性能，而在于<strong>简化多线程间的数据共享</strong>
+<ul>
+<li>BlockingQueue 提供一种读写阻塞等待的机制，即如果消费者速度较快，则 BlockingQueue 则可能被清空，此时消费线程再试图从 BlockingQueue 读取数据时就会被阻塞。</li>
+<li>反之，如果生产线程较快，则 BlockingQueue 可能会被装满，此时，生产线程再试图向 BlockingQueue 队列装入数据时，便会被阻塞等待。</li>
+</ul>
+</li>
+</ul>
+<p>并发 Deque：</p>
+<ul>
+<li><strong>LinkedBlockingDeque</strong>：是一个线程安全的双端队列实现。它的内部使用链表结构，每一个节点都维护了一个前驱节点和一个后驱节点。LinkedBlockingDeque 没有进行读写锁的分离，因此同一时间只能有一个线程对其进行操作</li>
+<li><strong>ConcurrentLinkedDeque</strong>：ConcurrentLinkedDeque 是一种基于链接节点的无限并发链表。可以安全地并发执行插入、删除和访问操作。当许多线程同时访问一个公共集合时，ConcurrentLinkedDeque 是一个合适的选择。</li>
+</ul>
+<p><a id="reference-遍历方式"></a></p>
+<h3 id="遍历方式">遍历方式</h3>
+<p><a id="reference-普通-for-循环"></a></p>
+<h4 id="普通-for-循环">普通 <code>for</code> 循环</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">; i </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">size</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(); i</span><span style="color:#D73A49;--shiki-dark:#F97583">++</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	Object o </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(i);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-增强-for-循环"></a></p>
+<h4 id="增强-for-循环">增强 <code>for</code> 循环</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (Object o </span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list) {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-iterator-迭代器"></a></p>
+<h4 id="iterator-迭代器"><code>Iterator</code> 迭代器</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Iterator&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Object</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; it </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">iterator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">while</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (it.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">hasNext</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	Object </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> it.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">next</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-listiterator-列表迭代器"></a></p>
+<h4 id="listiterator-列表迭代器"><code>ListIterator</code> 列表迭代器</h4>
+<p><code>ListIterator</code> 是 <code>Iterator</code> 的子类，可以双向访问并且在迭代过程中修改元素</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ListIterator&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">Object</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; it </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">listIterator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">while</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (it.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">hasNext</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	Object </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> it.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">next</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-foreach"></a></p>
+<h4 id="foreach"><code>forEach</code></h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">list.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">forEach</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(each </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(each));</span></span></code></pre>
+<p><a id="reference-stream-api"></a></p>
+<h4 id="stream-api">Stream API</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">list.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">stream</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">forEach</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(each </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(each));</span></span></code></pre>
+<p><a id="reference-list"></a></p>
+<h2 id="list">List</h2>
+<p><a id="reference-常见-list-集合"></a></p>
+<h3 id="常见-list-集合">常见 List 集合</h3>
+<p>非线程安全：</p>
+<ul>
+<li><code>ArrayList</code> 基于<strong>动态数组</strong>实现
+<ul>
+<li>允许快速的随机访问，即通过索引访问元素的时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O (1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>。</li>
+<li>在添加和删除元素时，如果操作位置不是列表末尾，可能需要移动大量元素，性能相对较低。</li>
+<li>适用于需要频繁随机访问元素，而对插入和删除操作性能要求不高的场景，如数据的查询和展示等。</li>
+<li>在扩容时会增加 50%</li>
+<li>可以使用 <code>Collections</code> 类的 <code>synchronizedList</code> 方法将 <code>ArrayList</code> 包装成线程安全的 <code>List</code>：<code>List&lt;String&gt; synchronizedList = Collections.synchronizedList(arrayList);</code></li>
+</ul>
+</li>
+<li><code>LinkedList</code> 基于<strong>双向链表</strong>实现
+<ul>
+<li>插入和删除元素时，只需修改链表的指针，不需要移动大量元素，时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>。</li>
+<li>随机访问元素时，需要从链表头或链表尾开始遍历，时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>。</li>
+<li>适用于需要频繁进行插入和删除操作的场景，如队列、栈等数据结构的实现，以及需要在列表中间频繁插入和删除元素的情况。</li>
+</ul>
+</li>
+</ul>
+<p>线程安全：</p>
+<ul>
+<li><code>Vector</code> 基于数组实现。
+<ul>
+<li><code>Vector</code> 中的方法大多是同步的，这使得它在多线程环境下可以保证数据的一致性，但在单线程环境下，由于同步带来的开销，性能会略低于 <code>ArrayList</code>。</li>
+<li>扩容时容量提高 1 倍。</li>
+</ul>
+</li>
+<li><code>CopyOnWriteArrayList</code> 在对列表进行修改（如添加、删除元素）时，会创建一个新的底层数组，将修改操作应用到新数组上，而读操作仍然在原数组上进行，这样可以保证读操作不会被写操作阻塞，实现了读写分离，提高了并发性能。
+<ul>
+<li>适用于读操作远远多于写操作的并发场景，如事件监听列表等，在这种场景下可以避免大量的锁竞争，提高系统的性能和响应速度。</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-遍历中修改元素"></a></p>
+<h3 id="遍历中修改元素">遍历中修改元素</h3>
+<p>对于非线程安全的实现：</p>
+<ul>
+<li>普通 <code>for</code> 可以直接修改元素</li>
+<li><code>forEach()</code>，不建议，可能会导致异常</li>
+<li>迭代器：可以使用 <code>remove()</code> 删除和 <code>set()</code> 修改（迭代器的而不是 List 本身的）</li>
+</ul>
+<p>对于线程安全的实现，可以直接修改</p>
+<p><a id="reference-arraylist-和-linkedlist"></a></p>
+<h3 id="arraylist-和-linkedlist">ArrayList 和 LinkedList</h3>
+<ul>
+<li><strong>底层数据结构不同</strong>：<code>ArrayList</code> 使用数组实现，通过索引进行快速访问元素。<code>LinkedList</code> 使用链表实现，通过节点之间的指针进行元素的访问和操作。</li>
+<li><strong>插入和删除操作的效率不同</strong>：<code>ArrayList</code> 在尾部的插入和删除操作效率较高，但在中间或开头的插入和删除操作效率较低，需要移动元素。<code>LinkedList</code> 在任意位置的插入和删除操作效率都比较高，因为只需要调整节点之间的指针，但是 <code>LinkedList</code> 是不支持随机访问的，所以除了头结点外插入和删除的时间复杂度都是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>，效率不高</li>
+<li><strong>随机访问的效率不同</strong>：<code>ArrayList</code> 支持通过索引进行快速随机访问，时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>。<code>LinkedList</code> 需要从头或尾开始遍历链表，时间复杂度为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>。</li>
+<li><strong>空间占用</strong>：<code>ArrayList</code> 在创建时需要分配一段连续的内存空间，因此会占用较大的空间。<code>LinkedList</code> 每个节点只需要存储元素和指针，因此相对较小。</li>
+<li><strong>使用场景</strong>：<code>ArrayList</code> 适用于频繁随机访问和尾部的插入删除操作，而 <code>LinkedList</code> 适用于频繁的中间插入删除操作和不需要随机访问的场景。</li>
+<li><strong>线程安全</strong>：这两个集合都不是线程安全的</li>
+</ul>
+<p><a id="reference-arraylist-扩容"></a></p>
+<h3 id="arraylist-扩容">ArrayList 扩容</h3>
+<ul>
+<li>计算新的容量：一般情况下，新的容量会扩大为原容量的 1.5 倍，然后检查是否超过了最大容量限制。
+<ul>
+<li>1.5 可以充分利用移位操作，减少浮点数或者运算时间和运算次数。</li>
+</ul>
+</li>
+<li>创建新数组</li>
+<li>元素复制</li>
+<li>更新引用：将 ArrayList 内部指向原数组的引用指向新数组。</li>
+<li>完成扩容</li>
+</ul>
+<p><a id="reference-copyonwritearraylist-实现线程安全"></a></p>
+<h3 id="copyonwritearraylist-实现线程安全">CopyOnWriteArrayList 实现线程安全</h3>
+<p>CopyOnWriteArrayList 底层也是通过一个数组保存数据，使用 <code>volatile</code> 关键字修饰数组，保证当前线程对数组对象重新赋值后，其他线程可以及时感知到。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">private</span><span style="color:#D73A49;--shiki-dark:#F97583"> transient</span><span style="color:#D73A49;--shiki-dark:#F97583"> volatile</span><span style="color:#D73A49;--shiki-dark:#F97583"> Object</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[] array;</span></span></code></pre>
+<p>在写入操作时，加了一把互斥锁 <code>ReentrantLock</code> 以保证线程安全。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> boolean</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> add</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(E e) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //获取锁</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    final</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ReentrantLock lock </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> this</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.lock;</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //加锁</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    lock.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">lock</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    try</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        Object</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[] elements </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> getArray</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> len </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> elements.length;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        Object</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[] newElements </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Arrays.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">copyOf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(elements, len </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        newElements[len] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> e;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">        setArray</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(newElements);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    } </span><span style="color:#D73A49;--shiki-dark:#F97583">finally</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        //释放锁</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        lock.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">unlock</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>读操作没有加锁，随时可以读取（但是如果在 <code>add()</code> 执行过程中读取，则有可能读取到旧的数据，但是能确保不会出现并发问题）</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> E </span><span style="color:#6F42C1;--shiki-dark:#B392F0">get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> index) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">	return</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getArray</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(), index);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-map"></a></p>
+<h2 id="map">Map</h2>
+<p><a id="reference-常见-map-集合"></a></p>
+<h3 id="常见-map-集合">常见 Map 集合</h3>
+<p>非线程安全：</p>
+<ul>
+<li><code>HashMap</code> 是基于<strong>哈希表</strong>实现的 <code>Map</code>
+<ul>
+<li>根据键的哈希值来存储和获取键值对，JDK 1.8 中是用<strong>数组+链表+红黑树</strong>来实现的。</li>
+<li><code>HashMap</code> 是非线程安全的，在多线程环境下，当多个线程同时对 <code>HashMap</code> 进行操作时，可能会导致数据不一致或出现死循环等问题。</li>
+<li>比如在扩容时，多个线程可能会同时修改哈希表的结构，从而破坏数据的完整性。</li>
+</ul>
+</li>
+<li><code>LinkedHashMap</code> 继承自 <code>HashMap</code>
+<ul>
+<li>在 <code>HashMap</code> 的基础上，使用<strong>双向链表维护了键值对的插入顺序或访问顺序</strong>，使得迭代顺序与插入顺序或访问顺序一致。</li>
+<li>由于它继承自 <code>HashMap</code>，在多线程并发访问时，同样会出现与 <code>HashMap</code> 类似的线程安全问题。</li>
+</ul>
+</li>
+<li><code>TreeMap</code> 是基于<strong>红黑树</strong>实现的 <code>Map</code>
+<ul>
+<li>可以对键进行排序，默认按照自然顺序排序，也可以通过指定的比较器进行排序。</li>
+<li><code>TreeMap</code> 是非线程安全的，在多线程环境下，如果多个线程同时对 <code>TreeMap</code> 进行插入、删除等操作，可能会破坏红黑树的结构，导致数据不一致或程序出现异常。</li>
+</ul>
+</li>
+</ul>
+<p>线程安全：</p>
+<ul>
+<li><code>Hashtable</code> 是早期 Java 提供的线程安全的 <code>Map</code> 实现，它的实现方式与 <code>HashMap</code> 类似，但在方法上使用了 <code>synchronized</code> 关键字来保证线程安全。
+<ul>
+<li>通过在每个可能修改 <code>Hashtable</code> 状态的方法上加上 <code>synchronized</code> 关键字，使得在同一时刻，只能有一个线程能够访问 <code>Hashtable</code> 的这些方法，从而保证了线程安全。</li>
+</ul>
+</li>
+<li><code>ConcurrentHashMap</code>
+<ul>
+<li>在 JDK 1.8 以前采用了<strong>分段锁</strong>等技术来提高并发性能。在 <code>ConcurrentHashMap</code> 中，将数据分成多个段（Segment），每个段都有自己的锁。在进行插入、删除等操作时，只需要获取相应段的锁，而不是整个 <code>Map</code> 的锁，这样可以允许多个线程同时访问不同的段，提高了并发访问的效率。</li>
+<li>在 JDK 1.8 以后是通过 <code>volatile</code> + CAS 或者 <code>synchronized</code> 来保证线程安全的。</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-map-遍历"></a></p>
+<h3 id="map-遍历">Map 遍历</h3>
+<p><a id="reference-entryset"></a></p>
+<h4 id="entryset"><code>entrySet()</code></h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> // 使用for-each循环和entrySet()遍历Map</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (Map.Entry&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">Integer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; entry </span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">entrySet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Key: "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> entry.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ", Value: "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> entry.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-keyset"></a></p>
+<h4 id="keyset"><code>keySet()</code></h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"> // 使用for-each循环和keySet()遍历Map的键</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (String key </span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">keySet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Key: "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> key </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ", Value: "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(key));</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-迭代器"></a></p>
+<h4 id="迭代器">迭代器</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 使用迭代器遍历Map</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Iterator&lt;Entry&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">Integer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;&gt; iterator </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">entrySet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">iterator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">while</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (iterator.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">hasNext</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Entry&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">Integer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; entry </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> iterator.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">next</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Key: "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> entry.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ", Value: "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> entry.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-lambda"></a></p>
+<h4 id="lambda">Lambda</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 使用Lambda表达式和forEach()方法遍历Map</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">forEach</span><span style="color:#24292E;--shiki-dark:#E1E4E8">((key, value) </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Key: "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> key </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ", Value: "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> value));</span></span></code></pre>
+<p><a id="reference-stream"></a></p>
+<h4 id="stream">Stream</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 使用Stream API遍历Map</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">entrySet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">stream</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">forEach</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(entry </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> System.out.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">println</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Key: "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> entry.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ", Value: "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> entry.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()));</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 还可以进行其他操作，如过滤、映射等</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Map&lt;</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">Integer</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt; filteredMap </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> map.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">entrySet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">stream</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                                    .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">filter</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(entry </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> entry.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                                    .</span><span style="color:#6F42C1;--shiki-dark:#B392F0">collect</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Collectors.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">toMap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Map.Entry</span><span style="color:#D73A49;--shiki-dark:#F97583">::</span><span style="color:#24292E;--shiki-dark:#E1E4E8">getKey, Map.Entry</span><span style="color:#D73A49;--shiki-dark:#F97583">::</span><span style="color:#24292E;--shiki-dark:#E1E4E8">getValue));</span></span></code></pre>
+<p><a id="reference-hashmap"></a></p>
+<h3 id="hashmap">HashMap</h3>
+<p><a id="reference-原理"></a></p>
+<h4 id="原理">原理</h4>
+<p><a id="reference-java7"></a></p>
+<h5 id="java7">Java7</h5>
+<ul>
+<li>数组和链表</li>
+<li>通过哈希算法将元素的键（Key）映射到数组中的槽位（Bucket）</li>
+<li>如果多个键映射到同一个槽位，以链表的形式存储在同一个槽位上</li>
+</ul>
+<p><img alt="" loading="lazy" decoding="async" width="1080" height="490" src="/_astro/IMG-20260804174731063.DmF3H2Aa_1pU4QJ.webp"></p>
+<p><a id="reference-java8"></a></p>
+<h5 id="java8">Java8</h5>
+<ul>
+<li>当一个链表的长度超过 8 的时候就转换为<strong>红黑树</strong>，查找时使用红黑树，时间复杂度 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.0139em;">g</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span>，可以提高查询性能</li>
+<li>在数量小于 6 时，会将红黑树转换回链表</li>
+</ul>
+<p><img alt="" loading="lazy" decoding="async" width="1080" height="517" src="/_astro/IMG-20260804174731206.C-4oze07_1Ul3W.webp"></p>
+<p><a id="reference-put-过程"></a></p>
+<h4 id="put-过程">Put 过程</h4>
+<p><img alt="" loading="lazy" decoding="async" width="1080" height="856" src="/_astro/IMG-20260804174731340.CtZlQIvp_1OD2Rv.webp"></p>
+<ul>
+<li>根据键的哈希值计算索引</li>
+<li>检查数组对应位置是否为空
+<ul>
+<li>如果为空，则创建一个 <code>Map.Entry</code> 对象来存储</li>
+<li>将 HashMap 的修改次数（modCount）加 1，可以发现并发修改（乐观锁）</li>
+</ul>
+</li>
+<li>如果不为空，比较该位置的第一个键的哈希值和插入键的哈希值
+<ul>
+<li>如果相同，则替换值</li>
+</ul>
+</li>
+<li>如果哈希值不同，则遍历该位置下的链表（或红黑树）
+<ul>
+<li>找到相同键，替换值</li>
+<li>未找到相同键，插入新元素（若链表则插入头部）</li>
+</ul>
+</li>
+<li>检查链表长度是否到达阈值（默认 8），且数组长度大于等于 64，则将链表转换为红黑树</li>
+<li>检查负载因子是否超过阈值（默认 0.75）。如果键值对数量/数组长度大于阈值，则扩容</li>
+<li>扩容
+<ul>
+<li>创建两倍大小数组</li>
+<li>键值对重新计算哈希值并分配到新数组</li>
+<li>更新数组引用和阈值参数</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-扩容"></a></p>
+<h4 id="扩容">扩容</h4>
+<p>如果 hashmap 中的元素个数超过了总容量 75%，则会触发扩容：</p>
+<ul>
+<li>对哈希表长度的扩展（2 倍）</li>
+<li>将旧哈希表中的数据放到新的哈希表中
+<ul>
+<li>元素的位置要么是在原位置</li>
+<li>要么是在原位置再移动 2 次幂的位置</li>
+</ul>
+</li>
+</ul>
+<p><img alt="" loading="lazy" decoding="async" width="727" height="67" src="/_astro/IMG-20260804174731471.81Y4pk6k_1BehHM.webp"></p>
+<p>在扩充 HashMap 的时候，不需要重新计算 hash，只需要判断原来的 hash 值新增的那个 bit 是 1 还是 0，0 则索引不变，1 则索引变成“原索引+oldCap”</p>
+<p><a id="reference-concurrenthashmap"></a></p>
+<h3 id="concurrenthashmap">ConcurrentHashMap</h3>
+<p><a id="reference-原理-1"></a></p>
+<h4 id="原理-1">原理</h4>
+<p><a id="reference-java7-1"></a></p>
+<h5 id="java7-1">Java7</h5>
+<p>分段锁技术将数据分成一段一段的存储，然后给每一段数据配一把锁，当一个线程占用锁访问其中一个段数据的时候，其他段的数据也能被其他线程访问，能够实现真正的并发访问。</p>
+<p><img alt="" loading="lazy" decoding="async" width="622" height="330" src="/_astro/IMG-20260804174731611.Capr7q1S_Zlu4oX.webp"></p>
+<p>使用数组+链表实现：</p>
+<ul>
+<li>数组分为：大数组 Segment 和小数组 HashEntry。
+<ul>
+<li>Segment 是一种<strong>可重入锁</strong>（ReentrantLock）</li>
+<li>HashEntry 用于存储键值对数据。</li>
+</ul>
+</li>
+<li>一个 ConcurrentHashMap 里包含一个 Segment 数组</li>
+<li>一个 Segment 里包含一个 HashEntry 数组</li>
+<li>每个 HashEntry 是一个链表结构的元素</li>
+</ul>
+<p>每个 Segment 都类似于一个小的 HashMap，每个 Segment 都有自己的锁，不同 Segment 之间的操作互不影响，从而提高并发性能。</p>
+<p>在 ConcurrentHashMap 中，对于插入、更新、删除等操作，需要先定位到具体的 Segment，然后再在该 Segment 上加锁，而不是像传统的 HashMap 一样对整个数据结构加锁。这样可以使得不同 Segment 之间的操作并行进行，提高了并发性能。</p>
+<p><a id="reference-java8-1"></a></p>
+<h5 id="java8-1">Java8</h5>
+<p>通过对头结点加锁来保证线程安全的，锁的粒度相比 Segment 来说更小了，发生冲突和加锁的频率降低了</p>
+<p><img alt="" loading="lazy" decoding="async" width="455" height="388" src="/_astro/IMG-20260804174731760.D-SJ7yxy_lQo1q.webp"></p>
+<p>使用数组+链表/红黑树</p>
+<p>通过 <code>volatile</code> + CAS 或者 <code>synchronized</code> 来实现的线程安全的。添加元素时首先会判断容器是否为空：</p>
+<ul>
+<li>
+<p>如果为空则使用 <code>volatile</code> 加 CAS 来初始化</p>
+</li>
+<li>
+<p>如果容器不为空，则根据存储的元素计算该位置是否为空。</p>
+<ul>
+<li>如果根据存储的元素计算结果为空，则利用 CAS 设置该节点；</li>
+<li>如果根据存储的元素计算结果不为空，则使用 <code>synchronized</code> ，然后，遍历桶中的数据，并替换或新增节点到桶中，最后再判断是否需要转为红黑树，这样就能保证并发访问时的线程安全了。</li>
+</ul>
+</li>
+<li>
+<p>在 <code>putVal</code> 中，如果计算出来的哈希槽没有存放元素，可以直接使用 CAS 来进行设置值。因为在设置元素的时候，哈希值在经过了各种扰动后，造成哈希碰撞的几率较低，所以可以预测能使用较少的自旋来完成哈希落槽操作。</p>
+</li>
+<li>
+<p>当发生了哈希碰撞的时候说明容量不够用了或者已经有大量线程访问了，因此这时候使用 <code>synchronized</code> 来处理哈希碰撞比 CAS 效率要高，发生了哈希碰撞大概率是线程竞争比较强烈。</p>
+</li>
+</ul>
+<blockquote>
+<p>ConcurrentHashMap 悲观锁和乐观锁都有使用</p>
+</blockquote>
+<ul>
+<li>如果为空则使用 <code>volatile</code> 加  <strong>CAS （乐观锁）</strong>  来初始化。</li>
+<li>如果容器不为空，则根据存储的元素计算该位置是否为空。</li>
+<li>如果根据存储的元素计算结果为空，则利用  <strong>CAS（乐观锁）</strong>  设置该节点；</li>
+<li>如果根据存储的元素计算结果不为空，则使用  <code>synchronized</code><strong>（悲观锁）</strong> ，然后，遍历桶中的数据，并替换或新增节点到桶中，最后再判断是否需要转为红黑树，这样就能保证并发访问时的线程安全了。</li>
+</ul>
+<p><a id="reference-hashtable"></a></p>
+<h3 id="hashtable">Hashtable</h3>
+<p><img alt="" loading="lazy" decoding="async" width="1438" height="916" src="/_astro/IMG-20260804174731881.BjZ8Njkv_Z2jxqEo.webp"></p>
+<ul>
+<li>Hashtable 的底层数据结构主要是<strong>数组+链表</strong>，数组是主体，链表是解决哈希冲突存在的。</li>
+<li>HashTable 是线程安全的，实现方式是 Hashtable 的<strong>所有公共方法均采用</strong> <code>synchronized</code>，当一个线程访问同步方法，另一个线程也访问的时候，就会陷入阻塞或者轮询的状态。
+<ul>
+<li>任何一个时刻<strong>只能有一个线程可以操纵 Hashtable</strong>，效率低</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-区别"></a></p>
+<h3 id="区别">区别</h3>
+<ul>
+<li>HashMap 线程不安全，效率高
+<ul>
+<li>可以存储 <code>null</code> 的 key 和 value，<code>null</code> 的 key 只能有一个，<code>null</code> 的 value 可以有多个。</li>
+<li>默认初始容量为 16，每次扩充变为原来 2 倍。</li>
+<li>创建时如果给定了初始容量，则扩充为 2 的幂次方大小。</li>
+<li>底层数据结构为数组+链表，插入元素后如果链表长度大于阈值（默认为 8），先判断数组长度是否小于 64，如果小于，则扩充数组，反之将链表转化为红黑树，以减少搜索时间。</li>
+</ul>
+</li>
+<li>HashTable 线程安全，效率低一点，其内部方法基本都经过 <code>synchronized</code> 修饰
+<ul>
+<li>不可以有 <code>null</code> 的 key 和 value。</li>
+<li>默认初始容量为 11，每次扩容变为原来的 2n+1。</li>
+<li>创建时给定了初始容量，会直接用给定的大小。</li>
+<li>底层数据结构为数组+链表。</li>
+<li>基本被淘汰了，要保证线程安全可以用 ConcurrentHashMap。</li>
+</ul>
+</li>
+<li>ConcurrentHashMap 主要基于分段锁和 CAS 操作。
+<ul>
+<li>它将整个哈希表分成了多 Segment（段），每个 Segment 都类似于一个小的 HashMap，它拥有自己的数组和一个独立的锁。</li>
+<li>在 ConcurrentHashMap 中，读操作不需要锁，可以直接对 Segment 进行读取，而写操作则只需要锁定对应的 Segment，而不是整个哈希表，这样可以大大提高并发性能。</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-set"></a></p>
+<h2 id="set">Set</h2>
+<p><a id="reference-无重复"></a></p>
+<h3 id="无重复">无重复</h3>
+<ul>
+<li><strong>set 集合特点</strong>：Set 集合中的元素是唯一的，不会出现重复的元素。</li>
+<li><strong>set 实现原理</strong>：Set 集合通过内部的数据结构（如哈希表、红黑树等）来实现 key 的无重复。当向 Set 集合中插入元素时，会先根据元素的 hashCode 值来确定元素的存储位置，然后再通过 equals 方法来判断是否已经存在相同的元素，如果存在则不会再次插入，保证了元素的唯一性。</li>
+</ul>
+<p><a id="reference-有序-set"></a></p>
+<h3 id="有序-set">有序 Set</h3>
+<ul>
+<li><strong>有序的 Set 是 TreeSet 和 LinkedHashSet</strong>。
+<ul>
+<li>TreeSet 是基于红黑树实现，保证元素的自然顺序。</li>
+<li>LinkedHashSet 是基于双重链表和哈希表的结合来实现元素的有序存储，保持元素插入顺序（不是按自然比较排序）</li>
+</ul>
+</li>
+<li><strong>记录插入顺序的集合通常指的是 LinkedHashSet</strong>，它不仅保证元素的唯一性，还可以保持元素的插入顺序。当需要在 Set 集合中记录元素的插入顺序时，可以选择使用 LinkedHashSet 来实现。</li>
+</ul>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>LinkedList 在按索引定位后再插入，整体仍是常数复杂度吗？</li>
+<li>HashSet 与 TreeSet 判断重复的依据是否相同？</li>
+<li>单次操作线程安全能否保证复合操作原子？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#集合">集合</a></li><li style="--depth: 1"><a href="#集合与数组">集合与数组</a></li><li style="--depth: 1"><a href="#常用集合">常用集合</a></li><li style="--depth: 1"><a href="#线程安全的集合">线程安全的集合</a></li><li style="--depth: 2"><a href="#util-包">util 包</a></li><li style="--depth: 2"><a href="#concurrent-包">concurrent 包</a></li><li style="--depth: 1"><a href="#遍历方式">遍历方式</a></li><li style="--depth: 2"><a href="#普通-for-循环">普通 for 循环</a></li><li style="--depth: 2"><a href="#增强-for-循环">增强 for 循环</a></li><li style="--depth: 2"><a href="#iterator-迭代器">Iterator 迭代器</a></li><li style="--depth: 2"><a href="#listiterator-列表迭代器">ListIterator 列表迭代器</a></li><li style="--depth: 2"><a href="#foreach">forEach</a></li><li style="--depth: 2"><a href="#stream-api">Stream API</a></li><li style="--depth: 0"><a href="#list">List</a></li><li style="--depth: 1"><a href="#常见-list-集合">常见 List 集合</a></li><li style="--depth: 1"><a href="#遍历中修改元素">遍历中修改元素</a></li><li style="--depth: 1"><a href="#arraylist-和-linkedlist">ArrayList 和 LinkedList</a></li><li style="--depth: 1"><a href="#arraylist-扩容">ArrayList 扩容</a></li><li style="--depth: 1"><a href="#copyonwritearraylist-实现线程安全">CopyOnWriteArrayList 实现线程安全</a></li><li style="--depth: 0"><a href="#map">Map</a></li><li style="--depth: 1"><a href="#常见-map-集合">常见 Map 集合</a></li><li style="--depth: 1"><a href="#map-遍历">Map 遍历</a></li><li style="--depth: 2"><a href="#entryset">entrySet()</a></li><li style="--depth: 2"><a href="#keyset">keySet()</a></li><li style="--depth: 2"><a href="#迭代器">迭代器</a></li><li style="--depth: 2"><a href="#lambda">Lambda</a></li><li style="--depth: 2"><a href="#stream">Stream</a></li><li style="--depth: 1"><a href="#hashmap">HashMap</a></li><li style="--depth: 2"><a href="#原理">原理</a></li><li style="--depth: 3"><a href="#java7">Java7</a></li><li style="--depth: 3"><a href="#java8">Java8</a></li><li style="--depth: 2"><a href="#put-过程">Put 过程</a></li><li style="--depth: 2"><a href="#扩容">扩容</a></li><li style="--depth: 1"><a href="#concurrenthashmap">ConcurrentHashMap</a></li><li style="--depth: 2"><a href="#原理-1">原理</a></li><li style="--depth: 3"><a href="#java7-1">Java7</a></li><li style="--depth: 3"><a href="#java8-1">Java8</a></li><li style="--depth: 1"><a href="#hashtable">Hashtable</a></li><li style="--depth: 1"><a href="#区别">区别</a></li><li style="--depth: 0"><a href="#set">Set</a></li><li style="--depth: 1"><a href="#无重复">无重复</a></li><li style="--depth: 1"><a href="#有序-set">有序 Set</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

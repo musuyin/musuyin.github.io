@@ -1,0 +1,1303 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>DBCI Agent 沙箱环境实现 · Musuyin&#39; Home</title><meta name="description" content="这份实现包含两个不同边界：Kubernetes 层创建工作负载，容器内 SRT 限制具体命令的执行环境。Pod 叫 Sandbox、文件工具做路径检查、Bash 经过 SRT，三者不能互相代替。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/framework/dbci-agent-sandbox/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="DBCI Agent 沙箱环境实现 · Musuyin' Home"><meta property="og:description" content="这份实现包含两个不同边界：Kubernetes 层创建工作负载，容器内 SRT 限制具体命令的执行环境。Pod 叫 Sandbox、文件工具做路径检查、Bash 经过 SRT，三者不能互相代替。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/framework/dbci-agent-sandbox/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">DBCI Agent 沙箱环境实现</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-09-15">2026-09-15</time></dd></div><div><dt>字数</dt><dd>11104</dd></div><div><dt>预计阅读</dt><dd>38 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Agent/">#Agent</a><a href="/tags/Sandbox/">#Sandbox</a><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/SRT/">#SRT</a><a href="/tags/Bubblewrap/">#Bubblewrap</a><a href="/tags/%E5%AE%89%E5%85%A8/">#安全</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>DBCI Agent 沙箱环境实现</h1><time datetime="2026-09-15">2026-09-15</time><p class="tags"><a href="/tags/Agent/">#Agent</a><a href="/tags/Sandbox/">#Sandbox</a><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/SRT/">#SRT</a><a href="/tags/Bubblewrap/">#Bubblewrap</a><a href="/tags/%E5%AE%89%E5%85%A8/">#安全</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>这份实现包含两个不同边界：Kubernetes 层创建工作负载，容器内 SRT 限制具体命令的执行环境。Pod 叫 Sandbox、文件工具做路径检查、Bash 经过 SRT，三者不能互相代替。</p>
+<p>本文基于 <strong>dbci-agentic-ai-platform</strong> 当前 <strong>main</strong> 分支提交 <strong>2e4221591816f27767abf625096fe7d48ecbad4b</strong> 的实际源码，解释项目中的沙箱环境如何创建、Agent 命令如何执行、文件和网络如何受限，以及当前设计能防住什么、不能防住什么。</p>
+<p>本文假设读者了解 Docker 的基础概念，例如镜像、容器、Volume 和端口，但不要求提前理解 Kubernetes Controller、CRD、SRT、bubblewrap、gVisor 或 Kata Containers。</p>
+<p>阅读完成后，应当能够回答：</p>
+<ul>
+<li><strong>Agent</strong> 和 <strong>SandboxAgent</strong> 到底有什么区别？</li>
+<li>为什么仓库里同时出现 SandboxAgent、Sandbox 和 SRT？</li>
+<li>谁真正创建并管理 Sandbox Pod？</li>
+<li>singleton Pod、privileged、gVisor、Kata 和 SandboxClaim 分别是什么？</li>
+<li>Agent 生成的 Bash 命令在哪里执行？</li>
+<li>项目有没有识别并拦截 rm -rf、kubectl delete 等高危命令？</li>
+<li>文件、网络、凭据、进程和 Kubernetes 权限分别由哪一层控制？</li>
+<li>当前实现距离“可以安全运行完全不可信代码”还有哪些差距？</li>
+</ul>
+<p><a id="reference-先说结论"></a></p>
+<h2 id="先说结论">先说结论</h2>
+<p>本项目不是用单一机制完成所有沙箱隔离，而是叠加了两层不同的沙箱：</p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>实现</th>
+<th>保护对象</th>
+<th>主要作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kubernetes 工作负载层</td>
+<td>SandboxAgent 转换成 agents.x-k8s.io/Sandbox</td>
+<td>整个 Agent Runtime</td>
+<td>用单独 Pod 和稳定 Service 运行 Agent</td>
+</tr>
+<tr>
+<td>容器内命令层</td>
+<td>Anthropic Sandbox Runtime，即 SRT</td>
+<td>Skills 的 Bash 子进程</td>
+<td>限制子进程的文件写入和网络访问</td>
+</tr>
+</tbody>
+</table>
+<p>最容易误解的一点是：</p>
+<blockquote>
+<p>SandboxAgent 并不表示 Agent 主进程发出的全部请求都经过 SRT，也不表示 Kubernetes 自动为它配置了 gVisor、Kata 或 NetworkPolicy。</p>
+</blockquote>
+<p>当前源码中，SRT 可以确认保护的是 Skills 暴露的 <strong>bash</strong> 工具。文件工具还有自己的路径检查。Agent 主进程的模型调用、MCP 调用及额外 Sidecar，并不会因为存在 <strong>spec.sandbox.network</strong> 就自动经过 SRT。</p>
+<p><a id="reference-用-docker-经验理解整体架构"></a></p>
+<h2 id="用-docker-经验理解整体架构">用 Docker 经验理解整体架构</h2>
+<p>如果只从 Docker 角度看，可以先把两层机制类比成：</p>
+<ul>
+<li>外层 Sandbox：不是直接执行 docker run，而是提交一张 Kubernetes“运行申请单”，让另一个 Controller 创建和维护容器。</li>
+<li>内层 SRT：已经进入 Agent 容器后，再用 bubblewrap 给某一条 Bash 命令套一个更小的隔离环境。</li>
+</ul>
+<pre class="mermaid">flowchart TB
+    U[用户在 UI 或 CLI 创建 Agent] --&gt; API[Controller API]
+    API --&gt;|workloadMode=deployment| A[kagent.dev Agent]
+    API --&gt;|workloadMode=sandbox| SA[kagent.dev SandboxAgent]
+
+    A --&gt; T[公共 Agent 编译器]
+    SA --&gt; T
+
+    T --&gt;|普通模式| D[Deployment 和 Service]
+    T --&gt;|沙箱模式| S[agents.x-k8s.io Sandbox]
+    S --&gt; ASC[外部 agent-sandbox Controller]
+    ASC --&gt; P[单副本 Agent Pod 和稳定 Service]
+
+    P --&gt; R[Go ADK Agent 主进程]
+    R --&gt;|Skills bash tool| SRT[srt]
+    SRT --&gt; B[bubblewrap 隔离后的 bash/python 子进程]
+
+    R --&gt;|模型或 MCP HTTP 请求| OUT[主进程网络]
+    B --&gt;|代理和域名白名单| NET[受控网络]</pre>
+<p><a id="reference-术语先扫盲"></a></p>
+<h2 id="术语先扫盲">术语先扫盲</h2>
+<p><a id="reference-cli-分流"></a></p>
+<h3 id="cli-分流">CLI 分流</h3>
+<p>*CLI（Command-Line Interface，命令行界面）*就是终端命令程序。本项目的 CLI 可以调用普通 Agent，也可以调用 SandboxAgent。</p>
+<p>所谓“CLI 分流”并不是一种隔离技术，只是 CLI 根据 Agent 类型选择不同 URL：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> buildA2AURL</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">baseURL</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">agent</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">agentResponse</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">api</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">AgentResponse</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    a2aPath </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "api/a2a"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> agentResponse </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> agentResponse.WorkloadMode </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> v1alpha2.WorkloadModeSandbox {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        a2aPath </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "api/a2a-sandboxes"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Sprintf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">/</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">/</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">/</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, baseURL, a2aPath, namespace, agent)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>源码：<strong>go/cli/internal/cli/agent/invoke.go</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>外部访问路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>普通 Agent</td>
+<td>/api/a2a/namespace/name</td>
+</tr>
+<tr>
+<td>SandboxAgent</td>
+<td>/api/a2a-sandboxes/namespace/name</td>
+</tr>
+</tbody>
+</table>
+<p>分开路径的主要目的是避免同 namespace、同名字的 Agent 和 SandboxAgent 在路由表中冲突。安全认证和授权仍由 Controller 的 A2A Handler 统一处理。</p>
+<p><a id="reference-pod"></a></p>
+<h3 id="pod">Pod</h3>
+<p>Docker 通常直接管理 Container；Kubernetes 通常管理 <em>Pod</em>。Pod 是一个或多个 Container 的包装层。</p>
+<p>同一个 Pod 内的 Container：</p>
+<ul>
+<li>共享 Pod IP；</li>
+<li>可以通过 localhost 通信；</li>
+<li>可以挂载同一个 Volume；</li>
+<li>生命周期通常由同一个 Kubernetes 工作负载对象管理。</li>
+</ul>
+<p>因此，Pod 不是虚拟机。默认情况下，容器仍共享宿主机内核。</p>
+<p><a id="reference-singleton-pod"></a></p>
+<h3 id="singleton-pod">singleton Pod</h3>
+<p><em>Singleton</em> 表示“单实例”。本项目生成的外部 Sandbox CR 将 replicas 固定为 1，因此一个 SandboxAgent 对应一个主要运行 Pod。</p>
+<p>它与普通 Deployment 的差异可以类比为：</p>
+<table>
+<thead>
+<tr>
+<th>普通 Deployment</th>
+<th>agent-sandbox Sandbox</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>偏向无状态、多副本服务</td>
+<td>偏向有稳定身份的单实例工作环境</td>
+</tr>
+<tr>
+<td>可滚动更新多个副本</td>
+<td>当前最多 0 或 1 个 Pod</td>
+</tr>
+<tr>
+<td>Pod 名称和 IP 可以变化</td>
+<td>通过稳定 Service 暴露固定网络身份</td>
+</tr>
+</tbody>
+</table>
+<p>这里的 singleton 不等于进程永远不重启，只表示期望副本数为一个。Pod 故障后仍可能被重新创建。</p>
+<p><a id="reference-crd-和-controller"></a></p>
+<h3 id="crd-和-controller">CRD 和 Controller</h3>
+<p>*CRD（Custom Resource Definition，自定义资源定义）*允许 Kubernetes 支持新的资源类型。</p>
+<p>Docker 用户可以这样理解：</p>
+<ul>
+<li>CRD 类似新增一种自定义 docker-compose 配置格式；</li>
+<li>Custom Resource 是按照该格式提交的一份配置；</li>
+<li>Controller 是持续读取配置并执行 docker run、检查状态、修复偏差的后台程序；</li>
+<li>Reconcile 是 Controller 每次把“实际状态”修正为“期望状态”的过程。</li>
+</ul>
+<p>本项目涉及两个不同 API Group：</p>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>API Group</th>
+<th>所属项目</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SandboxAgent</td>
+<td>kagent.dev/v1alpha2</td>
+<td>当前仓库</td>
+<td>描述 Agent 的模型、工具、Skills 和权限</td>
+</tr>
+<tr>
+<td>Sandbox</td>
+<td>agents.x-k8s.io/v1alpha1</td>
+<td>kubernetes-sigs/agent-sandbox</td>
+<td>描述实际 Sandbox Pod</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-sandboxtemplate-和-sandboxclaim"></a></p>
+<h3 id="sandboxtemplate-和-sandboxclaim">SandboxTemplate 和 SandboxClaim</h3>
+<p>这两个概念来自外部 agent-sandbox 项目的扩展模块：</p>
+<ul>
+<li><em>SandboxTemplate</em>：预先定义一份可复用的沙箱模板；</li>
+<li><em>SandboxClaim</em>：用户提交一张申请单，请求系统从模板分配一个沙箱；</li>
+<li><em>Warm Pool</em>：提前启动一批空闲沙箱，收到 Claim 时快速分配。</li>
+</ul>
+<p>本仓库当前都没有使用。它直接创建具体的 Sandbox CR，因此链路是：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>SandboxAgent -&gt; Sandbox -&gt; Pod</span></span></code></pre>
+<p>而不是：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>SandboxAgent -&gt; SandboxClaim -&gt; SandboxTemplate -&gt; Warm Pool -&gt; Sandbox -&gt; Pod</span></span></code></pre>
+<p><a id="reference-srt"></a></p>
+<h3 id="srt">SRT</h3>
+<p>*SRT（Sandbox Runtime）*是 Anthropic 开源的实验性沙箱运行器。它不是 Docker，也不是 Kubernetes Runtime。它包装某一个待执行命令，并使用操作系统能力限制该命令及其子进程。</p>
+<p>在 Linux 上，SRT 主要使用：</p>
+<ul>
+<li>bubblewrap：创建文件系统、网络、PID 等 namespace；</li>
+<li>HTTP/HTTPS Proxy：检查目标域名是否在白名单中；</li>
+<li>SOCKS5 Proxy：代理其他 TCP 流量；</li>
+<li>socat：在被隔离的网络 namespace 和代理之间桥接；</li>
+<li>seccomp：可用于限制 Unix Socket 等系统调用。</li>
+</ul>
+<p><a id="reference-bubblewrap"></a></p>
+<h3 id="bubblewrap">bubblewrap</h3>
+<p>*bubblewrap（bwrap）*是 Linux 上创建轻量隔离环境的工具。它使用的 namespace、bind mount 等能力和 Docker 底层机制有相似之处，但它不负责镜像、镜像仓库、容器网络编排或完整生命周期管理。</p>
+<p>在本项目中，Docker/Kubernetes 先启动 Agent 容器，bubblewrap 再在容器内部包住 Bash 子进程：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Kubernetes Pod</span></span>
+<span class="line"><span>└── Agent Container</span></span>
+<span class="line"><span>    ├── Go ADK 主进程</span></span>
+<span class="line"><span>    └── srt</span></span>
+<span class="line"><span>        └── bubblewrap</span></span>
+<span class="line"><span>            └── bash -c "模型生成的命令"</span></span></code></pre>
+<p><a id="reference-privileged"></a></p>
+<h3 id="privileged">privileged</h3>
+<p>Kubernetes 的 <strong>securityContext.privileged=true</strong> 类似 Docker 的 <strong>–privileged</strong>。它会大幅放宽容器能够使用的 Linux capabilities、设备和内核功能限制。</p>
+<p>它不是“让应用用户变成 root”这么简单，而是让容器获得接近宿主机级别的能力，因此通常被视为高风险设置。</p>
+<p>本项目在 Skills 或代码执行需要完整 bubblewrap 隔离、并且用户没有显式设置 <strong>allowPrivilegeEscalation=false</strong> 时，会自动将 Agent 主容器设为 privileged。后文会分析这里的安全取舍。</p>
+<p><a id="reference-gvisor-和-kata-containers"></a></p>
+<h3 id="gvisor-和-kata-containers">gVisor 和 Kata Containers</h3>
+<p>Docker 默认容器和宿主机共享 Linux 内核。容器逃逸漏洞一旦利用成功，可能影响宿主机。</p>
+<ul>
+<li><em>gVisor</em> 在应用与宿主机内核之间增加一个用户态内核兼容层，拦截大部分系统调用；</li>
+<li><em>Kata Containers</em> 通常为容器启动一个轻量虚拟机，隔离边界更接近 VM；</li>
+<li>Kubernetes 通过 <strong>runtimeClassName</strong> 指定 Pod 使用哪一种 Runtime。</li>
+</ul>
+<p>本仓库当前生成的 Sandbox Pod 没有主动设置 runtimeClassName，因此不能因为资源名叫 Sandbox 就推断它已经运行在 gVisor 或 Kata 中。实际隔离强度取决于集群默认容器运行时和外部 agent-sandbox 的部署配置。</p>
+<p><a id="reference-kubernetes-工作负载沙箱如何创建"></a></p>
+<h2 id="kubernetes-工作负载沙箱如何创建">Kubernetes 工作负载沙箱如何创建</h2>
+<p><a id="reference-api-根据-workloadmode-选择资源类型"></a></p>
+<h3 id="api-根据-workloadmode-选择资源类型">API 根据 workloadMode 选择资源类型</h3>
+<p>创建请求带有 <strong>workloadMode</strong>。服务端将它标准化后选择 Kubernetes 对象：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">workloadMode </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> v1alpha2.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">WorkloadMode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ToLower</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TrimSpace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(req.WorkloadMode)))</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> workloadMode </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ""</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    workloadMode </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> v1alpha2.WorkloadModeDeployment</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">switch</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> workloadMode {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">case</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> v1alpha2.WorkloadModeDeployment:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    agent </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">v1alpha2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Agent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{Spec: spec}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">case</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> v1alpha2.WorkloadModeSandbox:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    agent </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">v1alpha2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SandboxAgent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{Spec: spec}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">default</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, status.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(codes.InvalidArgument, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"unsupported workloadMode"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>源码：<strong>go/controller/internal/grpcserver/agents.go</strong>。</p>
+<p>这里没有静默回退：无法识别的模式直接报错。只有调用方完全不传 workloadMode 时，才使用兼容默认值 deployment。</p>
+<p><a id="reference-agent-和-sandboxagent-复用同一套业务配置"></a></p>
+<h3 id="agent-和-sandboxagent-复用同一套业务配置">Agent 和 SandboxAgent 复用同一套业务配置</h3>
+<p>源码通过 AgentObject 接口统一访问二者：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> AgentObject</span><span style="color:#D73A49;--shiki-dark:#F97583"> interface</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    client</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Object</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    GetAgentSpec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">AgentSpec</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    GetAgentStatus</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">AgentStatus</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    GetWorkloadMode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#6F42C1;--shiki-dark:#B392F0">WorkloadMode</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#E36209;--shiki-dark:#FFAB70">a </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Agent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">GetWorkloadMode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#6F42C1;--shiki-dark:#B392F0">WorkloadMode</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> WorkloadModeDeployment</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#E36209;--shiki-dark:#FFAB70">a </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SandboxAgent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">GetWorkloadMode</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#6F42C1;--shiki-dark:#B392F0">WorkloadMode</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> WorkloadModeSandbox</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>源码：<strong>go/api/v1alpha2/agentobject.go</strong>。</p>
+<p>因此模型配置、MCP 工具、Agent Tool、SkillSet、Prompt、Memory、ClusterAccess 等编译逻辑基本共享，区别集中在最后的工作负载输出阶段。</p>
+<p><a id="reference-controller-先编译再生成-kubernetes-对象"></a></p>
+<h3 id="controller-先编译再生成-kubernetes-对象">Controller 先编译，再生成 Kubernetes 对象</h3>
+<p>SandboxAgent Controller 收到事件后执行以下流程：</p>
+<ol>
+<li>获取 SandboxAgent。</li>
+<li>检查跨 namespace 引用。</li>
+<li>将 CRD 配置编译成 ADK AgentConfig。</li>
+<li>生成 Secret、ServiceAccount、PodTemplate 等对象。</li>
+<li>把 PodTemplate 包装成外部 Sandbox CR。</li>
+<li>创建或更新这些对象。</li>
+<li>将 Agent 配置投影到数据库。</li>
+<li>更新 SandboxAgent 的 Accepted 和 Ready 状态。</li>
+</ol>
+<p>核心代码：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">inputs, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a.adkTranslator.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">CompileAgent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, agent)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"failed to compile </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%w</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, resourceName, err)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">agentOutputs, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a.adkTranslator.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">BuildManifest</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, agent, inputs)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"failed to build manifest: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%w</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, err)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">reconcileDesiredObjects</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, agent, agentOutputs.Manifest, ownedObjects); err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"failed to reconcile owned objects: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%w</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, err)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>源码：<strong>go/controller/internal/controller/reconciler/reconciler.go</strong>。</p>
+<p><a id="reference-普通模式和-sandbox-模式在最后一步分叉"></a></p>
+<h3 id="普通模式和-sandbox-模式在最后一步分叉">普通模式和 Sandbox 模式在最后一步分叉</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> manifestCtx.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">runInSandbox</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a.sandboxBackend.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">BuildSandbox</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">sandboxbackend</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">BuildInput</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Agent:       manifestCtx.agent,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        PodTemplate: podTemplate,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    })</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#6F42C1;--shiki-dark:#B392F0">client</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Object</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">appsv1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Deployment</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#6A737D;--shiki-dark:#6A737D">/* ... */</span><span style="color:#24292E;--shiki-dark:#E1E4E8">},</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">corev1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Service</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#6A737D;--shiki-dark:#6A737D">/* ... */</span><span style="color:#24292E;--shiki-dark:#E1E4E8">},</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">nil</span></span></code></pre>
+<p>源码：<strong>go/controller/internal/controller/translator/agent/manifest_builder.go</strong>。</p>
+<p>这说明两种模式使用的是同一套 Agent Runtime 镜像和 PodTemplate 构建逻辑，不是两套完全不同的 Agent 实现。</p>
+<p><a id="reference-sandbox-backend-生成什么"></a></p>
+<h3 id="sandbox-backend-生成什么">Sandbox backend 生成什么</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">replicas </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> int32</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">sb </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">agentsandboxv1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Sandbox</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    TypeMeta: </span><span style="color:#6F42C1;--shiki-dark:#B392F0">metav1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TypeMeta</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        APIVersion: agentsandboxv1.GroupVersion.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Kind:       </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Sandbox"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    },</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ObjectMeta: </span><span style="color:#6F42C1;--shiki-dark:#B392F0">metav1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ObjectMeta</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Name:      name,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Namespace: in.Agent.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GetNamespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    },</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Spec: </span><span style="color:#6F42C1;--shiki-dark:#B392F0">agentsandboxv1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SandboxSpec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        PodTemplate: pt,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Replicas:    </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">replicas,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    },</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>源码：<strong>go/controller/pkg/sandboxbackend/agentsxk8s/agentsxk8s.go</strong>。</p>
+<p>这里可以得到四个结论：</p>
+<ul>
+<li>直接创建 Sandbox，不经过 SandboxTemplate 或 SandboxClaim；</li>
+<li>固定单副本；</li>
+<li>PodTemplate 中的容器、环境变量、Volume、探针和安全上下文会原样带过去；</li>
+<li>当前仓库只构建声明，真正创建 Pod 和 Service 的是外部 agent-sandbox Controller。</li>
+</ul>
+<p><a id="reference-外部依赖缺失时直接失败"></a></p>
+<h3 id="外部依赖缺失时直接失败">外部依赖缺失时直接失败</h3>
+<p>当前仓库只在 Go 代码中依赖 <strong>sigs.k8s.io/agent-sandbox v0.3.10</strong>，Helm Chart 没有安装其 CRD 和 Controller。</p>
+<p>每次协调 SandboxAgent 前，代码会查询 Sandbox API：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">List</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">agentsandboxv1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SandboxList</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{}, client.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Limit</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)); err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> meta.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">IsNoMatchError</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(err) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "agent-sandbox API is not available; install the agent-sandbox CRDs and controller"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"could not reach agent-sandbox API: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%w</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, err)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>源码：<strong>go/controller/pkg/sandboxbackend/apis_available.go</strong>。</p>
+<p>这符合 fail-fast 原则：依赖不存在时明确报错，不会偷偷退回普通 Deployment。</p>
+<p><a id="reference-ready-状态如何传递"></a></p>
+<h3 id="ready-状态如何传递">Ready 状态如何传递</h3>
+<p>外部 agent-sandbox Controller 创建 Pod 和 Service 后，会在 Sandbox.status.conditions 中写入 Ready。kagent Controller 再读取该条件并映射到 SandboxAgent：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> sb.Status.Conditions {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    c </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> sb.Status.Conditions[i]</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.Type </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(agentsandboxv1.SandboxConditionReady) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> c.Status, c.Reason, c.Message</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> metav1.ConditionUnknown,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "SandboxReadyPending"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "Sandbox Ready condition not yet reported"</span></span></code></pre>
+<p>UI 在首次聊天前轮询这个 Ready 状态，默认最多等待 120 秒，每 1.5 秒查询一次。超时后明确显示 <strong>Timed out waiting for sandbox workload to become ready</strong>。</p>
+<p>因此，UI 显示的 deploymentReady 对 SandboxAgent 而言，实际代表外部 Sandbox 的 Pod 和 Service 已 Ready，并不表示创建了 Deployment。</p>
+<p><a id="reference-容器内-srt-沙箱如何工作"></a></p>
+<h2 id="容器内-srt-沙箱如何工作">容器内 SRT 沙箱如何工作</h2>
+<p><a id="reference-srt-被直接打进-agent-镜像"></a></p>
+<h3 id="srt-被直接打进-agent-镜像">SRT 被直接打进 Agent 镜像</h3>
+<p>Agent 使用 <strong>golang-adk-full</strong> 镜像。Dockerfile 在构建时从 Anthropic 仓库拉取固定 commit，并将 CLI 链接为 <strong>/usr/bin/srt</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="dockerfile"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">ARG</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> SRT_COMMIT=ef4afdef4d711ba21a507d7f7369e305f7d3dbfa</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">RUN</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> git fetch --depth 1 \</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    https://github.com/anthropic-experimental/sandbox-runtime.git \</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    $SRT_COMMIT &amp;&amp; \</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    git checkout -q FETCH_HEAD &amp;&amp; \</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    npm run build</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">RUN</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> apk add --no-cache \</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    bash ca-certificates coreutils curl nodejs \</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    bubblewrap socat python3 ripgrep libstdc++</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">RUN</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ln -s /opt/sandbox-runtime/dist/cli.js /usr/bin/srt</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">USER</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> 1001:1001</span></span></code></pre>
+<p>源码：<strong>go/adk/Dockerfile.full</strong>。</p>
+<p>固定 commit 的好处是构建可复现；代价是升级和安全修复不会自动进入镜像，必须主动更新 SRT_COMMIT 并重新发布镜像。</p>
+<p><a id="reference-什么时候生成-srt-配置"></a></p>
+<h3 id="什么时候生成-srt-配置">什么时候生成 SRT 配置</h3>
+<p>只有以下任一条件成立时，Controller 才生成 <strong>srt-settings.json</strong> 并注入 <strong>KAGENT_SRT_SETTINGS_PATH</strong>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> needsSRTSettings</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">agent</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> v1alpha2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">AgentObject</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">sandboxCfg</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#6F42C1;--shiki-dark:#B392F0">v1alpha2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SandboxConfig</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    spec </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> agent.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GetAgentSpec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> spec.Skills </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> spec.Declarative </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;&amp;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        spec.Declarative.ExecuteCodeBlocks </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;&amp;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        *</span><span style="color:#24292E;--shiki-dark:#E1E4E8">spec.Declarative.ExecuteCodeBlocks</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>源码：<strong>go/controller/internal/controller/translator/agent/manifest_builder.go</strong>。</p>
+<p>这带来两个容易忽视的事实：</p>
+<ul>
+<li>普通 Agent 只要配置 Skills，也会使用容器内 SRT；SRT 并不是 SandboxAgent 专属能力。</li>
+<li>SandboxAgent 如果没有 Skills，也没有开启 executeCodeBlocks，就不会因为资源类型是 SandboxAgent 而自动执行 SRT 命令。</li>
+</ul>
+<p><a id="reference-bash-工具怎样启动命令"></a></p>
+<h3 id="bash-工具怎样启动命令">Bash 工具怎样启动命令</h3>
+<p>创建 Skills 工具时必须成功构造 CommandExecutor：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">commandExecutor, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> skillruntime.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewCommandExecutorFromEnv</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"failed to configure bash sandbox: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%w</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, err)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>NewCommandExecutorFromEnv 要求环境变量中存在 SRT 配置路径：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> resolveSRTSettingsArgs</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() ([]</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    settingsPath </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TrimSpace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(os.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Getenv</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"KAGENT_SRT_SETTINGS_PATH"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> settingsPath </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ""</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"KAGENT_SRT_SETTINGS_PATH is not set"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"--settings"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, settingsPath}, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">nil</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>真正执行时，用户输入中的 command 没有经过危险命令语义分析，而是直接成为 <strong>bash -c</strong> 的参数：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">args </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">([]</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{}, e.srtArgs</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">), </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"bash"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"-c"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, command)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">cmd </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> exec.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">CommandContext</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"srt"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, args</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">cmd.Dir </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> workingDir</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> cmd.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Run</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span></code></pre>
+<p>等价于：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">srt</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --settings</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /config/srt-settings.json</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> bash</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -c</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '&lt;模型生成的命令&gt;'</span></span></code></pre>
+<p>源码：<strong>go/adk/pkg/skills/shell.go</strong>。</p>
+<p>命令超时规则是：</p>
+<ul>
+<li>默认 30 秒；</li>
+<li>只要命令字符串包含 python，使用 60 秒；</li>
+<li>可通过 ADK_SKILL_COMMAND_TIMEOUT 和 ADK_SKILL_PYTHON_COMMAND_TIMEOUT 修改。</li>
+</ul>
+<p>需要注意：通过字符串是否包含 python 判断超时比较粗糙，它不是命令类型的安全验证。</p>
+<p><a id="reference-每个会话的工作目录"></a></p>
+<h3 id="每个会话的工作目录">每个会话的工作目录</h3>
+<p>每个 Session 会创建：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/tmp/kagent/&lt;session-id&gt;/</span></span>
+<span class="line"><span>├── uploads/</span></span>
+<span class="line"><span>├── outputs/</span></span>
+<span class="line"><span>├── skills -&gt; /workspace/skills</span></span>
+<span class="line"><span>├── .gitconfig</span></span>
+<span class="line"><span>├── .bashrc</span></span>
+<span class="line"><span>└── 其他 SRT 需要遮蔽的占位文件</span></span></code></pre>
+<p>创建目录前会清理并检查路径：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">basePath </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> filepath.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(os.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TempDir</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(), </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"kagent"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">sessionPath </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> filepath.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Clean</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(filepath.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Join</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(basePath, sessionID))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#D73A49;--shiki-dark:#F97583"> !</span><span style="color:#24292E;--shiki-dark:#E1E4E8">strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">HasPrefix</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    sessionPath,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    filepath.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Clean</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(basePath)</span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(filepath.Separator),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"invalid sessionID: path traversal detected"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>源码：<strong>go/adk/pkg/skills/discovery.go</strong>。</p>
+<p>这可以阻止把 Session ID 构造成 <strong>../../etc</strong> 一类路径，但它只保护会话目录的生成过程。</p>
+<p><a id="reference-文件工具还有第二套路径检查"></a></p>
+<h3 id="文件工具还有第二套路径检查">文件工具还有第二套路径检查</h3>
+<p>Skills 工具集除了 bash，还有 read_file、write_file 和 edit_file。这些文件工具并不通过 Bash 执行，而是在 Go 进程中直接读写文件，因此需要单独校验路径。</p>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>允许范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>read_file</td>
+<td>当前 Session 目录或 Skills 根目录</td>
+</tr>
+<tr>
+<td>write_file</td>
+<td>只能写当前 Session 目录</td>
+</tr>
+<tr>
+<td>edit_file</td>
+<td>只能修改当前 Session 目录</td>
+</tr>
+</tbody>
+</table>
+<p>读文件时会先解析软链接，再检查最终路径：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">resolvedCandidate, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> filepath.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">EvalSymlinks</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(candidate)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, err</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#D73A49;--shiki-dark:#F97583"> !</span><span style="color:#6F42C1;--shiki-dark:#B392F0">isWithinRoot</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(resolvedCandidate, sessionRoot) </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;&amp;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">   !</span><span style="color:#6F42C1;--shiki-dark:#B392F0">isWithinRoot</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(resolvedCandidate, skillsRoot) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"path is outside the allowed roots"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>写新文件时，即使目标文件还不存在，也会向上寻找已经存在的父目录、解析父目录软链接，然后确认最终地址仍位于 Session 目录。这是为了防止：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/tmp/kagent/session-a/link -&gt; /etc</span></span>
+<span class="line"><span>write_file("link/passwd")</span></span></code></pre>
+<p>通过软链接绕过目录限制。</p>
+<p>源码：<strong>go/adk/pkg/tools/skills.go</strong>。</p>
+<p><a id="reference-srt-文件系统策略"></a></p>
+<h3 id="srt-文件系统策略">SRT 文件系统策略</h3>
+<p>Controller 生成的配置核心内容是：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "filesystem"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "denyRead"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [],</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "allowWrite"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/tmp"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "denyWrite"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: []</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  },</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "enableWeakerNestedSandbox"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "allowAllUnixSockets"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>SRT 的文件权限模型是：</p>
+<ul>
+<li>读取采用 deny-only：默认都可以读，只有 denyRead 中的路径不能读；</li>
+<li>写入采用 allow-only：默认都不能写，只有 allowWrite 中的路径可以写；</li>
+<li>denyWrite 可以在已允许写的目录中再次禁止某些子路径。</li>
+</ul>
+<p>因此当前项目的实际效果是：</p>
+<ul>
+<li>Bash 子进程原则上只能写 /tmp；</li>
+<li>但读取没有额外限制，因为 denyRead 是空数组；</li>
+<li>SRT 会额外保护一些危险配置文件，例如 .gitconfig、.bashrc、.mcp.json 和 Git hooks；</li>
+<li>Agent 容器根文件系统同时被 Kubernetes 设置成只读，形成第二道写保护。</li>
+</ul>
+<p><strong>读取没有限制是一个重要边界。</strong> 如果 Pod 挂载了 /config、模型 Secret 或 ClusterAccess kubeconfig，Bash 子进程可能读取这些文件。系统提示词中的“不要输出凭据”不是强制安全机制，不能替代 denyRead 或凭据隔离。</p>
+<p><a id="reference-pod-文件系统配置"></a></p>
+<h3 id="pod-文件系统配置">Pod 文件系统配置</h3>
+<p>Controller 为声明式 Agent 创建以下 Volume：</p>
+<table>
+<thead>
+<tr>
+<th>路径</th>
+<th>来源</th>
+<th>Pod 层权限</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/config</td>
+<td>Secret Volume</td>
+<td>默认只读挂载语义</td>
+<td>Agent 配置和 srt-settings.json</td>
+</tr>
+<tr>
+<td>/tmp</td>
+<td>emptyDir</td>
+<td>可写</td>
+<td>Session、uploads、outputs、临时文件</td>
+</tr>
+<tr>
+<td>/workspace</td>
+<td>emptyDir</td>
+<td>可写</td>
+<td>Skills 初始化和工作区</td>
+</tr>
+<tr>
+<td>/workspace/skills</td>
+<td>Workspace 子目录或 SkillSet 挂载</td>
+<td>设计上供读取</td>
+<td>Skill 内容</td>
+</tr>
+<tr>
+<td>/var/run/secrets/tokens</td>
+<td>Projected Token</td>
+<td>挂载文件</td>
+<td>audience 为 kagent 的短期 token</td>
+</tr>
+</tbody>
+</table>
+<p>主容器被强制设置：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> readOnlyRootFilesystem {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    securityContext.ReadOnlyRootFilesystem </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>同时关闭默认 ServiceAccount Token 自动挂载：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">AutomountServiceAccountToken: </span><span style="color:#6F42C1;--shiki-dark:#B392F0">new</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p>但代码会显式挂载一个 audience 为 <strong>kagent</strong>、有效期 3600 秒的 projected token。它主要用于 Agent Runtime 向平台证明自己的工作负载身份，不等于通用 Kubernetes 管理凭据。</p>
+<p><a id="reference-srt-网络策略怎样生成"></a></p>
+<h3 id="srt-网络策略怎样生成">SRT 网络策略怎样生成</h3>
+<p>最终 allowedDomains 不是简单照抄用户配置，而是由 Controller 自动合并：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, svc </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> svcList.Items {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    allowedDomains </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        allowedDomains,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        svc.Name</span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"."</span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8">svc.Namespace,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> sandboxCfg </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> sandboxCfg.Network </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    allowedDomains </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        allowedDomains,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        sandboxCfg.Network.AllowedDomains</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">allowedDomains </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(allowedDomains, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">mcpServerHosts</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cfg)</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">allowedDomains </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(allowedDomains, clusterAccessHosts</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">allowedDomains </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(allowedDomains, platformAllowedDomains</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p>完整来源如下：</p>
+<table>
+<thead>
+<tr>
+<th>来源</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>集群中所有 Service 的 service.namespace</td>
+<td>允许调用集群内服务</td>
+</tr>
+<tr>
+<td>spec.sandbox.network.allowedDomains</td>
+<td>用户显式添加的域名</td>
+</tr>
+<tr>
+<td>Agent 配置中的 MCP Server hostname</td>
+<td>允许 Skills 访问相关 MCP 地址</td>
+</tr>
+<tr>
+<td>ClusterAccess kubeconfig 的 API Server hostname</td>
+<td>允许 kubectl 访问目标集群</td>
+</tr>
+<tr>
+<td>平台默认域名</td>
+<td>Slack 和内部邮件认证等平台集成</td>
+</tr>
+</tbody>
+</table>
+<p>平台默认域名当前是：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>slack.com</span></span>
+<span class="line"><span>hooks.slack.com</span></span>
+<span class="line"><span>auth.mail.net.sap</span></span></code></pre>
+<p>最终 SRT 网络配置为：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "network"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "allowedDomains"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"自动和手工合并后的域名"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "deniedDomains"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: []</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>SRT 在 Linux 上移除命令进程的普通网络 namespace，并通过 HTTP/HTTPS Proxy、SOCKS5 Proxy 和 Unix Socket 桥接允许的请求。目标域名不在列表时，请求会失败。</p>
+<p>但域名白名单只判断“连接到谁”，不理解“请求要做什么”。例如允许 github.com 后，SRT 无法仅凭域名区分读取公开仓库和向攻击者仓库上传数据。</p>
+<p><a id="reference-allowallunixsockets-的含义"></a></p>
+<h3 id="allowallunixsockets-的含义">allowAllUnixSockets 的含义</h3>
+<p>Unix Socket 是同一机器上进程间通信的一种方式，例如 Docker daemon 常使用 <strong>/var/run/docker.sock</strong>。</p>
+<p>当前配置设置：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#005CC5;--shiki-dark:#79B8FF">"allowAllUnixSockets"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>这会关闭 SRT 对 Unix Socket 创建的严格阻断。默认 Pod 并没有挂载 Docker Socket，所以这不等于命令天然可以控制宿主机 Docker；但如果以后通过 Volume 或 Sidecar 暴露了高权限 Socket，这个配置会显著放大风险。</p>
+<p><a id="reference-enableweakernestedsandbox-的含义"></a></p>
+<h3 id="enableweakernestedsandbox-的含义">enableWeakerNestedSandbox 的含义</h3>
+<p>SRT 本身运行在 Kubernetes Container 内，即“沙箱里面再启动沙箱”。有些集群禁止容器创建完整 Linux namespace，导致 bubblewrap 无法启动。</p>
+<p>当前项目同时采用两项设置：</p>
+<ul>
+<li><strong>enableWeakerNestedSandbox=true</strong>：完整隔离不可用时允许使用适合嵌套容器环境的较弱模式；</li>
+<li>如果没有显式禁止权限提升，Skills 会让主容器使用 <strong>privileged=true</strong>，为 bubblewrap 提供更强的 namespace 能力。</li>
+</ul>
+<p>相关代码：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> needCodeExecIsolation </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;&amp;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">   !</span><span style="color:#6F42C1;--shiki-dark:#B392F0">allowPrivilegeEscalationExplicitlyFalse</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(securityContext) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    securityContext.Privileged </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> new</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>如果用户显式配置：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  declarative</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    deployment</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      securityContext</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        allowPrivilegeEscalation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span></span></code></pre>
+<p>Controller 不会再设置 privileged。此时 SRT 只能依赖集群是否允许非特权 User Namespace，并可能进入较弱嵌套模式。</p>
+<p>这不是“越 privileged 越安全”的意思，而是一个明显的安全取舍：完整 bubblewrap 隔离需要更多内核能力，但把整个 Agent 容器设为 privileged 又扩大了容器逃逸后的影响面。</p>
+<p><a id="reference-高危命令到底怎样被限制"></a></p>
+<h2 id="高危命令到底怎样被限制">高危命令到底怎样被限制</h2>
+<p><a id="reference-当前没有高危命令黑名单"></a></p>
+<h3 id="当前没有高危命令黑名单">当前没有高危命令黑名单</h3>
+<p>当前实现没有在执行前解析命令，也没有维护下面这样的规则：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>禁止 rm -rf</span></span>
+<span class="line"><span>禁止 curl | sh</span></span>
+<span class="line"><span>禁止 kubectl delete</span></span>
+<span class="line"><span>禁止 chmod 777</span></span>
+<span class="line"><span>禁止 fork bomb</span></span></code></pre>
+<p>CommandExecutor 收到模型生成的字符串后，直接交给 <strong>srt bash -c</strong>。因此它采取的不是“判断这条命令危险不危险”，而是 <em>capability-based security</em>：即使命令本身危险，也通过限制它能访问的文件、网络、凭据和内核能力来缩小破坏范围。</p>
+<blockquote>
+<p>类比 Docker：不是检查容器里能不能执行 rm，而是让容器只能看到自己的文件系统、只挂载必要目录、使用只读根目录和受限网络。rm 仍然存在，但它能删除的东西应该有限。</p>
+</blockquote>
+<p><a id="reference-为什么不应该只依赖命令黑名单"></a></p>
+<h3 id="为什么不应该只依赖命令黑名单">为什么不应该只依赖命令黑名单</h3>
+<p>命令黑名单很容易绕过。例如只禁止字符串 rm -rf，模型仍可能生成：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">find</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /tmp</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -type</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> f</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -delete</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">python</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -c</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'import shutil; shutil.rmtree("/tmp/data")'</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">busybox</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rm</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -rf</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /tmp/data</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">/bin/rm</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -r</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -f</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /tmp/data</span></span></code></pre>
+<p>同一种危险操作可以有很多表达形式。Shell 还支持变量、管道、重定向、命令替换和动态下载，因此只做字符串匹配并不能建立可靠安全边界。</p>
+<p>更合理的设计是：</p>
+<ol>
+<li>用操作系统隔离限制进程能力。</li>
+<li>用最小文件和网络权限限制可访问资源。</li>
+<li>用 RBAC 或远端权限限制业务操作。</li>
+<li>对不可逆操作增加人工审批。</li>
+<li>记录命令、结果和安全拒绝事件，支持审计。</li>
+</ol>
+<p>当前仓库主要实现了前两项的一部分，以及 MCP Tool 的可选人工审批；对 Bash 命令本身没有审批。</p>
+<p><a id="reference-各类高危命令的实际结果"></a></p>
+<h3 id="各类高危命令的实际结果">各类高危命令的实际结果</h3>
+<table>
+<thead>
+<tr>
+<th>命令或行为</th>
+<th>当前主要限制</th>
+<th>仍需注意的风险</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rm -rf /</td>
+<td>容器根文件系统只读；SRT 只允许写 /tmp</td>
+<td>/tmp 下的数据仍可能被删除；是否能影响其他 Session 需要真实环境验证</td>
+</tr>
+<tr>
+<td>修改 /etc、/usr/bin</td>
+<td>根文件系统只读，SRT 不允许写这些路径</td>
+<td>privileged 配置扩大了隔离失效后的风险</td>
+</tr>
+<tr>
+<td>读取 /etc/kubeconfig/…</td>
+<td>当前 denyRead 为空，原则上允许读取</td>
+<td>kubeconfig 虽然只读，但可能被命令读取并外传</td>
+</tr>
+<tr>
+<td>curl evil.example</td>
+<td>域名不在 SRT allowlist 时被代理拒绝</td>
+<td>域名在白名单内时，SRT 不理解请求语义</td>
+</tr>
+<tr>
+<td>kubectl delete deployment</td>
+<td>API Server hostname会被自动放行</td>
+<td>最终能否删除完全取决于 kubeconfig 对应身份的 Kubernetes RBAC</td>
+</tr>
+<tr>
+<td>连接 Docker Socket</td>
+<td>默认没有挂载 Docker Socket</td>
+<td>allowAllUnixSockets=true；一旦挂载高权限 Socket，风险很高</td>
+</tr>
+<tr>
+<td>长时间运行命令</td>
+<td>Go Context 设置 30 秒或 60 秒超时</td>
+<td>仍应验证整个子进程树是否都被可靠回收</td>
+</tr>
+<tr>
+<td>CPU 或内存消耗</td>
+<td>Pod Resource limits 提供整体上限</td>
+<td>限制作用于整个 Pod，不是每条命令独享配额</td>
+</tr>
+<tr>
+<td>写其他 Session</td>
+<td>文件工具有 Session 路径检查</td>
+<td>Bash 的 allowWrite 是整个 /tmp，而不是 /tmp/kagent/当前Session，存在跨 Session 影响面</td>
+</tr>
+<tr>
+<td>调用危险 MCP Tool</td>
+<td>MCP 可配置 requireApproval</td>
+<td>只有被列出的 MCP Tool 会请求确认，Skills bash 不在该审批集合中</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-为什么-kubectl-delete-仍可能成功"></a></p>
+<h3 id="为什么-kubectl-delete-仍可能成功">为什么 kubectl delete 仍可能成功</h3>
+<p>ClusterAccess 会把 kubeconfig Secret 只读挂载到：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/etc/kubeconfig/&lt;shortName&gt;/config</span></span></code></pre>
+<p>源码实现：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">podRuntime.volumeMounts </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    podRuntime.volumeMounts,</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    corev1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">VolumeMount</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Name:      volName,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        MountPath: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/etc/kubeconfig/"</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ca.Spec.ShortName,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        ReadOnly:  </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    },</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p>源码：<strong>go/controller/internal/controller/translator/agent/cluster_access.go</strong>。</p>
+<p>“只读挂载”只表示不能修改 kubeconfig 文件，不表示不能使用里面的凭据。只要同时满足：</p>
+<ol>
+<li>Agent 能读取 kubeconfig；</li>
+<li>API Server hostname 已进入 SRT 白名单；</li>
+<li>kubeconfig 对应身份拥有 delete 权限；</li>
+</ol>
+<p>那么下面的命令仍然可能成功：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --kubeconfig</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /etc/kubeconfig/prod/config</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  delete</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> deployment</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> important-service</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> production</span></span></code></pre>
+<p>真正决定删除权限的是目标集群 RBAC，不是 SRT。因此 ClusterAccess 必须提供最小权限身份，例如只允许 get、list、watch，而不能直接挂载 cluster-admin 凭据。</p>
+<p><a id="reference-prompt-不是安全边界"></a></p>
+<h3 id="prompt-不是安全边界">Prompt 不是安全边界</h3>
+<p>Controller 会向 Agent 系统提示词追加类似要求：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Never reveal the contents of these kubeconfig files or the credentials,</span></span>
+<span class="line"><span>tokens, or certificates they contain.</span></span></code></pre>
+<p>这对正常模型行为有帮助，但不能作为强制访问控制。Prompt Injection、模型误判或恶意 Skill 都可能绕过文本要求。</p>
+<p>真正可靠的控制必须位于模型之外，例如：</p>
+<ul>
+<li>kubeconfig 本身使用最小权限；</li>
+<li>SRT denyRead 禁止读取凭据文件；</li>
+<li>通过凭据代理代替直接挂载长期 kubeconfig；</li>
+<li>为写操作增加独立审批；</li>
+<li>使用 NetworkPolicy 和 egress proxy 限制数据外传。</li>
+</ul>
+<p><a id="reference-mcp-tool-审批不覆盖-bash"></a></p>
+<h3 id="mcp-tool-审批不覆盖-bash">MCP Tool 审批不覆盖 Bash</h3>
+<p>项目确实实现了 HITL 工具审批，但审批集合只从 HTTP 和 SSE MCP Tool 的 <strong>requireApproval</strong> 收集：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">approvalSet </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> make</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, ht </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> agentConfig.HttpTools {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, name </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ht.RequireApproval {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        approvalSet[name] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, st </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> agentConfig.SseTools {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, name </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> st.RequireApproval {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        approvalSet[name] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>Skills 自带的 bash、read_file、write_file、edit_file 不会自动加入这个集合。因此当前不能说“所有高危命令执行前都会向用户确认”。</p>
+<p><a id="reference-当前设计更像损害控制而不是危险识别"></a></p>
+<h3 id="当前设计更像损害控制而不是危险识别">当前设计更像损害控制，而不是危险识别</h3>
+<p>可以把完整过程理解为：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>LLM 生成命令</span></span>
+<span class="line"><span>   │</span></span>
+<span class="line"><span>   ├── 没有命令语义审核</span></span>
+<span class="line"><span>   │</span></span>
+<span class="line"><span>   ▼</span></span>
+<span class="line"><span>srt 启动 bash</span></span>
+<span class="line"><span>   │</span></span>
+<span class="line"><span>   ├── 文件写路径限制</span></span>
+<span class="line"><span>   ├── 网络目标域名限制</span></span>
+<span class="line"><span>   ├── namespace 隔离</span></span>
+<span class="line"><span>   └── 超时</span></span>
+<span class="line"><span>   │</span></span>
+<span class="line"><span>   ▼</span></span>
+<span class="line"><span>Linux 内核执行命令</span></span>
+<span class="line"><span>   │</span></span>
+<span class="line"><span>   ├── 访问 Kubernetes API 时再受 kubeconfig RBAC 限制</span></span>
+<span class="line"><span>   └── 访问 MCP 时再受 MCP Tool 权限和可选审批限制</span></span></code></pre>
+<p>因此安全目标不是保证 Agent 永远不产生高危命令，而是让高危命令即使被产生，也尽量无法越过预先授予的能力边界。</p>
+<p><a id="reference-executecodeblocks-的当前状态"></a></p>
+<h2 id="executecodeblocks-的当前状态">ExecuteCodeBlocks 的当前状态</h2>
+<p>CRD 中有 <strong>executeCodeBlocks</strong> 字段，描述为自动执行 LLM 响应中的 Python 代码块。但当前 Go ADK 实现没有真正实例化代码执行器。</p>
+<p>仓库自己的说明写得很明确：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// Agent.Spec.ExecuteCodeBlocks -&gt; AgentConfig.ExecuteCode</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">//   - Currently disabled in Go controller</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">//   - Would enable SandboxedLocalCodeExecutor if true</span></span></code></pre>
+<p>源码：<strong>go/adk/pkg/config/config_usage.go</strong>。</p>
+<p>当前代码实际完成的是：</p>
+<ul>
+<li>把字段写入 AgentConfig；</li>
+<li>把 needCodeExecIsolation 设为 true；</li>
+<li>生成 SRT 配置；</li>
+<li>可能改变容器 SecurityContext。</li>
+</ul>
+<p>但在非测试代码中，没有找到读取 ExecuteCode 并创建代码执行器的实现。因此不能把 executeCodeBlocks 当成已经可用的生产功能。Skills Bash 是目前可以从源码确认的 SRT 执行入口。</p>
+<p><a id="reference-一个完整配置示例"></a></p>
+<h2 id="一个完整配置示例">一个完整配置示例</h2>
+<p>下面示例创建一个带 Skill 和 ClusterAccess 的 SandboxAgent：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">kagent.dev/v1alpha2</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">SandboxAgent</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">cluster-reader</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">agents</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Declarative</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  description</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">只读检查 Kubernetes 集群</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  sandbox</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    network</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      allowedDomains</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api.example.com</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  clusterAccess</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    - </span><span style="color:#22863A;--shiki-dark:#85E89D">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">production-readonly</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  skills</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    refs</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">registry.example.com/skills/kubernetes-inspection:1.0.0</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  declarative</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    modelConfig</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">default-model-config</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    systemMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#D73A49;--shiki-dark:#F97583">|</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">      只允许执行只读检查，不得修改或删除资源。</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    deployment</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      securityContext</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        runAsUser</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1001</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        runAsGroup</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1001</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        runAsNonRoot</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        allowPrivilegeEscalation</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        capabilities</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          drop</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            - </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ALL</span></span></code></pre>
+<p>这份配置需要正确理解：</p>
+<ul>
+<li>SandboxAgent 让 Controller 创建外部 Sandbox CR；</li>
+<li>Skill 使 Agent 获得 Bash 工具，并启用 SRT；</li>
+<li>allowedDomains 只是在自动域名列表上增加 api.example.com；</li>
+<li>allowPrivilegeEscalation=false 避免 Controller 自动设置 privileged；</li>
+<li>systemMessage 中“只读”只是行为指导；</li>
+<li>真正保证 kubectl 只读的是 production-readonly kubeconfig 对应的 RBAC。</li>
+</ul>
+<p><a id="reference-从创建到执行命令的完整时序"></a></p>
+<h2 id="从创建到执行命令的完整时序">从创建到执行命令的完整时序</h2>
+<pre class="mermaid">sequenceDiagram
+    participant User as 用户
+    participant UI as UI 或 CLI
+    participant API as kagent Controller API
+    participant KC as SandboxAgent Controller
+    participant AS as agent-sandbox Controller
+    participant Pod as Agent Pod
+    participant SRT as SRT/bubblewrap
+
+    User-&gt;&gt;UI: 创建 workloadMode=sandbox
+    UI-&gt;&gt;API: CreateAgent
+    API-&gt;&gt;API: 创建 SandboxAgent CR
+    KC-&gt;&gt;KC: 编译 Model、Tools、Skills、ClusterAccess
+    KC-&gt;&gt;KC: 生成 Secret、ServiceAccount、PodTemplate
+    KC-&gt;&gt;AS: 创建 agents.x-k8s.io/Sandbox
+    AS-&gt;&gt;Pod: 创建单副本 Pod 和稳定 Service
+    Pod--&gt;&gt;AS: Readiness Probe 成功
+    AS--&gt;&gt;KC: Sandbox Ready=True
+    KC--&gt;&gt;API: SandboxAgent Ready=True
+    UI-&gt;&gt;API: /api/a2a-sandboxes/ns/name
+    API-&gt;&gt;Pod: A2A message/stream
+    Pod-&gt;&gt;Pod: LLM 决定调用 bash
+    Pod-&gt;&gt;SRT: srt --settings ... bash -c command
+    SRT-&gt;&gt;SRT: 建立 namespace、文件和网络限制
+    SRT--&gt;&gt;Pod: stdout、stderr 或错误
+    Pod--&gt;&gt;UI: A2A 流式结果</pre>
+<p><a id="reference-当前实现的安全边界"></a></p>
+<h2 id="当前实现的安全边界">当前实现的安全边界</h2>
+<p><a id="reference-已经具备的保护"></a></p>
+<h3 id="已经具备的保护">已经具备的保护</h3>
+<ul>
+<li>SandboxAgent 缺少外部 agent-sandbox CRD 时明确失败，不回退成 Deployment。</li>
+<li>每个 Agent 使用独立 Pod，而不是在 Controller 进程中直接执行命令。</li>
+<li>Agent 镜像默认使用 UID 1001。</li>
+<li>主容器根文件系统只读。</li>
+<li>/tmp 使用临时 Volume。</li>
+<li>不自动挂载默认 Kubernetes ServiceAccount Token。</li>
+<li>Bash 必须经过 SRT，并且缺少配置时初始化报错。</li>
+<li>Bash 网络采用域名 allowlist。</li>
+<li>Bash 写入默认只允许 /tmp。</li>
+<li>文件工具执行路径规范化和软链接逃逸检查。</li>
+<li>命令具有 30 秒或 60 秒超时。</li>
+<li>ClusterAccess kubeconfig 以只读 Secret Volume 挂载。</li>
+<li>MCP HTTP/SSE 工具支持按工具名配置人工审批。</li>
+</ul>
+<p><a id="reference-没有实现或需要额外部署的保护"></a></p>
+<h3 id="没有实现或需要额外部署的保护">没有实现或需要额外部署的保护</h3>
+<ul>
+<li>没有 Bash 高危命令黑名单或语义审查。</li>
+<li>没有为 Bash 工具配置人工审批。</li>
+<li>没有默认 Kubernetes NetworkPolicy。</li>
+<li>没有默认 runtimeClassName，因此没有默认启用 gVisor 或 Kata。</li>
+<li>没有为每次聊天或每条命令创建独立 Pod。</li>
+<li>没有使用 SandboxClaim、SandboxTemplate 或 Warm Pool。</li>
+<li>没有在当前 backend 中设置 Sandbox TTL 或自动过期策略。</li>
+<li>SRT denyRead 为空，不能阻止 Bash 读取挂载进 Pod 的敏感文件。</li>
+<li>allowWrite=/tmp 不是按 Session 精确授权。</li>
+<li>allowAllUnixSockets=true 放宽了 Unix Socket 限制。</li>
+<li>Skills 默认可能触发 privileged=true。</li>
+<li>SRT 域名规则不检查 URL path、HTTP method 或请求内容。</li>
+<li>Agent 主进程和 ExtraContainers 不受 SRT 网络白名单控制。</li>
+</ul>
+<p><a id="reference-关键设计风险和改进方向"></a></p>
+<h2 id="关键设计风险和改进方向">关键设计风险和改进方向</h2>
+<p><a id="reference-风险sandbox-名称可能制造过强安全预期"></a></p>
+<h3 id="风险sandbox-名称可能制造过强安全预期">风险：Sandbox 名称可能制造过强安全预期</h3>
+<p>外部 agent-sandbox 的核心价值是稳定单实例工作负载和生命周期管理。当前仓库没有设置 gVisor、Kata 或额外 VM 隔离。</p>
+<p>改进方向：</p>
+<ul>
+<li>为 SandboxAgent 提供受管的 runtimeClassName；</li>
+<li>在目标集群部署 gVisor 或 Kata；</li>
+<li>Admission Webhook 强制 SandboxAgent 使用指定 RuntimeClass；</li>
+<li>禁止用户覆盖关键 Pod 安全字段。</li>
+</ul>
+<p><a id="reference-风险skills-默认-privileged"></a></p>
+<h3 id="风险skills-默认-privileged">风险：Skills 默认 privileged</h3>
+<p>为了让 bubblewrap 在容器内创建 namespace，当前逻辑可能把整个 Agent 容器设为 privileged。这扩大了容器逃逸和内核攻击面。</p>
+<p>改进方向：</p>
+<ul>
+<li>集群开启非特权 User Namespace；</li>
+<li>默认 allowPrivilegeEscalation=false，并验证 SRT 在目标内核上的行为；</li>
+<li>使用 gVisor/Kata 承担更强的外层隔离；</li>
+<li>将命令执行器拆到独立、短生命周期 Pod，而不是让 Agent 主容器 privileged。</li>
+</ul>
+<p><a id="reference-风险bash-可以读取凭据"></a></p>
+<h3 id="风险bash-可以读取凭据">风险：Bash 可以读取凭据</h3>
+<p>当前 denyRead 为空，SRT 允许读取容器内可见文件。ClusterAccess kubeconfig 和 /config 都可能成为读取目标。</p>
+<p>改进方向：</p>
+<ul>
+<li>将敏感文件加入 denyRead；</li>
+<li>不向命令执行容器直接挂载模型 Secret；</li>
+<li>使用凭据代理，把长期凭据换成短期、操作范围受限的 token；</li>
+<li>将 Bash Executor 与 Agent 主进程拆成不同容器或 Pod；</li>
+<li>对输出增加 Secret 扫描，但不能把扫描当作唯一防线。</li>
+</ul>
+<p><a id="reference-风险网络白名单过宽"></a></p>
+<h3 id="风险网络白名单过宽">风险：网络白名单过宽</h3>
+<p>源码会把所有可见 Kubernetes Service 加入 SRT 白名单。CRD 注释中的“allowedDomains 为空时默认拒绝出站”与最终 Builder 行为并不完全一致：用户没有添加域名，不代表最终列表为空。</p>
+<p>改进方向：</p>
+<ul>
+<li>只允许当前 Agent 实际依赖的 Service；</li>
+<li>不要全量 List 所有 namespace 的 Service；</li>
+<li>用 NetworkPolicy 实现 Pod 级 egress deny-by-default；</li>
+<li>通过统一 egress gateway 记录目标、方法和身份；</li>
+<li>对外部平台使用更细粒度、短期凭据。</li>
+</ul>
+<p><a id="reference-风险会话写边界不够细"></a></p>
+<h3 id="风险会话写边界不够细">风险：会话写边界不够细</h3>
+<p>文件工具只允许写当前 Session，但 SRT 配置允许写整个 /tmp。多个 Session 位于同一个 Agent Pod 的 /tmp/kagent 下，因此 Bash 的授权粒度比文件工具更宽。</p>
+<p>改进方向：</p>
+<ul>
+<li>为每次调用动态生成只允许当前 Session 目录的 SRT 配置；</li>
+<li>每个 Session 使用独立 Volume 或独立执行 Pod；</li>
+<li>将会话目录随机化并严格设置 Unix 权限；</li>
+<li>增加跨 Session 读写回归测试。</li>
+</ul>
+<p><a id="reference-风险审批只覆盖部分工具"></a></p>
+<h3 id="风险审批只覆盖部分工具">风险：审批只覆盖部分工具</h3>
+<p>MCP Tool 可以通过 requireApproval 请求用户确认，但 Bash 不在审批集合中。</p>
+<p>改进方向：</p>
+<ul>
+<li>将 Bash 纳入 BeforeToolCallback；</li>
+<li>将命令解析为结构化操作，例如 kubectl 的 verb、resource、namespace；</li>
+<li>对写操作、删除操作和凭据读取操作强制确认；</li>
+<li>审批时展示规范化命令、目标资源、凭据身份和影响范围；</li>
+<li>不允许通过 shell 拼接绕过已经批准的参数。</li>
+</ul>
+<p><a id="reference-如何验证实际集群中的沙箱"></a></p>
+<h2 id="如何验证实际集群中的沙箱">如何验证实际集群中的沙箱</h2>
+<p><a id="reference-确认外部-crd-已安装"></a></p>
+<h3 id="确认外部-crd-已安装">确认外部 CRD 已安装</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> api-resources</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> rg</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'sandboxagents|sandboxes'</span></span></code></pre>
+<p>期望至少看到：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>sandboxagents.kagent.dev</span></span>
+<span class="line"><span>sandboxes.agents.x-k8s.io</span></span></code></pre>
+<p>只看到 SandboxAgent 不够，因为真正创建 Pod 的 Sandbox CRD 和 agent-sandbox Controller 可能仍未安装。</p>
+<p><a id="reference-检查资源链路"></a></p>
+<h3 id="检查资源链路">检查资源链路</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> sandboxagent</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">namespac</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> sandbox</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">namespac</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod,service</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">namespac</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p>进一步检查 ownerReferences：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> sandbox</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">agent-nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">namespac</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> yaml</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">pod-nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">namespac</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> yaml</span></span></code></pre>
+<p>期望关系是：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>SandboxAgent owns Sandbox</span></span>
+<span class="line"><span>Sandbox owns Pod and Service</span></span></code></pre>
+<p><a id="reference-检查-pod-安全上下文"></a></p>
+<h3 id="检查-pod-安全上下文">检查 Pod 安全上下文</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">pod-nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">namespac</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> jsonpath='{.spec.containers[?(@.name=="kagent")].securityContext}'</span></span></code></pre>
+<p>重点检查：</p>
+<ul>
+<li>readOnlyRootFilesystem 是否为 true；</li>
+<li>privileged 是否为 true；</li>
+<li>allowPrivilegeEscalation 是否显式为 false；</li>
+<li>runAsUser 是否符合预期；</li>
+<li>是否配置 runtimeClassName；</li>
+<li>是否挂载了不应出现的 hostPath 或 Unix Socket。</li>
+</ul>
+<p><a id="reference-只查看-srt-配置不输出其他-secret"></a></p>
+<h3 id="只查看-srt-配置不输出其他-secret">只查看 SRT 配置，不输出其他 Secret</h3>
+<p>srt-settings.json 与 Agent 配置位于同一个 Secret。排查时只读取指定 key，不要打印整个 Secret，以免把模型凭据写入终端日志：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> secret</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">agent-nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">namespac</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> jsonpath='{.data.srt-settings\.json}'</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> base64</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span></span></code></pre>
+<p>重点确认：</p>
+<ul>
+<li>allowedDomains 是否包含意外域名；</li>
+<li>denyRead 是否为空；</li>
+<li>allowWrite 是否仍为 /tmp；</li>
+<li>allowAllUnixSockets 是否为 true；</li>
+<li>enableWeakerNestedSandbox 是否为 true。</li>
+</ul>
+<p><a id="reference-验证网络限制"></a></p>
+<h3 id="验证网络限制">验证网络限制</h3>
+<p>测试时应使用无敏感数据的目标：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -I</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> https://allowed.example.com</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -I</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> https://not-allowed.invalid</span></span></code></pre>
+<p>必须通过 Agent 的 Bash Tool 执行，直接 kubectl exec 进入 Pod 后运行 curl 不一定经过 SRT，不能证明 SRT 规则生效。</p>
+<p><a id="reference-验证文件限制"></a></p>
+<h3 id="验证文件限制">验证文件限制</h3>
+<p>可以设计无破坏性的测试：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">touch</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /tmp/sandbox-write-ok</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">touch</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /etc/sandbox-write-should-fail</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">printf</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> test</span><span style="color:#D73A49;--shiki-dark:#F97583"> &gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /workspace/sandbox-write-should-fail</span></span></code></pre>
+<p>然后验证：</p>
+<ul>
+<li>/tmp 写入成功；</li>
+<li>/etc 写入失败；</li>
+<li>/workspace 对 SRT Bash 的写入应失败；</li>
+<li>write_file 不能写出当前 Session 目录；</li>
+<li>通过软链接指向 Session 外部时，write_file 应拒绝。</li>
+</ul>
+<p><a id="reference-验证-kubernetes-最小权限"></a></p>
+<h3 id="验证-kubernetes-最小权限">验证 Kubernetes 最小权限</h3>
+<p>使用 ClusterAccess 前，应先对其身份执行：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> auth</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> can-i</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --list</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --kubeconfig</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /etc/kubeconfig/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">shortNam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">/config</span></span></code></pre>
+<p>对敏感操作做显式检查：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> auth</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> can-i</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> delete</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> deployments</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --namespace</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> production</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --kubeconfig</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /etc/kubeconfig/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">shortNam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">/config</span></span></code></pre>
+<p>只读 Agent 的期望结果必须是 <strong>no</strong>。如果返回 yes，问题在凭据授权，而不是 SRT。</p>
+<p><a id="reference-常见故障排查"></a></p>
+<h2 id="常见故障排查">常见故障排查</h2>
+<p><a id="reference-sandboxagent-一直不-ready"></a></p>
+<h3 id="sandboxagent-一直不-ready">SandboxAgent 一直不 Ready</h3>
+<p>按顺序检查：</p>
+<ol>
+<li>agents.x-k8s.io/Sandbox CRD 是否存在；</li>
+<li>agent-sandbox Controller 是否运行；</li>
+<li>Sandbox CR 是否已生成；</li>
+<li>Sandbox.status.conditions 中的 Ready 原因；</li>
+<li>Pod 是否 ImagePullBackOff、Pending 或探针失败；</li>
+<li>稳定 Service 是否已创建。</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> sandboxagent</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">namespac</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> sandbox</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">namespac</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> events</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">namespac</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --sort-by=.lastTimestamp</span></span></code></pre>
+<p><a id="reference-bash-tool-报-kagent_srt_settings_path-is-not-set"></a></p>
+<h3 id="bash-tool-报-kagent_srt_settings_path-is-not-set">Bash Tool 报 KAGENT_SRT_SETTINGS_PATH is not set</h3>
+<p>说明 Runtime 暴露了 Skills 工具，但 Controller 没有挂载 SRT 配置或环境变量。代码会直接报错，不会绕过 SRT 执行普通 Bash。</p>
+<p>检查：</p>
+<ul>
+<li>Agent 是否真的声明了 Skills；</li>
+<li>Secret 中是否存在 srt-settings.json；</li>
+<li>Pod 环境变量是否有 KAGENT_SRT_SETTINGS_PATH；</li>
+<li>/config 是否正确挂载。</li>
+</ul>
+<p><a id="reference-bubblewrap-无法创建-namespace"></a></p>
+<h3 id="bubblewrap-无法创建-namespace">bubblewrap 无法创建 namespace</h3>
+<p>常见原因：</p>
+<ul>
+<li>集群 Pod Security 禁止 privileged；</li>
+<li>节点关闭非特权 User Namespace；</li>
+<li>Seccomp 或 LSM 策略阻止相关系统调用；</li>
+<li>运行环境不支持嵌套 namespace。</li>
+</ul>
+<p>不要通过无条件放开 privileged 作为唯一解决办法。应同时评估 gVisor/Kata、User Namespace、Pod Security 和执行器拆分方案。</p>
+<p><a id="reference-域名已经加入-alloweddomainscurl-仍失败"></a></p>
+<h3 id="域名已经加入-alloweddomainscurl-仍失败">域名已经加入 allowedDomains，curl 仍失败</h3>
+<p>依次检查：</p>
+<ol>
+<li>该命令是否确实通过 Skills Bash Tool 执行；</li>
+<li>应用是否遵守 HTTP_PROXY、HTTPS_PROXY 或 ALL_PROXY；</li>
+<li>SRT Proxy 和 socat 是否正常；</li>
+<li>DNS 解析使用的 hostname 是否与白名单一致；</li>
+<li>TLS、证书和 SNI 是否匹配；</li>
+<li>目标是否通过另一个未加入白名单的域名重定向。</li>
+</ol>
+<p><a id="reference-为什么直接在-pod-中-kubectl-exec-测试不受限"></a></p>
+<h3 id="为什么直接在-pod-中-kubectl-exec-测试不受限">为什么直接在 Pod 中 kubectl exec 测试不受限</h3>
+<p>SRT 只包装由 Agent Skills Bash Tool 启动的子进程：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Agent bash tool -&gt; srt -&gt; bash</span></span></code></pre>
+<p>运维人员执行：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>kubectl exec -&gt; shell</span></span></code></pre>
+<p>是另一条路径，不会自动经过 SRT。因此测试沙箱时必须通过真实 Agent Tool 调用链验证。</p>
+<p><a id="reference-面试表达"></a></p>
+<h2 id="面试表达">面试表达</h2>
+<p><a id="reference-如何用一句话解释实现"></a></p>
+<h3 id="如何用一句话解释实现">如何用一句话解释实现</h3>
+<blockquote>
+<p>项目采用两层隔离：控制器把 SandboxAgent 翻译成 kubernetes-sigs agent-sandbox 的单实例 Sandbox 工作负载；容器内部再用 Anthropic SRT 和 bubblewrap 包装 Skills Bash 子进程，通过只读根文件系统、临时工作目录、域名白名单和最小 RBAC 限制命令影响面。</p>
+</blockquote>
+<p><a id="reference-为什么不直接用-deployment"></a></p>
+<h3 id="为什么不直接用-deployment">为什么不直接用 Deployment</h3>
+<p>可以回答：</p>
+<blockquote>
+<p>Deployment 更适合无状态、可水平扩缩的服务；Agent 工作区更接近有稳定网络身份和生命周期的单实例环境。agent-sandbox 提供 Sandbox CR 和稳定 Service，因此 Controller 只需要生成 PodTemplate 并委托外部 Controller 管理具体 Pod。</p>
+</blockquote>
+<p><a id="reference-如何防止-rm--rf"></a></p>
+<h3 id="如何防止-rm--rf">如何防止 rm -rf</h3>
+<p>不要回答“项目禁止 rm -rf”，因为源码没有命令黑名单。更准确的回答是：</p>
+<blockquote>
+<p>项目允许 Shell 正常解释命令，但通过 SRT 和 Pod 文件系统限制可写范围。rm -rf 仍可能执行，不过根文件系统只读，SRT 默认只允许写 /tmp。风险控制依赖能力边界，而不是字符串过滤；当前 /tmp 授权过宽、denyRead 为空和 Bash 无人工审批仍是待加固点。</p>
+</blockquote>
+<p><a id="reference-sandboxagent-是否等于-gvisor"></a></p>
+<h3 id="sandboxagent-是否等于-gvisor">SandboxAgent 是否等于 gVisor</h3>
+<blockquote>
+<p>不等于。SandboxAgent 是业务 CRD，最终生成 agents.x-k8s.io/Sandbox。当前 PodSpec 没有指定 runtimeClassName，因此默认仍使用集群容器运行时。要获得 gVisor 或 Kata 的更强内核隔离，需要集群安装对应 RuntimeClass 并强制 Sandbox Pod 使用它。</p>
+</blockquote>
+<p><a id="reference-privileged-和沙箱为什么同时出现"></a></p>
+<h3 id="privileged-和沙箱为什么同时出现">privileged 和沙箱为什么同时出现</h3>
+<blockquote>
+<p>bubblewrap 在容器内创建 namespace 需要内核能力，所以当前实现可能把 Skills Agent 设为 privileged，以换取完整的内层隔离能力。但 privileged 本身扩大了外层容器风险，因此更稳妥的方向是非特权 User Namespace、gVisor/Kata，或者把命令执行拆到独立短生命周期 Pod。</p>
+</blockquote>
+<p><a id="reference-最终评价"></a></p>
+<h2 id="最终评价">最终评价</h2>
+<p>当前实现已经具备清晰的分层结构：</p>
+<ol>
+<li>SandboxAgent 负责表达业务意图。</li>
+<li>kagent Controller 负责编译 Agent 和生成 PodTemplate。</li>
+<li>外部 agent-sandbox Controller 负责稳定单实例 Pod 和 Service。</li>
+<li>SRT 负责隔离 Skills Bash 子进程。</li>
+<li>文件工具通过 Go 路径检查限制会话目录。</li>
+<li>Kubernetes RBAC 决定 Agent 最终能够对集群做什么。</li>
+</ol>
+<p>它适合“受控企业环境中的 Agent 命令执行”，但当前还不能直接宣称能够安全运行完全不可信代码。最需要关注的差距是：</p>
+<ul>
+<li>privileged 默认行为；</li>
+<li>没有默认 gVisor/Kata 和 NetworkPolicy；</li>
+<li>SRT 允许读取全部可见文件；</li>
+<li>/tmp 写权限不是按 Session 隔离；</li>
+<li>自动网络白名单较宽；</li>
+<li>Bash 没有人工审批；</li>
+<li>executeCodeBlocks 尚未真正接入执行器。</li>
+</ul>
+<p>判断一个 Agent 沙箱是否安全，不能只问“有没有 Sandbox 这个资源”，而应继续问：</p>
+<blockquote>
+<p>命令在哪个进程执行？能读哪些文件？能写哪些目录？能访问哪些网络？持有什么凭据？凭据能做什么？是否需要人工确认？突破容器后还有没有 gVisor/Kata 这一层？</p>
+</blockquote>
+<p>只有这些问题都有明确、可验证的答案，沙箱边界才真正成立。</p>
+<p><a id="reference-源码索引"></a></p>
+<h2 id="源码索引">源码索引</h2>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>文件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent 与 SandboxAgent 模式</td>
+<td>go/api/v1alpha2/agentobject.go</td>
+</tr>
+<tr>
+<td>SandboxAgent CRD</td>
+<td>go/api/v1alpha2/sandboxagent_types.go</td>
+</tr>
+<tr>
+<td>Sandbox 网络配置 API</td>
+<td>go/api/v1alpha2/agent_types.go</td>
+</tr>
+<tr>
+<td>创建 Agent 时选择工作负载</td>
+<td>go/controller/internal/grpcserver/agents.go</td>
+</tr>
+<tr>
+<td>SandboxAgent Reconcile</td>
+<td>go/controller/internal/controller/reconciler/reconciler.go</td>
+</tr>
+<tr>
+<td>PodTemplate 和 SRT 配置</td>
+<td>go/controller/internal/controller/translator/agent/manifest_builder.go</td>
+</tr>
+<tr>
+<td>agent-sandbox backend</td>
+<td>go/controller/pkg/sandboxbackend/agentsxk8s/agentsxk8s.go</td>
+</tr>
+<tr>
+<td>外部 CRD 前置检查</td>
+<td>go/controller/pkg/sandboxbackend/apis_available.go</td>
+</tr>
+<tr>
+<td>ClusterAccess 挂载</td>
+<td>go/controller/internal/controller/translator/agent/cluster_access.go</td>
+</tr>
+<tr>
+<td>SRT 镜像构建</td>
+<td>go/adk/Dockerfile.full</td>
+</tr>
+<tr>
+<td>Bash 命令执行</td>
+<td>go/adk/pkg/skills/shell.go</td>
+</tr>
+<tr>
+<td>Session 目录</td>
+<td>go/adk/pkg/skills/discovery.go</td>
+</tr>
+<tr>
+<td>文件工具路径校验</td>
+<td>go/adk/pkg/tools/skills.go</td>
+</tr>
+<tr>
+<td>MCP Tool 人工审批</td>
+<td>go/adk/pkg/agent/agent.go、go/adk/pkg/agent/approval.go</td>
+</tr>
+<tr>
+<td>UI Ready 轮询</td>
+<td>ui/src/pages/ChatPage.tsx</td>
+</tr>
+<tr>
+<td>Sandbox CLI 路由</td>
+<td>go/cli/internal/cli/agent/invoke.go</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>沿 workloadMode → Controller 编译 → 直接创建 Sandbox CR → 外部 agent-sandbox Controller 创建 Pod 和 Service → Sandbox Ready 条件映射到 SandboxAgent → 会话工作目录 → Bash 启动器追踪一次调用。解释 kubectl exec 绕开工具启动器时为何不能代表 SRT 内执行结果，再从凭据和 API 权限判断潜在影响。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>Kubernetes 运行时安全基础：<a href="/notes/computer-science/cloud/kubernetes/kubernetes-security/">L11-Security</a>。</li>
+<li>工具权限与执行隔离的区别：<a href="/notes/computer-science/agent/framework/learn-claude-code/tool-permissions/">S03-Permission</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+<script src="/note-runtime/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,securityLevel:"strict",theme:"neutral"});document.querySelectorAll(".mermaid").forEach(node=>mermaid.run({nodes:[node]}).catch(()=>{}));</script>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#先说结论">先说结论</a></li><li style="--depth: 0"><a href="#用-docker-经验理解整体架构">用 Docker 经验理解整体架构</a></li><li style="--depth: 0"><a href="#术语先扫盲">术语先扫盲</a></li><li style="--depth: 1"><a href="#cli-分流">CLI 分流</a></li><li style="--depth: 1"><a href="#pod">Pod</a></li><li style="--depth: 1"><a href="#singleton-pod">singleton Pod</a></li><li style="--depth: 1"><a href="#crd-和-controller">CRD 和 Controller</a></li><li style="--depth: 1"><a href="#sandboxtemplate-和-sandboxclaim">SandboxTemplate 和 SandboxClaim</a></li><li style="--depth: 1"><a href="#srt">SRT</a></li><li style="--depth: 1"><a href="#bubblewrap">bubblewrap</a></li><li style="--depth: 1"><a href="#privileged">privileged</a></li><li style="--depth: 1"><a href="#gvisor-和-kata-containers">gVisor 和 Kata Containers</a></li><li style="--depth: 0"><a href="#kubernetes-工作负载沙箱如何创建">Kubernetes 工作负载沙箱如何创建</a></li><li style="--depth: 1"><a href="#api-根据-workloadmode-选择资源类型">API 根据 workloadMode 选择资源类型</a></li><li style="--depth: 1"><a href="#agent-和-sandboxagent-复用同一套业务配置">Agent 和 SandboxAgent 复用同一套业务配置</a></li><li style="--depth: 1"><a href="#controller-先编译再生成-kubernetes-对象">Controller 先编译，再生成 Kubernetes 对象</a></li><li style="--depth: 1"><a href="#普通模式和-sandbox-模式在最后一步分叉">普通模式和 Sandbox 模式在最后一步分叉</a></li><li style="--depth: 1"><a href="#sandbox-backend-生成什么">Sandbox backend 生成什么</a></li><li style="--depth: 1"><a href="#外部依赖缺失时直接失败">外部依赖缺失时直接失败</a></li><li style="--depth: 1"><a href="#ready-状态如何传递">Ready 状态如何传递</a></li><li style="--depth: 0"><a href="#容器内-srt-沙箱如何工作">容器内 SRT 沙箱如何工作</a></li><li style="--depth: 1"><a href="#srt-被直接打进-agent-镜像">SRT 被直接打进 Agent 镜像</a></li><li style="--depth: 1"><a href="#什么时候生成-srt-配置">什么时候生成 SRT 配置</a></li><li style="--depth: 1"><a href="#bash-工具怎样启动命令">Bash 工具怎样启动命令</a></li><li style="--depth: 1"><a href="#每个会话的工作目录">每个会话的工作目录</a></li><li style="--depth: 1"><a href="#文件工具还有第二套路径检查">文件工具还有第二套路径检查</a></li><li style="--depth: 1"><a href="#srt-文件系统策略">SRT 文件系统策略</a></li><li style="--depth: 1"><a href="#pod-文件系统配置">Pod 文件系统配置</a></li><li style="--depth: 1"><a href="#srt-网络策略怎样生成">SRT 网络策略怎样生成</a></li><li style="--depth: 1"><a href="#allowallunixsockets-的含义">allowAllUnixSockets 的含义</a></li><li style="--depth: 1"><a href="#enableweakernestedsandbox-的含义">enableWeakerNestedSandbox 的含义</a></li><li style="--depth: 0"><a href="#高危命令到底怎样被限制">高危命令到底怎样被限制</a></li><li style="--depth: 1"><a href="#当前没有高危命令黑名单">当前没有高危命令黑名单</a></li><li style="--depth: 1"><a href="#为什么不应该只依赖命令黑名单">为什么不应该只依赖命令黑名单</a></li><li style="--depth: 1"><a href="#各类高危命令的实际结果">各类高危命令的实际结果</a></li><li style="--depth: 1"><a href="#为什么-kubectl-delete-仍可能成功">为什么 kubectl delete 仍可能成功</a></li><li style="--depth: 1"><a href="#prompt-不是安全边界">Prompt 不是安全边界</a></li><li style="--depth: 1"><a href="#mcp-tool-审批不覆盖-bash">MCP Tool 审批不覆盖 Bash</a></li><li style="--depth: 1"><a href="#当前设计更像损害控制而不是危险识别">当前设计更像损害控制，而不是危险识别</a></li><li style="--depth: 0"><a href="#executecodeblocks-的当前状态">ExecuteCodeBlocks 的当前状态</a></li><li style="--depth: 0"><a href="#一个完整配置示例">一个完整配置示例</a></li><li style="--depth: 0"><a href="#从创建到执行命令的完整时序">从创建到执行命令的完整时序</a></li><li style="--depth: 0"><a href="#当前实现的安全边界">当前实现的安全边界</a></li><li style="--depth: 1"><a href="#已经具备的保护">已经具备的保护</a></li><li style="--depth: 1"><a href="#没有实现或需要额外部署的保护">没有实现或需要额外部署的保护</a></li><li style="--depth: 0"><a href="#关键设计风险和改进方向">关键设计风险和改进方向</a></li><li style="--depth: 1"><a href="#风险sandbox-名称可能制造过强安全预期">风险：Sandbox 名称可能制造过强安全预期</a></li><li style="--depth: 1"><a href="#风险skills-默认-privileged">风险：Skills 默认 privileged</a></li><li style="--depth: 1"><a href="#风险bash-可以读取凭据">风险：Bash 可以读取凭据</a></li><li style="--depth: 1"><a href="#风险网络白名单过宽">风险：网络白名单过宽</a></li><li style="--depth: 1"><a href="#风险会话写边界不够细">风险：会话写边界不够细</a></li><li style="--depth: 1"><a href="#风险审批只覆盖部分工具">风险：审批只覆盖部分工具</a></li><li style="--depth: 0"><a href="#如何验证实际集群中的沙箱">如何验证实际集群中的沙箱</a></li><li style="--depth: 1"><a href="#确认外部-crd-已安装">确认外部 CRD 已安装</a></li><li style="--depth: 1"><a href="#检查资源链路">检查资源链路</a></li><li style="--depth: 1"><a href="#检查-pod-安全上下文">检查 Pod 安全上下文</a></li><li style="--depth: 1"><a href="#只查看-srt-配置不输出其他-secret">只查看 SRT 配置，不输出其他 Secret</a></li><li style="--depth: 1"><a href="#验证网络限制">验证网络限制</a></li><li style="--depth: 1"><a href="#验证文件限制">验证文件限制</a></li><li style="--depth: 1"><a href="#验证-kubernetes-最小权限">验证 Kubernetes 最小权限</a></li><li style="--depth: 0"><a href="#常见故障排查">常见故障排查</a></li><li style="--depth: 1"><a href="#sandboxagent-一直不-ready">SandboxAgent 一直不 Ready</a></li><li style="--depth: 1"><a href="#bash-tool-报-kagent_srt_settings_path-is-not-set">Bash Tool 报 KAGENT_SRT_SETTINGS_PATH is not set</a></li><li style="--depth: 1"><a href="#bubblewrap-无法创建-namespace">bubblewrap 无法创建 namespace</a></li><li style="--depth: 1"><a href="#域名已经加入-alloweddomainscurl-仍失败">域名已经加入 allowedDomains，curl 仍失败</a></li><li style="--depth: 1"><a href="#为什么直接在-pod-中-kubectl-exec-测试不受限">为什么直接在 Pod 中 kubectl exec 测试不受限</a></li><li style="--depth: 0"><a href="#面试表达">面试表达</a></li><li style="--depth: 1"><a href="#如何用一句话解释实现">如何用一句话解释实现</a></li><li style="--depth: 1"><a href="#为什么不直接用-deployment">为什么不直接用 Deployment</a></li><li style="--depth: 1"><a href="#如何防止-rm--rf">如何防止 rm -rf</a></li><li style="--depth: 1"><a href="#sandboxagent-是否等于-gvisor">SandboxAgent 是否等于 gVisor</a></li><li style="--depth: 1"><a href="#privileged-和沙箱为什么同时出现">privileged 和沙箱为什么同时出现</a></li><li style="--depth: 0"><a href="#最终评价">最终评价</a></li><li style="--depth: 0"><a href="#源码索引">源码索引</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

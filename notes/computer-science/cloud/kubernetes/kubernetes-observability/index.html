@@ -1,0 +1,572 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kubernetes 可观测性与告警 · Musuyin&#39; Home</title><meta name="description" content="指标揭示总体趋势，日志保存事件细节，Trace 连接跨服务路径。用稳定上下文关联信号，再从用户 SLI 定义告警；采集更多数据不自动提高定位速度。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-observability/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Kubernetes 可观测性与告警 · Musuyin' Home"><meta property="og:description" content="指标揭示总体趋势，日志保存事件细节，Trace 连接跨服务路径。用稳定上下文关联信号，再从用户 SLI 定义告警；采集更多数据不自动提高定位速度。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-observability/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Kubernetes 可观测性与告警</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-13">2026-08-13</time></dd></div><div><dt>字数</dt><dd>2615</dd></div><div><dt>预计阅读</dt><dd>9 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/Observability/">#Observability</a><a href="/tags/SRE/">#SRE</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Kubernetes 可观测性与告警</h1><time datetime="2026-08-13">2026-08-13</time><p class="tags"><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/Observability/">#Observability</a><a href="/tags/SRE/">#SRE</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>指标揭示总体趋势，日志保存事件细节，Trace 连接跨服务路径。用稳定上下文关联信号，再从用户 SLI 定义告警；采集更多数据不自动提高定位速度。</p>
+<p><a id="reference-学习目标"></a></p>
+<h2 id="学习目标">学习目标</h2>
+<p>学完本章后，应当能够：</p>
+<ul>
+<li>说明 Metrics、Logs、Traces 各自回答什么问题，以及如何通过上下文关联。</li>
+<li>为服务使用 RED、为资源使用 USE，避免高基数和语义含糊的指标。</li>
+<li>从用户旅程定义 SLI/SLO、计算错误预算并设计多窗口燃烧率告警。</li>
+<li>编写可执行 Runbook，让告警包含影响、验证、止损、升级和恢复标准。</li>
+</ul>
+<blockquote>
+<p>心智模型：监控告诉你预先定义的问题是否发生，可观测性帮助从系统输出推断未知内部状态；最终目标不是收集更多数据，而是更快发现用户影响并安全恢复。</p>
+</blockquote>
+<p><a id="reference-可观测性模型"></a></p>
+<h2 id="可观测性模型">可观测性模型</h2>
+<p><img alt="IMG-20260817144535329" loading="lazy" decoding="async" width="2778" height="1034" src="/_astro/IMG-20260817144535329.B0vmO7nO_1Qc5iF.webp"></p>
+<blockquote>
+<p>图：Metrics、Logs、Traces 从信号源进入各自存储，再汇聚到 Dashboard、SLI/SLO、告警和事故响应的链路。</p>
+</blockquote>
+<p>Kubernetes 可观测性包含指标、日志和 Trace 三类信号，事件与审计日志提供重要补充。信号必须通过 <code>cluster</code>、<code>namespace</code>、<code>workload</code>、<code>pod</code>、<code>node</code>、<code>version</code> 等稳定维度关联。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>应用/控制面/Node</span></span>
+<span class="line"><span>├── Metrics → 时序数据库 → Dashboard / Alert / Autoscaling</span></span>
+<span class="line"><span>├── Logs    → 日志后端   → 查询 / 告警 / 审计</span></span>
+<span class="line"><span>└── Traces  → Trace 后端 → 跨服务调用链与性能分析</span></span></code></pre>
+<p><a id="reference-prometheus-指标体系"></a></p>
+<h2 id="prometheus-指标体系">Prometheus 指标体系</h2>
+<p><a id="reference-prometheus-的核心设计意义面试角度"></a></p>
+<h3 id="prometheus-的核心设计意义面试角度">Prometheus 的核心设计意义（面试角度）</h3>
+<p><strong>为什么需要 Prometheus？</strong></p>
+<p>在 Kubernetes 中，需要了解：</p>
+<ul>
+<li>Pod 占用了多少 CPU、内存？</li>
+<li>应用处理了多少请求？成功率怎么样？</li>
+<li>磁盘快满了吗？网络延迟多高？</li>
+</ul>
+<p>但是传统的“查询方式”行不通：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>问题 1：实时值波动太大，无法决策</span></span>
+<span class="line"><span>  查询一次 Pod 内存用量：500MB</span></span>
+<span class="line"><span>  1 秒后再查：800MB</span></span>
+<span class="line"><span>  1 秒后再查：300MB（GC 了）</span></span>
+<span class="line"><span>  → 无法判断"这个 Pod 需要多少内存"</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>问题 2：大量指标数据难以存储和查询</span></span>
+<span class="line"><span>  集群中有 1000 个 Pod × 10 个指标 = 10000 条数据</span></span>
+<span class="line"><span>  每秒采集一次 → 每秒 10000 条数据</span></span>
+<span class="line"><span>  一天 = 86400 秒 × 10000 = 860 亿条数据</span></span>
+<span class="line"><span>  → 需要专门的时序数据库</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>问题 3：需要历史数据做趋势分析和告警</span></span>
+<span class="line"><span>  今天 CPU 80% 告警？需要对比过去一周的趋势</span></span>
+<span class="line"><span>  "内存在快速增长吗？还是正常波动？"</span></span>
+<span class="line"><span>  → 需要存储历史数据，计算趋势</span></span></code></pre>
+<p><strong>Prometheus 解决方案（Pull + TimeSeries）：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>┌─────────────────────────────────────────────────────┐</span></span>
+<span class="line"><span>│  Prometheus 的核心架构                               │</span></span>
+<span class="line"><span>│                                                     │</span></span>
+<span class="line"><span>│  ┌─ Scraper（定时拉取）                             │</span></span>
+<span class="line"><span>│  │  每 15 秒 → kubelet /metrics                      │</span></span>
+<span class="line"><span>│  │          → App /metrics                          │</span></span>
+<span class="line"><span>│  │          → node_exporter /metrics                │</span></span>
+<span class="line"><span>│  │                                                  │</span></span>
+<span class="line"><span>│  ├─ 时间序列存储（TSDB）                            │</span></span>
+<span class="line"><span>│  │  metric_name{label1="v1", label2="v2"} →        │</span></span>
+<span class="line"><span>│  │  [时间点1: 值1] [时间点2: 值2] ...               │</span></span>
+<span class="line"><span>│  │                                                  │</span></span>
+<span class="line"><span>│  ├─ PromQL 查询引擎                                 │</span></span>
+<span class="line"><span>│  │  rate(http_requests_total[5m])                   │</span></span>
+<span class="line"><span>│  │  → 计算最近 5 分钟的平均请求速率                 │</span></span>
+<span class="line"><span>│  │                                                  │</span></span>
+<span class="line"><span>│  └─ 告警规则引擎                                    │</span></span>
+<span class="line"><span>│     if 条件 &gt; 阈值 then 触发告警                     │</span></span>
+<span class="line"><span>│                                                     │</span></span>
+<span class="line"><span>│  结果：Dashboard / 告警 / HPA 触发                  │</span></span>
+<span class="line"><span>└─────────────────────────────────────────────────────┘</span></span></code></pre>
+<p><strong>Prometheus vs 其他监控系统对比：</strong></p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>Prometheus</th>
+<th>传统日志聚合（ELK）</th>
+<th>云厂商 API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>采集方式</strong></td>
+<td><strong>Pull（主动拉）</strong></td>
+<td>Push（被动推）</td>
+<td>Push（API 调用）</td>
+</tr>
+<tr>
+<td><strong>时序支持</strong></td>
+<td><strong>原生支持</strong></td>
+<td>需要额外组件</td>
+<td>支持但收费</td>
+</tr>
+<tr>
+<td><strong>查询语言</strong></td>
+<td>PromQL（强大）</td>
+<td>SQL 查询</td>
+<td>受限</td>
+</tr>
+<tr>
+<td><strong>告警能力</strong></td>
+<td><strong>内置告警规则</strong></td>
+<td>需要 ElastAlert</td>
+<td>需要额外配置</td>
+</tr>
+<tr>
+<td><strong>集群友好</strong></td>
+<td><strong>Kubernetes 原生</strong></td>
+<td>通用但不专用</td>
+<td>厂商锁定</td>
+</tr>
+<tr>
+<td><strong>成本</strong></td>
+<td>开源免费</td>
+<td>开源但存储贵</td>
+<td>按量计费（贵）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心优势：Pull 模式（Prometheus 独特）</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Push 模式（日志系统常用）：</span></span>
+<span class="line"><span>  应用 → 主动推送日志 → 日志服务器</span></span>
+<span class="line"><span>  </span></span>
+<span class="line"><span>  问题：</span></span>
+<span class="line"><span>  ├─ 应用崩溃了，无法推送日志 → 看不到崩溃原因</span></span>
+<span class="line"><span>  ├─ 网络卡顿，日志堆积在应用内存 → OOM</span></span>
+<span class="line"><span>  └─ 应用需要知道日志服务器的地址 → 耦合</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Pull 模式（Prometheus）：</span></span>
+<span class="line"><span>  Prometheus ← 主动拉取 ← 应用的 /metrics 端口</span></span>
+<span class="line"><span>  </span></span>
+<span class="line"><span>  优势：</span></span>
+<span class="line"><span>  ├─ 应用崩溃了，Prometheus 看不到 /metrics</span></span>
+<span class="line"><span>  │   → 立即触发"采集失败"告警 → 发现故障</span></span>
+<span class="line"><span>  ├─ Prometheus 服务器挂了，应用照常工作</span></span>
+<span class="line"><span>  │   → Prometheus 恢复后继续采集 → 无缝恢复</span></span>
+<span class="line"><span>  └─ 应用不需要知道 Prometheus 在哪 → 完全解耦</span></span></code></pre>
+<p><a id="reference-prometheus-实现原理"></a></p>
+<h3 id="prometheus-实现原理">Prometheus 实现原理</h3>
+<p><a id="reference-采集机制scrape"></a></p>
+<h4 id="采集机制scrape">采集机制（Scrape）</h4>
+<p><strong>核心流程：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Prometheus 服务器（周期性，默认 15 秒）</span></span>
+<span class="line"><span>  │</span></span>
+<span class="line"><span>  ├─ 1. 读取 scrape_configs（告诉 Prometheus 去哪采集）</span></span>
+<span class="line"><span>  │  例如：</span></span>
+<span class="line"><span>  │    - job_name: kubernetes-pods</span></span>
+<span class="line"><span>  │      kubernetes_sd_configs:</span></span>
+<span class="line"><span>  │      - role: pod</span></span>
+<span class="line"><span>  │</span></span>
+<span class="line"><span>  ├─ 2. 服务发现（Service Discovery）</span></span>
+<span class="line"><span>  │  通过 Kubernetes API 发现所有 Pod</span></span>
+<span class="line"><span>  │  → 动态获取 Pod IP、Port、Label</span></span>
+<span class="line"><span>  │</span></span>
+<span class="line"><span>  ├─ 3. 发起 HTTP GET 请求</span></span>
+<span class="line"><span>  │  GET http://10.1.2.3:8080/metrics</span></span>
+<span class="line"><span>  │</span></span>
+<span class="line"><span>  ├─ 4. 解析 Prometheus 格式的响应</span></span>
+<span class="line"><span>  │  http_requests_total{method="GET", path="/"} 1234</span></span>
+<span class="line"><span>  │  http_request_duration_seconds_bucket{...} 0.05</span></span>
+<span class="line"><span>  │</span></span>
+<span class="line"><span>  └─ 5. 存入时序数据库</span></span>
+<span class="line"><span>     按 (metric_name, labels, timestamp) 作为 key</span></span></code></pre>
+<p><strong>应用暴露 /metrics 的例子：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>$ curl http://app:8080/metrics</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># HELP http_requests_total Total HTTP requests</span></span>
+<span class="line"><span># TYPE http_requests_total counter</span></span>
+<span class="line"><span>http_requests_total{method="GET", path="/api/users", status="200"} 1024</span></span>
+<span class="line"><span>http_requests_total{method="GET", path="/api/users", status="500"} 5</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># HELP http_request_duration_seconds HTTP request latency</span></span>
+<span class="line"><span># TYPE http_request_duration_seconds histogram</span></span>
+<span class="line"><span>http_request_duration_seconds_bucket{path="/api/users", le="0.1"} 800</span></span>
+<span class="line"><span>http_request_duration_seconds_bucket{path="/api/users", le="0.5"} 950</span></span>
+<span class="line"><span>http_request_duration_seconds_bucket{path="/api/users", le="+Inf"} 1024</span></span></code></pre>
+<p><a id="reference-时序数据库tsdb"></a></p>
+<h4 id="时序数据库tsdb">时序数据库（TSDB）</h4>
+<p><strong>存储结构：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Prometheus 不是关系数据库，而是时序数据库：</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Metric：http_requests_total</span></span>
+<span class="line"><span>├─ Dimension 1（标签组合）：{method="GET", status="200"}</span></span>
+<span class="line"><span>│  ├─ [时间 t1, 值 100]</span></span>
+<span class="line"><span>│  ├─ [时间 t2, 值 105]</span></span>
+<span class="line"><span>│  ├─ [时间 t3, 值 110]</span></span>
+<span class="line"><span>│  └─ [时间 t4, 值 115]</span></span>
+<span class="line"><span>│</span></span>
+<span class="line"><span>└─ Dimension 2（标签组合）：{method="POST", status="201"}</span></span>
+<span class="line"><span>   ├─ [时间 t1, 值 50]</span></span>
+<span class="line"><span>   ├─ [时间 t2, 值 52]</span></span>
+<span class="line"><span>   └─ ...</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>每条时间序列是一条直线的数据点序列，适合时间相关的查询和告警</span></span></code></pre>
+<p><a id="reference-promql-查询语言"></a></p>
+<h4 id="promql-查询语言">PromQL 查询语言</h4>
+<p><strong>常见查询示例：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span># 1. 瞬时值（现在这一刻的值）</span></span>
+<span class="line"><span>http_requests_total</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># 2. 范围查询（最近 5 分钟）</span></span>
+<span class="line"><span>http_requests_total[5m]</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># 3. 速率计算（关键！把累计值变成速率）</span></span>
+<span class="line"><span>rate(http_requests_total[5m])</span></span>
+<span class="line"><span>→ 计算最近 5 分钟的平均每秒请求数</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># 4. 按标签聚合</span></span>
+<span class="line"><span>sum by (path) (http_requests_total)</span></span>
+<span class="line"><span>→ 按 path 分组求和</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># 5. 错误率</span></span>
+<span class="line"><span>sum by (path) (rate(http_requests_total{status=~"5.."}[5m]))</span></span>
+<span class="line"><span>/ sum by (path) (rate(http_requests_total[5m]))</span></span>
+<span class="line"><span>→ 每个路径的 5xx 错误率</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># 6. 按百分位数计算（用于延迟分析）</span></span>
+<span class="line"><span>histogram_quantile(0.95, </span></span>
+<span class="line"><span>  rate(http_request_duration_seconds_bucket[5m]))</span></span>
+<span class="line"><span>→ 95% 的请求延迟不超过多少秒</span></span></code></pre>
+<p><a id="reference-告警规则"></a></p>
+<h4 id="告警规则">告警规则</h4>
+<p><strong>告警规则引擎的流程：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>alert.yml (告警规则文件):</span></span>
+<span class="line"><span>  - alert: HighErrorRate</span></span>
+<span class="line"><span>    expr: rate(http_requests_total{status=~"5.."}[5m]) &gt; 0.05</span></span>
+<span class="line"><span>    for: 5m</span></span>
+<span class="line"><span>    annotations:</span></span>
+<span class="line"><span>      summary: "High error rate detected"</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Prometheus 告警规则引擎（每分钟检查一次）：</span></span>
+<span class="line"><span>  1. 计算 expr（PromQL 表达式）</span></span>
+<span class="line"><span>  2. 如果结果 &gt; 0（True），进入"待命状态"（Pending）</span></span>
+<span class="line"><span>  3. 持续 for 时间（5 分钟）仍然 True，则触发告警</span></span>
+<span class="line"><span>  4. 告警发送给 Alertmanager</span></span>
+<span class="line"><span>  </span></span>
+<span class="line"><span>  优势：</span></span>
+<span class="line"><span>  ├─ for 时间防止瞬时尖峰误报</span></span>
+<span class="line"><span>  ├─ 自动消除告警（当 expr 变 False）</span></span>
+<span class="line"><span>  └─ 支持告警分组、路由、合并、去重</span></span></code></pre>
+<p><a id="reference-数据源"></a></p>
+<h3 id="数据源">数据源</h3>
+<p>Kubernetes 组件通常以 Prometheus 格式暴露 <code>/metrics</code>。常见数据源：</p>
+<table>
+<thead>
+<tr>
+<th>数据源</th>
+<th>主要内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>应用 <code>/metrics</code></td>
+<td>请求、错误、延迟和业务指标</td>
+</tr>
+<tr>
+<td>kubelet/cAdvisor</td>
+<td>容器 CPU、内存、文件系统、网络</td>
+</tr>
+<tr>
+<td>kube-state-metrics</td>
+<td>Deployment、Pod、PVC 等 API 对象状态</td>
+</tr>
+<tr>
+<td>node_exporter</td>
+<td>Node 操作系统与硬件指标</td>
+</tr>
+<tr>
+<td>API Server/Scheduler/Controller</td>
+<td>控制面请求、队列、延迟和错误</td>
+</tr>
+<tr>
+<td>metrics-server</td>
+<td>轻量资源指标，主要供 <code>kubectl top</code>、HPA/VPA 使用</td>
+</tr>
+</tbody>
+</table>
+<p>metrics-server 不是长期监控存储，也不能代替 Prometheus。kube-state-metrics 反映 Kubernetes 对象状态，不直接采集容器资源使用量。</p>
+<p><a id="reference-指标设计"></a></p>
+<h3 id="指标设计">指标设计</h3>
+<p><a id="reference-指标设计-1"></a></p>
+<h3 id="指标设计-1">指标设计</h3>
+<ul>
+<li>Counter：只增不减，如请求总数；使用 <code>rate()</code> 计算速率。</li>
+<li>Gauge：可增可减，如队列长度和当前连接数。</li>
+<li>Histogram：记录延迟/大小分布，适合计算分位数与 SLO。</li>
+<li>标签只使用有界集合。不要将 user ID、request ID、完整 URL 等高基数字段作为标签。</li>
+<li>记录单位和语义，例如秒使用 <code>_seconds</code>、字节使用 <code>_bytes</code>、累计值使用 <code>_total</code>。</li>
+</ul>
+<p><a id="reference-red-与-use"></a></p>
+<h3 id="red-与-use">RED 与 USE</h3>
+<p>面向请求型服务使用 RED：</p>
+<ul>
+<li>Rate：请求率。</li>
+<li>Errors：错误率。</li>
+<li>Duration：延迟分布。</li>
+</ul>
+<p>面向 Node、CPU、磁盘、连接池等资源使用 USE：</p>
+<ul>
+<li>Utilization：利用率。</li>
+<li>Saturation：饱和度/排队程度。</li>
+<li>Errors：错误数量或速率。</li>
+</ul>
+<p>Kubernetes 工作负载还需关注期望副本、可用副本、Pending、重启、OOMKilled、CPU throttling、PVC 与 EndpointSlice。</p>
+<p><a id="reference-日志采集"></a></p>
+<h2 id="日志采集">日志采集</h2>
+<p>应用优先把结构化日志写到 <code>stdout</code>/<code>stderr</code>。Node 上通常运行 DaemonSet 日志 Agent，读取容器日志并转发到独立后端；Kubernetes 本身不提供集群级日志存储。</p>
+<p>推荐字段：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "timestamp"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"2026-08-13T10:00:00+08:00"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "level"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"error"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "service"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"checkout-api"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "version"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1.8.2"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "trace_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"..."</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "request_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"..."</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dependency timeout"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "dependency"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"payment"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>要求：</p>
+<ul>
+<li>不记录密码、Token、Cookie、身份证号等敏感信息。</li>
+<li>明确日志保留、索引、冷热分层和访问权限。</li>
+<li>Node 配置日志轮转，防止 <code>/var/log</code> 写满。</li>
+<li>多行堆栈在采集端正确合并；格式变更向后兼容。</li>
+<li>对 kubelet、容器运行时、控制面和 Kubernetes Audit Log 分别采集。</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --all-containers</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --since=30m</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -c</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">containe</span><span style="color:#24292E;--shiki-dark:#E1E4E8">r</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --previous</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">journalctl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -u</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> kubelet</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --since</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "30 min ago"</span></span></code></pre>
+<p><a id="reference-tracing"></a></p>
+<h2 id="tracing">Tracing</h2>
+<p>分布式 Trace 用于定位一次请求跨多个服务、队列和数据库的耗时与错误。应用应传播 W3C Trace Context，并把 <code>trace_id</code> 写入结构化日志，实现日志与 Trace 互跳。</p>
+<p>常见链路：应用通过 OpenTelemetry SDK/自动探针产生 Span → OpenTelemetry Collector 接收、采样和处理 → Trace 后端存储与分析。</p>
+<p>采样策略：</p>
+<ul>
+<li>常规流量使用概率或基于速率采样控制成本。</li>
+<li>错误、慢请求和关键交易提高保留概率，可采用 tail sampling。</li>
+<li>采样、脱敏和保留策略必须考虑个人信息和合规。</li>
+</ul>
+<p>Trace 不能代替指标告警；指标发现异常，Trace 解释单次请求发生了什么，日志提供详细上下文。</p>
+<p><a id="reference-slislo-与错误预算"></a></p>
+<h2 id="slislo-与错误预算">SLI、SLO 与错误预算</h2>
+<ul>
+<li>SLI：可测量的服务质量指标。</li>
+<li>SLO：在时间窗口内对 SLI 的目标。</li>
+<li>Error Budget：允许不满足目标的比例，用于平衡可靠性和变更速度。</li>
+</ul>
+<p>例如 30 天可用性 SLO 为 99.9%，错误预算约为 0.1%。请求型 API 的 SLI 应从用户视角定义：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>可用性 SLI = 成功且满足有效性条件的请求数 / 有效请求总数</span></span>
+<span class="line"><span>延迟 SLI   = 延迟低于阈值的请求数 / 有效请求总数</span></span></code></pre>
+<p>不要直接用“Pod Running”作为服务可用性 SLI；Pod 正常不代表请求成功。</p>
+<p>常用 SLI：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTP API</td>
+<td>非预期 5xx 比例、P99 延迟达标比例</td>
+</tr>
+<tr>
+<td>异步任务</td>
+<td>在承诺时间内完成的任务比例、积压时长</td>
+</tr>
+<tr>
+<td>数据服务</td>
+<td>成功读写比例、复制延迟、数据新鲜度</td>
+</tr>
+<tr>
+<td>Kubernetes 平台</td>
+<td>API 请求成功率、Pod 启动延迟、调度成功率</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-告警设计"></a></p>
+<h2 id="告警设计">告警设计</h2>
+<p>告警应基于用户影响、趋势和可行动性，而不是看到任何异常指标就报警。</p>
+<table>
+<thead>
+<tr>
+<th>级别</th>
+<th>含义</th>
+<th>处理方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1</td>
+<td>大面积不可用、数据安全风险、错误预算快速燃烧</td>
+<td>立即通知值班，启动事故响应</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>核心功能明显降级或即将耗尽关键容量</td>
+<td>值班及时处理</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>局部异常、冗余下降、需要工作时间处理</td>
+<td>工单/白天处理</td>
+</tr>
+<tr>
+<td>Info</td>
+<td>变更、扩缩容、短暂自愈事件</td>
+<td>记录或看板，不呼叫值班</td>
+</tr>
+</tbody>
+</table>
+<p>对 SLO 推荐多窗口、多燃烧率告警：短窗口发现快速故障，长窗口捕获持续缓慢退化。容量类告警要预测“多久耗尽”，并排除短暂尖峰。</p>
+<p>容易产生噪声的告警：单个 Pod 重启一次、CPU 短时 90%、Deployment 发布期间短暂副本变化、已自动恢复且无用户影响的瞬态错误。</p>
+<p><a id="reference-基础告警矩阵"></a></p>
+<h2 id="基础告警矩阵">基础告警矩阵</h2>
+<table>
+<thead>
+<tr>
+<th>告警</th>
+<th>关键验证</th>
+<th>Runbook 入口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API 5xx/延迟燃烧</td>
+<td>版本、入口、依赖、可用副本</td>
+<td>发布/依赖/容量排障</td>
+</tr>
+<tr>
+<td>Pod CrashLoopBackOff</td>
+<td>退出码、previous 日志、探针、配置</td>
+<td>Pod 崩溃排障</td>
+</tr>
+<tr>
+<td>Pod Pending</td>
+<td>Scheduler 事件、request、taint、PVC</td>
+<td>调度排障</td>
+</tr>
+<tr>
+<td>OOMKilled</td>
+<td>limit、working set、GC、流量</td>
+<td>内存容量排障</td>
+</tr>
+<tr>
+<td>CPU throttling</td>
+<td>limit、使用率、延迟</td>
+<td>CPU 配额排障</td>
+</tr>
+<tr>
+<td>Node NotReady</td>
+<td>Node condition、kubelet、网络、运行时</td>
+<td>Node 故障排障</td>
+</tr>
+<tr>
+<td>PVC 容量不足</td>
+<td>使用率、增长率、扩容能力</td>
+<td>存储扩容 Runbook</td>
+</tr>
+<tr>
+<td>EndpointSlice 无就绪后端</td>
+<td>selector、Readiness、发布状态</td>
+<td>Service 排障</td>
+</tr>
+<tr>
+<td>CoreDNS 错误/高延迟</td>
+<td>CoreDNS、上游 DNS、网络策略</td>
+<td>DNS 排障</td>
+</tr>
+<tr>
+<td>CronJob 失败/未执行</td>
+<td>调度、并发、Job/Pod 日志</td>
+<td>批任务排障</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-runbook-模板"></a></p>
+<h2 id="runbook-模板">Runbook 模板</h2>
+<p>每条可呼叫告警必须附带：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="markdown"><code><span class="line"><span style="color:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold"># 告警名称</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold">## 用户影响</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">哪些用户、功能和区域受到影响。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold">## 立即确认</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Dashboard、查询、近期变更和影响范围。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold">## 止损操作</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">可安全执行的回滚、扩容、降级和流量切换步骤。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold">## 深入排查</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">按优先级排列的命令、日志、指标和判定分支。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold">## 验证恢复</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">SLI 回归阈值、稳定观察窗口和积压清理确认。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold">## 升级与沟通</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">何时升级到谁，事故频道和状态通知要求。</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold">## 证据与复盘</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">保存时间线、变更、日志、指标和最终根因。</span></span></code></pre>
+<p><a id="reference-通用首轮排障"></a></p>
+<h2 id="通用首轮排障">通用首轮排障</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pods</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> wide</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> events</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --sort-by=.lastTimestamp</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nodes</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> top</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nodes</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> top</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pods</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --containers</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rollout</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> history</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> deployment/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nam</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --all-containers</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --previous</span></span></code></pre>
+<p>先确认用户影响和近期变更，再按应用 → 工作负载 → Node → 控制面逐层缩小范围。事件会过期，事故期间及时保存关键输出与时间线。</p>
+<p><a id="reference-生产基线"></a></p>
+<h2 id="生产基线">生产基线</h2>
+<ul>
+<li>每个服务至少有 RED、容量、依赖和发布 Dashboard。</li>
+<li>Node/容器按 USE 方法覆盖，控制面监控 API Server、etcd、Scheduler、Controller 和 CoreDNS。</li>
+<li>日志集中存储并与指标、Trace 通过稳定字段关联。</li>
+<li>核心服务定义用户视角 SLI/SLO、错误预算和多窗口燃烧率告警。</li>
+<li>每条 P1/P2 告警有责任人、Runbook、验证标准，并定期演练。</li>
+<li>可观测系统自身具备高可用、容量、丢数、采集延迟和成本监控。</li>
+</ul>
+<p><a id="reference-实践与验收"></a></p>
+<h2 id="实践与验收">实践与验收</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> 为一个 HTTP API 采集请求率、错误率与延迟分布，并制作 RED Dashboard。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 定义 30 天可用性 SLO，计算允许失败量与当前错误预算消耗。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 制造高错误率，验证告警表达式、通知路由、静默和恢复通知。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 从告警跳转到日志和 Trace，利用 request/trace ID 还原一次失败请求。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 请未参与配置的人只依据 Runbook 完成首轮排障，记录缺失步骤。</li>
+</ul>
+<p>验收标准：告警必须代表可行动的问题；Dashboard、查询、日志字段和 Runbook 能共同缩短发现与恢复时间。</p>
+<p><a id="reference-官方参考"></a></p>
+<h2 id="官方参考">官方参考</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/cluster-administration/observability/">Kubernetes：可观测性</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/cluster-administration/logging/">Kubernetes：日志架构</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/cluster-administration/system-metrics/">Kubernetes：系统指标</a></li>
+<li><a href="https://prometheus.io/docs/practices/">Prometheus：指标与告警最佳实践</a></li>
+<li><a href="https://opentelemetry.io/docs/">OpenTelemetry：文档</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>为一次慢请求说明先看哪个指标、怎样找到日志与 Trace；检查标签基数和聚合是否保留需要的维度。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/sre/monitoring-logs-alerts/">L07-监控日志与告警实践</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#学习目标">学习目标</a></li><li style="--depth: 0"><a href="#可观测性模型">可观测性模型</a></li><li style="--depth: 0"><a href="#prometheus-指标体系">Prometheus 指标体系</a></li><li style="--depth: 1"><a href="#prometheus-的核心设计意义面试角度">Prometheus 的核心设计意义（面试角度）</a></li><li style="--depth: 1"><a href="#prometheus-实现原理">Prometheus 实现原理</a></li><li style="--depth: 2"><a href="#采集机制scrape">采集机制（Scrape）</a></li><li style="--depth: 2"><a href="#时序数据库tsdb">时序数据库（TSDB）</a></li><li style="--depth: 2"><a href="#promql-查询语言">PromQL 查询语言</a></li><li style="--depth: 2"><a href="#告警规则">告警规则</a></li><li style="--depth: 1"><a href="#数据源">数据源</a></li><li style="--depth: 1"><a href="#指标设计">指标设计</a></li><li style="--depth: 1"><a href="#指标设计-1">指标设计</a></li><li style="--depth: 1"><a href="#red-与-use">RED 与 USE</a></li><li style="--depth: 0"><a href="#日志采集">日志采集</a></li><li style="--depth: 0"><a href="#tracing">Tracing</a></li><li style="--depth: 0"><a href="#slislo-与错误预算">SLI、SLO 与错误预算</a></li><li style="--depth: 0"><a href="#告警设计">告警设计</a></li><li style="--depth: 0"><a href="#基础告警矩阵">基础告警矩阵</a></li><li style="--depth: 0"><a href="#runbook-模板">Runbook 模板</a></li><li style="--depth: 0"><a href="#通用首轮排障">通用首轮排障</a></li><li style="--depth: 0"><a href="#生产基线">生产基线</a></li><li style="--depth: 0"><a href="#实践与验收">实践与验收</a></li><li style="--depth: 0"><a href="#官方参考">官方参考</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

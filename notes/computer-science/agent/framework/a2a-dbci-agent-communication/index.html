@@ -1,0 +1,1364 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>A2A 协议与 DBCI Agent 通信实现 · Musuyin&#39; Home</title><meta name="description" content="先把编排和通信分开：模型决定是否委派，Controller 把 Agent 引用编译成工具配置，Runtime 再通过 A2A 发送请求。阅读时始终追踪请求、消息、任务和上下文四种标识，才能解释恢复、取消与持久化。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/framework/a2a-dbci-agent-communication/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="A2A 协议与 DBCI Agent 通信实现 · Musuyin' Home"><meta property="og:description" content="先把编排和通信分开：模型决定是否委派，Controller 把 Agent 引用编译成工具配置，Runtime 再通过 A2A 发送请求。阅读时始终追踪请求、消息、任务和上下文四种标识，才能解释恢复、取消与持久化。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/framework/a2a-dbci-agent-communication/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">A2A 协议与 DBCI Agent 通信实现</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-09-15">2026-09-15</time></dd></div><div><dt>字数</dt><dd>7369</dd></div><div><dt>预计阅读</dt><dd>25 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Agent/">#Agent</a><a href="/tags/A2A/">#A2A</a><a href="/tags/JSON-RPC/">#JSON-RPC</a><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/Google%20ADK/">#Google ADK</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>A2A 协议与 DBCI Agent 通信实现</h1><time datetime="2026-09-15">2026-09-15</time><p class="tags"><a href="/tags/Agent/">#Agent</a><a href="/tags/A2A/">#A2A</a><a href="/tags/JSON-RPC/">#JSON-RPC</a><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/Google%20ADK/">#Google ADK</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>先把编排和通信分开：模型决定是否委派，Controller 把 Agent 引用编译成工具配置，Runtime 再通过 A2A 发送请求。阅读时始终追踪请求、消息、任务和上下文四种标识，才能解释恢复、取消与持久化。</p>
+<p>本文基于 <code>dbci-agentic-ai-platform</code> 当前 <code>main</code> 分支 <code>0dd32d03011f8dd1609b1e262cc3fc0a8bfbd7af</code> 的实际源码，解释项目中的 Agent 如何互相发现、发送消息、保存上下文、处理流式事件，以及如何把子 Agent 包装成父 Agent 可以调用的工具。</p>
+<p>本文假设读者已经知道 LLM、Tool Calling、Kubernetes CRD 等基本概念，但不要求预先理解 JSON-RPC 或 A2A。</p>
+<p>阅读完成后，应当能够回答：</p>
+<ul>
+<li>JSON-RPC 和普通 HTTP/REST API 有什么区别？</li>
+<li>A2A 在 JSON-RPC 之上又增加了什么？</li>
+<li>为什么项目中的子 Agent 会表现成一个 Function Tool？</li>
+<li><code>messageId</code>、<code>taskId</code>、<code>contextId</code> 和数据库 Session 分别是什么？</li>
+<li>用户到 Agent、Agent 到 Agent、Gateway 到 Agent 三条调用链有什么区别？</li>
+<li>Agent Card、流式响应、HITL、认证、持久化分别在哪里实现？</li>
+<li>当前实现有哪些容易被忽略的边界和风险？</li>
+</ul>
+<p><a id="reference-一句话理解"></a></p>
+<h2 id="一句话理解">一句话理解</h2>
+<p>本项目的 Agent 间通信可以概括为：</p>
+<blockquote>
+<p>Controller 把 Kubernetes 中引用的子 Agent 编译为父 Agent 的一个 ADK Function Tool；父 Agent 的 LLM 决定调用该工具后，Runtime 再用 A2A JSON-RPC 向子 Agent 发送消息，并把子 Agent 的结果作为 Tool Result 交回父 Agent。</p>
+</blockquote>
+<pre class="mermaid">flowchart LR
+    U[用户] --&gt; UI[Web UI]
+    UI --&gt;|gRPC-Web stream| C[Controller]
+    C --&gt;|A2A message/stream| P[父 Agent Pod]
+    P --&gt;|LLM 选择 Agent Tool| T[Remote A2A Tool]
+    T --&gt;|A2A message/send| S[子 Agent Pod]
+    S --&gt;|Google ADK Runner| L[子 Agent LLM 和工具]
+    L --&gt;|Message 或 Task| T
+    T --&gt;|Function Result| P
+    P --&gt;|A2A Events| C
+    C --&gt;|流式帧| UI</pre>
+<p>这里有两个不同层次：</p>
+<ul>
+<li><em>编排层</em>：LLM 根据工具名称、description 和上下文决定是否调用子 Agent。</li>
+<li><em>通信层</em>：程序使用 A2A 定义的 JSON-RPC 消息，把请求真正发送给另一个 Agent。</li>
+</ul>
+<p>因此，A2A 解决的是“两个 Agent 服务如何用统一格式通信”，不负责决定“什么时候应该委派任务”。</p>
+<p><a id="reference-从-json-rpc-开始理解"></a></p>
+<h2 id="从-json-rpc-开始理解">从 JSON-RPC 开始理解</h2>
+<p><a id="reference-rpc-是什么"></a></p>
+<h3 id="rpc-是什么">RPC 是什么</h3>
+<p><em>RPC</em>（Remote Procedure Call，远程过程调用）的目标，是让调用远程服务看起来像调用一个本地函数。</p>
+<p>本地函数调用可能是：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">result, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> SendMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(message)</span></span></code></pre>
+<p>如果 <code>SendMessage</code> 实际运行在另一台机器上，客户端需要把以下信息编码后发到网络：</p>
+<ul>
+<li>想调用哪个方法；</li>
+<li>方法参数是什么；</li>
+<li>这次请求的标识是什么；</li>
+<li>成功结果或错误如何返回。</li>
+</ul>
+<p>RPC 框架负责完成这些工作。</p>
+<blockquote>
+<p>可以把 RPC 理解成“跨网络函数调用的约定”。本地调用依靠函数名和参数列表，远程调用则需要把函数名和参数序列化成网络消息。</p>
+</blockquote>
+<p><a id="reference-json-rpc-是什么"></a></p>
+<h3 id="json-rpc-是什么">JSON-RPC 是什么</h3>
+<p><em>JSON-RPC</em> 是一种很薄的 RPC 消息格式。它只规定 JSON 消息的结构，不强制使用哪个 HTTP 路径，也不定义 Agent、Tool 或 Session。</p>
+<p>一个标准请求包含四个核心字段：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "jsonrpc"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"2.0"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"request-001"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "method"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"message/send"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "params"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>jsonrpc</code></td>
+<td>协议版本，通常固定为 <code>2.0</code></td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td>关联请求和响应的 RPC ID</td>
+</tr>
+<tr>
+<td><code>method</code></td>
+<td>希望服务端执行的方法</td>
+</tr>
+<tr>
+<td><code>params</code></td>
+<td>方法参数</td>
+</tr>
+</tbody>
+</table>
+<p>成功响应使用 <code>result</code>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "jsonrpc"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"2.0"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"request-001"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "result"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "kind"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"task"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"task-001"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "contextId"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"context-001"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "status"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "state"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"completed"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>失败响应使用 <code>error</code>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "jsonrpc"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"2.0"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"request-001"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "error"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "code"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">-32602</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Invalid params"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>需要注意三个边界：</p>
+<ul>
+<li>JSON-RPC 的 <code>id</code> 只负责匹配 RPC 请求和响应，不等于 A2A 的 <code>messageId</code>、<code>taskId</code> 或 <code>contextId</code>。</li>
+<li>HTTP status 表示 HTTP 传输是否成功；JSON-RPC <code>error</code> 表示远程方法执行是否成功。HTTP 200 仍然可能携带 JSON-RPC error。</li>
+<li>JSON-RPC method 不是 REST path。<code>message/send</code> 通常放在请求 body 的 <code>method</code> 字段中，而不是请求 <code>/message/send</code> 路径。</li>
+</ul>
+<p><a id="reference-json-rpc-和-rest-的区别"></a></p>
+<h3 id="json-rpc-和-rest-的区别">JSON-RPC 和 REST 的区别</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>REST 风格</th>
+<th>JSON-RPC 风格</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>操作表达</td>
+<td>HTTP method 和 URL，例如 <code>GET /tasks/123</code></td>
+<td>body 中的 method，例如 <code>tasks/get</code></td>
+</tr>
+<tr>
+<td>参数位置</td>
+<td>path、query、header、body</td>
+<td>通常统一放在 <code>params</code></td>
+</tr>
+<tr>
+<td>结果关联</td>
+<td>HTTP 请求本身</td>
+<td>JSON-RPC <code>id</code></td>
+</tr>
+<tr>
+<td>错误表达</td>
+<td>HTTP status 和业务 body</td>
+<td>JSON-RPC <code>error.code/message/data</code></td>
+</tr>
+<tr>
+<td>适合场景</td>
+<td>面向资源的 CRUD</td>
+<td>面向方法调用的协议</td>
+</tr>
+</tbody>
+</table>
+<p>A2A 选择 JSON-RPC，是因为它要表达“发送消息”“查询任务”“取消任务”等远程操作，而不是单纯管理一组 REST 资源。</p>
+<p><a id="reference-a2a-在-json-rpc-之上定义了什么"></a></p>
+<h2 id="a2a-在-json-rpc-之上定义了什么">A2A 在 JSON-RPC 之上定义了什么</h2>
+<p><em>A2A</em>（Agent-to-Agent Protocol）不是另一个传输协议。当前项目使用 HTTP 承载 JSON-RPC，再由 A2A 定义 Agent 领域对象、方法和状态机。</p>
+<p><a id="reference-核心对象"></a></p>
+<h3 id="核心对象">核心对象</h3>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>作用</th>
+<th>在本项目中的含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent Card</td>
+<td>描述 Agent 地址、能力、输入输出模式和 skills</td>
+<td>客户端连接前的能力发现文档</td>
+</tr>
+<tr>
+<td>Message</td>
+<td>一条由 user 或 agent 发送的消息</td>
+<td>父 Agent 发给子 Agent 的任务描述</td>
+</tr>
+<tr>
+<td>Part</td>
+<td>Message 的内容单元</td>
+<td>TextPart、DataPart、FilePart 等</td>
+</tr>
+<tr>
+<td>Task</td>
+<td>可跟踪状态的执行任务</td>
+<td>子 Agent 的一次执行</td>
+</tr>
+<tr>
+<td>Artifact</td>
+<td>Agent 生成的结果载体</td>
+<td>最终文本或其他输出</td>
+</tr>
+<tr>
+<td>Event</td>
+<td>流式执行事件</td>
+<td>working、partial、artifact、completed 等</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-三类-id"></a></p>
+<h3 id="三类-id">三类 ID</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>生命周期</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JSON-RPC <code>id</code></td>
+<td>一次网络 RPC</td>
+<td>将 JSON-RPC response 对应到 request</td>
+</tr>
+<tr>
+<td>A2A <code>messageId</code></td>
+<td>一条消息</td>
+<td>标识具体输入或输出消息</td>
+</tr>
+<tr>
+<td>A2A <code>taskId</code></td>
+<td>一次任务执行</td>
+<td>查询、取消、恢复任务</td>
+</tr>
+<tr>
+<td>A2A <code>contextId</code></td>
+<td>多轮会话</td>
+<td>将多条消息和多个任务放进同一个上下文</td>
+</tr>
+</tbody>
+</table>
+<p>可以把它们类比为：</p>
+<blockquote>
+<p>JSON-RPC <code>id</code> 是快递单号，<code>messageId</code> 是包裹编号，<code>taskId</code> 是处理工单号，<code>contextId</code> 是整个客户会话号。</p>
+</blockquote>
+<p><a id="reference-本项目使用的-a2a-方法"></a></p>
+<h3 id="本项目使用的-a2a-方法">本项目使用的 A2A 方法</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>message/send</code></td>
+<td>非流式发送消息，返回 Message 或 Task</td>
+</tr>
+<tr>
+<td><code>message/stream</code></td>
+<td>发送消息并通过 SSE 持续返回事件</td>
+</tr>
+<tr>
+<td><code>tasks/get</code></td>
+<td>查询已有 Task</td>
+</tr>
+<tr>
+<td><code>tasks/cancel</code></td>
+<td>取消运行中的 Task</td>
+</tr>
+<tr>
+<td><code>tasks/resubscribe</code></td>
+<td>重新订阅已有 Task 的事件</td>
+</tr>
+<tr>
+<td>push notification config</td>
+<td>设置或读取任务回调配置</td>
+</tr>
+</tbody>
+</table>
+<p>当前 Agent Runtime 的服务端使用 <code>github.com/a2aproject/a2a-go v0.3.15</code>，Controller Proxy 使用 <code>trpc.group/trpc-go/trpc-a2a-go v0.2.5</code>。两套库通过兼容的 A2A JSON-RPC wire format 通信。</p>
+<p><a id="reference-项目中的三条-agent-调用链"></a></p>
+<h2 id="项目中的三条-agent-调用链">项目中的三条 Agent 调用链</h2>
+<p>理解代码前，必须区分三条调用链。</p>
+<p><a id="reference-ui-到顶层-agent"></a></p>
+<h3 id="ui-到顶层-agent">UI 到顶层 Agent</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Browser</span></span>
+<span class="line"><span>  -&gt; Controller MessageService gRPC-Web</span></span>
+<span class="line"><span>  -&gt; Controller A2A client message/stream</span></span>
+<span class="line"><span>  -&gt; Agent Pod :8080</span></span>
+<span class="line"><span>  -&gt; SSE A2A events</span></span>
+<span class="line"><span>  -&gt; Controller 转成 gRPC-Web stream</span></span>
+<span class="line"><span>  -&gt; Browser</span></span></code></pre>
+<p>这条链路是用户聊天的主路径，强调流式返回。</p>
+<p><a id="reference-父-agent-到子-agent"></a></p>
+<h3 id="父-agent-到子-agent">父 Agent 到子 Agent</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>父 Agent LLM</span></span>
+<span class="line"><span>  -&gt; Function Call</span></span>
+<span class="line"><span>  -&gt; KAgentRemoteA2ATool</span></span>
+<span class="line"><span>  -&gt; A2A client message/send</span></span>
+<span class="line"><span>  -&gt; 子 Agent Pod</span></span>
+<span class="line"><span>  -&gt; Message 或 Task</span></span>
+<span class="line"><span>  -&gt; Function Response</span></span>
+<span class="line"><span>  -&gt; 父 Agent LLM</span></span></code></pre>
+<p>这条链路是 Agent 间协作的主路径，表现为父 Agent 的一次工具调用。当前代码使用非流式 <code>SendMessage</code>。</p>
+<p><a id="reference-gateway-到-agent"></a></p>
+<h3 id="gateway-到-agent">Gateway 到 Agent</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>外部 API Client</span></span>
+<span class="line"><span>  -&gt; Kagent Gateway invoke endpoint</span></span>
+<span class="line"><span>  -&gt; invocation 持久化队列</span></span>
+<span class="line"><span>  -&gt; Controller A2A route</span></span>
+<span class="line"><span>  -&gt; 非阻塞 message/send</span></span>
+<span class="line"><span>  -&gt; tasks/get 轮询终态</span></span></code></pre>
+<p>这条链路用于异步、可轮询的外部 Agent invocation，不应与父子 Agent 的同步 Tool Call 混淆。</p>
+<p><a id="reference-agent-引用如何进入-crd"></a></p>
+<h2 id="agent-引用如何进入-crd">Agent 引用如何进入 CRD</h2>
+<p><a id="reference-tool-类型"></a></p>
+<h3 id="tool-类型">Tool 类型</h3>
+<p>源码：<code>go/api/v1alpha2/agent_types.go</code>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ToolProviderType</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    ToolProviderType_McpServer</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ToolProviderType</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "McpServer"</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    ToolProviderType_Agent</span><span style="color:#6F42C1;--shiki-dark:#B392F0">     ToolProviderType</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Agent"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Tool</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Type       </span><span style="color:#6F42C1;--shiki-dark:#B392F0">ToolProviderType</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> `json:"type,omitempty"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    McpServer  </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">McpServerTool</span><span style="color:#032F62;--shiki-dark:#9ECBFF">   `json:"mcpServer,omitempty"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Agent      </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TypedReference</span><span style="color:#032F62;--shiki-dark:#9ECBFF">  `json:"agent,omitempty"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    HeadersFrom []</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ValueRef</span><span style="color:#032F62;--shiki-dark:#9ECBFF">      `json:"headersFrom,omitempty"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>一个 Agent Tool 最好显式写为：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">kagent.dev/v1alpha2</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Agent</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">parent-agent</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">team-a</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Declarative</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  declarative</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    modelConfig</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">default-model-config</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    systemMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#D73A49;--shiki-dark:#F97583">|</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">      你是协调 Agent。数学问题交给 math-agent。</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    tools</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Agent</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        agent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">math-agent</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">team-a</span></span></code></pre>
+<p><code>TypedReference.NamespacedName()</code> 会在未填写 namespace 时使用父 Agent 所在 namespace：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#E36209;--shiki-dark:#FFAB70">t </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TypedReference</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">NamespacedName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">defaultNamespace</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">types</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NamespacedName</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    namespace </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> t.Namespace</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> namespace </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ""</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        namespace </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> defaultNamespace</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> types</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NamespacedName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{Namespace: namespace, Name: t.Name}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-a2aconfig-的真实作用"></a></p>
+<h3 id="a2aconfig-的真实作用"><code>a2aConfig</code> 的真实作用</h3>
+<p>CRD 中还存在：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  declarative</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    a2aConfig</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      skills</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        - </span><span style="color:#22863A;--shiki-dark:#85E89D">id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">solve-math</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Solve Math</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          description</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Solve mathematical problems</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          tags</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">math</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span></code></pre>
+<p>从当前 Go 实现看，Runtime 无论是否配置 <code>a2aConfig</code> 都会启动 A2A Server。<code>a2aConfig.skills</code> 的实际作用是把 skills 写进 Agent Card，供客户端发现和理解 Agent 能力。它不是运行时 A2A Server 的启停开关。</p>
+<p><a id="reference-controller-如何编译-agent-tool"></a></p>
+<h2 id="controller-如何编译-agent-tool">Controller 如何编译 Agent Tool</h2>
+<p>Controller 的 translator 会把 CRD 中的 Agent 引用编译成 runtime 可以读取的 <code>RemoteAgentConfig</code>。</p>
+<p>核心代码位于 <code>go/controller/internal/controller/translator/agent/compiler.go</code>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">case</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tool.Agent </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    agentRef </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tool.Agent.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NamespacedName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(agent.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GetNamespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">())</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> agentRef.Namespace </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> agent.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GetNamespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;&amp;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        agentRef.Name </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> agent.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GetName</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "agent tool cannot be used to reference itself, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, agentRef,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    toolAgent </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">v1alpha2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Agent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a.kube.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, agentRef, toolAgent); err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, err</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    originalURL </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Sprintf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "http://</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">.</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">:8080"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, toolAgent.Name, toolAgent.Namespace,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    cfg.RemoteAgents </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cfg.RemoteAgents, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">adk</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">RemoteAgentConfig</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Name:        utils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ConvertToPythonIdentifier</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(utils.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">GetObjectRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(toolAgent)),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Url:         originalURL,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Headers:     headers,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Description: toolAgent.Spec.Description,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    })</span></span></code></pre>
+<p>假设父 Agent <code>team-a/coordinator</code> 引用 <code>team-a/math-agent</code>，生成的运行时配置近似为：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "remote_agents"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"team_a__NS__math_agent"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "url"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://math-agent.team-a:8080"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "description"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"负责数学计算"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  ]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>这里的 URL 是 Kubernetes Service DNS：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>http://&lt;service-name&gt;.&lt;namespace&gt;:8080</span></span></code></pre>
+<p>如果设置全局 <code>proxy.url</code>，Controller 会把目标 URL 改成代理地址，同时增加：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="http"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">x-kagent-host</span><span style="color:#D73A49;--shiki-dark:#F97583">:</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> math-agent.team-a</span></span></code></pre>
+<p>由代理根据该 header 路由到真实 Kubernetes Service。</p>
+<p><a id="reference-静态引用安全检查"></a></p>
+<h3 id="静态引用安全检查">静态引用安全检查</h3>
+<p>Controller 在部署前检查 Agent 引用图：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">isVisited</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(agentRef) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "cycle detected in agent tool chain: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        agentRef, agentRef,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state.depth </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> MAX_DEPTH {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "recursion limit reached in agent tool chain: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        agentRef, agentRef,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>当前 <code>MAX_DEPTH</code> 是 10。它可以阻止：</p>
+<ul>
+<li><code>A -&gt; A</code> 自引用；</li>
+<li><code>A -&gt; B -&gt; A</code> 环形引用；</li>
+<li>超过限制的静态 Agent 链。</li>
+</ul>
+<p>这是静态引用图检查，不等同于运行时业务级循环检测。即使 Agent 引用图无环，LLM 仍可能在一个会话内重复调用同一个合法工具。</p>
+<p><a id="reference-跨-namespace-引用"></a></p>
+<h3 id="跨-namespace-引用">跨 namespace 引用</h3>
+<p>同 namespace 引用默认允许。跨 namespace 引用需要同时满足：</p>
+<ol>
+<li>目标 namespace 在 Controller 的 watch 范围内；</li>
+<li>目标 Agent 的 <code>allowedNamespaces</code> 允许来源 namespace；</li>
+<li>创建或更新父 Agent 的用户具有目标 Agent 的 invoke 权限。</li>
+</ol>
+<p>这是一种类似 Gateway API 的双向授权：父 Agent 声明“想引用谁”，目标 Agent 声明“允许谁引用”。</p>
+<p><a id="reference-agent-pod-启动时发生什么"></a></p>
+<h2 id="agent-pod-启动时发生什么">Agent Pod 启动时发生什么</h2>
+<p>Controller 会为 Agent 生成 Secret、ServiceAccount、Deployment 和 Service。Secret 中包含：</p>
+<ul>
+<li><code>config.json</code>：模型、instruction、MCP tools、remote agents 等运行时配置；</li>
+<li><code>agent-card.json</code>：Agent 对外声明的能力。</li>
+</ul>
+<p>Agent 进程启动后执行：</p>
+<ol>
+<li>从 <code>/config</code> 读取 <code>config.json</code> 和 <code>agent-card.json</code>；</li>
+<li>创建模型客户端和本地工具；</li>
+<li>把每个 <code>remote_agents</code> 元素转成 ADK Function Tool；</li>
+<li>创建 Google ADK Runner；</li>
+<li>创建 A2A Executor；</li>
+<li>在 8080 端口启动 A2A HTTP Server。</li>
+</ol>
+<p>Agent Card 近似如下：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"parent_agent"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "description"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"负责拆解和分发任务"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "url"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://parent-agent.team-a:8080"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "capabilities"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "streaming"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "pushNotifications"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "stateTransitionHistory"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  },</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "defaultInputModes"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"text"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "defaultOutputModes"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"text"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "preferredTransport"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"JSONRPC"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-a2a-server-路由"></a></p>
+<h3 id="a2a-server-路由">A2A Server 路由</h3>
+<p>源码：<code>go/adk/pkg/a2a/server/server.go</code>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">requestHandler </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a2asrv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewHandler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(executor, handlerOpts</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">jsonrpcHandler </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a2asrv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewJSONRPCHandler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(requestHandler)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">mux </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> http.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewServeMux</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">RegisterHealthEndpoints</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(mux)</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">RegisterFileBrowserEndpoints</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(mux)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">mux.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Handle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    a2asrv.WellKnownAgentCardPath,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    a2asrv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewStaticAgentCardHandler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8">agentCard),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">mux.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Handle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, jsonrpcHandler)</span></span></code></pre>
+<p>实际接口包括：</p>
+<table>
+<thead>
+<tr>
+<th>HTTP</th>
+<th>Path</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/.well-known/agent-card.json</code></td>
+<td>获取 Agent Card</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/</code></td>
+<td>发送 A2A JSON-RPC 请求</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/health</code>、<code>/healthz</code></td>
+<td>健康检查</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/files</code>、<code>/files/download</code></td>
+<td>文件访问能力</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-父-agent-如何构造-remote-agent-tool"></a></p>
+<h2 id="父-agent-如何构造-remote-agent-tool">父 Agent 如何构造 Remote Agent Tool</h2>
+<p>源码：<code>go/adk/pkg/agent/agent.go</code>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, remoteAgent </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> agentConfig.RemoteAgents {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    remoteClient, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> auth.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewControllerA2AClient</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        os.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Getenv</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"KAGENT_URL"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        remoteAgent.Url,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        usageAgentID,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "failed to configure authentication for remote Agent </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%w</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            remoteAgent.Name, err,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    remoteTool, sessionID, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tools.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewKAgentRemoteA2ATool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        remoteAgent.Name,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        remoteAgent.Description,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        remoteAgent.Url,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        remoteClient,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        remoteAgent.Headers,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        propagateToken,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Errorf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "failed to create remote A2A tool for </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%w</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            remoteAgent.Name, err,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    subagentSessionIDs[remoteAgent.Name] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> sessionID</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    remoteAgentTools </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(remoteAgentTools, remoteTool)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><code>NewKAgentRemoteA2ATool</code> 最终创建的是一个普通 ADK function tool：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> remoteA2AInput</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Request </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> `json:"request,omitempty"`</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ft, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> functiontool.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">New</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">functiontool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Config</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Name:        name,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Description: description,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}, </span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">ctx</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> tool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">in</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> remoteA2AInput</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) (</span><span style="color:#D73A49;--shiki-dark:#F97583">map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#6F42C1;--shiki-dark:#B392F0">any</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> state.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">run</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, strings.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TrimSpace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(in.Request))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">})</span></span></code></pre>
+<p>这解释了为什么父 Agent 能像调用 MCP 工具一样调用子 Agent：在模型视角中，两者都是 Tool；区别在 Tool 的执行器。</p>
+<table>
+<thead>
+<tr>
+<th>Tool 类型</th>
+<th>执行器</th>
+<th>下游协议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP Tool</td>
+<td>MCP Toolset</td>
+<td>MCP JSON-RPC</td>
+</tr>
+<tr>
+<td>Agent Tool</td>
+<td><code>KAgentRemoteA2ATool</code></td>
+<td>A2A JSON-RPC</td>
+</tr>
+<tr>
+<td>本地 Tool</td>
+<td>Go function</td>
+<td>进程内函数调用</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-父-agent-如何发现子-agent"></a></p>
+<h2 id="父-agent-如何发现子-agent">父 Agent 如何发现子 Agent</h2>
+<p>Remote tool 不会在父 Agent 启动时立即连接所有子 Agent，而是在第一次调用时执行 lazy initialization：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">resolver </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> agentcard.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewResolver</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s.httpClient)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">card, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> resolver.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Resolve</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, s.baseURL, resolveOpts</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">client, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a2aclient.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewFromCard</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ctx,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    card,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    a2aclient.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">WithJSONRPCTransport</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(s.httpClient),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p>Resolver 默认请求：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="http"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">GET</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> /.well-known/agent-card.json</span></span></code></pre>
+<p>拿到 Card 后，客户端读取：</p>
+<ul>
+<li>Agent 名称和 description；</li>
+<li>实际调用 URL；</li>
+<li><code>preferredTransport</code>；</li>
+<li>streaming 等 capabilities；</li>
+<li>skills。</li>
+</ul>
+<p>初始化由 <code>sync.Once</code> 保护，因此一个 remote tool 实例只创建一次 A2A client。HTTP transport 又被 <code>otelhttp</code> 包装，用于传递 W3C <code>traceparent</code> 和 <code>tracestate</code>。</p>
+<p><a id="reference-一次父子-agent-调用的完整过程"></a></p>
+<h2 id="一次父子-agent-调用的完整过程">一次父子 Agent 调用的完整过程</h2>
+<p><a id="reference-构造-a2a-message"></a></p>
+<h3 id="构造-a2a-message">构造 A2A Message</h3>
+<p>源码：<code>go/adk/pkg/tools/remote_a2a_tool.go</code>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">message </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a2atype.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    a2atype.MessageRoleUser,</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    a2atype</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">TextPart</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{Text: requestText},</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">message.ContextID </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s.lastContextID</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">result, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> client.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SendMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    sendCtx,</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">a2atype</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">MessageSendParams</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{Message: message},</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p>对应的 JSON-RPC 请求可以近似理解为：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "jsonrpc"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"2.0"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"rpc-001"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "method"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"message/send"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "params"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "kind"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"message"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "messageId"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"message-001"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "contextId"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"context-001"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "role"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"user"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">      "parts"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">          "kind"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"text"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">          "text"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"检查集群中为什么 Pod 一直 Pending"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      ]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>这里的 <code>role=user</code> 不是说真实用户直接请求了子 Agent，而是表示这条消息是子 Agent 本轮推理的输入。真实用户身份另外通过 <code>X-User-Id</code> 传播。</p>
+<p><a id="reference-header-和-trace-传播"></a></p>
+<h3 id="header-和-trace-传播">Header 和 trace 传播</h3>
+<p>客户端 interceptor 会处理：</p>
+<ul>
+<li><code>X-Kagent-Source: agent</code>：标记这是 Agent 发起的调用；</li>
+<li><code>X-User-Id</code>：把父会话的用户传播给子 Agent；</li>
+<li><code>X-MCP-Token-*</code>：仅传播显式作用域的 MCP credential header；</li>
+<li>静态 <code>headersFrom</code>；</li>
+<li>W3C Trace Context；</li>
+<li>在启用 <code>KAGENT_PROPAGATE_TOKEN=true</code> 时，传播允许的 Authorization。</li>
+</ul>
+<p><code>X-Kagent-Source: agent</code> 还有两个作用：</p>
+<ul>
+<li>子 Agent 创建 Session 时将来源记录为 <code>agent</code>；</li>
+<li>Controller 可以把这次调用记录为 internal A2A usage。</li>
+</ul>
+<p><a id="reference-子-agent-返回什么"></a></p>
+<h3 id="子-agent-返回什么">子 Agent 返回什么</h3>
+<p><code>message/send</code> 的结果不是固定字符串，而是联合类型：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>SendMessageResult = Message | Task</span></span></code></pre>
+<p>当前父 Agent 的处理逻辑是：</p>
+<table>
+<thead>
+<tr>
+<th>返回值</th>
+<th>处理方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Message</code></td>
+<td>提取文本，返回给父 LLM</td>
+</tr>
+<tr>
+<td><code>Task(completed)</code></td>
+<td>从 artifact/history 中提取文本和 usage</td>
+</tr>
+<tr>
+<td><code>Task(input-required)</code></td>
+<td>将子 Agent HITL 提升到父 Agent</td>
+</tr>
+<tr>
+<td><code>Task(failed)</code></td>
+<td>生成带 <code>error</code> 的 Tool Result</td>
+</tr>
+</tbody>
+</table>
+<p>成功 Tool Result 近似为：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "result"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"目标 Pod 因为缺少匹配的 node selector 而无法调度。"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "subagent_session_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"context-001"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "kagent_usage_metadata"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "promptTokenCount"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1200</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    "candidatesTokenCount"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">220</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>父 Agent 会把这个对象作为 function response 放回自己的上下文，然后由父 LLM 决定：</p>
+<ul>
+<li>直接向用户总结；</li>
+<li>继续询问另一个 Agent；</li>
+<li>再调用本地或 MCP Tool；</li>
+<li>根据错误调整策略。</li>
+</ul>
+<p><a id="reference-子-agent-的-executor-如何执行请求"></a></p>
+<h2 id="子-agent-的-executor-如何执行请求">子 Agent 的 Executor 如何执行请求</h2>
+<p>源码入口：<code>go/adk/pkg/a2a/executor.go</code>。</p>
+<p><a id="reference-恢复用户与会话"></a></p>
+<h3 id="恢复用户与会话">恢复用户与会话</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">userID </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "A2A_USER_"</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> reqCtx.ContextID</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> callCtx, ok </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a2asrv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">CallContextFrom</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx); ok {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> callCtx.User </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> callCtx.User.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ""</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        userID </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> callCtx.User.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">sessionID </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> reqCtx.ContextID</span></span></code></pre>
+<p>如果请求带有可信的 <code>X-User-Id</code>，interceptor 会将其转换成 <code>AuthenticatedUser</code>。否则 Runtime 使用 <code>A2A_USER_&lt;contextId&gt;</code> 作为默认 user ID。</p>
+<p>随后 Runtime 使用 <code>contextId</code> 查询或创建 ADK Session。<strong>A2A context 和 ADK session 在当前实现中使用同一个 ID。</strong></p>
+<p><a id="reference-a2a-part-转成模型输入"></a></p>
+<h3 id="a2a-part-转成模型输入">A2A Part 转成模型输入</h3>
+<p><code>messageToGenAIContent()</code> 负责转换：</p>
+<table>
+<thead>
+<tr>
+<th>A2A Part</th>
+<th>GenAI/ADK 表示</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TextPart</td>
+<td>文本 Part</td>
+</tr>
+<tr>
+<td>FilePart</td>
+<td>文件 Part</td>
+</tr>
+<tr>
+<td>function_call DataPart</td>
+<td>GenAI FunctionCall</td>
+</tr>
+<tr>
+<td>function_response DataPart</td>
+<td>GenAI FunctionResponse</td>
+</tr>
+<tr>
+<td>HITL decision DataPart</td>
+<td>由 HITL 恢复逻辑单独消费</td>
+</tr>
+</tbody>
+</table>
+<p>无法识别类型的普通 DataPart 不会直接塞给 LLM，以免把协议控制数据误当成用户内容。</p>
+<p><a id="reference-执行-adk-runner"></a></p>
+<h3 id="执行-adk-runner">执行 ADK Runner</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">var</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> runConfig </span><span style="color:#6F42C1;--shiki-dark:#B392F0">adkagent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">RunConfig</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> e.stream {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    runConfig.StreamingMode </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> adkagent.StreamingModeSSE</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> adkEvent, adkErr </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> r.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Run</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    runCtx, userID, sessionID, content, runConfig,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 将 ADK event 转换成 A2A event</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>子 Agent 本质上仍然运行标准 Agent Loop：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>输入消息</span></span>
+<span class="line"><span>  -&gt; 加载 session history</span></span>
+<span class="line"><span>  -&gt; 调用 LLM</span></span>
+<span class="line"><span>  -&gt; LLM 可能调用 MCP、本地工具或另一个 Agent</span></span>
+<span class="line"><span>  -&gt; Tool Result 回到 LLM</span></span>
+<span class="line"><span>  -&gt; 生成最终响应</span></span></code></pre>
+<p><a id="reference-adk-event-转成-a2a-event"></a></p>
+<h3 id="adk-event-转成-a2a-event">ADK Event 转成 A2A Event</h3>
+<p>Executor 会输出：</p>
+<ol>
+<li><code>submitted</code>；</li>
+<li><code>working</code>；</li>
+<li>partial message 或 artifact update；</li>
+<li><code>completed</code>、<code>failed</code> 或 <code>input-required</code>。</li>
+</ol>
+<p>生成最终结果的核心逻辑近似为：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(hitlParts) </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    hitlMsg </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a2atype.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        a2atype.MessageRoleAgent, hitlParts</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    inputRequired </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a2atype.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewStatusUpdateEvent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        reqCtx, a2atype.TaskStateInputRequired, hitlMsg,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    inputRequired.Final </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> queue.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Write</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, inputRequired)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(lastNonPartialParts) </span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    finalArtifact </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a2atype.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewArtifactEvent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        reqCtx, lastNonPartialParts</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    finalArtifact.LastChunk </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    queue.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Write</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, finalArtifact)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> queue.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Write</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ctx, </span><span style="color:#6F42C1;--shiki-dark:#B392F0">newCompletionStatusEvent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(reqCtx, finalMeta, hadRenderableOutput),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p><a id="reference-为什么-agent-tool-调用也能在-ui-展开"></a></p>
+<h2 id="为什么-agent-tool-调用也能在-ui-展开">为什么 Agent Tool 调用也能在 UI 展开</h2>
+<p>父 Agent 的 A2A Executor 会把 FunctionCall 转成 DataPart，并在 Agent Tool 的 function call metadata 中加入：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>kagent_subagent_session_id=&lt;child-context-id&gt;</span></span></code></pre>
+<p>子 Agent 返回时，Tool Result 中也包含：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "subagent_session_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"child-context-id"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>UI 发现工具名包含 <code>__NS__</code> 时，把它识别为 Agent Call；再根据 <code>subagent_session_id</code> 查询子 Session 的事件，从而展示：</p>
+<ul>
+<li>子 Agent 正在做什么；</li>
+<li>子 Agent 调用了哪些 MCP Tool；</li>
+<li>子 Agent 的 Tool Result；</li>
+<li>子 Agent token usage；</li>
+<li>子 Agent 是否正在等待审批。</li>
+</ul>
+<p>这不是前端从父 Agent 文本中猜出来的，而是后端显式写入的关联 ID。</p>
+<p><a id="reference-嵌套-hitl-如何工作"></a></p>
+<h2 id="嵌套-hitl-如何工作">嵌套 HITL 如何工作</h2>
+<p>*HITL（Human in the Loop，人类介入）*在多 Agent 场景中的难点是：真正需要审批的 Tool 位于子 Agent 内部，但用户连接的是父 Agent。</p>
+<p>当前实现采用两阶段恢复。</p>
+<p><a id="reference-等待审批"></a></p>
+<h3 id="等待审批">等待审批</h3>
+<pre class="mermaid">sequenceDiagram
+    participant U as 用户
+    participant P as 父 Agent
+    participant S as 子 Agent
+    participant M as MCP Tool
+
+    U-&gt;&gt;P: 发送任务
+    P-&gt;&gt;S: A2A message/send
+    S-&gt;&gt;M: 请求执行敏感工具
+    M--&gt;&gt;S: 需要审批
+    S--&gt;&gt;P: Task input-required
+    P--&gt;&gt;U: 展示子 Agent 内部工具及参数</pre>
+<p>父 Agent 收到 <code>input-required</code> 后保存：</p>
+<ul>
+<li>子 Agent <code>taskId</code>；</li>
+<li>子 Agent <code>contextId</code>；</li>
+<li>子 Agent 名称；</li>
+<li>内部待审批 function calls；</li>
+<li>批量审批决定或拒绝原因。</li>
+</ul>
+<p>然后调用父 Agent 的 <code>RequestConfirmation()</code>，把审批请求暴露给 UI。</p>
+<p><a id="reference-恢复执行"></a></p>
+<h3 id="恢复执行">恢复执行</h3>
+<pre class="mermaid">sequenceDiagram
+    participant U as 用户
+    participant P as 父 Agent
+    participant S as 子 Agent
+
+    U-&gt;&gt;P: approve / reject / answers
+    P-&gt;&gt;P: 恢复原 Agent Tool Call
+    P-&gt;&gt;S: 同 taskId + contextId + decision DataPart
+    S-&gt;&gt;S: 重建 FunctionResponse
+    S--&gt;&gt;P: completed 或 failed
+    P--&gt;&gt;U: 最终回答</pre>
+<p>恢复消息使用结构化 DataPart，而不是解析 <code>yes</code>、<code>approve</code> 等自然语言关键词。这避免了把普通文本误判成批准操作。</p>
+<p><a id="reference-session-和-task-如何持久化"></a></p>
+<h2 id="session-和-task-如何持久化">Session 和 Task 如何持久化</h2>
+<p>Agent Pod 中的 <code>KAGENT_URL</code> 指向 Controller。只要该值存在，Runtime 就会使用：</p>
+<ul>
+<li><code>KAgentSessionService</code>：保存 ADK Session 和 Event；</li>
+<li><code>KAgentTaskStore</code>：保存 A2A Task。</li>
+</ul>
+<p><a id="reference-session-持久化"></a></p>
+<h3 id="session-持久化">Session 持久化</h3>
+<p>子 Agent 首次处理某个 <code>contextId</code> 时会：</p>
+<ol>
+<li>查询 Session；</li>
+<li>不存在则创建；</li>
+<li>将 ADK Event 持续追加到 Session；</li>
+<li>后续相同 <code>contextId</code> 可以加载历史继续执行。</li>
+</ol>
+<p>当请求携带 <code>X-Kagent-Source: agent</code> 时，Controller 将 Session 标为：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>kind = sub_agent_call</span></span>
+<span class="line"><span>source = agent</span></span></code></pre>
+<p><a id="reference-task-持久化"></a></p>
+<h3 id="task-持久化">Task 持久化</h3>
+<p><code>KAgentTaskStore.Save()</code> 会：</p>
+<ol>
+<li>复制当前 Task；</li>
+<li>删除只用于实时展示的 partial history/artifact；</li>
+<li>序列化完整 Task JSON；</li>
+<li>调用 Controller <code>TaskService.PutTask</code>。</li>
+</ol>
+<p>这样 <code>tasks/get</code> 和 HITL 恢复可以在后续请求中取得任务状态。</p>
+<blockquote>
+<p>持久化 Task 不等于父 Agent 已经成为 durable workflow。父 Agent 到子 Agent 的 Tool Call 当前仍然等待 <code>SendMessage</code> 返回；客户端断开、Pod 重启和跨进程恢复需要分别分析。</p>
+</blockquote>
+<p><a id="reference-controller-a2a-proxy"></a></p>
+<h2 id="controller-a2a-proxy">Controller A2A Proxy</h2>
+<p>Controller 不只是资源控制器，还暴露统一 A2A 路由：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/api/a2a/{namespace}/{name}/</span></span>
+<span class="line"><span>/api/a2a-sandboxes/{namespace}/{name}/</span></span></code></pre>
+<p><a id="reference-动态注册"></a></p>
+<h3 id="动态注册">动态注册</h3>
+<p><code>A2ARegistrar</code> 监听：</p>
+<ul>
+<li><code>Agent</code>；</li>
+<li><code>SandboxAgent</code>；</li>
+<li><code>AccessPolicy</code>。</li>
+</ul>
+<p>资源变化后，它为目标 Agent 创建内部 A2A client，并把 handler 注册进动态 mux：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">client, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a2aclient.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewA2AClient</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    card.URL,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    a2aclient.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">WithHTTPReqHandler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        authimpl.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">A2ARequestHandler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(authenticator, agentRef),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">cardCopy </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#24292E;--shiki-dark:#E1E4E8">card</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">cardCopy.URL </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">a2aRouteURL</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(agent)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">a.handlerMux.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SetAgentHandler</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    a2aRouteKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(agent),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    client,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    cardCopy,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    tracingMiddleware,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    resource,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    identity,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p>这里有两张 Card：</p>
+<ul>
+<li>原始 Card URL 指向 <code>http://&lt;agent&gt;.&lt;namespace&gt;:8080</code>，供 Controller 调用真实 Agent Pod；</li>
+<li>对外 Card URL 改成 Controller <code>/api/a2a/...</code>，避免客户端依赖集群内部 DNS。</li>
+</ul>
+<p><a id="reference-passthroughmanager"></a></p>
+<h3 id="passthroughmanager">PassthroughManager</h3>
+<p>Controller 的代理不重新执行 Agent，而是把 A2A 方法转发给 Pod：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#E36209;--shiki-dark:#FFAB70">m </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">PassthroughManager</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">OnSendMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    ctx</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">request</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> protocol</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SendMessageParams</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">) (</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">protocol</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">MessageResult</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> m.client.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SendMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, request)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#E36209;--shiki-dark:#FFAB70">m </span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#6F42C1;--shiki-dark:#B392F0">PassthroughManager</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">OnSendMessageStream</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    ctx</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Context</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">request</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> protocol</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SendMessageParams</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">) (</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;-chan</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> protocol</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">StreamingMessageEvent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">error</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> m.client.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">StreamMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, request)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><code>tasks/get</code>、<code>tasks/cancel</code>、push notification 和 resubscribe 也采用相同方式转发。</p>
+<p><a id="reference-ui-聊天为什么使用另一条链路"></a></p>
+<h2 id="ui-聊天为什么使用另一条链路">UI 聊天为什么使用另一条链路</h2>
+<p>UI 不直接调用 Agent Pod，而是调用 Controller 的 <code>MessageService.SendMessage</code>。Controller 会：</p>
+<ol>
+<li>根据 <code>sessionId</code> 查询数据库 Session；</li>
+<li>验证当前用户就是 Session owner；</li>
+<li>检查 Session 绑定的 Agent UID 仍然匹配；</li>
+<li>创建 A2A message，强制 <code>contextId=sessionId</code>；</li>
+<li>调用目标 Agent 的 <code>message/stream</code>；</li>
+<li>将 A2A SSE event 编码成 gRPC-Web stream frame 发回浏览器。</li>
+</ol>
+<p>因此 UI 的外层对话可以实时看到 partial token 和状态变化。父 Agent 调子 Agent 使用的是 <code>message/send</code>，所以父 Tool Call 本身是同步等待；UI 若要显示子过程，会通过 <code>subagent_session_id</code> 单独读取子 Session。</p>
+<p><a id="reference-认证和权限边界"></a></p>
+<h2 id="认证和权限边界">认证和权限边界</h2>
+<p><a id="reference-controller-路由上的认证"></a></p>
+<h3 id="controller-路由上的认证">Controller 路由上的认证</h3>
+<p>通过 Controller <code>/api/a2a/...</code> 调用时会经过：</p>
+<ul>
+<li>用户或 workload 身份认证；</li>
+<li><code>AccessPolicy</code> 的 <code>AgentInvoke</code> 授权；</li>
+<li>Agent UID 和 live Pod UID 校验；</li>
+<li>nested invocation 目标约束；</li>
+<li>用户、ServiceAccount 和 group 权限处理。</li>
+</ul>
+<p>Agent Pod 使用 audience 为 <code>kagent</code> 的 projected ServiceAccount token。专用 HTTP transport 只允许把这个 token 发送到：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>同一个 KAGENT_URL origin</span></span>
+<span class="line"><span>且 path 以 /api/a2a/ 或 /api/a2a-sandboxes/ 开头</span></span></code></pre>
+<p>它还禁止 redirect，避免 workload token 被重定向到其他主机。</p>
+<p><a id="reference-默认父子调用的实际边界"></a></p>
+<h3 id="默认父子调用的实际边界">默认父子调用的实际边界</h3>
+<p>当前 translator 默认生成：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>http://child-agent.namespace:8080</span></span></code></pre>
+<p>也就是父 Agent 默认直接访问子 Agent Service，而不是 Controller <code>/api/a2a/...</code>。只有目标 URL 确实是 Controller A2A route 时，<code>NewControllerA2AClient</code> 才会附加 projected workload token；否则它返回 <code>nil</code>，remote tool 使用普通 HTTP client。</p>
+<p>这意味着需要明确区分：</p>
+<table>
+<thead>
+<tr>
+<th>检查</th>
+<th>CR 创建/更新</th>
+<th>Controller A2A route</th>
+<th>默认直连 Agent Service</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>引用存在</td>
+<td>有</td>
+<td>有</td>
+<td>已在编译期解析</td>
+</tr>
+<tr>
+<td>环路和深度</td>
+<td>有</td>
+<td>不负责</td>
+<td>不负责</td>
+</tr>
+<tr>
+<td><code>allowedNamespaces</code></td>
+<td>有</td>
+<td>依赖当前 AccessPolicy</td>
+<td>Runtime 不重新检查</td>
+</tr>
+<tr>
+<td>用户 <code>AgentInvoke</code></td>
+<td>有</td>
+<td>每次请求检查</td>
+<td>Agent Server 自身不执行同等检查</td>
+</tr>
+<tr>
+<td>workload token</td>
+<td>不适用</td>
+<td>校验</td>
+<td>默认不附加</td>
+</tr>
+<tr>
+<td><code>X-User-Id</code></td>
+<td>不适用</td>
+<td>由认证层建立</td>
+<td>Runtime interceptor 会读取</td>
+</tr>
+</tbody>
+</table>
+<p><strong>因此，CRD 校验保证“配置上允许引用”，Controller route 保证“每次调用经过运行时授权”；默认 Pod-to-Pod 直连并不天然等价于后者。</strong> 如果生产环境要求所有内部调用都做强制授权，需要结合实际 <code>proxy.url</code>、Service 暴露范围和 NetworkPolicy 核对数据面路径。当前 Helm 目录没有为普通 Agent Pod 提供对应的 NetworkPolicy 模板。</p>
+<p><a id="reference-可观测性"></a></p>
+<h2 id="可观测性">可观测性</h2>
+<p>Agent-to-Agent 调用已经包含以下观测信息：</p>
+<ul>
+<li><code>traceparent</code>、<code>tracestate</code>：父子 Agent trace 关联；</li>
+<li><code>gen_ai.operation.name=invoke_agent</code>；</li>
+<li><code>gen_ai.agent.name</code>、<code>gen_ai.agent.id</code>；</li>
+<li><code>kagent.user_id</code>；</li>
+<li><code>gen_ai.task.id</code>；</li>
+<li><code>gen_ai.conversation.id</code>；</li>
+<li><code>invocation_id</code>；</li>
+<li>LLM usage metadata；</li>
+<li>internal A2A usage event。</li>
+</ul>
+<p><code>X-Kagent-Source: agent</code> 是 internal A2A usage 统计的重要信号。Controller 只有看到该 header 才记录 Agent 发起的调用。</p>
+<p><a id="reference-当前实现中需要重点注意的行为"></a></p>
+<h2 id="当前实现中需要重点注意的行为">当前实现中需要重点注意的行为</h2>
+<p>以下结论来自当前源码，不是 A2A 协议本身的要求。</p>
+<p><a id="reference-子-agent-context-是-remote-tool-实例级"></a></p>
+<h3 id="子-agent-context-是-remote-tool-实例级">子 Agent context 是 remote tool 实例级</h3>
+<p><code>NewKAgentRemoteA2ATool()</code> 创建 tool 时执行一次：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">state </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> &amp;</span><span style="color:#6F42C1;--shiki-dark:#B392F0">remoteA2AState</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    lastContextID: a2atype.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">NewContextID</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>后续每次调用都使用：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">message.ContextID </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s.lastContextID</span></span></code></pre>
+<p>当前文件中没有看到根据父 Session 重新生成或映射 context ID 的逻辑。因此，从代码语义看，同一父 Agent Pod 中同一个 remote tool 的多次调用会复用同一个子 Agent context。</p>
+<p>这需要重点验证：</p>
+<ul>
+<li>不同父 Session 是否会共享子 Session；</li>
+<li>不同用户连续调用时，Session owner 校验如何表现；</li>
+<li>并发调用是否会把事件写入同一个子上下文；</li>
+<li>Pod 重启后生成新 context 是否符合产品预期。</li>
+</ul>
+<p><a id="reference-remote-agent-错误被包装成-tool-result"></a></p>
+<h3 id="remote-agent-错误被包装成-tool-result">Remote Agent 错误被包装成 Tool Result</h3>
+<p>网络或协议错误当前不是作为 Go error 返回，而是：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">return</span><span style="color:#D73A49;--shiki-dark:#F97583"> map</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#6F42C1;--shiki-dark:#B392F0">any</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "error"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Sprintf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "Remote agent '</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">' request failed: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%v</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, s.name, err,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ),</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">nil</span></span></code></pre>
+<p>这会让 ADK 把它当成一次成功返回的 Tool Result，再交给 LLM解释。优点是 LLM 可以尝试恢复；缺点是上层错误统计和 fail-fast 行为会变弱。若业务要求错误必须显式中断，这一语义需要调整，而不是额外添加静默 fallback。</p>
+<p><a id="reference-空-request-存在默认请求文本"></a></p>
+<h3 id="空-request-存在默认请求文本">空 request 存在默认请求文本</h3>
+<p>当模型传入空 <code>request</code> 时，当前实现会替换成默认英文任务描述，而不是报错。这属于显式 fallback。严格调用契约下，更合理的行为通常是参数校验失败并返回错误，让问题直接暴露。</p>
+<p><a id="reference-task-状态处理比较宽松"></a></p>
+<h3 id="task-状态处理比较宽松">Task 状态处理比较宽松</h3>
+<p>父 Agent 当前显式处理：</p>
+<ul>
+<li><code>input-required</code>；</li>
+<li><code>failed</code>。</li>
+</ul>
+<p>其余 Task state 进入默认结果分支。因此需要确认非流式 <code>SendMessage</code> 在所有部署版本中是否只会返回预期终态，尤其是：</p>
+<ul>
+<li><code>submitted</code>；</li>
+<li><code>working</code>；</li>
+<li><code>canceled</code>；</li>
+<li><code>rejected</code>；</li>
+<li><code>auth-required</code>。</li>
+</ul>
+<p>更严格的实现应逐个枚举状态，未知状态直接返回错误。</p>
+<p><a id="reference-两套-a2a-sdk-需要持续做兼容测试"></a></p>
+<h3 id="两套-a2a-sdk-需要持续做兼容测试">两套 A2A SDK 需要持续做兼容测试</h3>
+<p>Controller 和 Agent Runtime 使用不同 A2A Go SDK。当前方法名和主要对象兼容，但升级任意一侧时都应验证：</p>
+<ul>
+<li>Agent Card schema；</li>
+<li>JSON 字段名；</li>
+<li>SSE event 格式；</li>
+<li>Task state；</li>
+<li>streaming 和 resubscribe；</li>
+<li>error code；</li>
+<li>HITL DataPart metadata。</li>
+</ul>
+<p><a id="reference-本地观察-a2a-请求"></a></p>
+<h2 id="本地观察-a2a-请求">本地观察 A2A 请求</h2>
+<p><a id="reference-读取-agent-card"></a></p>
+<h3 id="读取-agent-card">读取 Agent Card</h3>
+<p>先把目标 Service 转发到本地：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> team-a</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> port-forward</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> service/math-agent</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 18080:8080</span></span></code></pre>
+<p>读取 Card：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --fail-with-body</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  http://127.0.0.1:18080/.well-known/agent-card.json</span></span></code></pre>
+<p>重点检查：</p>
+<ul>
+<li><code>url</code> 是否指向预期地址；</li>
+<li><code>preferredTransport</code> 是否为 <code>JSONRPC</code>；</li>
+<li><code>capabilities.streaming</code>；</li>
+<li><code>skills</code> 是否符合 <code>a2aConfig</code>。</li>
+</ul>
+<p><a id="reference-手工发送非流式消息"></a></p>
+<h3 id="手工发送非流式消息">手工发送非流式消息</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --fail-with-body</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -X</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> POST</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -H</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Content-Type: application/json'</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  http://127.0.0.1:18080/</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --data-binary</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "jsonrpc": "2.0",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "id": "local-request-1",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "method": "message/send",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "params": {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">      "message": {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "kind": "message",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "messageId": "local-message-1",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "contextId": "local-context-1",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "role": "user",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "parts": [</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">          {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "kind": "text",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "text": "请解释你的能力"</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">          }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        ]</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">      }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  }'</span></span></code></pre>
+<p>不要在命令中加入真实平台 token、MCP credential 或从 Secret 解码出的敏感 header。生产环境应通过正式入口测试认证链路。</p>
+<p><a id="reference-观察流式事件"></a></p>
+<h3 id="观察流式事件">观察流式事件</h3>
+<p>把 method 改成 <code>message/stream</code>，并允许 curl 持续读取：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --no-buffer</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --fail-with-body</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -X</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> POST</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -H</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Content-Type: application/json'</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -H</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Accept: text/event-stream'</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  http://127.0.0.1:18080/</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --data-binary</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "jsonrpc": "2.0",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "id": "local-stream-1",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "method": "message/stream",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "params": {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">      "message": {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "kind": "message",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "messageId": "local-message-2",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "contextId": "local-context-2",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "role": "user",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "parts": [</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">          {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "kind": "text",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">            "text": "给出一个简短回答"</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">          }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        ]</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">      }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  }'</span></span></code></pre>
+<p><a id="reference-排障顺序"></a></p>
+<h2 id="排障顺序">排障顺序</h2>
+<p><a id="reference-agent-根本没有成为-tool"></a></p>
+<h3 id="agent-根本没有成为-tool">Agent 根本没有成为 Tool</h3>
+<p>依次检查：</p>
+<ol>
+<li>父 Agent CR 的 <code>tools[].type</code> 是否为 <code>Agent</code>；</li>
+<li><code>tools[].agent.name/namespace</code> 是否正确；</li>
+<li>目标 Agent 是否存在；</li>
+<li>跨 namespace 的 <code>allowedNamespaces</code> 是否允许；</li>
+<li>Controller 是否报告 cycle 或 depth 错误；</li>
+<li>父 Agent 是否因配置变化完成 rollout；</li>
+<li>Runtime 日志是否出现 <code>Wired remote A2A agent tool</code>。</li>
+</ol>
+<p><a id="reference-能看到-tool但调用失败"></a></p>
+<h3 id="能看到-tool但调用失败">能看到 Tool，但调用失败</h3>
+<p>依次检查：</p>
+<ol>
+<li>目标 Agent Service 是否存在；</li>
+<li>EndpointSlice 是否包含 Ready Pod；</li>
+<li><code>http://agent.namespace:8080/healthz</code> 是否可达；</li>
+<li>Agent Card endpoint 是否返回合法 JSON；</li>
+<li>Card 的 <code>preferredTransport</code> 是否为双方支持的 transport；</li>
+<li><code>proxy.url</code> 和 <code>x-kagent-host</code> 是否匹配实际路由；</li>
+<li>是否把 Controller workload token 错误发送到了非 Controller origin；</li>
+<li>trace 中是否同时存在父调用、<code>invoke_agent</code> 和子 Agent span。</li>
+</ol>
+<p><a id="reference-子-agent-执行了但父-agent-没拿到正确结果"></a></p>
+<h3 id="子-agent-执行了但父-agent-没拿到正确结果">子 Agent 执行了，但父 Agent 没拿到正确结果</h3>
+<p>重点检查：</p>
+<ul>
+<li>返回的是 Message 还是 Task；</li>
+<li>Task state 是否为 <code>completed</code>；</li>
+<li>最终文本是在 status message、history 还是 artifact；</li>
+<li>function response 中是否有 <code>result</code>；</li>
+<li>是否只产生 partial artifact，持久化时又被清理；</li>
+<li><code>subagent_session_id</code> 是否正确；</li>
+<li>子 Agent Session 是否属于当前用户。</li>
+</ul>
+<p><a id="reference-hitl-卡住"></a></p>
+<h3 id="hitl-卡住">HITL 卡住</h3>
+<p>重点检查：</p>
+<ul>
+<li>Task 是否进入 <code>input-required</code>；</li>
+<li>status message 是否包含 long-running function call DataPart；</li>
+<li>父 Agent payload 是否保存 <code>task_id</code> 和 <code>context_id</code>；</li>
+<li>UI 返回的是结构化 decision，而不是自然语言文本；</li>
+<li>resume 消息是否使用原 task/context；</li>
+<li>Task Store 中是否仍能查询到原 Task。</li>
+</ul>
+<p><a id="reference-如何阅读源码"></a></p>
+<h2 id="如何阅读源码">如何阅读源码</h2>
+<table>
+<thead>
+<tr>
+<th>阅读目标</th>
+<th>文件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent CRD 和 Tool 引用</td>
+<td><code>go/api/v1alpha2/agent_types.go</code></td>
+</tr>
+<tr>
+<td>Agent 引用编译</td>
+<td><code>go/controller/internal/controller/translator/agent/compiler.go</code></td>
+</tr>
+<tr>
+<td>Agent Card 生成</td>
+<td><code>go/controller/internal/controller/translator/agent/utils.go</code></td>
+</tr>
+<tr>
+<td>Deployment、Service、token volume</td>
+<td><code>go/controller/internal/controller/translator/agent/manifest_builder.go</code></td>
+</tr>
+<tr>
+<td>Remote Agent 转 ADK Tool</td>
+<td><code>go/adk/pkg/agent/agent.go</code></td>
+</tr>
+<tr>
+<td>A2A client、发送、HITL</td>
+<td><code>go/adk/pkg/tools/remote_a2a_tool.go</code></td>
+</tr>
+<tr>
+<td>A2A HTTP Server</td>
+<td><code>go/adk/pkg/a2a/server/server.go</code></td>
+</tr>
+<tr>
+<td>A2A Message 到 ADK Runner</td>
+<td><code>go/adk/pkg/a2a/executor.go</code></td>
+</tr>
+<tr>
+<td>Part 转换和 metadata</td>
+<td><code>go/adk/pkg/a2a/converter.go</code></td>
+</tr>
+<tr>
+<td>HITL 编解码</td>
+<td><code>go/adk/pkg/a2a/hitl.go</code></td>
+</tr>
+<tr>
+<td>Session 持久化</td>
+<td><code>go/adk/pkg/session/session.go</code></td>
+</tr>
+<tr>
+<td>Task 持久化</td>
+<td><code>go/adk/pkg/taskstore/store.go</code></td>
+</tr>
+<tr>
+<td>Controller 动态 A2A 注册</td>
+<td><code>go/controller/internal/a2a/a2a_registrar.go</code></td>
+</tr>
+<tr>
+<td>Controller A2A route 和授权</td>
+<td><code>go/controller/internal/a2a/a2a_handler_mux.go</code></td>
+</tr>
+<tr>
+<td>Controller A2A 方法转发</td>
+<td><code>go/controller/internal/a2a/manager.go</code></td>
+</tr>
+<tr>
+<td>UI 聊天到 A2A stream</td>
+<td><code>go/controller/internal/grpcserver/messages.go</code></td>
+</tr>
+<tr>
+<td>Gateway 异步 invocation</td>
+<td><code>go/kagent-gateway/internal/server/a2a_adapter.go</code></td>
+</tr>
+<tr>
+<td>前端子 Agent 活动展示</td>
+<td><code>ui/src/components/chat/ChatRichMessage.tsx</code></td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-面试式总结"></a></p>
+<h2 id="面试式总结">面试式总结</h2>
+<p><a id="reference-这个项目的-a2a-是怎么实现的"></a></p>
+<h3 id="这个项目的-a2a-是怎么实现的">这个项目的 A2A 是怎么实现的？</h3>
+<p>Controller 把 Agent CR 中的 Agent Tool 引用编译成 <code>RemoteAgentConfig</code>，Go ADK Runtime 再将它包装成一个 Function Tool。父 Agent 的 LLM 选择该 Tool 后，Runtime 先通过 well-known endpoint 获取子 Agent Card，然后使用 A2A JSON-RPC <code>message/send</code> 发送带 <code>contextId</code> 的 Message。子 Agent 的 A2A Executor 将 Message 转成 GenAI Content，恢复持久化 Session，运行 Google ADK Runner，并以 Message、Task、Artifact 和状态事件返回结果。</p>
+<p><a id="reference-a2a-和-mcp-有什么区别"></a></p>
+<h3 id="a2a-和-mcp-有什么区别">A2A 和 MCP 有什么区别？</h3>
+<p>MCP 主要标准化 Agent 如何发现和调用工具、资源与 prompt；A2A 标准化一个 Agent 如何发现和调用另一个具备独立会话、任务状态和能力描述的 Agent。在本项目中，两者都最终表现为父 LLM 可调用的 Tool，但 MCP Tool 下游执行某个确定函数，Agent Tool 下游会启动另一个完整 Agent Loop。</p>
+<p><a id="reference-为什么需要-task而不是只返回-message"></a></p>
+<h3 id="为什么需要-task而不是只返回-message">为什么需要 Task，而不是只返回 Message？</h3>
+<p>Message 适合即时结果；Task 可以表达 submitted、working、completed、failed、canceled 和 input-required，支持流式事件、查询、取消、恢复和 HITL。Agent 执行通常是多阶段过程，因此 Task 比单次字符串响应更适合。</p>
+<p><a id="reference-controller-在-a2a-中负责什么"></a></p>
+<h3 id="controller-在-a2a-中负责什么">Controller 在 A2A 中负责什么？</h3>
+<p>Controller 负责 CR 编译、静态引用校验、统一 A2A route、Agent Card URL 重写、认证授权、代理转发、Session/Task 持久化 API、usage 和 trace。真正的 LLM 推理和 Tool Loop 运行在各个 Agent Pod 中。</p>
+<p><a id="reference-agent-之间是否共享上下文"></a></p>
+<h3 id="agent-之间是否共享上下文">Agent 之间是否共享上下文？</h3>
+<p>不直接共享。父 Agent 把一段任务文本作为新 Message 发给子 Agent；子 Agent 使用自己的 <code>contextId</code> 和持久化 Session。父 Agent只收到子 Agent 的结果与关联 metadata。若需要传递更多背景，必须显式放入请求文本、DataPart、FilePart 或其他协议字段。</p>
+<p><a id="reference-当前实现最值得继续改进的地方是什么"></a></p>
+<h3 id="当前实现最值得继续改进的地方是什么">当前实现最值得继续改进的地方是什么？</h3>
+<p>优先核对 remote tool 的 context 是否应按父 Session 隔离，并统一内部 A2A 是否必须经过受认证的 Controller route。随后应把 remote error 和 Task state 改成严格、穷举、fail-fast 的处理，并为两套 A2A SDK 增加协议兼容测试。</p>
+<p><a id="reference-验证记录"></a></p>
+<h2 id="验证记录">验证记录</h2>
+<p>分析时执行了以下相关测试：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">go</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> test</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ./adk/pkg/tools</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  ./adk/pkg/a2a</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  ./adk/pkg/auth</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  ./controller/internal/a2a</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  ./controller/internal/controller/translator/agent</span></span></code></pre>
+<p>结果：236 个测试通过；另一个 <code>a2a</code> 测试二进制在本机链接阶段失败。失败信息来自 macOS 27 SDK 中 <code>arm64e.x1</code> architecture 与当前 clang/tapi 的兼容问题，不是 Go 测试断言失败。因此本文的源码链路已完成静态核对，但不能把这次本地结果表述为所有目标包完整通过。</p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>用一条父子调用串起 CRD → RemoteAgentConfig → Agent Card → SendMessage → Task/Message → Tool Result。再分别检查 UI 流式调用和 Gateway 异步调用为何不同。文中 main 提交哈希限定了实现快照，不应解释为平台持续不变的行为。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>协议对象与跨语言契约：<a href="/notes/computer-science/agent/theory/a2a-protocol-contracts/">S08-A2A</a>。</li>
+<li>同一平台的执行隔离边界：<a href="/notes/computer-science/agent/framework/dbci-agent-sandbox/">DBCI Agent 沙箱环境实现</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+<script src="/note-runtime/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,securityLevel:"strict",theme:"neutral"});document.querySelectorAll(".mermaid").forEach(node=>mermaid.run({nodes:[node]}).catch(()=>{}));</script>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#一句话理解">一句话理解</a></li><li style="--depth: 0"><a href="#从-json-rpc-开始理解">从 JSON-RPC 开始理解</a></li><li style="--depth: 1"><a href="#rpc-是什么">RPC 是什么</a></li><li style="--depth: 1"><a href="#json-rpc-是什么">JSON-RPC 是什么</a></li><li style="--depth: 1"><a href="#json-rpc-和-rest-的区别">JSON-RPC 和 REST 的区别</a></li><li style="--depth: 0"><a href="#a2a-在-json-rpc-之上定义了什么">A2A 在 JSON-RPC 之上定义了什么</a></li><li style="--depth: 1"><a href="#核心对象">核心对象</a></li><li style="--depth: 1"><a href="#三类-id">三类 ID</a></li><li style="--depth: 1"><a href="#本项目使用的-a2a-方法">本项目使用的 A2A 方法</a></li><li style="--depth: 0"><a href="#项目中的三条-agent-调用链">项目中的三条 Agent 调用链</a></li><li style="--depth: 1"><a href="#ui-到顶层-agent">UI 到顶层 Agent</a></li><li style="--depth: 1"><a href="#父-agent-到子-agent">父 Agent 到子 Agent</a></li><li style="--depth: 1"><a href="#gateway-到-agent">Gateway 到 Agent</a></li><li style="--depth: 0"><a href="#agent-引用如何进入-crd">Agent 引用如何进入 CRD</a></li><li style="--depth: 1"><a href="#tool-类型">Tool 类型</a></li><li style="--depth: 1"><a href="#a2aconfig-的真实作用">a2aConfig 的真实作用</a></li><li style="--depth: 0"><a href="#controller-如何编译-agent-tool">Controller 如何编译 Agent Tool</a></li><li style="--depth: 1"><a href="#静态引用安全检查">静态引用安全检查</a></li><li style="--depth: 1"><a href="#跨-namespace-引用">跨 namespace 引用</a></li><li style="--depth: 0"><a href="#agent-pod-启动时发生什么">Agent Pod 启动时发生什么</a></li><li style="--depth: 1"><a href="#a2a-server-路由">A2A Server 路由</a></li><li style="--depth: 0"><a href="#父-agent-如何构造-remote-agent-tool">父 Agent 如何构造 Remote Agent Tool</a></li><li style="--depth: 0"><a href="#父-agent-如何发现子-agent">父 Agent 如何发现子 Agent</a></li><li style="--depth: 0"><a href="#一次父子-agent-调用的完整过程">一次父子 Agent 调用的完整过程</a></li><li style="--depth: 1"><a href="#构造-a2a-message">构造 A2A Message</a></li><li style="--depth: 1"><a href="#header-和-trace-传播">Header 和 trace 传播</a></li><li style="--depth: 1"><a href="#子-agent-返回什么">子 Agent 返回什么</a></li><li style="--depth: 0"><a href="#子-agent-的-executor-如何执行请求">子 Agent 的 Executor 如何执行请求</a></li><li style="--depth: 1"><a href="#恢复用户与会话">恢复用户与会话</a></li><li style="--depth: 1"><a href="#a2a-part-转成模型输入">A2A Part 转成模型输入</a></li><li style="--depth: 1"><a href="#执行-adk-runner">执行 ADK Runner</a></li><li style="--depth: 1"><a href="#adk-event-转成-a2a-event">ADK Event 转成 A2A Event</a></li><li style="--depth: 0"><a href="#为什么-agent-tool-调用也能在-ui-展开">为什么 Agent Tool 调用也能在 UI 展开</a></li><li style="--depth: 0"><a href="#嵌套-hitl-如何工作">嵌套 HITL 如何工作</a></li><li style="--depth: 1"><a href="#等待审批">等待审批</a></li><li style="--depth: 1"><a href="#恢复执行">恢复执行</a></li><li style="--depth: 0"><a href="#session-和-task-如何持久化">Session 和 Task 如何持久化</a></li><li style="--depth: 1"><a href="#session-持久化">Session 持久化</a></li><li style="--depth: 1"><a href="#task-持久化">Task 持久化</a></li><li style="--depth: 0"><a href="#controller-a2a-proxy">Controller A2A Proxy</a></li><li style="--depth: 1"><a href="#动态注册">动态注册</a></li><li style="--depth: 1"><a href="#passthroughmanager">PassthroughManager</a></li><li style="--depth: 0"><a href="#ui-聊天为什么使用另一条链路">UI 聊天为什么使用另一条链路</a></li><li style="--depth: 0"><a href="#认证和权限边界">认证和权限边界</a></li><li style="--depth: 1"><a href="#controller-路由上的认证">Controller 路由上的认证</a></li><li style="--depth: 1"><a href="#默认父子调用的实际边界">默认父子调用的实际边界</a></li><li style="--depth: 0"><a href="#可观测性">可观测性</a></li><li style="--depth: 0"><a href="#当前实现中需要重点注意的行为">当前实现中需要重点注意的行为</a></li><li style="--depth: 1"><a href="#子-agent-context-是-remote-tool-实例级">子 Agent context 是 remote tool 实例级</a></li><li style="--depth: 1"><a href="#remote-agent-错误被包装成-tool-result">Remote Agent 错误被包装成 Tool Result</a></li><li style="--depth: 1"><a href="#空-request-存在默认请求文本">空 request 存在默认请求文本</a></li><li style="--depth: 1"><a href="#task-状态处理比较宽松">Task 状态处理比较宽松</a></li><li style="--depth: 1"><a href="#两套-a2a-sdk-需要持续做兼容测试">两套 A2A SDK 需要持续做兼容测试</a></li><li style="--depth: 0"><a href="#本地观察-a2a-请求">本地观察 A2A 请求</a></li><li style="--depth: 1"><a href="#读取-agent-card">读取 Agent Card</a></li><li style="--depth: 1"><a href="#手工发送非流式消息">手工发送非流式消息</a></li><li style="--depth: 1"><a href="#观察流式事件">观察流式事件</a></li><li style="--depth: 0"><a href="#排障顺序">排障顺序</a></li><li style="--depth: 1"><a href="#agent-根本没有成为-tool">Agent 根本没有成为 Tool</a></li><li style="--depth: 1"><a href="#能看到-tool但调用失败">能看到 Tool，但调用失败</a></li><li style="--depth: 1"><a href="#子-agent-执行了但父-agent-没拿到正确结果">子 Agent 执行了，但父 Agent 没拿到正确结果</a></li><li style="--depth: 1"><a href="#hitl-卡住">HITL 卡住</a></li><li style="--depth: 0"><a href="#如何阅读源码">如何阅读源码</a></li><li style="--depth: 0"><a href="#面试式总结">面试式总结</a></li><li style="--depth: 1"><a href="#这个项目的-a2a-是怎么实现的">这个项目的 A2A 是怎么实现的？</a></li><li style="--depth: 1"><a href="#a2a-和-mcp-有什么区别">A2A 和 MCP 有什么区别？</a></li><li style="--depth: 1"><a href="#为什么需要-task而不是只返回-message">为什么需要 Task，而不是只返回 Message？</a></li><li style="--depth: 1"><a href="#controller-在-a2a-中负责什么">Controller 在 A2A 中负责什么？</a></li><li style="--depth: 1"><a href="#agent-之间是否共享上下文">Agent 之间是否共享上下文？</a></li><li style="--depth: 1"><a href="#当前实现最值得继续改进的地方是什么">当前实现最值得继续改进的地方是什么？</a></li><li style="--depth: 0"><a href="#验证记录">验证记录</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

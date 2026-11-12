@@ -1,0 +1,523 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lab1: MapReduce · Musuyin&#39; Home</title><meta name="description" content="先用顺序版本确认 Map、排序分组与 Reduce 的数据契约，再把任务分给 Worker。实验的关键是 Coordinator 如何跟踪状态、检测超时、重派任务，并避免过期结果污染最终输出。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/distribute-system/labs/mapreduce-lab/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Lab1: MapReduce · Musuyin' Home"><meta property="og:description" content="先用顺序版本确认 Map、排序分组与 Reduce 的数据契约，再把任务分给 Worker。实验的关键是 Coordinator 如何跟踪状态、检测超时、重派任务，并避免过期结果污染最终输出。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/distribute-system/labs/mapreduce-lab/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Lab1: MapReduce</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-05-12">2026-05-12</time></dd></div><div><dt>字数</dt><dd>1815</dd></div><div><dt>预计阅读</dt><dd>7 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">#分布式</a><a href="/tags/MIT6824/">#MIT6824</a><a href="/tags/MapReduce/">#MapReduce</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Lab1: MapReduce</h1><time datetime="2026-05-12">2026-05-12</time><p class="tags"><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">#分布式</a><a href="/tags/MIT6824/">#MIT6824</a><a href="/tags/MapReduce/">#MapReduce</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>先用顺序版本确认 Map、排序分组与 Reduce 的数据契约，再把任务分给 Worker。实验的关键是 Coordinator 如何跟踪状态、检测超时、重派任务，并避免过期结果污染最终输出。</p>
+<p><a id="reference-introduction"></a></p>
+<h2 id="introduction">Introduction</h2>
+<p>The code provides a sequential MapReduce implementation.</p>
+<p><a id="reference-code"></a></p>
+<h3 id="code">Code</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">package</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// simple sequential MapReduce.</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">//</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// go run mrsequential.go wc.so pg*.txt</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">//</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">fmt</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">6.5840/mr</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">plugin</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">os</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">log</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">io/ioutil</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#6F42C1;--shiki-dark:#B392F0">sort</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// for sorting by key.</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ByKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#6F42C1;--shiki-dark:#B392F0">mr</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">KeyValue</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// for sorting by key.</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#E36209;--shiki-dark:#FFAB70">a </span><span style="color:#6F42C1;--shiki-dark:#B392F0">ByKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">           { </span><span style="color:#D73A49;--shiki-dark:#F97583">return</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(a) }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#E36209;--shiki-dark:#FFAB70">a </span><span style="color:#6F42C1;--shiki-dark:#B392F0">ByKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Swap</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">i</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">j</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)      { a[i], a[j] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a[j], a[i] }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span><span style="color:#E36209;--shiki-dark:#FFAB70">a </span><span style="color:#6F42C1;--shiki-dark:#B392F0">ByKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#6F42C1;--shiki-dark:#B392F0">Less</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">i</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">j</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">bool</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> { </span><span style="color:#D73A49;--shiki-dark:#F97583">return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a[i].Key </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> a[j].Key }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(os.Args) </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fprintf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(os.Stderr, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Usage: mrsequential xxx.so inputfiles...</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       os.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Exit</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    mapf, reducef </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> loadPlugin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(os.Args[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">])</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // read each input file,    // pass it to Map,    // accumulate the intermediate Map output.    //    intermediate := []mr.KeyValue{}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _, filename </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#D73A49;--shiki-dark:#F97583"> range</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> os.Args[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:] {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       file, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> os.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Open</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(filename)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">       if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fatalf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"cannot open </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%v</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, filename)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       content, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ioutil.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ReadAll</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(file)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">       if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fatalf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"cannot read </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%v</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, filename)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       file.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Close</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       kva </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> mapf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(filename, </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(content))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       intermediate </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(intermediate, kva</span><span style="color:#D73A49;--shiki-dark:#F97583">...</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // a big difference from real MapReduce is that all the    // intermediate data is in one place, intermediate[],    // rather than being partitioned into NxM buckets.    //</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    sort.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Sort</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">ByKey</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(intermediate))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    oname </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "mr-out-0"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ofile, _ </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> os.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Create</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(oname)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    //</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // call Reduce on each distinct key in intermediate[],    // and print the result to mr-out-0.    //    i := 0</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(intermediate) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       j </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i </span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">       for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> j </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> len</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(intermediate) </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;&amp;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> intermediate[j].Key </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> intermediate[i].Key {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          j</span><span style="color:#D73A49;--shiki-dark:#F97583">++</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       values </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> []</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">       for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> k </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> i; k </span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> j; k</span><span style="color:#D73A49;--shiki-dark:#F97583">++</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          values </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> append</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(values, intermediate[k].Value)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       output </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> reducef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(intermediate[i].Key, values)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">       // this is the correct format for each line of Reduce output.</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fprintf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ofile, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%v</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> %v\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, intermediate[i].Key, output)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       i </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> j</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ofile.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Close</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// load the application Map and Reduce functions</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// from a plugin file, e.g. ../mrapps/wc.so</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> loadPlugin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">filename</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) (</span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) []</span><span style="color:#6F42C1;--shiki-dark:#B392F0">mr</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">KeyValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, []</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    p, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> plugin.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Open</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(filename)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fatalf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"cannot load plugin </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%v</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, filename)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    xmapf, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Lookup</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Map"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fatalf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"cannot find Map in </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%v</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, filename)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    mapf </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> xmapf.(</span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) []</span><span style="color:#6F42C1;--shiki-dark:#B392F0">mr</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">KeyValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    xreducef, err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> p.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Lookup</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Reduce"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">       log.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Fatalf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"cannot find Reduce in </span><span style="color:#005CC5;--shiki-dark:#79B8FF">%v</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, filename)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    reducef </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> xreducef.(</span><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, []</span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> mapf, reducef</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-phase"></a></p>
+<h3 id="phase">Phase</h3>
+<ol>
+<li><strong>Load plugin</strong>: initialize <code>Map</code> and <code>Reduce</code> functions from a <code>.so</code> plugin file.</li>
+<li><strong>Map phase</strong>: read each input file, pass content to <code>Map</code>, collect all intermediate <code>KeyValue</code> pairs.</li>
+<li><strong>Sort</strong>: sort all intermediate pairs by key.</li>
+<li><strong>Reduce phase</strong>: for each distinct key, call <code>Reduce</code> on all its values, write result to output file.</li>
+</ol>
+<p>In the sequential version, <strong>all intermediate data is gathered in one place</strong> — no need to route keys to specific workers.</p>
+<p><a id="reference-distributed-mapreduce"></a></p>
+<h2 id="distributed-mapreduce">Distributed MapReduce</h2>
+<p><a id="reference-job"></a></p>
+<h3 id="job">Job</h3>
+<blockquote>
+<p>Your job is to implement a distributed MapReduce, consisting of two programs, the coordinator and the worker. There will be just one coordinator process, and one or more worker processes executing in parallel. In a real system the workers would run on a bunch of different machines, but for this lab you’ll run them all on a single machine. The workers will talk to the coordinator via RPC. Each worker process will, in a loop, ask the coordinator for a task, read the task’s input from one or more files, execute the task, write the task’s output to one or more files, and again ask the coordinator for a new task. The coordinator should notice if a worker hasn’t completed its task in a reasonable amount of time (for this lab, use ten seconds), and give the same task to a different worker.</p>
+<p>We have given you a little code to start you off. The “main” routines for the coordinator and worker are in <code>main/mrcoordinator.go</code> and <code>main/mrworker.go</code>; don’t change these files. You should put your implementation in <code>mr/coordinator.go</code>, <code>mr/worker.go</code>, and <code>mr/rpc.go</code>.</p>
+</blockquote>
+<p><a id="reference-details"></a></p>
+<h3 id="details">Details</h3>
+<p><a id="reference-intermediate-file-file-routing"></a></p>
+<h4 id="intermediate-file-file-routing">Intermediate File File Routing</h4>
+<p>In the distributed version, <strong>multiple Reduce workers</strong> run in parallel, and <strong>the same key must always go to the same Reduce worker</strong>.</p>
+<p>This is achieved with the hash function in <code>worker.go</code>:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// use ihash(key) % NReduce to choose the reduce task number</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">func</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ihash</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#E36209;--shiki-dark:#FFAB70">key</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    h </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> fnv.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">New32a</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    h.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Write</span><span style="color:#24292E;--shiki-dark:#E1E4E8">([]</span><span style="color:#D73A49;--shiki-dark:#F97583">byte</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(key))</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#D73A49;--shiki-dark:#F97583"> int</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(h.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Sum32</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() </span><span style="color:#D73A49;--shiki-dark:#F97583">&amp;</span><span style="color:#D73A49;--shiki-dark:#F97583"> 0x</span><span style="color:#005CC5;--shiki-dark:#79B8FF">7fffffff</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>Map workers do <strong>not</strong> send intermediate data to the Coordinator.</li>
+<li>Map workers write intermediate data <strong>directly to local files</strong>, partitioned by <code>ihash(key) % NReduce</code>.</li>
+</ul>
+<p><a id="reference-intermediate-file-name-convention"></a></p>
+<h4 id="intermediate-file-name-convention">Intermediate File Name Convention</h4>
+<p>Files are named <code>mr-X-Y</code> where:</p>
+<ul>
+<li><code>X</code> = Map task number</li>
+<li><code>Y</code> = Reduce task number (= <code>ihash(key) % NReduce</code>)</li>
+</ul>
+<p><a id="reference-intermediate-flie-count"></a></p>
+<h4 id="intermediate-flie-count">Intermediate Flie Count</h4>
+<p>With <strong>M Map tasks</strong> and <strong>N Reduce tasks</strong>:</p>
+<ul>
+<li>Each Map worker writes <strong>N</strong> intermediate files (one per Reduce bucket).</li>
+<li>Total intermediate files = <strong>M × N</strong>.</li>
+</ul>
+<p><a id="reference-files-to-implement"></a></p>
+<h3 id="files-to-implement">Files to Implement</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What to implement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mr/rpc.go</code></td>
+<td>RPC message structs (task request/reply, etc.)</td>
+</tr>
+<tr>
+<td><code>mr/coordinator.go</code></td>
+<td>Task distribution, state tracking, crash recovery</td>
+</tr>
+<tr>
+<td><code>mr/worker.go</code></td>
+<td>Request tasks from Coordinator, run Map/Reduce, write output</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Coordinator</strong></td>
+<td>Manages all tasks in a job. Tracks task state, hands out tasks to workers.</td>
+</tr>
+<tr>
+<td><strong>Worker</strong></td>
+<td>Executes Map or Reduce tasks assigned by the Coordinator.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Communication:</strong> Via Unix domain socket (RPC over HTTP), not TCP.</p>
+<p><a id="reference-rpc"></a></p>
+<h3 id="rpc">RPC</h3>
+<p><a id="reference-constants"></a></p>
+<h4 id="constants">Constants</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    StatusOK</span><span style="color:#D73A49;--shiki-dark:#F97583">   =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // got a task, proceed</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    StatusWait</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // no task available yet, retry later</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    StatusDone</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // all done, worker should exit</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    TaskMap</span><span style="color:#D73A49;--shiki-dark:#F97583">    =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    TaskReduce</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p><a id="reference-rpc-1-ask-for-task"></a></p>
+<h4 id="rpc-1-ask-for-task">RPC 1: Ask for Task</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> AskArgs</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{}  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// worker has nothing to send</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> AskReply</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Status   </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // see status constants above</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Type     </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // TaskMap or TaskReduce</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Index    </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // task number (used in filename: mr-X-Y)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Filename </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // input file, only meaningful for Map tasks</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    NReduce  </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // always included, needed by Map worker for ihash()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>Worker logic after receiving reply:</strong></p>
+<ol>
+<li>Check <code>Status</code> first</li>
+<li>If <code>StatusOK</code> → read <code>Type</code>, <code>Index</code>, <code>Filename</code> and execute task</li>
+<li>If <code>StatusWait</code> → sleep briefly and retry</li>
+<li>If <code>StatusDone</code> → exit</li>
+</ol>
+<p><a id="reference-rpc-2-report-completion"></a></p>
+<h4 id="rpc-2-report-completion">RPC 2: Report Completion</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> FinishArgs</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Type  </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // TaskMap or TaskReduce</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Index </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#6A737D;--shiki-dark:#6A737D">  // which task finished</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> FinishReply</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{}  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// no response needed</span></span></code></pre>
+<p><a id="reference-key-design-decisions"></a></p>
+<h4 id="key-design-decisions">Key Design Decisions</h4>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AskArgs</code> is empty</td>
+<td>Worker has nothing to identify itself; Coordinator tracks timing internally</td>
+</tr>
+<tr>
+<td><code>NReduce</code> always included</td>
+<td>Simpler than conditionally setting it only for Map tasks</td>
+</tr>
+<tr>
+<td><code>FinishReply</code> is empty</td>
+<td>If the RPC succeeds, the Coordinator received it</td>
+</tr>
+<tr>
+<td><code>Filename</code> left empty for Reduce</td>
+<td>Simpler than using <code>*string</code>; worker ignores it when <code>Type == TaskReduce</code></td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-coordinator"></a></p>
+<h3 id="coordinator">Coordinator</h3>
+<p><a id="reference-coordinators-role"></a></p>
+<h4 id="coordinators-role">Coordinator’s Role</h4>
+<p>The Coordinator is a passive server。</p>
+<ul>
+<li>It never contacts workers.</li>
+<li>Workers drive all progress by calling RPCs on the Coordinator.</li>
+<li>The Coordinator only maintains state and responds to requests.</li>
+</ul>
+<p><a id="reference-task-state-machine"></a></p>
+<h4 id="task-state-machine">Task State Machine</h4>
+<pre class="mermaid">graph LR
+	A[TaskUndo]--&gt;B[TaskProcessing]
+	B[TaskProcessing]--&gt;C[TaskDone]
+	B[TaskProcessing]--&gt;|timeout| A[TaskUndo]</pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    TaskUndo</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> iota</span><span style="color:#6A737D;--shiki-dark:#6A737D">   // not yet assigned</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    TaskProcessing</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // assigned to a worker</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    TaskDone</span><span style="color:#6A737D;--shiki-dark:#6A737D">          // completed</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">const</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    TaskMap</span><span style="color:#D73A49;--shiki-dark:#F97583">    =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 0</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    TaskReduce</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p><a id="reference-data-structure"></a></p>
+<h4 id="data-structure">Data Structure</h4>
+<p><a id="reference-task-struct"></a></p>
+<h5 id="task-struct">Task Struct</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Task</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Index     </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Filename  </span><span style="color:#D73A49;--shiki-dark:#F97583">string</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // only used by Map tasks</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Status    </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    StartTime </span><span style="color:#6F42C1;--shiki-dark:#B392F0">time</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Time</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>A single <code>Task</code> type is shared by both Map and Reduce — <code>Filename</code> is left empty for Reduce tasks.</p>
+<p><a id="reference-coordinator-struct"></a></p>
+<h5 id="coordinator-struct">Coordinator Struct</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">type</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> Coordinator</span><span style="color:#D73A49;--shiki-dark:#F97583"> struct</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    mu          </span><span style="color:#6F42C1;--shiki-dark:#B392F0">sync</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Mutex</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    mapTasks    []</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Task</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    reduceTasks []</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Task</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    nReduce     </span><span style="color:#D73A49;--shiki-dark:#F97583">int</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><strong>No cached flags or counters</strong> — all phase state is derived by scanning the task arrays when needed.</p>
+<p><a id="reference-rpc-handlers"></a></p>
+<h4 id="rpc-handlers">RPC Handlers</h4>
+<p><a id="reference-asktask"></a></p>
+<h5 id="asktask">AskTask</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Lock</span></span>
+<span class="line"><span>  1. Scan mapTasks for TaskUndo → assign it, spawn timeout goroutine, return StatusOK</span></span>
+<span class="line"><span>  2. Count TaskDone map tasks</span></span>
+<span class="line"><span>     - If count &lt; total → some maps still running → return StatusWait</span></span>
+<span class="line"><span>  3. All maps done → scan reduceTasks for TaskUndo → assign it, spawn timeout goroutine, return StatusOK</span></span>
+<span class="line"><span>  4. All reduce tasks assigned or done → return StatusWait</span></span>
+<span class="line"><span>Unlock (via defer)</span></span></code></pre>
+<p>Key rules:</p>
+<ul>
+<li>Lock is held only briefly (no sleeping inside lock)</li>
+<li>Goroutine is spawned <strong>after</strong> state update, <strong>outside</strong> the lock</li>
+<li><code>reply</code> fields are set directly (<code>reply.Status = ...</code>), never <code>reply = &amp;AskReply{...}</code></li>
+</ul>
+<p><a id="reference-timeout-goroutine-spawned-per-assigned-task"></a></p>
+<h5 id="timeout-goroutine-spawned-per-assigned-task">Timeout Goroutine (spawned per assigned task)</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>sleep 10 seconds</span></span>
+<span class="line"><span>Lock</span></span>
+<span class="line"><span>  if task.Status != TaskDone → task.Status = TaskUndo</span></span>
+<span class="line"><span>Unlock</span></span></code></pre>
+<p>The task pointer (<code>&amp;c.mapTasks[i]</code>) is passed into the goroutine so it modifies the original, not a copy.</p>
+<p><a id="reference-finishtask"></a></p>
+<h5 id="finishtask">FinishTask</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Lock</span></span>
+<span class="line"><span>  if task.Status == TaskProcessing → task.Status = TaskDone</span></span>
+<span class="line"><span>Unlock</span></span></code></pre>
+<p>The <code>TaskProcessing</code> check prevents a stale/crashed worker from incorrectly marking a re-assigned task as done.</p>
+<p><a id="reference-done"></a></p>
+<h5 id="done">Done</h5>
+<p>Scans <code>reduceTasks</code> and returns <code>true</code> only when all are <code>TaskDone</code>. Called periodically by <code>mrcoordinator.go</code> to decide when to exit.</p>
+<p><a id="reference-key-design-decisions-1"></a></p>
+<h4 id="key-design-decisions-1">Key Design Decisions</h4>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One <code>sync.Mutex</code> on Coordinator</td>
+<td>Protects all shared state; simpler than per-task locks</td>
+</tr>
+<tr>
+<td>No <code>defer</code> + manual unlock mix</td>
+<td>Would cause double-unlock panic; use <code>defer</code> only</td>
+</tr>
+<tr>
+<td>Recompute phase state each time</td>
+<td>Avoids cached flags going out of sync with task array</td>
+</tr>
+<tr>
+<td>Goroutine spawned outside lock</td>
+<td>Goroutine re-acquires lock itself; lock is never held during sleep</td>
+</tr>
+<tr>
+<td><code>FinishTask</code> checks <code>TaskProcessing</code></td>
+<td>Prevents stale worker reports from corrupting re-assigned task state</td>
+</tr>
+<tr>
+<td><code>reply</code> fields set directly</td>
+<td>RPC framework holds original pointer; replacing it has no effect</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-common-pitfalls"></a></p>
+<h4 id="common-pitfalls">Common Pitfalls</h4>
+<ul>
+<li><strong><code>for _, task := range slice</code></strong> gives a copy — use index (<code>slice[i]</code>) to modify in place</li>
+<li><strong>Spawning goroutine inside lock</strong> — goroutine tries to re-acquire same lock → deadlock</li>
+<li><strong><code>reply = &amp;AskReply{}</code></strong> — replaces local pointer only, RPC caller sees no change</li>
+<li><strong>No status set at end of AskTask</strong> — default <code>Status=0</code> equals <code>StatusOK</code>, confusing the worker</li>
+</ul>
+<p><a id="reference-worker"></a></p>
+<h3 id="worker">Worker</h3>
+<p><a id="reference-workers-role"></a></p>
+<h4 id="workers-role">Worker’s Role</h4>
+<p>The Worker is stateless.</p>
+<ul>
+<li>It doesn’t know in advance whether it will run Map or Reduce tasks.</li>
+<li>It drives all progress by repeatedly asking the Coordinator for work, executing whatever task it receives, then reporting completion.</li>
+</ul>
+<p><a id="reference-main-loop"></a></p>
+<h4 id="main-loop">Main Loop</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>loop:</span></span>
+<span class="line"><span>    call AskTask RPC</span></span>
+<span class="line"><span>    if reply == nil    → Coordinator is gone, exit</span></span>
+<span class="line"><span>    if StatusWait      → sleep 1s, retry</span></span>
+<span class="line"><span>    if StatusDone      → exit</span></span>
+<span class="line"><span>    if StatusOK:</span></span>
+<span class="line"><span>        switch Type:</span></span>
+<span class="line"><span>            TaskMap    → dealMap()</span></span>
+<span class="line"><span>            TaskReduce → dealReduce()</span></span>
+<span class="line"><span>        call FinishTask RPC</span></span></code></pre>
+<p>The same worker process can execute both Map and Reduce tasks across its lifetime.</p>
+<p><a id="reference-map-task-dealmap"></a></p>
+<h4 id="map-task-dealmap">Map Task (<code>dealMap</code>)</h4>
+<p><a id="reference-steps"></a></p>
+<h5 id="steps">Steps</h5>
+<ol>
+<li>Read input file content from disk</li>
+<li>Call <code>mapf(filename, content)</code> to get <code>[]KeyValue</code></li>
+<li>Partition output into <code>NReduce</code> buckets using <code>ihash(key) % NReduce</code></li>
+<li>Write each bucket to an intermediate file atomically</li>
+</ol>
+<p><a id="reference-intermediate-file-naming"></a></p>
+<h5 id="intermediate-file-naming">Intermediate File Naming</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>mr-X-Y</span></span>
+<span class="line"><span>  X = Map task index</span></span>
+<span class="line"><span>  Y = ihash(key) % NReduce  (which Reduce task this key belongs to)</span></span></code></pre>
+<p><a id="reference-atomic-write-pattern"></a></p>
+<h5 id="atomic-write-pattern">Atomic Write Pattern</h5>
+<p>Write to a temp file first, then rename — prevents corrupt partial files if the worker crashes mid-write:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ofile, _ </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> os.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">CreateTemp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Sprintf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"mr-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF">-*"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, mapIndex, bucket))</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// ... write data ...</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ofile.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Close</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">os.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Rename</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ofile.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(), fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Sprintf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"mr-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF">-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, mapIndex, bucket))</span></span></code></pre>
+<p><code>os.Rename</code> is atomic on Unix — readers always see either the complete old file or the complete new file.</p>
+<p><a id="reference-why-atomic-writes-are-safe-with-duplicate-tasks"></a></p>
+<h5 id="why-atomic-writes-are-safe-with-duplicate-tasks">Why atomic writes are safe with duplicate tasks</h5>
+<p>If two workers are assigned the same Map task (one timed out), both produce identical output (deterministic <code>mapf</code>). The second rename simply overwrites the first — no corruption.</p>
+<p><a id="reference-intermediate-file-format"></a></p>
+<h5 id="intermediate-file-format">Intermediate File Format</h5>
+<p>JSON-encoded <code>[]KeyValue</code> per file. JSON handles keys/values with any content safely (no ambiguity from spaces).</p>
+<p><a id="reference-reduce-task-dealreduce"></a></p>
+<h4 id="reduce-task-dealreduce">Reduce Task (<code>dealReduce</code>)</h4>
+<p><a id="reference-steps-1"></a></p>
+<h5 id="steps-1">Steps</h5>
+<ol>
+<li>Find all intermediate files for this Reduce index using Glob</li>
+<li>Decode each file into <code>[]KeyValue</code> and merge into one slice</li>
+<li>Sort by key</li>
+<li>Group consecutive equal keys, call <code>reducef(key, values)</code></li>
+<li>Write output atomically to <code>mr-out-Y</code></li>
+</ol>
+<p><a id="reference-finding-input-files"></a></p>
+<h5 id="finding-input-files">Finding Input Files</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">filepath.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Glob</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(fmt.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Sprintf</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"mr-[0-9]*-</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%d</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, reduceIndex))</span></span></code></pre>
+<p><strong>Important:</strong> The pattern must use <code>[0-9]*</code> (not <code>*</code>) for the Map index part. A plain <code>*</code> would also match files like <code>mr-worker-jobcount-12345-0</code> written by some test plugins into the same directory, causing JSON decode failures.</p>
+<p><a id="reference-output-file"></a></p>
+<h5 id="output-file">Output File</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>mr-out-Y   (Y = Reduce task index)</span></span></code></pre>
+<p><a id="reference-key-design-decisions-2"></a></p>
+<h4 id="key-design-decisions-2">Key Design Decisions</h4>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Worker is stateless</td>
+<td>Task type decided per-iteration by Coordinator reply</td>
+</tr>
+<tr>
+<td><code>nil</code> reply → exit</td>
+<td>In this lab, dial failure means Coordinator has exited</td>
+</tr>
+<tr>
+<td>Buckets in memory before writing</td>
+<td>Avoids opening/closing NReduce files repeatedly per key</td>
+</tr>
+<tr>
+<td>JSON encoding for intermediate files</td>
+<td>Handles any key/value content; no ambiguity from spaces</td>
+</tr>
+<tr>
+<td><code>os.CreateTemp</code> for temp filenames</td>
+<td>Guarantees unique names; avoids collision between concurrent workers</td>
+</tr>
+<tr>
+<td>Glob pattern <code>mr-[0-9]*-%d</code></td>
+<td>Prevents matching non-intermediate files written by test plugins</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-common-pitfalls-1"></a></p>
+<h4 id="common-pitfalls-1">Common Pitfalls</h4>
+<ul>
+<li><strong>Glob pattern too broad (<code>mr-*-%d</code>)</strong> — accidentally matches plugin-created files, causing JSON decode failures</li>
+<li><strong>Writing directly to final filename</strong> — crashed worker leaves corrupt partial file; use temp + rename</li>
+<li><strong>Not closing file before rename</strong> — data may not be flushed to disk</li>
+<li><strong><code>log.Fatal</code> on dial error</strong> — kills worker when Coordinator exits normally; use <code>return false</code> instead</li>
+</ul>
+<p><a id="reference-run--test"></a></p>
+<h3 id="run--test">Run &amp; Test</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> src</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">make</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> mr</span></span></code></pre>
+<p><img alt="IMG-20260722152433530" loading="lazy" decoding="async" width="630" height="584" src="/_astro/IMG-20260722152433530.BaK5RsSq_ZX9g7h.webp"></p>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>检查 Map 输出分区、Reduce 输入集合与临时文件提交方式；让一个 Worker 超时后再返回，结果应如何处理？</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>衔接机制或实践：<a href="/notes/computer-science/cloud/distribute-system/mapreduce/">L02-MapReduce</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+<script src="/note-runtime/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:false,securityLevel:"strict",theme:"neutral"});document.querySelectorAll(".mermaid").forEach(node=>mermaid.run({nodes:[node]}).catch(()=>{}));</script>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#introduction">Introduction</a></li><li style="--depth: 1"><a href="#code">Code</a></li><li style="--depth: 1"><a href="#phase">Phase</a></li><li style="--depth: 0"><a href="#distributed-mapreduce">Distributed MapReduce</a></li><li style="--depth: 1"><a href="#job">Job</a></li><li style="--depth: 1"><a href="#details">Details</a></li><li style="--depth: 2"><a href="#intermediate-file-file-routing">Intermediate File File Routing</a></li><li style="--depth: 2"><a href="#intermediate-file-name-convention">Intermediate File Name Convention</a></li><li style="--depth: 2"><a href="#intermediate-flie-count">Intermediate Flie Count</a></li><li style="--depth: 1"><a href="#files-to-implement">Files to Implement</a></li><li style="--depth: 1"><a href="#rpc">RPC</a></li><li style="--depth: 2"><a href="#constants">Constants</a></li><li style="--depth: 2"><a href="#rpc-1-ask-for-task">RPC 1: Ask for Task</a></li><li style="--depth: 2"><a href="#rpc-2-report-completion">RPC 2: Report Completion</a></li><li style="--depth: 2"><a href="#key-design-decisions">Key Design Decisions</a></li><li style="--depth: 1"><a href="#coordinator">Coordinator</a></li><li style="--depth: 2"><a href="#coordinators-role">Coordinator’s Role</a></li><li style="--depth: 2"><a href="#task-state-machine">Task State Machine</a></li><li style="--depth: 2"><a href="#data-structure">Data Structure</a></li><li style="--depth: 3"><a href="#task-struct">Task Struct</a></li><li style="--depth: 3"><a href="#coordinator-struct">Coordinator Struct</a></li><li style="--depth: 2"><a href="#rpc-handlers">RPC Handlers</a></li><li style="--depth: 3"><a href="#asktask">AskTask</a></li><li style="--depth: 3"><a href="#timeout-goroutine-spawned-per-assigned-task">Timeout Goroutine (spawned per assigned task)</a></li><li style="--depth: 3"><a href="#finishtask">FinishTask</a></li><li style="--depth: 3"><a href="#done">Done</a></li><li style="--depth: 2"><a href="#key-design-decisions-1">Key Design Decisions</a></li><li style="--depth: 2"><a href="#common-pitfalls">Common Pitfalls</a></li><li style="--depth: 1"><a href="#worker">Worker</a></li><li style="--depth: 2"><a href="#workers-role">Worker’s Role</a></li><li style="--depth: 2"><a href="#main-loop">Main Loop</a></li><li style="--depth: 2"><a href="#map-task-dealmap">Map Task (dealMap)</a></li><li style="--depth: 3"><a href="#steps">Steps</a></li><li style="--depth: 3"><a href="#intermediate-file-naming">Intermediate File Naming</a></li><li style="--depth: 3"><a href="#atomic-write-pattern">Atomic Write Pattern</a></li><li style="--depth: 3"><a href="#why-atomic-writes-are-safe-with-duplicate-tasks">Why atomic writes are safe with duplicate tasks</a></li><li style="--depth: 3"><a href="#intermediate-file-format">Intermediate File Format</a></li><li style="--depth: 2"><a href="#reduce-task-dealreduce">Reduce Task (dealReduce)</a></li><li style="--depth: 3"><a href="#steps-1">Steps</a></li><li style="--depth: 3"><a href="#finding-input-files">Finding Input Files</a></li><li style="--depth: 3"><a href="#output-file">Output File</a></li><li style="--depth: 2"><a href="#key-design-decisions-2">Key Design Decisions</a></li><li style="--depth: 2"><a href="#common-pitfalls-1">Common Pitfalls</a></li><li style="--depth: 1"><a href="#run--test">Run &amp; Test</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

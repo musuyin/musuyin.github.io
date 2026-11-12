@@ -1,0 +1,294 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>并发互斥场景 · Musuyin&#39; Home</title><meta name="description" content="任务分发首先要解决“谁领取任务”，随后才是“领取者失败后如何恢复”。这两个阶段分别依赖原子分配与确认/重投机制；它们都不能单独保证业务副作用只执行一次。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/design-pattern/design/concurrent-task-claiming/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="并发互斥场景 · Musuyin' Home"><meta property="og:description" content="任务分发首先要解决“谁领取任务”，随后才是“领取者失败后如何恢复”。这两个阶段分别依赖原子分配与确认/重投机制；它们都不能单独保证业务副作用只执行一次。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/design-pattern/design/concurrent-task-claiming/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">并发互斥场景</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-26">2026-08-26</time></dd></div><div><dt>字数</dt><dd>2104</dd></div><div><dt>预计阅读</dt><dd>8 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%B9%B6%E5%8F%91/">#并发</a><a href="/tags/Redis/">#Redis</a><a href="/tags/MySQL/">#MySQL</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>并发互斥场景</h1><time datetime="2026-08-26">2026-08-26</time><p class="tags"><a href="/tags/%E5%B9%B6%E5%8F%91/">#并发</a><a href="/tags/Redis/">#Redis</a><a href="/tags/MySQL/">#MySQL</a></p></header><div class="prose"><p>任务分发首先要解决“谁领取任务”，随后才是“领取者失败后如何恢复”。这两个阶段分别依赖原子分配与确认/重投机制；它们都不能单独保证业务副作用只执行一次。</p>
+<p><a id="reference-核心问题"></a></p>
+<h2 id="核心问题">核心问题</h2>
+<p>多个实例并发消费同一个消息队列时，如何保证同一条消息不被多个实例同时处理？</p>
+<p>关键认知：<strong>锁的粒度应该下沉到元素级别，而不是锁住整个队列</strong>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>错误思路：实例 A 取出消息后持有全局锁，其他实例全部等待</span></span>
+<span class="line"><span>正确思路：原子抢占某一条消息 + 立即释放，各实例并行处理各自拿到的消息</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>队列: [msg1, msg2, msg3, msg4]</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>实例1 原子抢到 msg1 → 独立处理</span></span>
+<span class="line"><span>实例2 原子抢到 msg2 → 独立处理  ← 不需要等实例1完成</span></span>
+<span class="line"><span>实例3 原子抢到 msg3 → 独立处理</span></span></code></pre>
+<p>锁的作用范围只是<strong>确定谁负责这条消息</strong>，消息一旦分配出去就各自并行处理。</p>
+<p><a id="reference-方案一mysql-行锁"></a></p>
+<h2 id="方案一mysql-行锁">方案一：MySQL 行锁</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sql"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 原子地抢一条待处理任务</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- 自动提交事务中，UPDATE 完成并提交后释放锁；显式事务需等提交/回滚</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">UPDATE</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> tasks</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">SET</span><span style="color:#D73A49;--shiki-dark:#F97583"> status</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'running'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, worker_id </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ?, started_at </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> NOW</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">WHERE</span><span style="color:#D73A49;--shiki-dark:#F97583"> status</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'pending'</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">ORDER BY</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> created_at </span><span style="color:#D73A49;--shiki-dark:#F97583">ASC</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">LIMIT</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- affected_rows = 1：抢到了</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">-- affected_rows = 0：队列为空或被别人抢走，重试或等待</span></span></code></pre>
+<ul>
+<li>MySQL <code>UPDATE</code> 是原子语句；InnoDB 锁通常持有到事务提交或回滚，不能把语句结束等同于事务结束。见 <a href="https://dev.mysql.com/doc/refman/8.4/en/innodb-locking.html">InnoDB 锁文档</a></li>
+<li>并发执行相同 SQL 时，MySQL 保证最多只有一个实例能把同一行从 <code>pending</code> 改成 <code>running</code></li>
+<li><strong>不需要额外加互斥锁</strong>，<code>UPDATE</code> 的原子性本身就是并发保障</li>
+</ul>
+<p><strong>宕机恢复</strong>：定时扫描 <code>status = 'running'</code> 且 <code>started_at</code> 超时的行，重置为 <code>pending</code>。</p>
+<p><a id="reference-方案二redis-listlpop"></a></p>
+<h2 id="方案二redis-listlpop">方案二：Redis List（LPOP）</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>LPOP queue_name</span></span></code></pre>
+<p>Redis 单线程处理命令，<code>LPOP</code> 天然原子。同一时刻只有一个实例能弹出同一个元素，弹出后其他实例拿到的是下一个元素。<strong>不需要额外加锁</strong>。</p>
+<p>适合：对持久化要求不高、消息量大、需要极低延迟的场景。</p>
+<p><a id="reference-方案三redis-stream--consumer-group推荐"></a></p>
+<h2 id="方案三redis-stream--consumer-group推荐">方案三：Redis Stream + Consumer Group（推荐）</h2>
+<p><a id="reference-底层结构"></a></p>
+<h3 id="底层结构">底层结构</h3>
+<p>Stream 底层是 <strong>Radix Tree（基数树）</strong>，每个节点存储 <strong>listpack</strong>（紧凑型连续内存，类似压缩列表）。</p>
+<ul>
+<li>消息 ID 格式：<code>毫秒时间戳-序号</code>（如 <code>1690000000000-0</code>），天然有序</li>
+<li>Radix Tree 按 ID 范围查找效率高，适合“从某个 ID 之后读取”的场景</li>
+<li>Redis 单线程处理命令，所有 Stream 操作（XADD、XREAD、XACK）本身都是原子的</li>
+</ul>
+<p><a id="reference-两种消费模式"></a></p>
+<h3 id="两种消费模式">两种消费模式</h3>
+<p><strong>模式一：独立消费（广播）</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>XREAD COUNT 1 BLOCK 30000 STREAMS mystream $</span></span></code></pre>
+<p>每个实例维护自己的 lastID，彼此不共享进度。同一条消息会被所有实例读到，适合广播通知，不适合任务分发。</p>
+<p><strong>模式二：Consumer Group（任务分发）</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 创建消费组</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">XGROUP</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> CREATE</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> mystream</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> workers</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> $ </span><span style="color:#032F62;--shiki-dark:#9ECBFF">MKSTREAM</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 消费者拉取（&gt; 表示"给我一条没有被任何人取走的消息"）</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">XREADGROUP</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> GROUP</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> workers</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> instanceA</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> COUNT</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 1</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> BLOCK</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 30000</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> STREAMS</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> mystream</span><span style="color:#D73A49;--shiki-dark:#F97583"> &gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 处理完成后 ACK</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">XACK</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> mystream</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> workers</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">message-i</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p><a id="reference-pel-机制核心"></a></p>
+<h3 id="pel-机制核心">PEL 机制（核心）</h3>
+<p>Consumer Group 内部维护一个 <strong>PEL（Pending Entries List）</strong>，记录“已投递给某个 Consumer 但尚未 ACK 的消息”。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>消息 msg1 投递给 instanceA → 进入 PEL：{msg1 → instanceA}</span></span>
+<span class="line"><span>instanceB 执行 XREADGROUP  → 拿到 msg2，不会拿到 msg1</span></span>
+<span class="line"><span>instanceA 处理完，XACK     → msg1 从 PEL 移除</span></span></code></pre>
+<p>PEL 跟踪未确认消息的归属，正常读取新消息时不会重复分配。但认领超时消息不会停止旧消费者，业务处理仍可能重叠；必须设计幂等和超时边界。见 <a href="https://redis.io/docs/latest/commands/xclaim/">XCLAIM 文档</a></p>
+<p><a id="reference-宕机恢复xclaim"></a></p>
+<h3 id="宕机恢复xclaim">宕机恢复（XCLAIM）</h3>
+<p>Consumer 宕机后消息滞留在 PEL，永远不会 ACK。需要另一个实例定期认领：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 查看滞留超过 60s 的消息</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">XPENDING</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> mystream</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> workers</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> -</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> +</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 10</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 认领超时消息（60000ms = 60s）</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">XCLAIM</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> mystream</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> workers</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> instanceB</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 60000</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">message-i</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p>认领后重新处理，因此消费逻辑必须是<strong>幂等</strong>的（处理前检查数据库状态，避免重复执行）。</p>
+<p><a id="reference-三种方案对比"></a></p>
+<h2 id="三种方案对比">三种方案对比</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Redis Stream Consumer Group</th>
+<th>MySQL UPDATE</th>
+<th>Redis LPOP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>原子性来源</td>
+<td>PEL 机制 + 单线程</td>
+<td>UPDATE 行锁</td>
+<td>单线程</td>
+</tr>
+<tr>
+<td>需要额外加锁</td>
+<td>不需要</td>
+<td>不需要</td>
+<td>不需要</td>
+</tr>
+<tr>
+<td>宕机恢复</td>
+<td>XCLAIM 认领</td>
+<td>扫超时 running 行</td>
+<td>需自行实现</td>
+</tr>
+<tr>
+<td>消息持久化</td>
+<td>取决于 Redis 持久化配置</td>
+<td>取决于事务与落盘配置</td>
+<td>取决于 Redis 持久化配置</td>
+</tr>
+<tr>
+<td>消息回溯</td>
+<td>支持（按 ID 范围）</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>任务队列、需要 ACK</td>
+<td>任务队列、强一致</td>
+<td>简单队列、低延迟</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-常见误区"></a></p>
+<h2 id="常见误区">常见误区</h2>
+<p><strong>误区：取消息时需要先加 Redis 分布式锁，再取，再释放锁</strong></p>
+<p>这是把锁的粒度搞错了。正确理解：<code>LPOP</code> / <code>XREADGROUP</code> 的弹出/投递操作本身就是原子的，不需要在外面再套一层锁。加额外的锁反而会引入锁竞争和死锁风险。</p>
+<p><strong>需要加锁的场景</strong>：多个操作组合在一起需要原子性时（如“读-判断-写”三步合一），才需要 <code>SET NX</code> 分布式锁或 Lua 脚本。</p>
+<p><a id="reference-方案四rabbitmq"></a></p>
+<h2 id="方案四rabbitmq">方案四：RabbitMQ</h2>
+<p><a id="reference-并发分发机制"></a></p>
+<h3 id="并发分发机制">并发分发机制</h3>
+<p>RabbitMQ 的并发安全由 <strong>AMQP 协议的 Channel + 消息确认机制（ACK）</strong> 保证，不需要额外加锁。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Exchange → Queue → [msg1, msg2, msg3, msg4]</span></span>
+<span class="line"><span>                        ↓       ↓</span></span>
+<span class="line"><span>                    instanceA  instanceB   ← RabbitMQ 轮询/按权重分发，天然互斥</span></span></code></pre>
+<p>每条消息从 Queue 弹出并投递给某个 Consumer 后，在 Consumer 发送 ACK 之前，这条消息处于 <strong>Unacked</strong> 状态，不会再投递给其他 Consumer。</p>
+<p><a id="reference-核心概念"></a></p>
+<h3 id="核心概念">核心概念</h3>
+<p><strong>prefetch count（流量控制）</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">channel.basic_qos(</span><span style="color:#E36209;--shiki-dark:#FFAB70">prefetch_count</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 同一时刻每个 Consumer 最多持有 1 条未 ACK 的消息</span></span></code></pre>
+<p>不设置 prefetch 的话，RabbitMQ 会把大量消息预推给某个 Consumer，导致负载不均。设为 1 是任务队列场景的标准做法。</p>
+<p><strong>消息状态流转</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Ready → Unacked（投递给 Consumer）→ 已删除（ACK）</span></span>
+<span class="line"><span>                                  → 重新入队（NACK / 超时）</span></span></code></pre>
+<p><strong>宕机恢复</strong></p>
+<p>Consumer 断开连接后，该 Consumer 持有的所有 Unacked 消息自动重新入队（Ready），由其他 Consumer 重新消费。不需要像 Redis Stream 那样手动 XCLAIM。</p>
+<p><a id="reference-与-redis-stream-的关键差异"></a></p>
+<h3 id="与-redis-stream-的关键差异">与 Redis Stream 的关键差异</h3>
+<p>RabbitMQ 消息被 ACK 后<strong>从队列删除</strong>，无法回溯历史。Redis Stream 消息 ACK 后仍保留在 Stream 中，可以按 ID 范围重放。</p>
+<p><a id="reference-方案五kafka"></a></p>
+<h2 id="方案五kafka">方案五：Kafka</h2>
+<p><a id="reference-并发分发机制-1"></a></p>
+<h3 id="并发分发机制-1">并发分发机制</h3>
+<p>Kafka 的并发模型与前面几种<strong>本质不同</strong>：它不是“谁来抢”，而是<strong>静态分区分配</strong>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Topic: okx-signals</span></span>
+<span class="line"><span>  Partition 0: [msg1, msg4, msg7, ...]  → instanceA 负责</span></span>
+<span class="line"><span>  Partition 1: [msg2, msg5, msg8, ...]  → instanceB 负责</span></span>
+<span class="line"><span>  Partition 2: [msg3, msg6, msg9, ...]  → instanceC 负责</span></span></code></pre>
+<p>同一个 Consumer Group 内，<strong>一个 Partition 同一时刻只能被一个 Consumer 消费</strong>。这个约束由 Kafka Broker 的 Consumer Group 协调器（Group Coordinator）强制保证，不需要加锁。</p>
+<p><a id="reference-offset-机制"></a></p>
+<h3 id="offset-机制">Offset 机制</h3>
+<p>每个 Consumer 维护自己负责的 Partition 的消费进度（Offset），提交 Offset 相当于 ACK：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Partition 0 offset: 消费到第 100 条</span></span>
+<span class="line"><span>instanceA 提交 offset=101 → Broker 记录</span></span>
+<span class="line"><span>instanceA 重启后从已提交的 101 继续；业务处理与提交之间仍有失败窗口</span></span></code></pre>
+<p><strong>自动提交 vs 手动提交</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 自动提交：每隔一段时间自动提交当前 offset，可能丢消息（处理中宕机）</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">config.Consumer.Offsets.AutoCommit.Enable </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> true</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 手动提交：处理完成后再提交，保证 at-least-once</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">session.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">MarkMessage</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(msg, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">session.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Commit</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span></code></pre>
+<p><a id="reference-宕机恢复rebalance"></a></p>
+<h3 id="宕机恢复rebalance">宕机恢复（Rebalance）</h3>
+<p>某个 Consumer 宕机后，Kafka 触发 <strong>Rebalance</strong>，将该 Consumer 负责的 Partition 重新分配给组内其他 Consumer。重新分配后从上次提交的 Offset 继续消费。</p>
+<p>Rebalance 期间整个 Consumer Group <strong>暂停消费</strong>，这是 Kafka 的一个延迟抖动点。</p>
+<p><a id="reference-kafka-不适合任务队列场景的原因"></a></p>
+<h3 id="kafka-不适合任务队列场景的原因">Kafka 不适合“任务队列”场景的原因</h3>
+<p>Kafka 的分区数决定了最大并发度——3 个 Partition 最多 3 个 Consumer 并行，多余的 Consumer 闲置。且消息有序性只在单 Partition 内保证。</p>
+<p>Kafka 真正擅长的是<strong>高吞吐日志流</strong>（埋点、日志收集、事件溯源），不是细粒度任务分发。</p>
+<p><a id="reference-五种方案横向对比"></a></p>
+<h2 id="五种方案横向对比">五种方案横向对比</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>MySQL UPDATE</th>
+<th>Redis LPOP</th>
+<th>Redis Stream</th>
+<th>RabbitMQ</th>
+<th>Kafka</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>并发安全来源</td>
+<td>行锁</td>
+<td>单线程</td>
+<td>PEL + 单线程</td>
+<td>AMQP Unacked</td>
+<td>分区独占</td>
+</tr>
+<tr>
+<td>需要额外加锁</td>
+<td>不需要</td>
+<td>不需要</td>
+<td>不需要</td>
+<td>不需要</td>
+<td>不需要</td>
+</tr>
+<tr>
+<td>宕机恢复</td>
+<td>扫超时行</td>
+<td>需自行实现</td>
+<td>XCLAIM 认领</td>
+<td>自动重入队</td>
+<td>Rebalance + Offset</td>
+</tr>
+<tr>
+<td>消息持久化</td>
+<td>取决于事务与落盘配置</td>
+<td>可配置 RDB/AOF</td>
+<td>可配置 RDB/AOF</td>
+<td>可配置持久化</td>
+<td>按日志保留配置</td>
+</tr>
+<tr>
+<td>消息回溯</td>
+<td>支持</td>
+<td>不支持</td>
+<td>支持</td>
+<td>不支持（ACK后删除）</td>
+<td>支持（按Offset）</td>
+</tr>
+<tr>
+<td>消费模型</td>
+<td>抢占式</td>
+<td>抢占式</td>
+<td>抢占式（PEL）</td>
+<td>推送+ACK</td>
+<td>分区静态分配</td>
+</tr>
+<tr>
+<td>最大并发度</td>
+<td>不限</td>
+<td>不限</td>
+<td>不限</td>
+<td>不限</td>
+<td>受分区数限制</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>任务队列、强一致</td>
+<td>简单队列</td>
+<td>任务队列+回溯</td>
+<td>任务队列、RPC</td>
+<td>高吞吐日志流</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-延伸显式分布式锁的适用场景"></a></p>
+<h2 id="延伸显式分布式锁的适用场景">延伸：显式分布式锁的适用场景</h2>
+<p>Redis <code>SET NX</code>（Set if Not eXists）适合的是：<strong>不走消息队列，但多个实例可能同时触发同一个任务</strong>的场景。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 典型场景：定时任务，多个实例同时触发，只允许一个执行</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ok, _ </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> rdb.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">SetNX</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ctx, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"task:lock:hour:"</span><span style="color:#D73A49;--shiki-dark:#F97583">+</span><span style="color:#24292E;--shiki-dark:#E1E4E8">hourKey, instanceID, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">time.Minute).</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Result</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#D73A49;--shiki-dark:#F97583"> !</span><span style="color:#24292E;--shiki-dark:#E1E4E8">ok {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#6A737D;--shiki-dark:#6A737D"> // 其他实例已在执行，跳过</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 示例缺少安全解锁：须校验唯一持有者 token 后再原子删除</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">// 不能直接 DEL，过期后可能删除另一实例重新取得的锁</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">doTask</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span></code></pre>
+<p>与消息队列的区别：消息队列的“谁处理哪条消息”由队列本身决定；<code>SET NX</code> 锁只在有效租期内协调互斥；业务幂等仍需唯一键或状态机。安全解锁需原子比较唯一 token 后删除，见 <a href="https://redis.io/docs/latest/develop/clients/patterns/distributed-locks/">Redis 分布式锁</a>。</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>为什么原子领取不等于业务恰好执行一次？</li>
+<li>消费超时后重投，原消费者仍在运行时会发生什么？</li>
+<li>数据库事务提交、Redis ACK、Kafka offset 分别确认了什么？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#核心问题">核心问题</a></li><li style="--depth: 0"><a href="#方案一mysql-行锁">方案一：MySQL 行锁</a></li><li style="--depth: 0"><a href="#方案二redis-listlpop">方案二：Redis List（LPOP）</a></li><li style="--depth: 0"><a href="#方案三redis-stream--consumer-group推荐">方案三：Redis Stream + Consumer Group（推荐）</a></li><li style="--depth: 1"><a href="#底层结构">底层结构</a></li><li style="--depth: 1"><a href="#两种消费模式">两种消费模式</a></li><li style="--depth: 1"><a href="#pel-机制核心">PEL 机制（核心）</a></li><li style="--depth: 1"><a href="#宕机恢复xclaim">宕机恢复（XCLAIM）</a></li><li style="--depth: 0"><a href="#三种方案对比">三种方案对比</a></li><li style="--depth: 0"><a href="#常见误区">常见误区</a></li><li style="--depth: 0"><a href="#方案四rabbitmq">方案四：RabbitMQ</a></li><li style="--depth: 1"><a href="#并发分发机制">并发分发机制</a></li><li style="--depth: 1"><a href="#核心概念">核心概念</a></li><li style="--depth: 1"><a href="#与-redis-stream-的关键差异">与 Redis Stream 的关键差异</a></li><li style="--depth: 0"><a href="#方案五kafka">方案五：Kafka</a></li><li style="--depth: 1"><a href="#并发分发机制-1">并发分发机制</a></li><li style="--depth: 1"><a href="#offset-机制">Offset 机制</a></li><li style="--depth: 1"><a href="#宕机恢复rebalance">宕机恢复（Rebalance）</a></li><li style="--depth: 1"><a href="#kafka-不适合任务队列场景的原因">Kafka 不适合“任务队列”场景的原因</a></li><li style="--depth: 0"><a href="#五种方案横向对比">五种方案横向对比</a></li><li style="--depth: 0"><a href="#延伸显式分布式锁的适用场景">延伸：显式分布式锁的适用场景</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

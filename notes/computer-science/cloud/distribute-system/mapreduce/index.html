@@ -1,0 +1,477 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MapReduce · Musuyin&#39; Home</title><meta name="description" content="MapReduce 将计算分为 Map 生成中间键值、按键分组与 Reduce 聚合。框架负责任务分配、数据路由与失败重试，用户函数则需符合输入输出契约。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/distribute-system/mapreduce/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="MapReduce · Musuyin' Home"><meta property="og:description" content="MapReduce 将计算分为 Map 生成中间键值、按键分组与 Reduce 聚合。框架负责任务分配、数据路由与失败重试，用户函数则需符合输入输出契约。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/distribute-system/mapreduce/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">MapReduce</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-05-06">2026-05-06</time></dd></div><div><dt>字数</dt><dd>4448</dd></div><div><dt>预计阅读</dt><dd>15 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">#分布式</a><a href="/tags/MIT6824/">#MIT6824</a><a href="/tags/MapReduce/">#MapReduce</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>MapReduce</h1><time datetime="2026-05-06">2026-05-06</time><p class="tags"><a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">#分布式</a><a href="/tags/MIT6824/">#MIT6824</a><a href="/tags/MapReduce/">#MapReduce</a></p></header><div class="prose"><link rel="stylesheet" href="/note-runtime/katex/katex.min.css">
+<p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>MapReduce 将计算分为 Map 生成中间键值、按键分组与 Reduce 聚合。框架负责任务分配、数据路由与失败重试，用户函数则需符合输入输出契约。</p>
+<p><a id="reference-introduction"></a></p>
+<h2 id="introduction">Introduction</h2>
+<p><em>MapReduce</em> is a programming model for processing and generating large data sets. The computations can be distributed across multiple machines.</p>
+<blockquote>
+<p><strong>Analogy</strong>: Think of a library doing a word count across thousands of books. MapReduce is like hiring many workers (Map) to each count words in one book, then having a smaller team (Reduce) tally the totals across all books — automatically parallelized and fault-tolerant.</p>
+</blockquote>
+<p><a id="reference-programming-model"></a></p>
+<h2 id="programming-model">Programming Model</h2>
+<p>Two computations:</p>
+<ul>
+<li>Takes a set of <strong>input</strong> key/value pairs</li>
+<li>Produces a set of <strong>output</strong> key/value pairs</li>
+</ul>
+<p>The MapReduce library expresses the computations as <em>Map</em> and <em>Reduce</em>:</p>
+<ul>
+<li><em>Map</em>: takes an input pair and produces <strong>a set of <em>intermediate</em> key/value pairs</strong></li>
+<li>MapReduce groups all intermediate values together with the same intermediate key and passes them to the <em>Reduce</em> function</li>
+<li><em>Reduce</em>: accepts an intermediate key and a set of values for that key. Merges together the values to <strong>form a possibly smaller set of values</strong></li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>map(k1, v1)        -&gt; list(k2, v2)</span></span>
+<span class="line"><span>reduce(k2, list(v2)) -&gt; list(v2)</span></span></code></pre>
+<p><a id="reference-examples"></a></p>
+<h3 id="examples">Examples</h3>
+<table>
+<thead>
+<tr>
+<th>Application</th>
+<th>Map</th>
+<th>Reduce</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Count words</td>
+<td>Emits each word plus an associated count of occurrences</td>
+<td>Sums together all counts emitted for a particular word</td>
+</tr>
+<tr>
+<td>Distributed grep</td>
+<td>Emits a line if it matches a supplied pattern</td>
+<td>Copies the supplied intermediate data to the output</td>
+</tr>
+<tr>
+<td>Count of URL access frequency</td>
+<td>Processes logs of web page requests and outputs <code>&lt;URL, 1&gt;</code></td>
+<td>Adds together all values for the same URL and emits <code>&lt;URL, total count&gt;</code></td>
+</tr>
+<tr>
+<td>Reverse Web-Link graph</td>
+<td>Outputs <code>&lt;target, source&gt;</code> pairs for each link to a <code>target</code> URL found in a page named <code>source</code></td>
+<td>Concatenates the list of all source URLs associated with a given target URL and emits the pair <code>&lt;target, list(source)&gt;</code></td>
+</tr>
+<tr>
+<td>Distributed sort</td>
+<td>Extracts the key from each record, and emits a <code>&lt;key, record&gt;</code> pair</td>
+<td>Emits all pairs unchanged</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-implementation"></a></p>
+<h2 id="implementation">Implementation</h2>
+<p><a id="reference-execution"></a></p>
+<h3 id="execution">Execution</h3>
+<ul>
+<li><em>Map</em> invocations are distributed across multiple machines by automatically partitioning the input data into a set of <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> splits
+<ul>
+<li>The input splits can be processed in parallel by different machines</li>
+</ul>
+</li>
+<li><em>Reduce</em> invocations are distributed by partitioning the intermediate key space into <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> pieces using a partitioning function
+<ul>
+<li>e.g., <code>hash(key) % R</code></li>
+</ul>
+</li>
+</ul>
+<p><img alt="IMG-20260722152433425" loading="lazy" decoding="async" width="994" height="731" src="/_astro/IMG-20260722152433425.CK2LOFLW_1KTpUU.webp"></p>
+<p>The execution proceeds in 7 steps:</p>
+<ol>
+<li><strong>Split</strong>: Divide input files into <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> pieces (typically 16 MB to 64 MB per piece). Start up many copies of the program on a cluster of machines.</li>
+<li><strong>Assign</strong>: One copy becomes the <em>master</em>; the rest are <em>workers</em>. Master picks idle workers and assigns map or reduce tasks. (Total: <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> map tasks and <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> reduce tasks.)</li>
+<li><strong>Map</strong>: Each Map worker reads its input split, parses key/value pairs, passes them to the user Map function, and <strong>buffers the intermediate key/value pairs in memory</strong>.</li>
+<li><strong>Spill to disk</strong>: Buffered pairs are <strong>periodically written to local disk</strong>, <strong>partitioned into <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> regions</strong> by the partitioning function. The locations are <strong>reported back to the master</strong>, which forwards them to reduce workers.</li>
+<li><strong>Shuffle &amp; Sort</strong>: Each Reduce worker uses <strong>remote procedure calls (RPC)</strong> to fetch intermediate data from Map workers’ local disks. Once all data is fetched, it <strong>sorts by key</strong> so that the same key is grouped together.</li>
+<li><strong>Reduce</strong>: The Reduce worker iterates over the sorted data. For each unique key, it <strong>passes the key and its list of values to the Reduce function</strong>. Output is <strong>appended to a final output file</strong> for this partition.</li>
+<li><strong>Complete</strong>: When all tasks finish, the master <strong>wakes up the user program</strong>. The <code>MapReduce</code> call returns to user code.</li>
+</ol>
+<p>The output is available in <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> output files. These are often <strong>piped as input to another MapReduce call</strong> or another distributed application — no need to merge them into a single file.</p>
+<p><a id="reference-master-data-structures"></a></p>
+<h3 id="master-data-structures">Master Data Structures</h3>
+<p>The master stores two things for each map/reduce task:</p>
+<ul>
+<li><strong>State</strong>: idle, in-progress, or completed</li>
+<li><strong>Worker identity</strong>: which machine is running it (for non-idle tasks)</li>
+</ul>
+<p>The master is the <strong>conduit</strong> for propagating intermediate file locations from Map tasks to Reduce tasks:</p>
+<ul>
+<li>Stores the locations and sizes of the <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> intermediate file regions produced by each map task</li>
+<li>Receives location updates as map tasks complete</li>
+<li>Pushes this information incrementally to in-progress reduce workers</li>
+</ul>
+<p><a id="reference-fault-tolerance"></a></p>
+<h3 id="fault-tolerance">Fault Tolerance</h3>
+<p>MapReduce is resilient to large-scale worker failures.</p>
+<p><a id="reference-worker-failure"></a></p>
+<h4 id="worker-failure">Worker Failure</h4>
+<p>The master <strong>pings every worker periodically</strong>.</p>
+<ul>
+<li>If no response within a timeout, the master <strong>marks the worker as failed</strong></li>
+</ul>
+<p>Task re-execution rules:</p>
+<ul>
+<li><strong>Completed map tasks</strong> are re-executed — their output is on the <strong>failed machine’s local disk</strong>, now inaccessible</li>
+<li><strong>In-progress map or reduce tasks</strong> are re-executed — they never finished</li>
+<li><strong>Completed reduce tasks</strong> are NOT re-executed — their output is in the <strong>global file system</strong> (e.g., GFS)</li>
+</ul>
+<p>When a map task is re-executed (e.g., worker A fails, worker B re-runs it), all Reduce workers are notified. Any Reduce worker that hasn’t yet read from A will now read from B.</p>
+<p><a id="reference-master-failure"></a></p>
+<h4 id="master-failure">Master Failure</h4>
+<p>The master writes <strong>periodic checkpoints</strong> of its data structures. A new master can resume from the last checkpoint.</p>
+<p><strong>Current limitation</strong>: only one master exists. If it fails, the entire MapReduce computation is aborted. Clients must check for this condition and retry.</p>
+<p><a id="reference-semantics-in-the-presence-of-failures"></a></p>
+<h4 id="semantics-in-the-presence-of-failures">Semantics in the Presence of Failures</h4>
+<p>When Map and Reduce operators are <em>deterministic</em>, the distributed output is identical to a <strong>non-faulting sequential execution</strong>.</p>
+<p>This guarantee is achieved via <strong>atomic commits</strong>. Each in-progress task writes to <strong>private temporary files</strong>:</p>
+<ul>
+<li>A Map task produces <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> temporary files.
+<ul>
+<li>On completion, sends the <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> filenames to the master.</li>
+<li>If the master already received this message (duplicate), it <strong>ignores it</strong>.</li>
+<li>Otherwise, it records the filenames.</li>
+</ul>
+</li>
+<li>A Reduce task produces one temporary file.
+<ul>
+<li>On completion, <strong>atomically renames</strong> it to the final output file.</li>
+<li>If multiple executions race, the filesystem’s <strong>atomic rename</strong> ensures only one execution’s data survives.</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-locality"></a></p>
+<h3 id="locality">Locality</h3>
+<p>GFS stores each input data block with multiple replicas across the cluster. The master exploits this by <strong>scheduling each map task on a machine that already holds a replica of its input</strong>, so workers read from local disk rather than the network.</p>
+<blockquote>
+<p>This optimization reduces network bandwidth during the Map phase. However, the <strong>Reduce phase always requires remote reads</strong>, since intermediate data must be fetched from Map workers scattered across the cluster.</p>
+</blockquote>
+<p><a id="reference-task-granularity"></a></p>
+<h3 id="task-granularity">Task Granularity</h3>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> and <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> should be <strong>much larger than the number of worker machines</strong>:</p>
+<ul>
+<li>Improves <strong>dynamic load balancing</strong> — idle workers can quickly pick up remaining tasks</li>
+<li><strong>Speeds up recovery</strong> — a failed worker’s tasks are spread across many machines</li>
+</ul>
+<p>Practical bounds on <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> and <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span>:</p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scheduling</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>M</mi><mo>+</mo><mi>R</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(M + R)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mclose">)</span></span></span></span> decisions</td>
+</tr>
+<tr>
+<td>Master memory</td>
+<td><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>M</mi><mo>×</mo><mi>R</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(M \times R)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0278em;">O</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.109em;">M</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span><span class="mclose">)</span></span></span></span> state</td>
+</tr>
+</tbody>
+</table>
+<p>In practice:</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> is constrained by the user (determines the number of output files)</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> is chosen so each task processes 16 MB to 64 MB of input data</li>
+</ul>
+<p><a id="reference-backup-tasks"></a></p>
+<h3 id="backup-tasks">Backup Tasks</h3>
+<p>A <em>straggler</em> — a machine that takes unusually long to finish — can delay the entire job.</p>
+<blockquote>
+<p><strong>Why stragglers occur</strong>: a bad disk, CPU contention from other processes, or a machine stuck in error-recovery mode can all cause one worker to run 10× slower than its peers.</p>
+</blockquote>
+<p>When a MapReduce operation is <strong>close to completion</strong>, the master schedules <strong>backup executions</strong> of all remaining in-progress tasks. The task is marked complete when <strong>either</strong> the primary or backup execution finishes. This typically adds only a few percent to the total resource usage but can cut end-to-end latency significantly.</p>
+<p><a id="reference-refinements"></a></p>
+<h2 id="refinements">Refinements</h2>
+<p><a id="reference-partitioning-function"></a></p>
+<h3 id="partitioning-function">Partitioning Function</h3>
+<p>Users specify <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi></mrow><annotation encoding="application/x-tex">R</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.0077em;">R</span></span></span></span> (the number of reduce tasks). Intermediate data is partitioned across reduce tasks using a partitioning function on the key.</p>
+<ul>
+<li><strong>Default</strong>: <code>hash(key) mod R</code> — generally well-balanced</li>
+<li><strong>Custom</strong>: e.g., <code>hash(Hostname(urlkey)) mod R</code> — groups all URLs from the same host into one output file</li>
+</ul>
+<p><a id="reference-ordering-guarantees"></a></p>
+<h3 id="ordering-guarantees">Ordering Guarantees</h3>
+<p>Within a given partition, intermediate key/value pairs are processed in <strong>increasing key order</strong>, making it easy to generate a sorted output file per partition.</p>
+<p><a id="reference-combiner-function"></a></p>
+<h3 id="combiner-function">Combiner Function</h3>
+<p>An optional function that performs <strong>partial merging</strong> of intermediate data on the Map worker <strong>before</strong> sending it over the network. This reduces shuffle traffic.</p>
+<ul>
+<li>Typically uses the <strong>same code as the Reduce function</strong></li>
+<li><strong>Key difference</strong>: Combiner output goes to an <strong>intermediate file</strong> (forwarded to Reduce tasks); Reduce output goes to the <strong>final output file</strong></li>
+</ul>
+<blockquote>
+<p><strong>Example</strong>: In word counting, instead of shipping <code>&lt;the, 1&gt;</code> a hundred times, the Combiner locally sums them to <code>&lt;the, 100&gt;</code> — 100× less data over the network.</p>
+</blockquote>
+<p><a id="reference-input-and-output-types"></a></p>
+<h3 id="input-and-output-types">Input and Output Types</h3>
+<p>The library supports multiple input formats:</p>
+<ul>
+<li><strong>“text” mode</strong>: each line is a key/value pair (key = byte offset, value = line contents)</li>
+<li><strong>Custom types</strong>: implement a simple <em>reader</em> interface</li>
+<li>Output types are similarly extensible</li>
+</ul>
+<p><a id="reference-side-effects"></a></p>
+<h3 id="side-effects">Side-effects</h3>
+<p>Map/Reduce operators can produce <strong>auxiliary output files</strong> as additional side-effects.</p>
+<ul>
+<li>Writers must make side-effects <strong>atomic and idempotent</strong> — write to a temp file, then atomically rename it</li>
+<li><strong>No cross-file atomic two-phase commits</strong> — tasks producing multiple output files with cross-file consistency requirements must be deterministic</li>
+</ul>
+<p><a id="reference-skipping-bad-records"></a></p>
+<h3 id="skipping-bad-records">Skipping Bad Records</h3>
+<p>User code bugs can cause Map/Reduce to crash <strong>deterministically</strong> on certain records.</p>
+<ul>
+<li>Each worker installs a <strong>signal handler</strong> to catch segmentation faults and bus errors</li>
+<li>On crash, the worker sends the <strong>sequence number of the offending record</strong> to the master via UDP</li>
+<li>If the master sees <strong>more than one failure on the same record</strong>, it marks that record to be <strong>skipped</strong> on the next re-execution</li>
+</ul>
+<p><a id="reference-local-execution"></a></p>
+<h3 id="local-execution">Local Execution</h3>
+<p>A sequential local implementation runs all MapReduce work on a single machine.</p>
+<ul>
+<li>Facilitates debugging, profiling, and small-scale testing</li>
+<li>Compatible with standard debuggers (e.g., <code>gdb</code>)</li>
+</ul>
+<p><a id="reference-status-information"></a></p>
+<h3 id="status-information">Status Information</h3>
+<p>The master runs an internal <strong>HTTP server</strong> exporting status pages:</p>
+<ul>
+<li>Computation progress: tasks completed, bytes processed, processing rates</li>
+<li>Links to stderr and stdout files generated by each task</li>
+<li>Which workers have failed and which tasks they were processing</li>
+</ul>
+<p><a id="reference-counters"></a></p>
+<h3 id="counters">Counters</h3>
+<p>A facility for counting occurrences of various events across all workers.</p>
+<ul>
+<li>Counter values are <strong>piggybacked on heartbeat pings</strong> and aggregated by the master</li>
+<li>The master <strong>deduplicates</strong> counter updates to avoid double-counting from re-executed tasks</li>
+<li>Some counters are maintained automatically (e.g., number of input/output key/value pairs)</li>
+<li>Useful for <strong>sanity checks</strong> (e.g., verify that output pairs == input pairs for a bijective operation)</li>
+</ul>
+<p><a id="reference-lecture"></a></p>
+<h2 id="lecture">Lecture</h2>
+<p>Context: multi-hour computations on multi-terabyte data-sets</p>
+<ul>
+<li>only practical with 1000s of computers
+<ul>
+<li>e.g. build search index, or sort, or analyze structure of web</li>
+</ul>
+</li>
+</ul>
+<p>Goal: easy for non-specialist programmers</p>
+<ul>
+<li>programmer just defines <code>Map</code> and <code>Reduce</code> functions.
+<ul>
+<li>often simple sequential code</li>
+</ul>
+</li>
+<li>MR manages, and hides, all aspects of distribution.
+<ul>
+<li>MR is a framework / library</li>
+<li>application is just <code>Map()</code> / <code>Reduce()</code></li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-abstract-view-of-a-mapreduce-job"></a></p>
+<h3 id="abstract-view-of-a-mapreduce-job">Abstract View of A MapReduce Job</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Input1 -&gt; Map -&gt; a,1 b,1</span></span>
+<span class="line"><span>Input2 -&gt; Map -&gt; 	 b,1</span></span>
+<span class="line"><span>Input3 -&gt; Map -&gt; a,1 	c,1</span></span>
+<span class="line"><span>				 |   |  |</span></span>
+<span class="line"><span>				 |   |  | -&gt; Reduce -&gt; c,1</span></span>
+<span class="line"><span>				 |   |-----&gt; Reduce -&gt; b,2</span></span>
+<span class="line"><span>				 |---------&gt; Reduce -&gt; a,2</span></span></code></pre>
+<ol>
+<li>Input is (already) split into <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">M</span></span></span></span> pieces</li>
+<li>MR calls <code>Map()</code> for each input split, produces list of <code>k,v</code> pairs
+<ul>
+<li>intermediate data</li>
+<li>each <code>Map()</code> call is a task</li>
+</ul>
+</li>
+<li>When Maps are done,
+<ul>
+<li>MR gathers all intermediate <code>v</code>’s for each <code>k</code>,</li>
+<li>and passes each key + values to a <code>Reduce</code> call</li>
+</ul>
+</li>
+<li>Final output is set of <code>&lt;k,v&gt;</code> pairs from <code>Reduce()</code> s</li>
+</ol>
+<p><a id="reference-word-count"></a></p>
+<h4 id="word-count">Word Count</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Map(d) {</span></span>
+<span class="line"><span>	chop d into words</span></span>
+<span class="line"><span>	for each word w</span></span>
+<span class="line"><span>		emit(w, "1")</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Reduce(k, v[]) {</span></span>
+<span class="line"><span>	emit(len(v[]))</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p><a id="reference-scales"></a></p>
+<h3 id="scales">Scales</h3>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span> worker computers (might) get <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi></mrow><annotation encoding="application/x-tex">N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.109em;">N</span></span></span></span>x throughput.</p>
+<ul>
+<li><code>Maps()</code>s can run in parallel, since they don’t interact.</li>
+<li>Same for <code>Reduce()</code>s.</li>
+</ul>
+<p>Thus more computers -&gt; more throughput</p>
+<p><a id="reference-hide-complexity"></a></p>
+<h3 id="hide-complexity">Hide Complexity</h3>
+<ul>
+<li>Sending map+reduce code to servers</li>
+<li>Tracking which tasks have finished</li>
+<li>Shuffling intermediate data from Maps to Reduces</li>
+<li>Balancing load over servers</li>
+<li>Recovering from crashed servers</li>
+</ul>
+<p>To get these benefits, MapReduce restricts applications:</p>
+<ul>
+<li>Only one pattern (Map -&gt; shuffle -&gt; Reduce).</li>
+<li>No interaction or state (other than via intermediate output).</li>
+<li>Only batch: no real-time or streaming processing.</li>
+</ul>
+<p><a id="reference-details"></a></p>
+<h3 id="details">Details</h3>
+<p><a id="reference-gfs-google-file-system"></a></p>
+<h4 id="gfs-google-file-system">GFS (Google File System)</h4>
+<p>Input and output are stored on the GFS cluster file system</p>
+<ul>
+<li>MR needs huge parallel input and output throughput.</li>
+<li>GFS splits files over many servers, many disks, in 64 MB chunks</li>
+<li>Maps read in parallel</li>
+<li>Reduces write in parallel</li>
+<li>GFS replicates data on 2 or 3 servers, for fault tolerance</li>
+</ul>
+<p><a id="reference-output"></a></p>
+<h4 id="output">Output</h4>
+<ul>
+<li>MR writes Map() output to local disk</li>
+<li>MR splits into files by hash(key) mod R</li>
+<li>Each “hash bucket” contains multiple keys</li>
+<li>The map workers all hash the same way</li>
+</ul>
+<p><a id="reference-the-shuffle"></a></p>
+<h4 id="the-shuffle">The Shuffle</h4>
+<ul>
+<li>Each Reduce task processes one hash bucket</li>
+<li>MR fetches each Reduce tasks’ bucket from every Map worker</li>
+<li>Merge, sort by key, call <code>Reduce()</code> for each key</li>
+<li>Each Reduce task writes a separate output file on GFS</li>
+</ul>
+<p><a id="reference-coordinator-master"></a></p>
+<h3 id="coordinator-master">Coordinator (Master)</h3>
+<p>The Coordinator manages all the steps in a job.</p>
+<ul>
+<li>Tracks state of each task</li>
+<li>Hands out tasks to worker machines</li>
+</ul>
+<p><a id="reference-limitation"></a></p>
+<h3 id="limitation">Limitation</h3>
+<p>In 2004 were limited by network speed. MR send over the network:</p>
+<ul>
+<li>Maps read input from GFS.</li>
+<li>Reduces fetch Map intermediate output.</li>
+<li>Often as large as input, e.g. for sorting.</li>
+<li>Reduces write output files to GFS.</li>
+</ul>
+<p><a id="reference-optimise"></a></p>
+<h4 id="optimise">Optimise</h4>
+<p>MR minimize network use:</p>
+<ul>
+<li>Coordinator tries to run each Map task on GFS server that stores its input.</li>
+<li>All computers run both GFS and MR workers</li>
+<li>So Map input is usually read from GFS data on local disk, not over network.</li>
+<li>Intermediate data goes over network just once.</li>
+<li>Map worker writes to local disk.</li>
+<li>Reduce workers read from Map worker disks over the network.</li>
+<li>(Storing it in GFS would require at least two trips over the network.)</li>
+</ul>
+<p><a id="reference-balance"></a></p>
+<h3 id="balance">Balance</h3>
+<p><a id="reference-why-need-balance"></a></p>
+<h4 id="why-need-balance">Why Need Balance</h4>
+<ul>
+<li>If one server has more work than others, or is slower, then other servers will lie idle (wasted) at the end, waiting.</li>
+<li>So ideally MR divides work so that all workers finish at same time.</li>
+<li>But tasks vary in size, and computers vary in speed.</li>
+</ul>
+<p><a id="reference-solution"></a></p>
+<h4 id="solution">Solution</h4>
+<p>Many more tasks than worker machines.</p>
+<ul>
+<li>Coordinator hands out new tasks to workers who finish previous tasks.</li>
+<li>So faster servers do more tasks than slower ones.</li>
+<li>And slow servers are given less work, reducing impact on total time.</li>
+</ul>
+<p><a id="reference-fault-tolerance-1"></a></p>
+<h3 id="fault-tolerance-1">Fault tolerance?</h3>
+<p>We want MR framework to hide failures.</p>
+<ul>
+<li>Coordinator re-runs just the failed <code>Map()</code>s and <code>Reduce()</code>s.</li>
+</ul>
+<blockquote>
+<p>Suppose MR runs a Map task twice, one Reduce sees first run’s output, but another Reduce sees the second run’s output?</p>
+</blockquote>
+<p>The two Map executions had better produce identical intermediate output.</p>
+<p>Map and Reduce should be pure deterministic functions:</p>
+<ul>
+<li>They are only allowed to look at their arguments/input.</li>
+<li>No state, no file I/O, no interaction, no external communication, no random numbers.</li>
+<li>Programmer is responsible for ensuring this determinism.</li>
+</ul>
+<p><a id="reference-other-failuresproblems"></a></p>
+<h4 id="other-failuresproblems">Other Failures/Problems</h4>
+<blockquote>
+<p>What if the coordinator gives two workers the same Map() task?</p>
+</blockquote>
+<ul>
+<li>Perhaps the coordinator incorrectly thinks one worker died.</li>
+<li>It will tell Reduce workers about only one of them.</li>
+</ul>
+<blockquote>
+<p>What if the coordinator gives two workers the same Reduce() task?</p>
+</blockquote>
+<ul>
+<li>they will both try to write the same output file on GFS!</li>
+<li>atomic GFS rename prevents mixing; one complete file will be visible.</li>
+</ul>
+<blockquote>
+<p>What if a single worker is very slow – a “straggler”?</p>
+</blockquote>
+<ul>
+<li>perhaps due to flakey hardware.</li>
+<li>coordinator starts a second copy of last few tasks.</li>
+</ul>
+<blockquote>
+<p>What if a worker computes incorrect output, due to broken h/w or s/w?</p>
+</blockquote>
+<ul>
+<li>MR assumes “fail-stop” CPUs and software.</li>
+</ul>
+<blockquote>
+<p>What if the coordinator crashes?</p>
+</blockquote>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>用词频统计追踪同一个 key 如何从不同 Map 输出进入同一 Reduce；重试时如何避免输出半成品？</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>衔接机制或实践：<a href="/notes/computer-science/cloud/distribute-system/labs/mapreduce-lab/">Lab1-MapReduce</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#introduction">Introduction</a></li><li style="--depth: 0"><a href="#programming-model">Programming Model</a></li><li style="--depth: 1"><a href="#examples">Examples</a></li><li style="--depth: 0"><a href="#implementation">Implementation</a></li><li style="--depth: 1"><a href="#execution">Execution</a></li><li style="--depth: 1"><a href="#master-data-structures">Master Data Structures</a></li><li style="--depth: 1"><a href="#fault-tolerance">Fault Tolerance</a></li><li style="--depth: 2"><a href="#worker-failure">Worker Failure</a></li><li style="--depth: 2"><a href="#master-failure">Master Failure</a></li><li style="--depth: 2"><a href="#semantics-in-the-presence-of-failures">Semantics in the Presence of Failures</a></li><li style="--depth: 1"><a href="#locality">Locality</a></li><li style="--depth: 1"><a href="#task-granularity">Task Granularity</a></li><li style="--depth: 1"><a href="#backup-tasks">Backup Tasks</a></li><li style="--depth: 0"><a href="#refinements">Refinements</a></li><li style="--depth: 1"><a href="#partitioning-function">Partitioning Function</a></li><li style="--depth: 1"><a href="#ordering-guarantees">Ordering Guarantees</a></li><li style="--depth: 1"><a href="#combiner-function">Combiner Function</a></li><li style="--depth: 1"><a href="#input-and-output-types">Input and Output Types</a></li><li style="--depth: 1"><a href="#side-effects">Side-effects</a></li><li style="--depth: 1"><a href="#skipping-bad-records">Skipping Bad Records</a></li><li style="--depth: 1"><a href="#local-execution">Local Execution</a></li><li style="--depth: 1"><a href="#status-information">Status Information</a></li><li style="--depth: 1"><a href="#counters">Counters</a></li><li style="--depth: 0"><a href="#lecture">Lecture</a></li><li style="--depth: 1"><a href="#abstract-view-of-a-mapreduce-job">Abstract View of A MapReduce Job</a></li><li style="--depth: 2"><a href="#word-count">Word Count</a></li><li style="--depth: 1"><a href="#scales">Scales</a></li><li style="--depth: 1"><a href="#hide-complexity">Hide Complexity</a></li><li style="--depth: 1"><a href="#details">Details</a></li><li style="--depth: 2"><a href="#gfs-google-file-system">GFS (Google File System)</a></li><li style="--depth: 2"><a href="#output">Output</a></li><li style="--depth: 2"><a href="#the-shuffle">The Shuffle</a></li><li style="--depth: 1"><a href="#coordinator-master">Coordinator (Master)</a></li><li style="--depth: 1"><a href="#limitation">Limitation</a></li><li style="--depth: 2"><a href="#optimise">Optimise</a></li><li style="--depth: 1"><a href="#balance">Balance</a></li><li style="--depth: 2"><a href="#why-need-balance">Why Need Balance</a></li><li style="--depth: 2"><a href="#solution">Solution</a></li><li style="--depth: 1"><a href="#fault-tolerance-1">Fault tolerance?</a></li><li style="--depth: 2"><a href="#other-failuresproblems">Other Failures/Problems</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

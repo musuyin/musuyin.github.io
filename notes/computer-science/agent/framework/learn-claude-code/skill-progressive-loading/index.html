@@ -1,0 +1,233 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Skill Loading · Musuyin&#39; Home</title><meta name="description" content="Skill 加载把“有哪些知识”与“知识正文”分开。模型先看到触发信息，用到时再读取具体流程，避免所有任务都携带无关手册。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/skill-progressive-loading/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Skill Loading · Musuyin' Home"><meta property="og:description" content="Skill 加载把“有哪些知识”与“知识正文”分开。模型先看到触发信息，用到时再读取具体流程，避免所有任务都携带无关手册。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/framework/learn-claude-code/skill-progressive-loading/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Skill Loading</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-07-21">2026-07-21</time></dd></div><div><dt>字数</dt><dd>1674</dd></div><div><dt>预计阅读</dt><dd>6 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Skill Loading</h1><time datetime="2026-07-21">2026-07-21</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>Skill 加载把“有哪些知识”与“知识正文”分开。模型先看到触发信息，用到时再读取具体流程，避免所有任务都携带无关手册。</p>
+<p><a id="reference-skill-loading--用到的时候才加载"></a></p>
+<h2 id="skill-loading--用到的时候才加载">Skill Loading — 用到的时候才加载</h2>
+<blockquote>
+<p><em>“用到时再加载，别全塞 prompt 里”</em> — 通过 tool_result 注入，不塞 system prompt。</p>
+<p><strong>Harness 层</strong>：知识——按需加载，不堆满上下文。</p>
+</blockquote>
+<p><a id="reference-问题"></a></p>
+<h3 id="问题">问题</h3>
+<p>你的项目有一套 React 组件规范、一份 SQL 风格指南、一份 API 设计文档。你希望 Agent 自动遵守这些规范。最直接的想法，全塞进 system prompt：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">SYSTEM</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"You are a coding agent. "</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    +</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> open</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"docs/react-style.md"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">).read()       </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 2000 行</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    +</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> open</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"docs/sql-style.md"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">).read()         </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 1500 行</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    +</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> open</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"docs/api-design.md"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">).read()        </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 3000 行</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p>6500 行 system prompt。Agent 每次调用 LLM 都带着这些文档——不管是在改 CSS 颜色还是修 SQL 查询。99% 的内容和当前任务无关，白白消耗 token。</p>
+<p><a id="reference-解决方案"></a></p>
+<h3 id="解决方案">解决方案</h3>
+<p><img alt="IMG-20260928133931312" loading="lazy" decoding="async" width="800" height="380" src="/_astro/IMG-20260928133931312.CrJcdg5M_1OflDF.svg"></p>
+<p>保留上一章的最小 hook 结构、<code>todo_write</code> 和子 Agent，本章重点转向新增的 <code>load_skill</code> 工具。启动时把技能目录注入 SYSTEM prompt，运行时多注册一个工具加载完整内容，用到才花 token。</p>
+<p>两层设计：</p>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>位置</th>
+<th>时机</th>
+<th>代价</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 目录</td>
+<td>system prompt</td>
+<td>启动时注入（harness 扫描 skills/）</td>
+<td>~100 tokens/skill，每轮都带</td>
+</tr>
+<tr>
+<td>2. 内容</td>
+<td>tool_result</td>
+<td>Agent 调用 load_skill 时；SKILL.md 可指引后续的 read_file/bash 调用，用于按需访问额外资源</td>
+<td>~2000 tokens/skill，按需</td>
+</tr>
+</tbody>
+</table>
+<p>dispatch 机制不变，load_skill 通过 <code>TOOL_HANDLERS[block.name]</code> 分发。</p>
+<p><a id="reference-工作原理"></a></p>
+<h3 id="工作原理">工作原理</h3>
+<p><strong>skills/ 目录</strong>，每个技能一个子目录，包含 <code>SKILL.md</code> 文件：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>skills/</span></span>
+<span class="line"><span>  agent-builder/SKILL.md</span></span>
+<span class="line"><span>  code-review/SKILL.md</span></span>
+<span class="line"><span>  mcp-builder/SKILL.md</span></span>
+<span class="line"><span>  pdf/SKILL.md</span></span></code></pre>
+<p><strong>第一级：启动时注入目录</strong>：harness 启动时调用 <code>_scan_skills()</code> 扫描 skills/ 目录，解析每个 SKILL.md 的 YAML frontmatter（<code>name</code>、<code>description</code>），存入 <code>SKILL_REGISTRY</code> 字典。<code>list_skills()</code> 从注册表生成目录，注入 SYSTEM prompt。Agent 每轮都能看到“我有哪些技能可用”，不花额外 API 调用：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">SKILL_REGISTRY</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: dict[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">dict</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> _scan_skills</span><span style="color:#24292E;--shiki-dark:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> SKILLS_DIR</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.exists():</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> d </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> sorted</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">SKILLS_DIR</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.iterdir()):</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> d.is_dir():</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            continue</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        manifest </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> d </span><span style="color:#D73A49;--shiki-dark:#F97583">/</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "SKILL.md"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> manifest.exists():</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            raw </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> manifest.read_text()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            meta, body </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> _parse_frontmatter(raw)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> meta.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, d.name)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            desc </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> meta.get(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"description"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, raw.split(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)[</span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span><span style="color:#24292E;--shiki-dark:#E1E4E8">].lstrip(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"#"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">).strip())</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">            SKILL_REGISTRY</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[name] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"name"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: name, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"description"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: desc, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: raw}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">_scan_skills()  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># runs once at startup</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> list_skills</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.join(</span><span style="color:#D73A49;--shiki-dark:#F97583">f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"- **</span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'name'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">**: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'description'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#D73A49;--shiki-dark:#F97583"> for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> s </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> SKILL_REGISTRY</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.values())</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> build_system</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    catalog </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> list_skills()</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"You are a coding agent at </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{WORKDIR}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">. "</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Skills available:</span><span style="color:#005CC5;--shiki-dark:#79B8FF">\n{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">catalog</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}\n</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">        "Use load_skill to get full details when needed."</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">SYSTEM</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> build_system()</span></span></code></pre>
+<p><strong>第二级：load_skill</strong>：Agent 决定“我需要 SQL 风格指南”，调用 <code>load_skill("sql-style")</code>。通过注册表查找，不走文件路径，没有路径遍历风险。SKILL.md 内容通过 <code>tool_result</code> 注入，并可通过现有的 file 和 bash 工具进一步访问引用的 <code>references/</code>、<code>scripts/</code> 或 <code>assets/</code>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> load_skill</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(name: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) -&gt; </span><span style="color:#005CC5;--shiki-dark:#79B8FF">str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    skill </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> SKILL_REGISTRY</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.get(name)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    if</span><span style="color:#D73A49;--shiki-dark:#F97583"> not</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> skill:</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> f</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Skill not found: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">{</span><span style="color:#24292E;--shiki-dark:#E1E4E8">name</span><span style="color:#005CC5;--shiki-dark:#79B8FF">}</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> skill[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"content"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span></code></pre>
+<p>关键区别：技能内容不是 system prompt 的一部分，它作为一次工具结果进入当前 messages。后续调用会随历史一起携带，直到上下文压缩、截断或会话结束。这和 S08 的 compact 自然衔接：按需加载解决了“不该提前带的不要带”，compact 解决“该丢的怎么丢”。</p>
+<p><a id="reference-相对-s06-的变更"></a></p>
+<h3 id="相对-s06-的变更">相对 S06 的变更</h3>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>之前 (s06)</th>
+<th>之后 (s07)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工具数量</td>
+<td>7 (bash, read, write, edit, glob, todo_write, task)</td>
+<td>8 (+load_skill)</td>
+</tr>
+<tr>
+<td>知识加载</td>
+<td>无</td>
+<td>两级：启动时目录注入 SYSTEM + 运行时 load_skill；SKILL.md 可指引后续资源访问</td>
+</tr>
+<tr>
+<td>SYSTEM 提示</td>
+<td>静态字符串</td>
+<td>启动时扫描 skills/ 注入目录</td>
+</tr>
+<tr>
+<td>技能注册表</td>
+<td>无</td>
+<td>SKILL_REGISTRY（启动时填充，防路径遍历）</td>
+</tr>
+<tr>
+<td>循环</td>
+<td>不变</td>
+<td>不变（skill 工具自动分发）</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-试一下"></a></p>
+<h3 id="试一下">试一下</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">cd</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> learn-claude-code</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">python</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> s07_skill_loading/code.py</span></span></code></pre>
+<p>试试这些 prompt：</p>
+<ol>
+<li><code>What skills are available?</code></li>
+<li><code>Load the code-review skill and follow its instructions</code></li>
+<li><code>I need to do a code review -- load the relevant skill first</code></li>
+</ol>
+<p>观察重点：Agent 是否直接从 SYSTEM 里的目录知道有哪些技能？需要完整规范时是否出现 <code>[HOOK] load_skill</code>？加载后回答是否使用了对应 skill 的说明？</p>
+<p><a id="reference-接下来"></a></p>
+<h3 id="接下来">接下来</h3>
+<p>按需加载解决了“不该带的不要带”。但另一个问题来了：Agent 连续工作 30 分钟后，messages 列表塞满了中间过程。旧的 tool_result、过时的文件内容，占着上下文但不产生价值。</p>
+<p>S08 Context Compact → 四层压缩策略。便宜的先跑，贵的后跑。</p>
+<p><a id="reference-claude-code"></a></p>
+<h2 id="claude-code">Claude Code</h2>
+<blockquote>
+<p>以下基于 CC 源码 <code>loadSkillsDir.ts</code>、<code>SkillTool.ts</code>、<code>bundledSkills.ts</code>、<code>commands.ts</code> 的分析。</p>
+</blockquote>
+<p><a id="reference-技能来源不是只有一个-skills-目录"></a></p>
+<h3 id="技能来源不是只有一个-skills-目录">技能来源：不是只有一个 skills/ 目录</h3>
+<p>教学版假设所有技能在 <code>skills/</code> 目录下。CC 实际从多个来源加载，分布在多个文件中：<code>loadSkillsDir.ts</code> 负责从 user/project/<code>--add-dir</code> 目录和 legacy commands（<code>.claude/commands/</code>）加载；<code>bundledSkills.ts</code> 负责内置技能；<code>SkillTool.ts</code> 处理 MCP 远程技能；<code>commands.ts</code> 负责命令聚合。类型包括 managed/policy skills、user skills（<code>~/.claude/skills/</code>）、project skills（<code>.claude/skills/</code>）、<code>--add-dir</code> skills、legacy commands、dynamic skills、conditional skills（带 <code>paths</code> frontmatter，按文件路径激活）、bundled skills、plugin skills、MCP skills。</p>
+<p><a id="reference-skillmd-frontmatter-常见字段"></a></p>
+<h3 id="skillmd-frontmatter-常见字段">SKILL.md Frontmatter 常见字段</h3>
+<p>CC 的 SKILL.md YAML frontmatter 由 <code>parseSkillFrontmatterFields()</code> 解析（<code>loadSkillsDir.ts</code>），常见字段包括：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code> / <code>description</code></td>
+<td>显示名称和描述</td>
+</tr>
+<tr>
+<td><code>when_to_use</code></td>
+<td>指导模型何时调用</td>
+</tr>
+<tr>
+<td><code>allowed-tools</code></td>
+<td>技能可用工具的自动允许列表</td>
+</tr>
+<tr>
+<td><code>context</code></td>
+<td><code>inline</code>（默认）或 <code>fork</code>（作为子 Agent 运行）</td>
+</tr>
+<tr>
+<td><code>model</code></td>
+<td>模型覆盖（haiku/sonnet/opus/inherit）</td>
+</tr>
+<tr>
+<td><code>hooks</code></td>
+<td>技能级别的 hook 配置</td>
+</tr>
+<tr>
+<td><code>paths</code></td>
+<td>条件激活的 glob 模式</td>
+</tr>
+<tr>
+<td><code>user-invocable</code></td>
+<td>用户可以通过 <code>/name</code> 调用</td>
+</tr>
+</tbody>
+</table>
+<p>完整字段列表随版本迭代会变化，以上仅列出教学版涉及的核心字段。</p>
+<p><a id="reference-两级加载的精确实现"></a></p>
+<h3 id="两级加载的精确实现">两级加载的精确实现</h3>
+<ol>
+<li><strong>Catalog（启动时）</strong>：<code>getSkillDirCommands()</code> 扫描目录 → 注册为 <code>Command</code> 对象，只包含元数据。<code>getSkillListingAttachments()</code> 把技能列表格式化为附件，预算为上下文窗口的 ~1%（上限 8000 字符）。</li>
+<li><strong>Load（调用时）</strong>：模型调 <code>Skill</code> 工具（输入字段是 <code>skill</code> + 可选 <code>args</code>，教学版用 <code>name</code>）→ <code>getPromptForCommand()</code> 展开完整 SKILL.md 内容 → <code>SkillTool</code> 返回的 tool_result 展示文本只是 <code>"Launching skill: {name}"</code>，真正的技能内容通过 <code>newMessages</code> 注入对话。教学版把两者合并为“通过 tool_result 注入”是一种简化；加载后的 SKILL.md 仍可作为指引，帮助模型后续通过现有 file/bash 工具访问相关资源。</li>
+</ol>
+<p><a id="reference-教学版的简化是刻意的"></a></p>
+<h4 id="教学版的简化是刻意的">教学版的简化是刻意的</h4>
+<ul>
+<li>多文件多来源 → 1 个 <code>skills/</code> 目录：足以展示两级加载的核心概念</li>
+<li>多个 frontmatter 字段 → 只解析 name/description：减少解析复杂度</li>
+<li>forked skills（<code>context: 'fork'</code>）→ 省略：教学版只展开 inline 技能加载</li>
+<li><code>Skill</code> 工具输入 <code>skill</code>+<code>args</code> → 教学版用 <code>name</code>：避免参数解析的额外复杂度</li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>追踪一次 Skill 内容从目录元数据到工具结果的路径，再检查它是否真的进入了后续模型请求。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续理解相关机制：<a href="/notes/computer-science/agent/harness/skill-design/">Skill 设计</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#skill-loading--用到的时候才加载">Skill Loading — 用到的时候才加载</a></li><li style="--depth: 1"><a href="#问题">问题</a></li><li style="--depth: 1"><a href="#解决方案">解决方案</a></li><li style="--depth: 1"><a href="#工作原理">工作原理</a></li><li style="--depth: 1"><a href="#相对-s06-的变更">相对 S06 的变更</a></li><li style="--depth: 1"><a href="#试一下">试一下</a></li><li style="--depth: 1"><a href="#接下来">接下来</a></li><li style="--depth: 0"><a href="#claude-code">Claude Code</a></li><li style="--depth: 1"><a href="#技能来源不是只有一个-skills-目录">技能来源：不是只有一个 skills/ 目录</a></li><li style="--depth: 1"><a href="#skillmd-frontmatter-常见字段">SKILL.md Frontmatter 常见字段</a></li><li style="--depth: 1"><a href="#两级加载的精确实现">两级加载的精确实现</a></li><li style="--depth: 2"><a href="#教学版的简化是刻意的">教学版的简化是刻意的</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

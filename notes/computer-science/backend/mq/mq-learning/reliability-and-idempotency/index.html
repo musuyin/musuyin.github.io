@@ -1,0 +1,202 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>03-reliability-and-idempotency · Musuyin&#39; Home</title><meta name="description" content="可靠性要覆盖数据库、生产者、Broker、消费者和外部副作用。以“业务成功但确认未知”的窗口为主线，组合 Outbox、Confirm、手动 ACK、唯一约束与重试隔离，才能把重复收敛为一致结果。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/mq/mq-learning/reliability-and-idempotency/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="03-reliability-and-idempotency · Musuyin' Home"><meta property="og:description" content="可靠性要覆盖数据库、生产者、Broker、消费者和外部副作用。以“业务成功但确认未知”的窗口为主线，组合 Outbox、Confirm、手动 ACK、唯一约束与重试隔离，才能把重复收敛为一致结果。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/mq/mq-learning/reliability-and-idempotency/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">03-reliability-and-idempotency</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-10-11">2026-10-11</time></dd></div><div><dt>字数</dt><dd>2082</dd></div><div><dt>预计阅读</dt><dd>7 分钟</dd></div></dl></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>03-reliability-and-idempotency</h1><time datetime="2026-10-11">2026-10-11</time></header><div class="prose"><p>可靠性要覆盖数据库、生产者、Broker、消费者和外部副作用。以“业务成功但确认未知”的窗口为主线，组合 Outbox、Confirm、手动 ACK、唯一约束与重试隔离，才能把重复收敛为一致结果。</p>
+<p><a id="reference-可靠消费幂等与宕机恢复"></a></p>
+<h2 id="可靠消费幂等与宕机恢复">可靠消费、幂等与宕机恢复</h2>
+<p><a id="reference-端到端可靠性不是一个开关"></a></p>
+<h3 id="端到端可靠性不是一个开关">端到端可靠性不是一个开关</h3>
+<p>要逐段检查：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>业务状态 -&gt; 生产者本地 -&gt; Broker 接收/复制 -&gt; Queue 保存</span></span>
+<span class="line"><span>         -&gt; Consumer 获取 -&gt; 业务副作用提交 -&gt; ACK</span></span></code></pre>
+<p>任何相邻两步都可能出现“前一步成功、后一步未知/失败”。可靠设计的核心是：<strong>持久记录事实、允许重试、接受重复、用幂等收敛、让失败可观测和可补偿。</strong></p>
+<p><a id="reference-生产可靠性"></a></p>
+<h3 id="生产可靠性">生产可靠性</h3>
+<p><a id="reference-publisher-confirm"></a></p>
+<h4 id="publisher-confirm">Publisher Confirm</h4>
+<p>Channel 开启 confirm 模式后，Broker 对发布给出 ack/nack。批量异步 Confirm 吞吐通常优于逐条同步等待。需维护发布序号到消息/outbox 记录的映射，并处理：</p>
+<ul>
+<li>ack：标记 outbox 已发布；</li>
+<li>nack/超时/连接断开：保持待发布并重试；</li>
+<li>Confirm 之前断线：结果未知，按至少一次重发。</li>
+</ul>
+<p>Confirm 只证明 Broker 接受了消息（具体安全程度受队列类型和配置影响），不证明消费者业务成功。</p>
+<p><a id="reference-路由失败检测"></a></p>
+<h4 id="路由失败检测">路由失败检测</h4>
+<p>设置 <code>mandatory=true</code> 并监听 Return；若 exchange 存在但没有匹配队列，消息返回生产者。注意：不存在的 exchange 通常会关闭 Channel，因此拓扑也要监控。</p>
+<p><a id="reference-transactional-outbox"></a></p>
+<h4 id="transactional-outbox">Transactional Outbox</h4>
+<p>解决“业务数据库写入 + MQ 发布”的双写原子性：</p>
+<ol>
+<li>同一数据库事务内写业务记录和 outbox；</li>
+<li>Relay 扫描/监听未发布 outbox；</li>
+<li>发布并等 Confirm 后标记成功；</li>
+<li>超时重发，所以仍可能重复；</li>
+<li>定期归档，监控最老 NEW 记录年龄。</li>
+</ol>
+<p>MongoDB 可在 replica set/sharded cluster 的事务条件下采用事务。若暂不能使用事务，可设计单文档原子状态机，或使用定期对账补偿，但必须明确一致性边界。</p>
+<p>不要用进程内内存队列托底关键消息：宕机即丢；本地磁盘队列也会引入刷盘、容量、多实例和恢复复杂度。</p>
+<p><a id="reference-broker-可靠性"></a></p>
+<h3 id="broker-可靠性">Broker 可靠性</h3>
+<p>生产环境至少考虑：</p>
+<ul>
+<li>durable exchange/queue；</li>
+<li>persistent message；</li>
+<li>quorum queue 多副本与多数派提交；</li>
+<li>合理的磁盘/内存水位、容量和告警；</li>
+<li>跨故障域部署与经过验证的恢复流程；</li>
+<li>权限、TLS、vhost 隔离。</li>
+</ul>
+<p>这些降低 Broker 丢失概率，但不能替代 Confirm、Outbox 和幂等。</p>
+<p><a id="reference-消费可靠性"></a></p>
+<h3 id="消费可靠性">消费可靠性</h3>
+<p><a id="reference-ack-时机"></a></p>
+<h4 id="ack-时机">ACK 时机</h4>
+<p>原则：<strong>所有必须成功的业务副作用提交后再 ACK。</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="go"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> err </span><span style="color:#D73A49;--shiki-dark:#F97583">:=</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> handle</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(msg); err </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> nil</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 分类后重试或进 DLQ</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">delivery.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">Ack</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<p>不要在耗时任务开始前 ACK；否则消费者中途宕机会丢任务。也不要把非关键副作用无限纳入同一成功条件，否则次要操作会阻塞主任务；应拆事件或设计状态机。</p>
+<p><a id="reference-宕机恢复矩阵"></a></p>
+<h4 id="宕机恢复矩阵">宕机恢复矩阵</h4>
+<table>
+<thead>
+<tr>
+<th>故障时刻</th>
+<th>结果</th>
+<th>所需机制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>收到消息、业务未写入</td>
+<td>未 ACK，重投</td>
+<td>手动 ACK</td>
+</tr>
+<tr>
+<td>业务写入一半</td>
+<td>可能脏状态</td>
+<td>DB 事务/状态机</td>
+</tr>
+<tr>
+<td>业务成功、ACK 前宕机</td>
+<td>重投且可能重复</td>
+<td>幂等</td>
+</tr>
+<tr>
+<td>ACK 成功后进程退出</td>
+<td>正常完成</td>
+<td>无</td>
+</tr>
+<tr>
+<td>Broker/网络中断</td>
+<td>Channel 关闭、未 ACK 重投</td>
+<td>重连并重新订阅</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-幂等设计"></a></p>
+<h3 id="幂等设计">幂等设计</h3>
+<p><a id="reference-先定义幂等键"></a></p>
+<h4 id="先定义幂等键">先定义幂等键</h4>
+<p>优先使用稳定 <code>eventId</code>。若“一次会话只能生成一份最终报告”，业务键也可为：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>(event_type, conversation_id, schema_version)</span></span></code></pre>
+<p>不要每次消费创建随机报告 ID 后再用它去重；随机 ID 每次不同。</p>
+<p><a id="reference-数据库唯一约束--状态机"></a></p>
+<h4 id="数据库唯一约束--状态机">数据库唯一约束 + 状态机</h4>
+<p>推荐报告集合建立唯一索引，例如 <code>(conversation_id, report_version)</code>。处理流程：</p>
+<ol>
+<li>原子插入或 upsert <code>PENDING</code>；</li>
+<li>若已 <code>SUCCEEDED</code>，直接 ACK；</li>
+<li>若 <code>PROCESSING</code>，根据租约判断另一个 worker 是否仍在处理；</li>
+<li>以条件更新抢占：<code>status in [PENDING, RETRYABLE] &amp;&amp; lease_until &lt; now</code>；</li>
+<li>执行业务；</li>
+<li>条件更新为 <code>SUCCEEDED</code> 并保存结果。</li>
+</ol>
+<p>“先 SELECT 不存在，再 INSERT”有并发竞态，必须由唯一索引兜底。</p>
+<p><a id="reference-外部副作用"></a></p>
+<h4 id="外部副作用">外部副作用</h4>
+<p>LLM 调用、短信、支付等不一定支持事务回滚：</p>
+<ul>
+<li>若供应商支持 idempotency key，传 <code>eventId</code>；</li>
+<li>发送前持久化调用记录和请求摘要；</li>
+<li>超时结果未知时先查询供应商状态，勿盲重试；</li>
+<li>将报告步骤拆成可恢复状态机，已完成步骤不重复执行；</li>
+<li>对不可避免的重复成本做对账和限额。</li>
+</ul>
+<p>对本项目，建议先按会话唯一创建报告，再让 LLM 结果更新同一记录；不要每次 delivery 新建随机报告。若 worker 在 LLM 成功后、落库前宕机，仍可能再次调用，需要调用记录或供应商幂等能力进一步收敛。</p>
+<p><a id="reference-重试不是简单-requeue"></a></p>
+<h3 id="重试不是简单-requeue">重试不是简单 requeue</h3>
+<p><a id="reference-错误分类"></a></p>
+<h4 id="错误分类">错误分类</h4>
+<ul>
+<li><strong>可重试瞬态错误</strong>：网络超时、限流、临时 5xx、短暂主从切换；</li>
+<li><strong>不可重试永久错误</strong>：JSON 非法、ID 非法、schema 不支持、必要配置缺失；</li>
+<li><strong>结果未知</strong>：请求可能已成功但响应丢失，优先查询或以幂等键重试。</li>
+</ul>
+<p><a id="reference-延迟退避--dlq"></a></p>
+<h4 id="延迟退避--dlq">延迟退避 + DLQ</h4>
+<p>不要立即永久 <code>NACK requeue=true</code>。常见 RabbitMQ 方案：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>main queue</span></span>
+<span class="line"><span>  --失败1--&gt; retry.5s queue  --TTL/DLX--&gt; main</span></span>
+<span class="line"><span>  --失败2--&gt; retry.30s queue --TTL/DLX--&gt; main</span></span>
+<span class="line"><span>  --失败3--&gt; retry.5m queue  --TTL/DLX--&gt; main</span></span>
+<span class="line"><span>  --超过上限/永久错误--&gt; dead-letter queue</span></span></code></pre>
+<p>可使用消息 header 记录业务 attempt，但应防伪并考虑 x-death；也可由重试服务重新发布。延迟消息插件可简化，但增加插件依赖。DLQ 不是垃圾桶：要告警、展示原因、支持修复后安全重放。</p>
+<p><a id="reference-超时并发和背压"></a></p>
+<h3 id="超时并发和背压">超时、并发和背压</h3>
+<ul>
+<li>消费处理设置总超时与每个下游超时；</li>
+<li><code>prefetch × consumer 数</code> 是在途任务上限之一；</li>
+<li>扩容前检查 LLM QPS、Mongo 连接池和成本；</li>
+<li>优雅停机：停止接收新 delivery，等待在途任务到限时；未完成的不 ACK，让 Broker 重投；</li>
+<li>单任务过长时关注连接心跳、Kubernetes termination grace period 和业务租约。</li>
+</ul>
+<p><a id="reference-顺序与并发"></a></p>
+<h3 id="顺序与并发">顺序与并发</h3>
+<p>全局顺序往往代价极高。先问是否只需“同一会话有序”。可用：</p>
+<ul>
+<li>按 conversation ID 哈希到固定队列，每队列单消费者；</li>
+<li>每条事件携带 aggregate version，数据库只接受期望版本；</li>
+<li>可交换操作通过幂等与最终状态消除顺序要求。</li>
+</ul>
+<p>RabbitMQ 多消费者 + 重投无法保证业务完成严格有序。</p>
+<p><a id="reference-推荐改造优先级"></a></p>
+<h3 id="推荐改造优先级">推荐改造优先级</h3>
+<ol>
+<li>先修复 <code>WaitGroup.Add</code> 与 goroutine 的启动顺序，并以测试约束连接/Channel 重建生命周期；</li>
+<li>为消息增加 <code>eventId/eventType/schemaVersion/occurredAt/traceId</code>；</li>
+<li>报告表加业务唯一索引，消费改为原子 upsert/状态机；</li>
+<li>永久错误不 requeue，有限退避后 DLQ；</li>
+<li>durable 拓扑 + quorum queue + <code>mandatory</code> + Confirm；</li>
+<li>业务更新与 outbox 同事务，Relay 可重试发布；</li>
+<li>增加队列深度、最老消息年龄、失败率、DLQ、处理耗时、outbox age 告警；</li>
+<li>做 kill -9、断网、Broker 重启、毒消息和积压恢复演练。</li>
+</ol>
+<p><a id="reference-可靠性验收问题"></a></p>
+<h3 id="可靠性验收问题">可靠性验收问题</h3>
+<p>上线前必须能回答：</p>
+<ul>
+<li>发消息超时时，如何判断是否已成功？</li>
+<li>消费业务成功但 ACK 丢失，重投会产生什么副作用？</li>
+<li>一条永久坏消息最终在哪里？谁处理？</li>
+<li>消费者停 30 分钟后恢复，容量多久追平？</li>
+<li>DB 成功、MQ 失败如何自动补偿？</li>
+<li>Broker 丢一个节点或重启后，哪些数据可能丢？</li>
+<li>如何从 trace/eventId 定位一条消息全链路？</li>
+</ul>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>Confirm 成功能否证明报告已经生成？</li>
+<li>Outbox Relay 为何仍可能重复发布？</li>
+<li>调用外部计费 API 的幂等边界应怎样定义？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#可靠消费幂等与宕机恢复">可靠消费、幂等与宕机恢复</a></li><li style="--depth: 1"><a href="#端到端可靠性不是一个开关">端到端可靠性不是一个开关</a></li><li style="--depth: 1"><a href="#生产可靠性">生产可靠性</a></li><li style="--depth: 2"><a href="#publisher-confirm">Publisher Confirm</a></li><li style="--depth: 2"><a href="#路由失败检测">路由失败检测</a></li><li style="--depth: 2"><a href="#transactional-outbox">Transactional Outbox</a></li><li style="--depth: 1"><a href="#broker-可靠性">Broker 可靠性</a></li><li style="--depth: 1"><a href="#消费可靠性">消费可靠性</a></li><li style="--depth: 2"><a href="#ack-时机">ACK 时机</a></li><li style="--depth: 2"><a href="#宕机恢复矩阵">宕机恢复矩阵</a></li><li style="--depth: 1"><a href="#幂等设计">幂等设计</a></li><li style="--depth: 2"><a href="#先定义幂等键">先定义幂等键</a></li><li style="--depth: 2"><a href="#数据库唯一约束--状态机">数据库唯一约束 + 状态机</a></li><li style="--depth: 2"><a href="#外部副作用">外部副作用</a></li><li style="--depth: 1"><a href="#重试不是简单-requeue">重试不是简单 requeue</a></li><li style="--depth: 2"><a href="#错误分类">错误分类</a></li><li style="--depth: 2"><a href="#延迟退避--dlq">延迟退避 + DLQ</a></li><li style="--depth: 1"><a href="#超时并发和背压">超时、并发和背压</a></li><li style="--depth: 1"><a href="#顺序与并发">顺序与并发</a></li><li style="--depth: 1"><a href="#推荐改造优先级">推荐改造优先级</a></li><li style="--depth: 1"><a href="#可靠性验收问题">可靠性验收问题</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

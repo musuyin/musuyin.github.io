@@ -1,0 +1,325 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Terraform · Musuyin&#39; Home</title><meta name="description" content="Terraform 通过 Provider 管理外部资源，用配置表达目标，用 State 建立资源映射，plan 展示预期变更。真正执行前要理解哪些变化原地更新，哪些会替换资源。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/component/terraform/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Terraform · Musuyin' Home"><meta property="og:description" content="Terraform 通过 Provider 管理外部资源，用配置表达目标，用 State 建立资源映射，plan 展示预期变更。真正执行前要理解哪些变化原地更新，哪些会替换资源。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/component/terraform/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Terraform</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-12">2026-08-12</time></dd></div><div><dt>字数</dt><dd>1618</dd></div><div><dt>预计阅读</dt><dd>6 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Terraform/">#Terraform</a><a href="/tags/IaC/">#IaC</a><a href="/tags/%E9%9D%A2%E8%AF%95/">#面试</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Terraform</h1><time datetime="2026-08-12">2026-08-12</time><p class="tags"><a href="/tags/Cloud/">#Cloud</a><a href="/tags/Terraform/">#Terraform</a><a href="/tags/IaC/">#IaC</a><a href="/tags/%E9%9D%A2%E8%AF%95/">#面试</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>Terraform 通过 Provider 管理外部资源，用配置表达目标，用 State 建立资源映射，plan 展示预期变更。真正执行前要理解哪些变化原地更新，哪些会替换资源。</p>
+<p><a id="reference-什么是-terraform"></a></p>
+<h2 id="什么是-terraform">什么是 Terraform</h2>
+<p>Terraform 是 HashiCorp 开源的<strong>基础设施即代码（IaC，Infrastructure as Code）工具</strong>。</p>
+<p><strong>它解决什么问题？</strong></p>
+<p>没有 Terraform 之前，创建云资源（虚拟机、数据库、网络、K8s 集群）需要：</p>
+<ul>
+<li>手动在云控制台点击操作（容易出错，无法复现）</li>
+<li>写各云厂商自己的脚本（AWS CLI / gcloud / az，各不相同）</li>
+<li>没有版本控制，不知道谁改了什么</li>
+</ul>
+<p>Terraform 的做法：<strong>用代码描述你想要的基础设施，Terraform 负责把它变成现实</strong>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>写 .tf 文件（声明期望状态）→ terraform plan（预览变更）→ terraform apply（执行创建/修改）</span></span></code></pre>
+<p>类比理解：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>工具</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>管理应用部署</td>
+<td>Kubernetes YAML</td>
+<td>声明期望的应用状态</td>
+</tr>
+<tr>
+<td><strong>管理基础设施</strong></td>
+<td><strong>Terraform HCL</strong></td>
+<td><strong>声明期望的云资源状态</strong></td>
+</tr>
+</tbody>
+</table>
+<p>K8s 管的是“应用层”（Pod/Service），Terraform 管的是“基础设施层”（服务器/网络/云数据库/K8s 集群本身）。</p>
+<p><a id="reference-核心概念"></a></p>
+<h2 id="核心概念">核心概念</h2>
+<p><a id="reference-hcl配置语言"></a></p>
+<h3 id="hcl配置语言">HCL（配置语言）</h3>
+<p>Terraform 使用 HCL（HashiCorp Configuration Language）编写配置文件，扩展名为 <code>.tf</code>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="hcl"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 创建一个 AWS EC2 实例</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">resource</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "aws_instance"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "web_server"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  ami</span><span style="color:#D73A49;--shiki-dark:#F97583">           =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "ami-0c55b159cbfafe1f0"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  instance_type</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "t2.micro"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  tags</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "student-mgmt-server"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-resource资源"></a></p>
+<h3 id="resource资源">Resource（资源）</h3>
+<p>Resource 是 Terraform 管理的最小单元，代表一个云基础设施对象。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="hcl"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">resource</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "&lt;provider&gt;_&lt;type&gt;"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "&lt;local_name&gt;"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">  # 配置参数</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li><code>aws_instance</code>：AWS EC2 虚拟机</li>
+<li><code>google_container_cluster</code>：GKE K8s 集群</li>
+<li><code>azurerm_kubernetes_cluster</code>：AKS K8s 集群</li>
+<li><code>aws_s3_bucket</code>：AWS S3 存储桶</li>
+</ul>
+<p><a id="reference-provider"></a></p>
+<h3 id="provider">Provider</h3>
+<p>Provider 是对接各云厂商 API 的插件，告诉 Terraform“去哪个云上操作”。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="hcl"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">terraform</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">  required_providers</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    aws</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      source  </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "hashicorp/aws"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      version </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "~&gt; 5.0"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">provider</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "aws"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  region</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "us-east-1"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>常用 Provider：AWS、GCP、Azure、Kubernetes、Helm（是的，Helm 也有 Terraform Provider）。</p>
+<p><a id="reference-state状态文件"></a></p>
+<h3 id="state状态文件">State（状态文件）</h3>
+<p><code>terraform.tfstate</code> 是 Terraform 最重要的文件，记录了<strong>当前实际部署的资源状态</strong>。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>.tf 文件（期望状态）+ terraform.tfstate（实际状态）→ terraform plan 计算差异 → apply 执行变更</span></span></code></pre>
+<ul>
+<li>State 默认存本地，生产环境必须存<strong>远端（Remote State）</strong>，如 S3、GCS、Terraform Cloud</li>
+<li>State 文件包含敏感信息，不能提交到 Git</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="hcl"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 远端 State 配置示例（存到 S3）</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">terraform</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">  backend</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "s3"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    bucket</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "my-terraform-state"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    key</span><span style="color:#D73A49;--shiki-dark:#F97583">    =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "prod/student-mgmt/terraform.tfstate"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    region</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "us-east-1"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-module模块"></a></p>
+<h3 id="module模块">Module（模块）</h3>
+<p>Module 是可复用的 Terraform 配置包，类比 Helm Chart——封装一组资源，通过变量参数化。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="hcl"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 调用一个 VPC 模块</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">module</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "vpc"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  source</span><span style="color:#D73A49;--shiki-dark:#F97583">  =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "terraform-aws-modules/vpc/aws"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  version</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "5.0.0"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  name</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "student-mgmt-vpc"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  cidr</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "10.0.0.0/16"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-variable变量"></a></p>
+<h3 id="variable变量">Variable（变量）</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="hcl"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># variables.tf</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">variable</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "environment"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  type</span><span style="color:#D73A49;--shiki-dark:#F97583">    =</span><span style="color:#D73A49;--shiki-dark:#F97583"> string</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  default</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "dev"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">variable</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "replica_count"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  type</span><span style="color:#D73A49;--shiki-dark:#F97583">    =</span><span style="color:#D73A49;--shiki-dark:#F97583"> number</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  default</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 引用变量</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">resource</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "aws_instance"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "web"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  instance_type</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> var</span><span style="color:#D73A49;--shiki-dark:#F97583">.</span><span style="color:#24292E;--shiki-dark:#E1E4E8">environment </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "prod"</span><span style="color:#D73A49;--shiki-dark:#F97583"> ?</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "t3.medium"</span><span style="color:#D73A49;--shiki-dark:#F97583"> :</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "t2.micro"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><a id="reference-核心工作流"></a></p>
+<h2 id="核心工作流">核心工作流</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>terraform init     # 初始化，下载 Provider 插件</span></span>
+<span class="line"><span>      │</span></span>
+<span class="line"><span>terraform plan     # 预览变更（不实际执行），输出 +创建 ~修改 -删除</span></span>
+<span class="line"><span>      │</span></span>
+<span class="line"><span>terraform apply    # 执行变更，更新 state 文件</span></span>
+<span class="line"><span>      │</span></span>
+<span class="line"><span>terraform destroy  # 销毁所有资源（危险！）</span></span></code></pre>
+<p><code>terraform plan</code> 输出示例：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>+ aws_instance.web_server will be created    # + 表示新建</span></span>
+<span class="line"><span>~ aws_security_group.sg will be updated      # ~ 表示修改</span></span>
+<span class="line"><span>- aws_s3_bucket.old will be destroyed        # - 表示删除</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Plan: 1 to add, 1 to change, 1 to destroy.</span></span></code></pre>
+<p><a id="reference-terraform-vs-手动操作-vs-ansible"></a></p>
+<h2 id="terraform-vs-手动操作-vs-ansible">Terraform vs 手动操作 vs Ansible</h2>
+<table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>手动控制台</th>
+<th>Ansible</th>
+<th>Terraform</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>版本控制</td>
+<td>无</td>
+<td>有</td>
+<td>有</td>
+</tr>
+<tr>
+<td>幂等性</td>
+<td>无</td>
+<td>有（部分）</td>
+<td>有（声明式）</td>
+</tr>
+<tr>
+<td>多云支持</td>
+<td>各自操作</td>
+<td>有限</td>
+<td>原生支持</td>
+</tr>
+<tr>
+<td>定位</td>
+<td>-</td>
+<td>配置管理（在已有机器上装软件）</td>
+<td><strong>基础设施编排</strong>（创建机器本身）</td>
+</tr>
+<tr>
+<td>状态追踪</td>
+<td>无</td>
+<td>无</td>
+<td>有（state 文件）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Terraform 管“有没有这台机器”，Ansible 管“这台机器上装了什么软件”。两者互补，不冲突。</p>
+</blockquote>
+<p><a id="reference-实际场景用-terraform-创建-k8s-集群"></a></p>
+<h2 id="实际场景用-terraform-创建-k8s-集群">实际场景：用 Terraform 创建 K8s 集群</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="hcl"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 在 GCP 上创建一个 GKE 集群</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">resource</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "google_container_cluster"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "primary"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  name</span><span style="color:#D73A49;--shiki-dark:#F97583">     =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "student-mgmt-cluster"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  location</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "us-central1"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  initial_node_count</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">  node_config</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    machine_type</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "e2-medium"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    disk_size_gb</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 50</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 输出 kubeconfig 所需信息</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">output</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "cluster_endpoint"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  value</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> google_container_cluster</span><span style="color:#D73A49;--shiki-dark:#F97583">.</span><span style="color:#24292E;--shiki-dark:#E1E4E8">primary</span><span style="color:#D73A49;--shiki-dark:#F97583">.</span><span style="color:#24292E;--shiki-dark:#E1E4E8">endpoint</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>然后用 Helm 往这个集群里部署应用——<strong>Terraform 负责创建集群，Helm 负责往集群里部署应用</strong>，两者分工清晰。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Terraform（基础设施层）→ 创建 K8s 集群、网络、数据库</span></span>
+<span class="line"><span>      ↓</span></span>
+<span class="line"><span>Helm（应用层）→ 往集群里部署应用、中间件</span></span></code></pre>
+<p><a id="reference-面试高频问题"></a></p>
+<h2 id="面试高频问题">面试高频问题</h2>
+<p><strong>Q：Terraform 是什么？解决了什么问题？</strong>
+Terraform 是基础设施即代码工具，用 HCL 声明式描述云资源（服务器、网络、K8s 集群等），通过 plan/apply 工作流实现版本化、可复现的基础设施管理，支持多云统一操作。</p>
+<p><strong>Q：State 文件的作用是什么？为什么要存到远端？</strong>
+State 记录 Terraform 当前管理的实际资源状态，是计算“期望状态 vs 实际状态”差异的基础。本地 State 在团队协作时会产生冲突，且容易丢失；远端 State（S3/GCS）支持加锁（防止并发 apply）和共享，是生产必选。</p>
+<p><strong>Q：Terraform 和 Helm 的关系？各管什么层？</strong>
+两者分工互补。Terraform 管基础设施层（创建 K8s 集群本身、云网络、云数据库、IAM 权限），Helm 管应用层（往已有的 K8s 集群里部署应用）。典型流程：Terraform 创建集群 → Helm 部署应用。</p>
+<p><strong>Q：terraform plan 和 terraform apply 的区别？</strong>
+<code>plan</code> 只计算并预览变更（会创建/修改/删除哪些资源），不实际执行，用于 Review；<code>apply</code> 真正执行变更并更新 state 文件。生产环境标准流程是：plan 输出结果人工确认后再 apply。</p>
+<p><strong>Q：什么是幂等性？Terraform 如何保证？</strong>
+幂等性指多次执行同一操作结果相同。Terraform 通过声明式配置 + state 对比保证：如果资源已存在且与 .tf 描述一致，apply 不做任何操作；只对存在差异的资源执行变更。</p>
+<p><strong>Q：Terraform 管什么，不管什么？</strong></p>
+<table>
+<thead>
+<tr>
+<th>Terraform 管</th>
+<th>Terraform 不管</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>云服务器（CPU / 内存 / 磁盘规格）</td>
+<td>Pod / Deployment / Service（这是 K8s / Helm 的职责）</td>
+</tr>
+<tr>
+<td>网络（VPC / 子网 / 防火墙规则）</td>
+<td>容器内的应用配置</td>
+</tr>
+<tr>
+<td>K8s 集群本身（Node 数量 / 节点规格 / 版本）</td>
+<td>应用的业务逻辑</td>
+</tr>
+<tr>
+<td>云数据库（MySQL / Redis 实例的规格、存储大小）</td>
+<td></td>
+</tr>
+<tr>
+<td>IAM 权限 / 存储桶 / DNS 等云资源</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>一句话：<strong>Terraform 管“有什么机器/资源”，Helm/K8s 管“机器上跑什么应用”</strong>。</p>
+<p><strong>Q：修改 Terraform 重建集群后，需要重新跑 Helm 吗？可以让 Terraform 自动触发 Helm？</strong></p>
+<p>有三种方案，复杂度递增：</p>
+<p><strong>方案一：手动分步执行（最常见）</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>terraform apply   # 重建/修改集群</span></span>
+<span class="line"><span>      ↓</span></span>
+<span class="line"><span>helm upgrade      # 手动重新部署应用</span></span></code></pre>
+<p>集群重建后 Helm Release 会丢失，需要手动重跑。简单直接，适合小团队。</p>
+<p><strong>方案二：Terraform 内嵌 Helm Provider（自动触发）</strong></p>
+<p>Terraform 有官方的 Helm Provider，可以把 Helm Release 也声明为 Terraform 资源，<code>terraform apply</code> 一次性完成“建集群 + 部署应用”：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="hcl"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 先创建 K8s 集群</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">resource</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "google_container_cluster"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "primary"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  name</span><span style="color:#D73A49;--shiki-dark:#F97583">               =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "my-cluster"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  initial_node_count</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 3</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 再用 Helm Provider 部署应用（depends_on 保证顺序）</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">resource</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "helm_release"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> "student_mgmt"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  depends_on</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [google_container_cluster</span><span style="color:#D73A49;--shiki-dark:#F97583">.</span><span style="color:#24292E;--shiki-dark:#E1E4E8">primary]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  name</span><span style="color:#D73A49;--shiki-dark:#F97583">       =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "student-mgmt"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  chart</span><span style="color:#D73A49;--shiki-dark:#F97583">      =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "./mychart"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  values</span><span style="color:#D73A49;--shiki-dark:#F97583">     =</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> [</span><span style="color:#005CC5;--shiki-dark:#79B8FF">file</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"values-prod.yaml"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)]</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>优点：一条命令全搞定；缺点：Terraform state 既管基础设施又管应用，职责混杂，集群频繁变更时 Helm 也会被反复触发。</p>
+<p><strong>方案三：GitOps（生产主流）</strong></p>
+<p>用 ArgoCD 或 Flux 持续监听 Git 仓库，集群重建后自动重新同步 Helm Chart，无需手动操作：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Git 仓库（Helm Chart + values）</span></span>
+<span class="line"><span>      │</span></span>
+<span class="line"><span>      ▼ ArgoCD 持续监听</span></span>
+<span class="line"><span>      自动 helm apply → K8s 集群</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Terraform（管集群）←→ ArgoCD（管应用）</span></span>
+<span class="line"><span>两者解耦，各自独立，集群重建后 ArgoCD 自动恢复应用</span></span></code></pre>
+<p><strong>实践建议：</strong></p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>个人项目 / 小团队</td>
+<td>方案一（手动分步）或方案二（Helm Provider）</td>
+</tr>
+<tr>
+<td>生产环境 / 多团队</td>
+<td>方案三（GitOps，Terraform + ArgoCD）</td>
+</tr>
+<tr>
+<td>SAP / 大型云平台</td>
+<td>方案三，配合 Gardener 管理集群生命周期</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>追踪 init → plan → apply 过程中依赖、状态锁和权限的作用；State 与 Git 配置各保存什么？</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>衔接机制或实践：<a href="/notes/computer-science/cloud/practice/setup-account-case-study/">setup-account</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#什么是-terraform">什么是 Terraform</a></li><li style="--depth: 0"><a href="#核心概念">核心概念</a></li><li style="--depth: 1"><a href="#hcl配置语言">HCL（配置语言）</a></li><li style="--depth: 1"><a href="#resource资源">Resource（资源）</a></li><li style="--depth: 1"><a href="#provider">Provider</a></li><li style="--depth: 1"><a href="#state状态文件">State（状态文件）</a></li><li style="--depth: 1"><a href="#module模块">Module（模块）</a></li><li style="--depth: 1"><a href="#variable变量">Variable（变量）</a></li><li style="--depth: 0"><a href="#核心工作流">核心工作流</a></li><li style="--depth: 0"><a href="#terraform-vs-手动操作-vs-ansible">Terraform vs 手动操作 vs Ansible</a></li><li style="--depth: 0"><a href="#实际场景用-terraform-创建-k8s-集群">实际场景：用 Terraform 创建 K8s 集群</a></li><li style="--depth: 0"><a href="#面试高频问题">面试高频问题</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

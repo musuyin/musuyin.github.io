@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kubernetes 集群运维 · Musuyin&#39; Home</title><meta name="description" content="集群运维同时维护组件版本、证书和一致性。升级与恢复先确认前置条件，再分批执行；etcd 状态、业务卷和外部依赖需要分别备份与验证。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-cluster-operations/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Kubernetes 集群运维 · Musuyin' Home"><meta property="og:description" content="集群运维同时维护组件版本、证书和一致性。升级与恢复先确认前置条件，再分批执行；etcd 状态、业务卷和外部依赖需要分别备份与验证。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-cluster-operations/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Kubernetes 集群运维</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-13">2026-08-13</time></dd></div><div><dt>字数</dt><dd>2572</dd></div><div><dt>预计阅读</dt><dd>9 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/kubeadm/">#kubeadm</a><a href="/tags/etcd/">#etcd</a><a href="/tags/SRE/">#SRE</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Kubernetes 集群运维</h1><time datetime="2026-08-13">2026-08-13</time><p class="tags"><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/kubeadm/">#kubeadm</a><a href="/tags/etcd/">#etcd</a><a href="/tags/SRE/">#SRE</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>集群运维同时维护组件版本、证书和一致性。升级与恢复先确认前置条件，再分批执行；etcd 状态、业务卷和外部依赖需要分别备份与验证。</p>
+<p><a id="reference-学习目标"></a></p>
+<h2 id="学习目标">学习目标</h2>
+<p>学完本章后，应当能够：</p>
+<ul>
+<li>解释 kubeadm 高可用控制面、API Server 入口与 etcd quorum 的关系。</li>
+<li>执行集群健康检查、证书检查、Node 加入/退出和逐级版本升级。</li>
+<li>安全备份 etcd，并在隔离环境验证恢复、RPO 与 RTO。</li>
+<li>在控制面、etcd、kubelet、容器运行时和网络之间定位集群级故障。</li>
+</ul>
+<blockquote>
+<p>心智模型：集群运维是在维护一组有版本偏差约束、证书时限和一致性要求的分布式组件。备份、升级和节点维护都必须先验证前置条件，再分批执行并保留回退路径。</p>
+</blockquote>
+<p><a id="reference-kubeadm-集群架构"></a></p>
+<h2 id="kubeadm-集群架构">kubeadm 集群架构</h2>
+<p><img alt="IMG-20260817144455759" loading="lazy" decoding="async" width="2882" height="1191" src="/_astro/IMG-20260817144455759.BIhuCvrB_1jngR4.webp"></p>
+<blockquote>
+<p>图：高可用 kubeadm 控制面、API Server 负载均衡、etcd quorum，以及备份、证书和逐级升级的运维关系。</p>
+</blockquote>
+<p>kubeadm 用于引导和维护符合 Kubernetes 约定的集群，但不会替你安装 CNI、监控、日志、备份和完整生命周期平台。</p>
+<p>典型控制面组件：</p>
+<ul>
+<li>kube-apiserver：API 入口，负责认证、鉴权、准入和对象读写。</li>
+<li>kube-controller-manager：运行控制循环，使实际状态收敛到期望状态。</li>
+<li>kube-scheduler：为未绑定 Node 的 Pod 选择 Node。</li>
+<li>etcd：保存 Kubernetes API 对象和控制面状态。</li>
+<li>kubelet：在每个 Node 上管理 Pod；控制面组件在 kubeadm 集群中通常以 Static Pod 运行。</li>
+</ul>
+<p>kubeadm 管理的 Static Pod manifest 通常位于：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/etc/kubernetes/manifests/</span></span>
+<span class="line"><span>├── etcd.yaml</span></span>
+<span class="line"><span>├── kube-apiserver.yaml</span></span>
+<span class="line"><span>├── kube-controller-manager.yaml</span></span>
+<span class="line"><span>└── kube-scheduler.yaml</span></span></code></pre>
+<p>kubelet 监视该目录，文件变化会触发对应 Static Pod 重建。不要直接无备份地修改 manifest；集群配置应保留为代码并经过评审。</p>
+<p><a id="reference-高可用拓扑"></a></p>
+<h3 id="高可用拓扑">高可用拓扑</h3>
+<table>
+<thead>
+<tr>
+<th>拓扑</th>
+<th>特点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stacked etcd</td>
+<td>每个控制面 Node 同时运行 etcd，部署简单、故障域耦合</td>
+<td>常见 kubeadm HA 集群</td>
+</tr>
+<tr>
+<td>External etcd</td>
+<td>etcd 与控制面 Node 分离，故障域与扩缩容独立，运维更复杂</td>
+<td>有独立 etcd 运维能力的场景</td>
+</tr>
+</tbody>
+</table>
+<p>高可用控制面通常在 API Server 前放置负载均衡器，并部署奇数个 etcd 成员。增加 etcd 成员不等于提高性能，成员数和拓扑应遵循 etcd 官方建议。</p>
+<p><a id="reference-日常健康检查"></a></p>
+<h2 id="日常健康检查">日常健康检查</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> cluster-info</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --raw=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'/readyz?verbose'</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nodes</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> wide</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pods</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> kube-system</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> wide</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> events</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --sort-by=.lastTimestamp</span></span></code></pre>
+<p>控制面还应监控：</p>
+<ul>
+<li>API Server 请求成功率、延迟、inflight request 与 429/5xx。</li>
+<li>etcd leader、成员健康、磁盘 fsync/commit 延迟、DB 大小与剩余空间。</li>
+<li>Scheduler 调度延迟、Pending Pod 和失败原因。</li>
+<li>Controller workqueue 深度、重试和 leader election。</li>
+<li>证书剩余有效期、Node 心跳和 kubelet 状态。</li>
+</ul>
+<p><a id="reference-etcd-备份"></a></p>
+<h2 id="etcd-备份">etcd 备份</h2>
+<p>etcd 是控制面事实数据存储。备份必须加密、限制访问、异地保存并定期做完整恢复演练。</p>
+<p>在可访问本地 etcd 证书和端点的控制面 Node 上，可以使用类似命令创建快照；证书路径和端点以实际 manifest 为准：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ETCDCTL_API</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">3</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> etcdctl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --endpoints=https://127.0.0.1:2379</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --cacert=/etc/kubernetes/pki/etcd/ca.crt</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --cert=/etc/kubernetes/pki/etcd/server.crt</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --key=/etc/kubernetes/pki/etcd/server.key</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  snapshot</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> save</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /secure-backup/etcd-snapshot.db</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">etcdutl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --write-out=table</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  snapshot</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> status</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /secure-backup/etcd-snapshot.db</span></span></code></pre>
+<p>备份计划至少记录：</p>
+<ul>
+<li>集群标识、Kubernetes/etcd 版本、创建时间和操作者。</li>
+<li>快照校验结果、文件哈希、加密方式和保留周期。</li>
+<li><code>/etc/kubernetes/</code> 中 PKI、kubeconfig、manifest 与 kubeadm 配置的安全备份。</li>
+<li>外部依赖：CNI、CSI、Ingress/Gateway、CRD/Operator 和云资源声明。</li>
+</ul>
+<p>etcd 快照只包含 Kubernetes API 数据，不包含 PV 中的业务数据；业务数据需要独立一致性备份。</p>
+<p><a id="reference-etcd-恢复"></a></p>
+<h2 id="etcd-恢复">etcd 恢复</h2>
+<blockquote>
+<p>恢复 etcd 是破坏性灾难恢复操作，会改变集群控制面状态。必须在维护窗口或事故指挥下执行，先保护现有数据目录并确认恢复点。</p>
+</blockquote>
+<p>恢复原则：</p>
+<ol>
+<li>停止所有 API Server，避免恢复期间继续读写 etcd。</li>
+<li>使用与快照兼容的 etcd 版本和 <code>etcdutl</code> 恢复到新的、空的数据目录。</li>
+<li>对多成员 etcd 按恢复方案配置成员名称、peer URL 与初始集群。</li>
+<li>修改 Static Pod manifest 指向恢复后的数据目录/集群。</li>
+<li>启动 etcd、验证成员健康，再启动 API Server 和其他控制面组件。</li>
+<li>验证 API 对象、Node、关键工作负载、存储和外部控制器。</li>
+</ol>
+<p>单成员示意命令，参数必须按实际集群修改：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">etcdutl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --data-dir=/var/lib/etcd-restored</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  snapshot</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> restore</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /secure-backup/etcd-snapshot.db</span></span></code></pre>
+<p>etcd v3.5 之后恢复推荐使用 <code>etcdutl</code>，不要把旧教程中的 <code>etcdctl snapshot restore</code> 直接用于生产。恢复演练必须在隔离环境完成，并记录 RTO、RPO 与验证结果。</p>
+<p><a id="reference-证书管理"></a></p>
+<h2 id="证书管理">证书管理</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 检查 kubeadm 管理证书的过期时间</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubeadm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> certs</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> check-expiration</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 按需续期，生产执行前先备份 /etc/kubernetes</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubeadm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> certs</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> renew</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> all</span></span></code></pre>
+<p>注意：</p>
+<ul>
+<li>kubeadm 在控制面升级时通常会续期证书；是否启用取决于升级参数。</li>
+<li>HA 集群需要在每个控制面 Node 上执行相应续期。</li>
+<li>续期后需要让使用证书的控制面组件重启，并更新分发在外部的 kubeconfig。</li>
+<li><code>kubeadm certs renew</code> 使用现有证书属性，若要修改 SAN 等内容，需要按新的 kubeadm 配置重新生成证书。</li>
+<li>外部 CA、外部 etcd 或企业 PKI 场景应采用对应流程，不能机械套用上述命令。</li>
+</ul>
+<p>证书过期常表现为 <code>x509: certificate has expired or is not yet valid</code>。同时检查系统时间、NTP、客户端 kubeconfig 和控制面证书，不要只续期单个文件。</p>
+<p><a id="reference-node-扩容"></a></p>
+<h2 id="node-扩容">Node 扩容</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 在控制面生成短期 join 命令</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubeadm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> token</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --print-join-command</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 新 Node 完成内核、容器运行时、kubelet/kubeadm 和网络前置配置后执行 join</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubeadm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> join</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">control-plane-endpoin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">t</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">:6443</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --token</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">toke</span><span style="color:#24292E;--shiki-dark:#E1E4E8">n</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --discovery-token-ca-cert-hash</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> sha256:</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">has</span><span style="color:#24292E;--shiki-dark:#E1E4E8">h</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 控制面验证</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nodes</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> wide</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> node/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">new-nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p>扩容前确认 Kubernetes 版本偏差、容器运行时、cgroup driver、内核模块、时间同步、DNS、镜像仓库、CNI MTU、安全组和 Node 标签/taint。</p>
+<p><a id="reference-node-缩容与维护"></a></p>
+<h2 id="node-缩容与维护">Node 缩容与维护</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> cordon</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> drain</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --ignore-daemonsets</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --delete-emptydir-data</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --timeout=15m</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> delete</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> node</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p>随后才能在目标 Node 执行 <code>kubeadm reset</code> 并释放底层主机。<code>kubeadm reset</code> 会清理 kubeadm 管理的本地状态，是破坏性操作；它不会自动完整清理所有 CNI 规则、iptables/IPVS 和用户数据，应按所用发行版/CNI 的卸载流程处理。</p>
+<p>删除 Node 前确认：</p>
+<ul>
+<li>PDB、StatefulSet、Local PV 和 <code>emptyDir</code> 数据影响。</li>
+<li>关键服务在其余故障域仍有足够容量。</li>
+<li>Node 上没有未被控制器管理的裸 Pod 或重要静态数据。</li>
+<li>云负载均衡、监控、CMDB 和自动扩缩容组状态会同步更新。</li>
+</ul>
+<p><a id="reference-版本升级"></a></p>
+<h2 id="版本升级">版本升级</h2>
+<p>升级必须查看当前版本对应的 Version Skew Policy 和 kubeadm 官方升级指南。通常按次要版本逐级升级，并遵循以下顺序：</p>
+<ol>
+<li>阅读 Release Notes、弃用 API 和组件兼容矩阵。</li>
+<li>备份 etcd、<code>/etc/kubernetes/</code>、集群配置与关键业务数据，并验证恢复路径。</li>
+<li>在预生产执行升级和回滚演练。</li>
+<li>升级第一台控制面 Node：先 kubeadm，再执行 <code>kubeadm upgrade apply</code>，随后 kubelet/kubectl。</li>
+<li>逐台升级其他控制面 Node，验证 etcd quorum 与 API 可用性。</li>
+<li>逐台 cordon/drain 并升级 Worker Node，保持最小服务容量。</li>
+<li>验证系统组件、CNI/CSI、Ingress/Gateway、监控、CRD/Operator 和核心 SLI。</li>
+<li>观察稳定后清理升级备份并更新资产、Runbook 和版本基线。</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubeadm</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> upgrade</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> plan</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nodes</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pods</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --raw=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'/readyz?verbose'</span></span></code></pre>
+<p>禁止同时升级 Kubernetes、操作系统、容器运行时、CNI 和业务大版本；多个变量会显著增加回滚和归因难度。</p>
+<p><a id="reference-控制面故障排查"></a></p>
+<h2 id="控制面故障排查">控制面故障排查</h2>
+<p><a id="reference-kubectl-无法连接-api-server"></a></p>
+<h3 id="kubectl-无法连接-api-server">kubectl 无法连接 API Server</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 从客户端确认地址、证书和网络</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> config</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> view</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --minify</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> cluster-info</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --cacert</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">cluster-ca.cr</span><span style="color:#24292E;--shiki-dark:#E1E4E8">t</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> https://</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">control-plane-endpoin</span><span style="color:#24292E;--shiki-dark:#E1E4E8">t</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">:6443/livez</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 在控制面 Node 检查 kubelet、容器运行时和 Static Pod</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">systemctl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> status</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> kubelet</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">journalctl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -u</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> kubelet</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --since</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "30 min ago"</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">crictl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> ps</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -a</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">crictl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">kube-apiserver-container-i</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">ls</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -l</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /etc/kubernetes/manifests</span></span></code></pre>
+<p>判断：</p>
+<ul>
+<li>负载均衡地址失败但单个 API Server 正常：检查 LB、健康检查和安全组。</li>
+<li>API Server 容器反复退出：检查证书、manifest 参数、端口、etcd 连通性和磁盘。</li>
+<li>所有 API Server 都无法访问 etcd：检查 etcd quorum、证书、磁盘空间和网络。</li>
+</ul>
+<p><a id="reference-api-可用但对象不收敛"></a></p>
+<h3 id="api-可用但对象不收敛">API 可用但对象不收敛</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> lease</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> kube-system</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pods</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> kube-system</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">scheduler-or-controller-po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> kube-system</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">crictl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> logs</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">container-i</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<ul>
+<li>新 Pod 不调度：检查 Scheduler、Pending 事件和 admission webhook。</li>
+<li>Deployment 副本不恢复：检查 Controller Manager leader、workqueue 和权限。</li>
+<li>API 请求卡住：检查不可用 admission webhook、APIService、etcd 延迟和 API Server inflight request。</li>
+</ul>
+<p><a id="reference-node-大面积-notready"></a></p>
+<h3 id="node-大面积-notready">Node 大面积 NotReady</h3>
+<p>优先判断是否为控制面误报、网络分区、证书/时间问题、CNI 故障或统一配置变更。不要同时重启全部 Node；保留一个故障样本用于证据采集，分批恢复并持续观察业务 SLI。</p>
+<p><a id="reference-变更与灾备基线"></a></p>
+<h2 id="变更与灾备基线">变更与灾备基线</h2>
+<ul>
+<li>所有集群配置、版本、插件和证书责任人可追踪，控制面变更走评审和维护窗口。</li>
+<li>etcd 自动备份、加密异地保存，至少按季度执行隔离恢复演练。</li>
+<li>证书剩余有效期提前告警，避免依赖人工记忆。</li>
+<li>Node 与控制面逐台维护，遵守 PDB 和容量水位，不同时破坏同一故障域。</li>
+<li>升级前有兼容性检查、预生产演练、回退标准和稳定观察窗口。</li>
+<li>控制面、etcd、CNI、CSI、DNS 与入口组件都有 Runbook 和值班告警。</li>
+</ul>
+<p><a id="reference-实践与验收"></a></p>
+<h2 id="实践与验收">实践与验收</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> 完成一次日常健康检查并保存基线：API、组件、Node、系统 Pod、事件与容量。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 创建 etcd 快照，校验状态，在隔离环境恢复并验证关键 API 对象。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 检查全部证书到期时间，形成提前轮换和告警计划。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 对一个 Worker Node 执行 cordon、drain、维护验证与 uncordon。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 在测试集群按官方顺序完成一个小版本升级，记录兼容性、观察项和回退点。</li>
+</ul>
+<p>验收标准：不仅命令执行成功，还应证明 API、工作负载、网络、存储和核心 SLI 恢复，并留下时间线和证据。</p>
+<p><a id="reference-官方参考"></a></p>
+<h2 id="官方参考">官方参考</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/">Kubernetes：使用 kubeadm 管理集群</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/">Kubernetes：升级 kubeadm 集群</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/">Kubernetes：kubeadm 证书管理</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/">Kubernetes：运行 etcd 集群</a></li>
+<li><a href="https://kubernetes.io/releases/version-skew-policy/">Kubernetes：Version Skew Policy</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>区分 API Server 不可达、etcd 无多数派和单个 kubelet 故障的影响范围；备份文件存在能否证明恢复目标可达？</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/sre/sre-methods-failure-drills/">L08-SRE方法与故障演练</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#学习目标">学习目标</a></li><li style="--depth: 0"><a href="#kubeadm-集群架构">kubeadm 集群架构</a></li><li style="--depth: 1"><a href="#高可用拓扑">高可用拓扑</a></li><li style="--depth: 0"><a href="#日常健康检查">日常健康检查</a></li><li style="--depth: 0"><a href="#etcd-备份">etcd 备份</a></li><li style="--depth: 0"><a href="#etcd-恢复">etcd 恢复</a></li><li style="--depth: 0"><a href="#证书管理">证书管理</a></li><li style="--depth: 0"><a href="#node-扩容">Node 扩容</a></li><li style="--depth: 0"><a href="#node-缩容与维护">Node 缩容与维护</a></li><li style="--depth: 0"><a href="#版本升级">版本升级</a></li><li style="--depth: 0"><a href="#控制面故障排查">控制面故障排查</a></li><li style="--depth: 1"><a href="#kubectl-无法连接-api-server">kubectl 无法连接 API Server</a></li><li style="--depth: 1"><a href="#api-可用但对象不收敛">API 可用但对象不收敛</a></li><li style="--depth: 1"><a href="#node-大面积-notready">Node 大面积 NotReady</a></li><li style="--depth: 0"><a href="#变更与灾备基线">变更与灾备基线</a></li><li style="--depth: 0"><a href="#实践与验收">实践与验收</a></li><li style="--depth: 0"><a href="#官方参考">官方参考</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

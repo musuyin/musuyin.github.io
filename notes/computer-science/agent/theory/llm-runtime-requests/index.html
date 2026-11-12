@@ -1,0 +1,187 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Agent 模型调用 · Musuyin&#39; Home</title><meta name="description" content="一次模型请求由消息、工具定义和生成配置共同组成。上下文由应用或服务会话机制显式维护，不能因为模型名称相同就假设它记得上一轮，也不能把输出上限当作输入窗口。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/agent/theory/llm-runtime-requests/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Agent 模型调用 · Musuyin' Home"><meta property="og:description" content="一次模型请求由消息、工具定义和生成配置共同组成。上下文由应用或服务会话机制显式维护，不能因为模型名称相同就假设它记得上一轮，也不能把输出上限当作输入窗口。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/agent/theory/llm-runtime-requests/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Agent 模型调用</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-10-28">2026-10-28</time></dd></div><div><dt>字数</dt><dd>2479</dd></div><div><dt>预计阅读</dt><dd>9 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a><a href="/tags/LLM/">#LLM</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Agent 模型调用</h1><time datetime="2026-10-28">2026-10-28</time><p class="tags"><a href="/tags/AI/">#AI</a><a href="/tags/Agent/">#Agent</a><a href="/tags/LLM/">#LLM</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>一次模型请求由消息、工具定义和生成配置共同组成。上下文由应用或服务会话机制显式维护，不能因为模型名称相同就假设它记得上一轮，也不能把输出上限当作输入窗口。</p>
+<p><a id="reference-模型调用在-agent-中的位置"></a></p>
+<h2 id="模型调用在-agent-中的位置">模型调用在 Agent 中的位置</h2>
+<p>Agent 的循环是：运行时组装输入 → 模型提出下一步动作或回答 → 运行时执行工具 → 将结果加入下一次输入。模型调用本身只负责一次推断，不负责持久化历史、真正执行工具或确认业务完成。</p>
+<p>一次请求通常由三部分组成：带角色的消息、当前可用的工具定义，以及模型与生成参数。多轮状态需要通过重新传入消息，或通过服务提供的会话、响应引用机制保留；不能因为调用的是同一个模型，就认为模型自动记得上一轮。</p>
+<p>相关内容：<a href="/notes/computer-science/agent/theory/agent/">S01-Agent</a>、<a href="/notes/computer-science/agent/theory/tool-use/">S04-Tool-Use</a>、<a href="/notes/computer-science/agent/theory/agent-memory/">S02-Memory</a>。</p>
+<p><a id="reference-上下文窗口与应用预算"></a></p>
+<h2 id="上下文窗口与应用预算">上下文窗口与应用预算</h2>
+<p><a id="reference-模型上限不等于应用配置"></a></p>
+<h3 id="模型上限不等于应用配置">模型上限不等于应用配置</h3>
+<p>上下文窗口是模型服务在某种模型和部署配置下支持的 token 上限。托管模型通常不能通过任意设置一个 <code>context_window</code> 参数，把服务支持的窗口扩大。自托管推理服务可能允许配置最大序列长度，但还受模型训练、位置编码、显存和服务实现约束，增大配置不保证长文本质量。</p>
+<p>应用真正控制的是：选哪个模型、给本次输入分配多少 token、为输出留多少空间，以及达到什么预算时触发裁剪或压缩。框架里叫作 <code>context_window</code> 的配置，也可能只是预算计算所用的模型能力元数据，需要检查它是否真的被发给服务端。</p>
+<p>输入不仅包含用户问题，还包括 system/developer 指令、工具 schema、历史消息、工具结果、检索片段及多模态内容。中文字符数不等于 token 数，JSON 的标点和字段名同样有成本。</p>
+<p><a id="reference-每次请求如何计算预算"></a></p>
+<h3 id="每次请求如何计算预算">每次请求如何计算预算</h3>
+<p>对于输入与输出共享窗口上限的服务，可以用以下约束做预算：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>T_input + R_output + S &lt;= C_model</span></span>
+<span class="line"><span>T_input &lt;= B_app</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>T_input = T_instructions + T_tools + T_history + T_retrieved + T_current</span></span></code></pre>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>含义</th>
+<th>谁决定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>C_model</code></td>
+<td>当前模型服务支持的上下文上限</td>
+<td>模型服务</td>
+</tr>
+<tr>
+<td><code>B_app</code></td>
+<td>应用允许本次输入使用的预算</td>
+<td>应用开发者</td>
+</tr>
+<tr>
+<td><code>R_output</code></td>
+<td>本次输出预留量</td>
+<td>应用配置，受服务输出上限限制</td>
+</tr>
+<tr>
+<td><code>S</code></td>
+<td>计数误差、封装开销等安全余量</td>
+<td>应用开发者</td>
+</tr>
+<tr>
+<td><code>T_input</code></td>
+<td>实际序列化后输入的 token 数</td>
+<td>本次请求内容</td>
+</tr>
+</tbody>
+</table>
+<p>一些服务还有独立的输入上限、输出上限或不同的推理 token 计费规则，应按服务的实际契约校验，不能只套一个公式。</p>
+<p>例如，假设服务窗口是 128,000 token，应用输入预算是 90,000，输出预留 4,000，安全余量 8,000，那么输入必须满足 <code>T_input &lt;= min(90,000, 116,000)</code>。这里的 90,000 是应用主动限制输入的预算，不是把模型改成了 90,000 token 的窗口；这些数值只是演示计算，不能直接当作生产默认值。</p>
+<p>压缩触发点应低于硬上限，还要为下一步可能返回的大工具结果留空间。输入已超限时，再把全部历史发给相同窗口的模型做摘要，摘要请求也可能失败。具体处理见 <a href="/notes/computer-science/agent/theory/agent-memory/#reference-%E5%8E%8B%E7%BC%A9%E8%A7%A6%E5%8F%91%E4%B8%8E%E9%A2%84%E7%AE%97">S02-Memory</a>。</p>
+<p><a id="reference-为什么不把窗口尽量填满"></a></p>
+<h3 id="为什么不把窗口尽量填满">为什么不把窗口尽量填满</h3>
+<p>窗口够大只说明请求能被接收，不说明模型能够稳定利用每个细节。无关历史、重复日志和相似工具会增加干扰；某些长上下文任务还会出现中间信息利用率下降的问题。</p>
+<p>更长的输入通常增加计算、延迟和费用，具体还受模型架构及缓存影响。因此应比较“保留了什么证据、任务是否完成”，而不只是“用了多少窗口”。</p>
+<p><a id="reference-生成参数如何选择"></a></p>
+<h2 id="生成参数如何选择">生成参数如何选择</h2>
+<p>不同服务的字段名称、支持范围和默认值不同。下面讨论的是参数的作用，不是一份可直接复制到任意 SDK 的请求。</p>
+<table>
+<thead>
+<tr>
+<th>参数类别</th>
+<th>控制什么</th>
+<th>Agent 中的设置依据</th>
+<th>容易误解的地方</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型选择</td>
+<td>能力、窗口、延迟、价格</td>
+<td>用真实任务比较工具选择、参数正确率和最终成功率</td>
+<td>模型更大不保证每种任务都更合适</td>
+</tr>
+<tr>
+<td>输出 token 上限</td>
+<td>本次最多生成多少内容</td>
+<td>工具参数生成通常短；长报告和复杂推理需要更多空间</td>
+<td>输出上限不等于输入窗口，也不保证模型一定用满</td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>采样分布的尖锐程度</td>
+<td>对结构化提取、工具参数可评估较低值；开放式创作可评估较高值</td>
+<td>设为 0 不等于事实正确，也不保证跨服务完全确定</td>
+</tr>
+<tr>
+<td><code>top_p</code></td>
+<td>从累计概率达到阈值的候选 token 集合采样</td>
+<td>通常先保留默认值，调 temperature 或 top_p 中的一项</td>
+<td>同时调两项会让效果变化更难归因</td>
+</tr>
+<tr>
+<td>推理强度或预算</td>
+<td>部分模型支持的额外推理投入</td>
+<td>对困难规划和诊断比较成功率、时延和费用</td>
+<td>不是所有模型支持，也不等于要求输出完整思维过程</td>
+</tr>
+<tr>
+<td>工具选择策略</td>
+<td>可自由选择、必须调用、指定工具或禁用工具</td>
+<td>普通执行允许选择；需要特定动作时显式限定</td>
+<td>强制调用工具不证明业务上应该调用，也不代表参数正确</td>
+</tr>
+<tr>
+<td>结构化输出约束</td>
+<td>输出字段和类型</td>
+<td>计划、分类结果等适合使用受支持的 schema 约束</td>
+<td>结构合法不等于计划合理或事实真实</td>
+</tr>
+<tr>
+<td>流式输出</td>
+<td>是否分片接收响应</td>
+<td>便于展示进度、降低首段等待时间</td>
+<td>不完整的参数片段不能直接执行</td>
+</tr>
+</tbody>
+</table>
+<p>工具 schema 的生成约束与普通文本结构化输出不是完全相同的机制，需要分别检查服务支持情况。部分推理模型不开放 temperature、top_p，不能照搬普通模型的参数。</p>
+<p>输出上限应覆盖参数或计划的完整生成；过小可能截断 JSON。若服务返回长度截断、拒绝或错误，运行时必须识别对应状态，不能把“没有工具调用”一律视为任务成功。</p>
+<p><a id="reference-从任务分布确定参数"></a></p>
+<h3 id="从任务分布确定参数">从任务分布确定参数</h3>
+<p>先构造一组真实代表性任务，包含简单查询、复杂参数、长历史和多步骤任务，再固定工具和上下文策略，逐项调整参数。</p>
+<p>观察工具选对率、参数校验通过率、业务验收通过率、平均与 P95 延迟、每个成功任务的成本。单次演示成功不足以确定配置，应重复运行观察波动。</p>
+<p>低 temperature 的配置可以减少某些输出变化，但无法替代 schema 校验、权限校验和结果验收。参数调优解决的是模型行为分布，运行时校验解决的是可执行性与边界。</p>
+<p><a id="reference-请求组装与响应处理"></a></p>
+<h2 id="请求组装与响应处理">请求组装与响应处理</h2>
+<p>下面是应用自己的配置和接口示意，不对应某家模型 API 的固定字段。<code>adapter</code> 负责把这些概念转换成所选服务实际支持的请求格式，不能把这些配置键直接发给任意服务。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">config </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "model_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"应用已配置的模型标识"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "input_budget_tokens"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">90_000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "output_reserve_tokens"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">4_000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "safety_margin_tokens"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">8_000</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">request </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> adapter.build_request(</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    model_id</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">config[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"model_id"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    messages</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">active_messages,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    tools</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">selected_tool_schemas,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    output_limit</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">config[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"output_reserve_tokens"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 必须按包含工具定义和消息封装的实际请求计数；无法满足预算则显式报错。</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">validate_request_budget(request, config, model_capabilities)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">response </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> adapter.invoke(request)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 识别完整输出、工具调用、截断、拒绝与服务错误。</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">validated_response </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> validate_complete_response(response)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">event_log.append(validated_response)</span></span></code></pre>
+<p>这里没有直接执行工具：工具调用的名称、参数、身份与权限还需要运行时验证。模型返回最终文本后，也需要结合任务验收判断完成，而不能只检查文本里是否写了“已完成”。</p>
+<p><a id="reference-token-计数与缓存"></a></p>
+<h2 id="token-计数与缓存">Token 计数与缓存</h2>
+<p>优先使用服务提供的计数接口或适配当前模型的 tokenizer。仅按字符数估算可以作为早期预警，但不能当作精确计数；消息封装、工具格式和多模态输入可能带来额外成本。</p>
+<p>服务返回的 usage 适合用于校准估算和统计成本，但它是在请求后拿到的，不能替代调用前的超限检查。</p>
+<p>Prompt cache 可以在条件满足时减少重复前缀的计算或计费，但缓存命中的内容仍属于逻辑上下文，不能因此超出窗口。缓存也不是长期记忆：它不负责选择重要事实、处理记忆冲突或保证未来能召回。</p>
+<p><a id="reference-延伸阅读"></a></p>
+<h2 id="延伸阅读">延伸阅读</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2307.03172">Lost in the Middle</a>：长上下文中信息位置与利用效果的实验研究，结论需要结合具体模型和任务验证。</li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>区分窗口容量、当前输入、输出预算和缓存；用真实任务分布评价工具选择、延迟与成本，避免从一次演示推断可靠性。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>衔接相关实践：<a href="/notes/computer-science/agent/framework/learn-claude-code/agent-loop/">S01-Agent Loop</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/agent/">智能体学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#模型调用在-agent-中的位置">模型调用在 Agent 中的位置</a></li><li style="--depth: 0"><a href="#上下文窗口与应用预算">上下文窗口与应用预算</a></li><li style="--depth: 1"><a href="#模型上限不等于应用配置">模型上限不等于应用配置</a></li><li style="--depth: 1"><a href="#每次请求如何计算预算">每次请求如何计算预算</a></li><li style="--depth: 1"><a href="#为什么不把窗口尽量填满">为什么不把窗口尽量填满</a></li><li style="--depth: 0"><a href="#生成参数如何选择">生成参数如何选择</a></li><li style="--depth: 1"><a href="#从任务分布确定参数">从任务分布确定参数</a></li><li style="--depth: 0"><a href="#请求组装与响应处理">请求组装与响应处理</a></li><li style="--depth: 0"><a href="#token-计数与缓存">Token 计数与缓存</a></li><li style="--depth: 0"><a href="#延伸阅读">延伸阅读</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

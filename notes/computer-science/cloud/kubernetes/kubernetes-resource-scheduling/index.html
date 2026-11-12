@@ -1,0 +1,433 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kubernetes 调度与资源治理 · Musuyin&#39; Home</title><meta name="description" content="调度、扩缩容和配额共享资源声明，却解决不同问题：能放哪里、需要多少、谁可以创建。requests 同时影响放置和部分扩缩容判断，limits 则约束运行时资源使用。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-resource-scheduling/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="Kubernetes 调度与资源治理 · Musuyin' Home"><meta property="og:description" content="调度、扩缩容和配额共享资源声明，却解决不同问题：能放哪里、需要多少、谁可以创建。requests 同时影响放置和部分扩缩容判断，limits 则约束运行时资源使用。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/cloud/kubernetes/kubernetes-resource-scheduling/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">Kubernetes 调度与资源治理</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-13">2026-08-13</time></dd></div><div><dt>字数</dt><dd>2624</dd></div><div><dt>预计阅读</dt><dd>9 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/Scheduling/">#Scheduling</a><a href="/tags/Autoscaling/">#Autoscaling</a><a href="/tags/SRE/">#SRE</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>Kubernetes 调度与资源治理</h1><time datetime="2026-08-13">2026-08-13</time><p class="tags"><a href="/tags/Kubernetes/">#Kubernetes</a><a href="/tags/Scheduling/">#Scheduling</a><a href="/tags/Autoscaling/">#Autoscaling</a><a href="/tags/SRE/">#SRE</a></p></header><div class="prose"><p><a id="reference-理解主线"></a></p>
+<h2 id="理解主线">理解主线</h2>
+<p>调度、扩缩容和配额共享资源声明，却解决不同问题：能放哪里、需要多少、谁可以创建。requests 同时影响放置和部分扩缩容判断，limits 则约束运行时资源使用。</p>
+<p><a id="reference-学习目标"></a></p>
+<h2 id="学习目标">学习目标</h2>
+<p>学完本章后，应当能够：</p>
+<ul>
+<li>解释 requests 如何影响调度与 HPA，limits 如何影响节流和 OOM。</li>
+<li>使用 Quota、LimitRange、PriorityClass、亲和性、污点与容忍实现资源治理。</li>
+<li>区分 HPA、VPA 与 Node Autoscaling 的控制对象，识别控制环冲突。</li>
+<li>根据 Scheduler 事件系统排查 Pending，而不是盲目增加 Node。</li>
+</ul>
+<blockquote>
+<p>心智模型：调度解决“这个 Pod 能放在哪里”，扩缩容解决“需要多少 Pod 或 Node”，配额与优先级解决“资源紧张时谁可以使用”。这些控制环共享 requests，错误配置会互相放大。</p>
+</blockquote>
+<p><a id="reference-治理目标"></a></p>
+<h2 id="治理目标">治理目标</h2>
+<p><img alt="IMG-20260817144516025" loading="lazy" decoding="async" width="3659" height="758" src="/_astro/IMG-20260817144516025.CQFtO7c8_2b1jdg.webp"></p>
+<blockquote>
+<p>图：业务指标触发 HPA、Scheduler 判断可调度性、Cluster Autoscaler 扩 Node，以及 VPA、Quota、PDB 等约束的反馈链。</p>
+</blockquote>
+<p>资源治理要同时解决四个问题：</p>
+<ol>
+<li>谁可以在什么范围创建资源。</li>
+<li>Pod 至少需要多少资源、最多能使用多少资源。</li>
+<li>Pod 应该调度到哪些 Node，以及故障域如何分布。</li>
+<li>负载与 Node 容量如何随需求变化。</li>
+</ol>
+<p><a id="reference-namespace"></a></p>
+<h2 id="namespace">Namespace</h2>
+<p>Namespace 用于划分资源名称和管理边界，适合按环境、团队或租户组织资源。Namespace 本身不提供完整安全隔离，还需结合 RBAC、ResourceQuota、LimitRange、NetworkPolicy 和 Pod Security Admission。</p>
+<p>生产环境避免长期把业务部署到 <code>default</code>，并为资源明确 Namespace：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> create</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> namespace</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> production</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> config</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> set-context</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --current</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --namespace=production</span></span></code></pre>
+<p><a id="reference-requests-与-limits"></a></p>
+<h2 id="requests-与-limits">requests 与 limits</h2>
+<p><a id="reference-request-和-limit-的核心设计意义"></a></p>
+<h3 id="request-和-limit-的核心设计意义">Request 和 Limit 的核心设计意义</h3>
+<p><strong>为什么需要 request 和 limit？</strong></p>
+<p>在集群中，同一个 Node 上运行多个 Pod，需要解决两个问题：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>问题 1：调度器如何判断这个 Pod 能否放在某个 Node 上？</span></span>
+<span class="line"><span>  - 不能只看当前实时使用量（实时值波动太大）</span></span>
+<span class="line"><span>  - 需要一个"预期需要量"来做调度决策</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>问题 2：一个 Pod 用了多少资源是"超限"？该如何处理？</span></span>
+<span class="line"><span>  - Pod 是否能临时突增使用资源（短时间峰值）</span></span>
+<span class="line"><span>  - 长期超用应该如何处理（限制还是驱逐）</span></span></code></pre>
+<p><strong>Request 与 Limit 分工：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>┌─────────────────────────────────────────────────────┐</span></span>
+<span class="line"><span>│  Pod 资源管理的三个阶段                              │</span></span>
+<span class="line"><span>│                                                     │</span></span>
+<span class="line"><span>│  调度阶段（Request）                               │</span></span>
+<span class="line"><span>│  ├─ Scheduler 看 request 值                         │</span></span>
+<span class="line"><span>│  ├─ 检查 Node 剩余容量是否 ≥ request               │</span></span>
+<span class="line"><span>│  └─ 决定能否放这个 Pod                              │</span></span>
+<span class="line"><span>│                                                     │</span></span>
+<span class="line"><span>│  运行阶段（Limit）                                 │</span></span>
+<span class="line"><span>│  ├─ 容器实际使用资源 &lt; limit                        │</span></span>
+<span class="line"><span>│  │  └─ 正常运行，允许临时突增（CPU 可争抢，内存）  │</span></span>
+<span class="line"><span>│  ├─ 容器实际使用资源 ≈ limit                        │</span></span>
+<span class="line"><span>│  │  └─ 可能被限流（CPU throttling）或驱逐（内存）  │</span></span>
+<span class="line"><span>│  └─ 单位时间被驱逐/限流的次数                       │</span></span>
+<span class="line"><span>│     └─ 是告警信号（需要提高 limit 或加 Pod）       │</span></span>
+<span class="line"><span>└─────────────────────────────────────────────────────┘</span></span></code></pre>
+<p><strong>关键概念对比：</strong></p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Request</th>
+<th>Limit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>定义</strong></td>
+<td>Pod <strong>预期需要</strong>多少资源</td>
+<td>Pod <strong>最多能用</strong>多少资源</td>
+</tr>
+<tr>
+<td><strong>发生时机</strong></td>
+<td>调度时（Scheduler 决策）</td>
+<td>运行时（Kubelet enforcement）</td>
+</tr>
+<tr>
+<td><strong>作用角色</strong></td>
+<td>Scheduler 的<strong>可调度性判断</strong></td>
+<td>Kubelet 的<strong>资源隔离</strong></td>
+</tr>
+<tr>
+<td><strong>CPU 超过</strong></td>
+<td>不触发调度决策</td>
+<td>被 <strong>CFS throttling</strong>（限流）</td>
+</tr>
+<tr>
+<td><strong>内存超过</strong></td>
+<td>不触发调度决策</td>
+<td>Pod 被 <strong>OOMKilled</strong>（驱逐）</td>
+</tr>
+<tr>
+<td><strong>建议关系</strong></td>
+<td>limit ≥ request（通常 1.5-2 倍）</td>
+<td>limit ≥ request</td>
+</tr>
+</tbody>
+</table>
+<p><strong>类比理解（面试好用）：</strong></p>
+<blockquote>
+<p>Request 和 Limit 就像“航空公司的座位管理”：</p>
+<ul>
+<li>
+<p><strong>Request</strong> = 你提前购票时说“我需要一个座位”，航空公司据此确认是否能接待你</p>
+<ul>
+<li>航空公司看 request 来决定是否给你分配座位（调度决策）</li>
+<li>航空公司不会说“你这趟航班只坐了 0.5 个座位，让你分享一个”</li>
+<li>Request 影响的是<strong>整体规划</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Limit</strong> = 上飞机后，你最多能占用 1 个座位，不能占 1.5 个</p>
+<ul>
+<li>如果你超过座位（比如 limit 定为 1 个座位，你想占 1.2 个）</li>
+<li>乘务员会制止你（内存超 limit → OOMKilled；CPU 超 limit → 限流）</li>
+<li>Limit 影响的是<strong>运行时的隔离</strong></li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p><strong>错用会怎样：</strong></p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Request 偏低：</span></span>
+<span class="line"><span>  ┌──────────────────────────────┐</span></span>
+<span class="line"><span>  │ Node 可用：5GB 内存            │</span></span>
+<span class="line"><span>  │ Pod1: request=1GB, limit=3GB  │</span></span>
+<span class="line"><span>  │ Pod2: request=1GB, limit=3GB  │</span></span>
+<span class="line"><span>  │ Pod3: request=1GB, limit=3GB  │</span></span>
+<span class="line"><span>  │ （Scheduler 都允许）           │</span></span>
+<span class="line"><span>  │                              │</span></span>
+<span class="line"><span>  │ 实际运行：                     │</span></span>
+<span class="line"><span>  │ Pod1 用 2GB, Pod2 用 2GB       │</span></span>
+<span class="line"><span>  │ Pod3 要 2GB → 内存不足！       │</span></span>
+<span class="line"><span>  │ Pod3 被 OOMKilled             │</span></span>
+<span class="line"><span>  └──────────────────────────────┘</span></span>
+<span class="line"><span>  </span></span>
+<span class="line"><span>  原因：Request 不能真实反映需求，导致过度装箱</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Request 偏高：</span></span>
+<span class="line"><span>  ┌──────────────────────────────┐</span></span>
+<span class="line"><span>  │ Node 可用：5GB 内存            │</span></span>
+<span class="line"><span>  │ Pod1: request=2GB, limit=4GB  │</span></span>
+<span class="line"><span>  │ Pod2: request=2GB, limit=4GB  │</span></span>
+<span class="line"><span>  │ Pod3: request=2GB, limit=4GB  │</span></span>
+<span class="line"><span>  │ （第 3 个 Pod Pending）        │</span></span>
+<span class="line"><span>  │                              │</span></span>
+<span class="line"><span>  │ 实际只用 1GB×3 = 3GB          │</span></span>
+<span class="line"><span>  │ 但 2GB×3 = 6GB &gt; 5GB，无法调度  │</span></span>
+<span class="line"><span>  │ 浪费了 Node 容量，误导扩容     │</span></span>
+<span class="line"><span>  └──────────────────────────────┘</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>  原因：Request 过高导致资源浪费、假扩容</span></span></code></pre>
+<p><a id="reference-详细对比表"></a></p>
+<h3 id="详细对比表">详细对比表</h3>
+<table>
+<thead>
+<tr>
+<th>配置</th>
+<th>调度/运行语义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU request</td>
+<td>Scheduler 计算 Node 是否可容纳 Pod；HPA 的 CPU 利用率通常也以它为分母</td>
+</tr>
+<tr>
+<td>Memory request</td>
+<td>Scheduler 预留容量的重要依据，也影响 Pod QoS</td>
+</tr>
+<tr>
+<td>CPU limit</td>
+<td>超过时通常被 CFS throttling，不会因此直接 OOM</td>
+</tr>
+<tr>
+<td>Memory limit</td>
+<td>超过时容器可能被 OOMKilled</td>
+</tr>
+</tbody>
+</table>
+<p><a id="reference-调度决策的核心逻辑"></a></p>
+<h3 id="调度决策的核心逻辑">调度决策的核心逻辑</h3>
+<p>Scheduler 主要依据 request 而非实时使用量调度。request 偏低会导致过度装箱和节点压力；偏高会造成资源浪费、Pod Pending，并误导节点自动扩缩容。</p>
+<p>Pod QoS 分为 <code>Guaranteed</code>、<code>Burstable</code>、<code>BestEffort</code>。节点资源压力下，QoS 较低且超用 request 的 Pod 通常更容易被驱逐，但 QoS 不是业务优先级替代品。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> top</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --containers</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> jsonpath='{.status.qosClass}{"\n"}'</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> node/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p><a id="reference-设定建议"></a></p>
+<h3 id="设定建议">设定建议</h3>
+<p><strong>Request 的设定：</strong></p>
+<ul>
+<li>基于历史实际使用量的 P50/P95</li>
+<li>加上启动峰值和业务增长率预留</li>
+<li>定期审查和调整（不是一成不变）</li>
+</ul>
+<p><strong>Limit 的设定：</strong></p>
+<ul>
+<li>通常是 request 的 1.5-2 倍</li>
+<li>给予容器处理突发流量的余地</li>
+<li>防止单个 Pod 吃掉整个 Node 的资源</li>
+</ul>
+<p><a id="reference-limitrange"></a></p>
+<h2 id="limitrange">LimitRange</h2>
+<p>LimitRange 在单个 Namespace 中约束或默认化容器、Pod、PVC 的 request/limit。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">LimitRange</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">container-defaults</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">production</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  limits</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Container</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    defaultRequest</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">100m</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">128Mi</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    default</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">1Gi</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    min</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">10m</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">32Mi</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    max</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">4</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">8Gi</span></span></code></pre>
+<p>默认值只是安全网，不能代替基于真实负载测量的容量规划。</p>
+<p><a id="reference-resourcequota"></a></p>
+<h2 id="resourcequota">ResourceQuota</h2>
+<p>ResourceQuota 限制 Namespace 的资源总量或对象数量。若配额追踪 CPU/内存 requests 或 limits，新建 Pod 通常必须显式设置相关字段，或由 LimitRange 注入默认值。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">ResourceQuota</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">production-quota</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">production</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  hard</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    requests.cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"20"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    requests.memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">40Gi</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    limits.cpu</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"40"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    limits.memory</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">80Gi</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    pods</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"200"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    persistentvolumeclaims</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"50"</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    services.loadbalancers</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"5"</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> resourcequota</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> production</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> limitrange</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> production</span></span></code></pre>
+<p><a id="reference-priorityclass-与抢占"></a></p>
+<h2 id="priorityclass-与抢占">PriorityClass 与抢占</h2>
+<p>PriorityClass 表示 Pod 的调度优先级。当高优先级 Pod 无法调度时，Scheduler 可能抢占低优先级 Pod。错误使用高优先级会把普通业务变成“不可驱逐对象”，加剧故障。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">scheduling.k8s.io/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">PriorityClass</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">business-critical</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">100000</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">globalDefault</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">false</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">description</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">仅用于经过评审的核心在线服务</span></span></code></pre>
+<ul>
+<li>平台预先定义少量等级，不允许团队随意创建极高值。</li>
+<li><code>system-cluster-critical</code>、<code>system-node-critical</code> 保留给集群关键组件。</li>
+<li>抢占对 PDB 的遵守是 best effort，不能把 PDB 当成绝对保护。</li>
+</ul>
+<p><a id="reference-node-选择与亲和性"></a></p>
+<h2 id="node-选择与亲和性">Node 选择与亲和性</h2>
+<p><a id="reference-nodeselector-与-node-affinity"></a></p>
+<h3 id="nodeselector-与-node-affinity">nodeSelector 与 Node Affinity</h3>
+<p><code>nodeSelector</code> 是简单的精确标签匹配；Node Affinity 支持 <code>In</code>、<code>NotIn</code>、<code>Exists</code> 等表达式，并分为硬约束与软偏好。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  affinity</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    nodeAffinity</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      requiredDuringSchedulingIgnoredDuringExecution</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        nodeSelectorTerms</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        - </span><span style="color:#22863A;--shiki-dark:#85E89D">matchExpressions</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          - </span><span style="color:#22863A;--shiki-dark:#85E89D">key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">node.kubernetes.io/instance-type</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            operator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">In</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            values</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">memory-optimized</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      preferredDuringSchedulingIgnoredDuringExecution</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">weight</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">100</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        preference</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">          matchExpressions</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">          - </span><span style="color:#22863A;--shiki-dark:#85E89D">key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">topology.kubernetes.io/zone</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            operator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">In</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">            values</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">zone-a</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]</span></span></code></pre>
+<p>硬约束过多会制造无法调度的 Pod，也会限制节点自动扩缩容的选择空间。业务偏好尽量使用 <code>preferred</code>，只有硬件、合规或存储约束才使用 <code>required</code>。</p>
+<p><a id="reference-pod-亲和性与反亲和性"></a></p>
+<h3 id="pod-亲和性与反亲和性">Pod 亲和性与反亲和性</h3>
+<ul>
+<li>Pod Affinity：让相关 Pod 靠近，减少网络延迟。</li>
+<li>Pod Anti-Affinity：让相同应用分散，降低单一故障域影响。</li>
+<li><code>topologyKey</code> 决定 Node、Zone 等故障域，常用 <code>kubernetes.io/hostname</code> 和 <code>topology.kubernetes.io/zone</code>。</li>
+</ul>
+<p>严格反亲和性在资源紧张或故障域不足时会导致 Pending。对于多副本均匀分布，通常优先使用 Topology Spread Constraints。</p>
+<p><a id="reference-taint-与-toleration"></a></p>
+<h2 id="taint-与-toleration">Taint 与 Toleration</h2>
+<p>Taint 作用于 Node，Toleration 作用于 Pod。Toleration 只表示 Pod 可以容忍该污点，并不保证一定调度到该 Node；若要专用节点，通常同时配置 Node Affinity。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> taint</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nodes</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> dedicated=gpu:NoSchedule</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> node/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> grep</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A3</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> Taints</span></span></code></pre>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  tolerations</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">key</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">dedicated</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    operator</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Equal</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">gpu</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    effect</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">NoSchedule</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  nodeSelector</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    dedicated</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">gpu</span></span></code></pre>
+<p>常见 effect：</p>
+<ul>
+<li><code>NoSchedule</code>：新 Pod 不会调度，已运行 Pod 不受影响。</li>
+<li><code>PreferNoSchedule</code>：尽量避免调度，是软限制。</li>
+<li><code>NoExecute</code>：不容忍的已有 Pod 也会被驱逐；可用 <code>tolerationSeconds</code> 延迟驱逐。</li>
+</ul>
+<p><a id="reference-hpa"></a></p>
+<h2 id="hpa">HPA</h2>
+<p>HorizontalPodAutoscaler 自动修改 Deployment、StatefulSet 等可扩缩对象的副本数，不适用于 DaemonSet。资源指标通常来自 Metrics API，自定义/外部指标需要相应 Adapter。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">autoscaling/v2</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">HorizontalPodAutoscaler</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">metadata</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  namespace</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">production</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">spec</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  scaleTargetRef</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    apiVersion</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">apps/v1</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    kind</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Deployment</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">api</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  minReplicas</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  maxReplicas</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">20</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  behavior</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    scaleUp</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      stabilizationWindowSeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">0</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      policies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">      - </span><span style="color:#22863A;--shiki-dark:#85E89D">type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Percent</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        value</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">100</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        periodSeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">60</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    scaleDown</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      stabilizationWindowSeconds</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">300</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">  metrics</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">  - </span><span style="color:#22863A;--shiki-dark:#85E89D">type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Resource</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">    resource</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">cpu</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">      target</span><span style="color:#24292E;--shiki-dark:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        type</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">Utilization</span></span>
+<span class="line"><span style="color:#22863A;--shiki-dark:#85E89D">        averageUtilization</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">60</span></span></code></pre>
+<p>CPU <code>averageUtilization</code> 是相对 CPU request 的百分比。未设置 request 会使相应 Pod 的 CPU 利用率无法计算。HPA 与手工设置 <code>.spec.replicas</code> 可能相互覆盖，应明确唯一控制方。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> hpa</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -A</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> hpa/api</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> production</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> top</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> production</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> apiservice</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> grep</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> metrics</span></span></code></pre>
+<p><a id="reference-vpa"></a></p>
+<h2 id="vpa">VPA</h2>
+<p>VerticalPodAutoscaler 根据历史与实时使用量建议或调整容器 requests。VPA 不随 Kubernetes 核心默认安装，需要额外部署其组件与 CRD。</p>
+<p>常见模式：</p>
+<ul>
+<li><code>Off</code>：只生成建议，适合先做容量分析。</li>
+<li><code>Initial</code>：只在 Pod 创建时应用建议。</li>
+<li><code>Recreate</code>/<code>Auto</code>：可能需要重建 Pod 才能调整资源，使用前评估中断。</li>
+</ul>
+<p>CPU/内存型 HPA 与 VPA 同时控制相同资源时可能产生反馈冲突。常见组合是 VPA 先用 <code>Off</code> 生成建议，HPA 按业务指标扩副本；或者明确拆分各自控制的指标。</p>
+<p><a id="reference-node-autoscaling--cluster-autoscaler"></a></p>
+<h2 id="node-autoscaling--cluster-autoscaler">Node Autoscaling / Cluster Autoscaler</h2>
+<p>节点自动扩缩容与 HPA 解决的问题不同：HPA 创建更多 Pod，节点自动扩缩容为无法调度的 Pod 提供 Node，并在容量空闲时合并 Node。</p>
+<p>Cluster Autoscaler 基于预配置 Node Group 增减 Node。它主要依据 Pending Pod 的 request、调度约束和 Node Group 模板判断是否扩容，不以实际 CPU 使用率直接扩 Node。</p>
+<p>完整链路：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>业务指标升高 → HPA 增加副本 → 新 Pod 因容量不足 Pending</span></span>
+<span class="line"><span>→ Cluster Autoscaler 扩 Node → Scheduler 放置 Pod</span></span>
+<span class="line"><span>→ 负载下降、HPA 缩副本 → 空闲 Node 被安全合并</span></span></code></pre>
+<p>PDB、Local PV、严格亲和性、安全 Pod、不可驱逐注解等都可能阻止缩容。生产环境必须对扩容失败、云配额不足和 Pending 时长告警。</p>
+<p><a id="reference-pending-排障-runbook"></a></p>
+<h2 id="pending-排障-runbook">Pending 排障 Runbook</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pod/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">po</span><span style="color:#24292E;--shiki-dark:#E1E4E8">d</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> events</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --sort-by=.lastTimestamp</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nodes</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -L</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> topology.kubernetes.io/zone,node.kubernetes.io/instance-type</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> describe</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> node/</span><span style="color:#D73A49;--shiki-dark:#F97583">&lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">nod</span><span style="color:#24292E;--shiki-dark:#E1E4E8">e</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> resourcequota,limitrange</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">kubectl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> get</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> hpa</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -n</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF">n</span><span style="color:#24292E;--shiki-dark:#E1E4E8">s</span><span style="color:#D73A49;--shiki-dark:#F97583">&gt;</span></span></code></pre>
+<p>按 Scheduler 事件分类：</p>
+<ul>
+<li><code>Insufficient cpu/memory</code>：检查 request、Node 可分配量与扩容器。</li>
+<li><code>untolerated taint</code>：检查 taint/toleration，避免盲目添加 <code>Exists</code>。</li>
+<li><code>didn't match Pod's node affinity/selector</code>：核对 Node 标签与硬约束。</li>
+<li><code>didn't match pod anti-affinity</code>：检查副本数与可用故障域。</li>
+<li><code>unbound immediate PersistentVolumeClaims</code>：转到 PVC/StorageClass 排障。</li>
+<li>ResourceQuota 拒绝创建：查看 admission 返回信息与配额使用量。</li>
+</ul>
+<p><a id="reference-生产基线"></a></p>
+<h2 id="生产基线">生产基线</h2>
+<ul>
+<li>每个 Namespace 配置责任人、RBAC、Quota、LimitRange 和成本标签。</li>
+<li>requests 根据 P50/P95 用量、启动峰值和 SLO 定期校准；内存 limit 留出合理峰值与 GC 空间。</li>
+<li>核心服务使用至少两个故障域，避免不必要的硬亲和性。</li>
+<li>HPA 设置最小冗余、最大成本边界、缩容稳定窗口和扩容失败告警。</li>
+<li>VPA 先以建议模式观察；节点自动扩缩容必须演练云配额不足、Node 启动失败和安全缩容。</li>
+</ul>
+<p><a id="reference-实践与验收"></a></p>
+<h2 id="实践与验收">实践与验收</h2>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> 为练习 Namespace 设置 LimitRange 与 ResourceQuota，观察未声明资源和超额创建的结果。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 用不可满足的 node affinity 或未容忍 taint 制造 Pending，再通过事件修复。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 对 CPU 负载配置 HPA，确认指标、requests、期望副本和实际副本变化一致。</li>
+<li class="task-list-item"><input type="checkbox" disabled> 制造 HPA 扩容后 Pod Pending，判断瓶颈在指标、工作负载还是 Node 容量。</li>
+</ul>
+<p>验收标准：看到 Pending 或扩容失效时，能够用证据区分资源不足、约束冲突、配额拒绝、指标缺失与节点扩容失败。</p>
+<p><a id="reference-官方参考"></a></p>
+<h2 id="官方参考">官方参考</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/policy/resource-quotas/">Kubernetes：资源配额</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/policy/limit-range/">Kubernetes：LimitRange</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/scheduling-eviction/">Kubernetes：调度、抢占与驱逐</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/">Kubernetes：HPA</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/autoscaling/">Kubernetes：工作负载自动扩缩容</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/cluster-administration/node-autoscaling/">Kubernetes：Node 自动扩缩容</a></li>
+</ul>
+<p><a id="reference-复习与应用"></a></p>
+<h2 id="复习与应用">复习与应用</h2>
+<p>Pending 时如何用事件区分容量不足、约束不匹配和配额拒绝？分别判断加 Node 是否有效。</p>
+<p><a id="reference-关联阅读"></a></p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li>继续阅读对应概念或实践：<a href="/notes/computer-science/cloud/kubernetes/kubernetes-high-availability/">L10-High Availability</a>。</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/cloud/">云平台与运维学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#理解主线">理解主线</a></li><li style="--depth: 0"><a href="#学习目标">学习目标</a></li><li style="--depth: 0"><a href="#治理目标">治理目标</a></li><li style="--depth: 0"><a href="#namespace">Namespace</a></li><li style="--depth: 0"><a href="#requests-与-limits">requests 与 limits</a></li><li style="--depth: 1"><a href="#request-和-limit-的核心设计意义">Request 和 Limit 的核心设计意义</a></li><li style="--depth: 1"><a href="#详细对比表">详细对比表</a></li><li style="--depth: 1"><a href="#调度决策的核心逻辑">调度决策的核心逻辑</a></li><li style="--depth: 1"><a href="#设定建议">设定建议</a></li><li style="--depth: 0"><a href="#limitrange">LimitRange</a></li><li style="--depth: 0"><a href="#resourcequota">ResourceQuota</a></li><li style="--depth: 0"><a href="#priorityclass-与抢占">PriorityClass 与抢占</a></li><li style="--depth: 0"><a href="#node-选择与亲和性">Node 选择与亲和性</a></li><li style="--depth: 1"><a href="#nodeselector-与-node-affinity">nodeSelector 与 Node Affinity</a></li><li style="--depth: 1"><a href="#pod-亲和性与反亲和性">Pod 亲和性与反亲和性</a></li><li style="--depth: 0"><a href="#taint-与-toleration">Taint 与 Toleration</a></li><li style="--depth: 0"><a href="#hpa">HPA</a></li><li style="--depth: 0"><a href="#vpa">VPA</a></li><li style="--depth: 0"><a href="#node-autoscaling--cluster-autoscaler">Node Autoscaling / Cluster Autoscaler</a></li><li style="--depth: 0"><a href="#pending-排障-runbook">Pending 排障 Runbook</a></li><li style="--depth: 0"><a href="#生产基线">生产基线</a></li><li style="--depth: 0"><a href="#实践与验收">实践与验收</a></li><li style="--depth: 0"><a href="#官方参考">官方参考</a></li><li style="--depth: 0"><a href="#复习与应用">复习与应用</a></li><li style="--depth: 0"><a href="#关联阅读">关联阅读</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

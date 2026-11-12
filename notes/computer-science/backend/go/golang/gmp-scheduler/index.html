@@ -1,0 +1,204 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>GMP · Musuyin&#39; Home</title><meta name="description" content="G、M、P 分别描述待执行任务、系统线程与执行 Go 代码所需的调度资源。理解三者的绑定与解绑后，再分析本地队列、工作窃取、网络轮询和抢占；队列长度与调度顺序属于特定运行时实现。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/go/golang/gmp-scheduler/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="GMP · Musuyin' Home"><meta property="og:description" content="G、M、P 分别描述待执行任务、系统线程与执行 Go 代码所需的调度资源。理解三者的绑定与解绑后，再分析本地队列、工作窃取、网络轮询和抢占；队列长度与调度顺序属于特定运行时实现。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/go/golang/gmp-scheduler/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">GMP</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-08-23">2026-08-23</time></dd></div><div><dt>字数</dt><dd>3104</dd></div><div><dt>预计阅读</dt><dd>11 分钟</dd></div></dl><div class="tag-cloud" aria-label="标签"><a href="/tags/Go/">#Go</a><a href="/tags/%E5%B9%B6%E5%8F%91/">#并发</a><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a></div></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>GMP</h1><time datetime="2026-08-23">2026-08-23</time><p class="tags"><a href="/tags/Go/">#Go</a><a href="/tags/%E5%B9%B6%E5%8F%91/">#并发</a><a href="/tags/%E5%85%AB%E8%82%A1/">#八股</a></p></header><div class="prose"><p>G、M、P 分别描述待执行任务、系统线程与执行 Go 代码所需的调度资源。理解三者的绑定与解绑后，再分析本地队列、工作窃取、网络轮询和抢占；队列长度与调度顺序属于特定运行时实现。</p>
+<p><a id="reference-运行模式"></a></p>
+<h2 id="运行模式">运行模式</h2>
+<ul>
+<li>
+<p>G：goroutine，协程</p>
+</li>
+<li>
+<p>M：machine，系统线程</p>
+</li>
+<li>
+<p>P：processor，逻辑处理器</p>
+</li>
+<li>
+<p>M 必须绑定 P 才能执行 G</p>
+</li>
+<li>
+<p>每个 P 维护自己的本地 G 队列（len=256）</p>
+</li>
+<li>
+<p>M 从 P 的本地队列取 G 执行</p>
+<ul>
+<li>当本地队列空时，M 会按优先级从<strong>全局队列</strong>、<strong>网络轮询器</strong>、<strong>其他 P 队列</strong>中窃取 goroutine（work-stealing）</li>
+</ul>
+</li>
+</ul>
+<p><img alt="IMG-20260831131251371" loading="lazy" decoding="async" width="1536" height="1024" src="/_astro/IMG-20260831131251371.DWpkrQdh_ZJRrEz.webp"></p>
+<p><a id="reference-go-scheduler"></a></p>
+<h2 id="go-scheduler">Go scheduler</h2>
+<p>Go scheduler 就是 Go 运行时的<strong>协程调度器</strong>，负责在系统线程上调度执行 goroutine。</p>
+<ul>
+<li>是 Go runtime 的一部分，它内嵌在 Go 程序里，和 Go 程序一起运行。</li>
+<li>主要工作是决定哪个 goroutine 在哪个线程上运行，以及何时进行上下文切换。</li>
+</ul>
+<p>scheduler 的核心是 <code>schedule()</code> 函数，它在无限循环中寻找可运行的 goroutine。当找到后通过 <code>execute()</code> 函数切换到 goroutine 执行，goroutine 主动让出或被抢占时再回到调度循环。</p>
+<p><a id="reference-goroutine-调度策略"></a></p>
+<h2 id="goroutine-调度策略">goroutine 调度策略</h2>
+<p>Go 语言采用的是<strong>抢占式调度策略</strong>。Go 会启动一个线程，一直运行着 <code>sysmon</code> 函数，<code>sysmon</code> 运行在 M 上，且不需要 P。当 <code>sysmon</code> 发现 M 已运行同一个 G 10ms 以上时，它会将该 G 的内部参数  <code>preempt</code>  设置为 true，表示需要被抢占，让出 CPU 了</p>
+<ul>
+<li>Before Go 1.14：调度策略是<strong>协作式</strong>抢占调度
+<ul>
+<li>主要是通过<strong>函数调用</strong>来实现的，在编译期，编译器会在几乎所有的函数调用的入口处，插入一小段<strong>检查代码</strong>。</li>
+<li>这段代码会检查当前 goroutine 是否已经被标记为需要被抢占。
+<ul>
+<li>如果是，当 G 进行函数调用时，G 会检查自己的  <code>preempt</code>  标志，如果它为 true，则它将自己与 M 分离并推入 goroutine 的全局队列，抢占完成。</li>
+</ul>
+</li>
+<li>但这种模式有个明显的缺陷：如果一个 goroutine 执行了一个不包含任何函数调用的<strong>超大循环</strong>，那么调度器的“抢占”标记就永远得不到检查，这个 goroutine 就会一直霸占着 M，导致同一个 P 队列里的其他 G 全都没机会执行，造成<strong>调度延迟</strong>。</li>
+</ul>
+</li>
+<li>After Go 1.14：调度策略<strong>基于信号的异步抢占</strong>机制
+<ul>
+<li><code>sysmon</code> 会检测到运行了 10ms 以上的 G</li>
+<li>然后 <code>sysmon</code> 向运行 G 的 M 发送信号（<code>SIGURG</code>）。</li>
+<li>Go 的信号处理程序会调用 M 上的一个叫作 <code>gsignal</code> 的 goroutine 来处理该信号，并使其检查该信号。</li>
+<li><code>gsignal</code> 看到抢占信号，停止正在运行的 G。</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-调度发生时机"></a></p>
+<h2 id="调度发生时机">调度发生时机</h2>
+<ul>
+<li>等待读取或写入未缓冲的通道</li>
+<li>由于 <code>time.Sleep()</code> 而等待</li>
+<li>等待互斥量释放</li>
+<li>发生系统调用</li>
+</ul>
+<p><a id="reference-m-寻找-g-的过程"></a></p>
+<h2 id="m-寻找-g-的过程">M 寻找 G 的过程</h2>
+<ol>
+<li>M 优先查找本地队列（LRQ）：从当前 P 的 LRQ 里 <code>runqget</code> 一个 G，无锁 CAS</li>
+<li>如果本地队列中没有可运行 G，检查全局队列（GRQ），<code>globrunqget</code>，加锁查找</li>
+<li>如果全局队列中没有，则检查网络轮询器（netpoll），检查 <code>netpoll</code> 中有没有因为网络 IO 就绪的 G（非阻塞模式）</li>
+<li>如果仍无，从另一 P 偷取 G：随机找，获取一半（work-steal）</li>
+</ol>
+<p><img alt="IMG-20260831131251416" loading="lazy" decoding="async" width="1402" height="1122" src="/_astro/IMG-20260831131251416.pD43an8D_24JVh0.webp"></p>
+<p><a id="reference-work-steal"></a></p>
+<h3 id="work-steal">work-steal</h3>
+<p>窃取的实质就是遍历所有 P，查看其运行队列是否有 goroutine，如果有，则取其一半到当前工作线程的运行队列</p>
+<p>为了保证公平性，遍历 P 时并不是按照数组下标顺序访问 P，而是使用了一种伪随机的方式遍历 <code>allp</code> 中的每个 P，防止每次遍历时使用同样的顺序访问 <code>allp</code> 中的元素</p>
+<p><a id="reference-p-的作用"></a></p>
+<h2 id="p-的作用">P 的作用</h2>
+<p>GMP 中的 P 层理论上可以去掉，但会带来严重的性能问题。</p>
+<ul>
+<li><strong>掉 P 的后果</strong>：如果直接变成 GM 模型，所有 M 都需要从<strong>全局队列</strong>中获取 goroutine，这就需要全局锁保护。在高并发场景下，大量 M 争抢同一把锁会造成严重的<strong>锁竞争</strong>，CPU 大部分时间都浪费在等锁上，调度效率急剧下降。</li>
+<li><strong>P 层的价值</strong>：P 的存在实现了<strong>无锁的本地调度</strong>。每个 P 维护独立的本地队列，M 绑定 P 后可以直接从本地队列取 G 执行，大部分情况下都不需要全局锁。只有本地队列空了才去偷取，这大大减少了锁竞争。</li>
+</ul>
+<p><a id="reference-p-和-m-的创建时机"></a></p>
+<h2 id="p-和-m-的创建时机">P 和 M 的创建时机</h2>
+<p><a id="reference-p-的创建时机"></a></p>
+<h3 id="p-的创建时机">P 的创建时机</h3>
+<ul>
+<li>P 在调度器初始化时<strong>一次性创建</strong>。</li>
+<li>在 <code>schedinit()</code> 函数中会调用 <code>procresize()</code>，根据 <code>GOMAXPROCS</code> 值创建对应数量的 P 对象，存储在全局的 <code>allp</code> 数组中。</li>
+<li>之后 P 的数量基本固定，只有在调用 <code>runtime.GOMAXPROCS()</code> 动态调整时才会重新分配 P。</li>
+</ul>
+<p><a id="reference-m-的创建时机"></a></p>
+<h3 id="m-的创建时机">M 的创建时机</h3>
+<p>M 采用<strong>按需创建</strong>策略。初始只有 m0 存在，当出现以下情况时会创建新的 M：</p>
+<ul>
+<li>所有现有 M 都在执行阻塞的系统调用，但还有可运行的 goroutine 需要执行</li>
+<li>通过 <code>startm()</code> 函数发现没有空闲 M 可以绑定 P 执行 goroutine</li>
+<li>M 的数量受 runtime 内部  <code>sched.maxmcount</code>  限制（默认 10000），可通过  <code>runtime/debug.SetMaxThreads()</code>  调整（Go 中并没有  <code>GOMAXTHREADS</code>  这一环境变量）</li>
+</ul>
+<p><a id="reference-m-的创建流程"></a></p>
+<h3 id="m-的创建流程">M 的创建流程</h3>
+<ul>
+<li>新 M 通过 <code>newm()</code> 函数创建，它会调用 <code>newosproc()</code> 创建新的系统线程，并为这个 M 分配独立的 g0。</li>
+<li>创建完成后，新 M 会进入 <code>mstart()</code> 开始调度循环。</li>
+</ul>
+<p><a id="reference-m0"></a></p>
+<h2 id="m0">m0</h2>
+<ul>
+<li>m0 是在 Go 启动时创建的第一个 M，m0 对应程序启动时的主系统线程，它在 Go 程序的整个生命周期中都存在。
+<ul>
+<li>与其他通过 <code>runtime.newm()</code> 动态创建的 M 不同，m0 是在程序初始化阶段<strong>静态分配</strong>的，有专门的<strong>全局变量</strong>存储。</li>
+</ul>
+</li>
+<li>m0 主要负责执行 Go 程序的<strong>启动流程</strong>，包括调度器初始化、内存管理器初始化、垃圾回收器设置等。
+<ul>
+<li>它会创建并运行第一个用户 goroutine 来执行 <code>main.main</code> 函数。</li>
+<li>在程序运行期间，m0 也参与正常的 goroutine 调度，和其他 M 没有本质区别。</li>
+<li>m0 在程序退出时还负责处理清理工作，比如等待其他 goroutine 结束、执行 defer 函数等。</li>
+</ul>
+</li>
+</ul>
+<p><img alt="IMG-20260831131251453" loading="lazy" decoding="async" width="1746" height="901" src="/_astro/IMG-20260831131251453.DfB40vFe_Z12Ky1t.webp"></p>
+<p><a id="reference-g0"></a></p>
+<h2 id="g0">g0</h2>
+<p>g0 是一个特殊的 goroutine，不是普通的用户协程，而是<strong>调度协程</strong>，每个 M 都有自己的 g0。</p>
+<ul>
+<li>它使用系统线程的原始栈空间，而不是像普通 goroutine 那样使用可增长的分段栈。
+<ul>
+<li>g0 的栈大小通常是 8KB，比普通 goroutine 的 2KB 初始栈要大。</li>
+</ul>
+</li>
+<li><strong>核心作用</strong>：g0 专门负责<strong>执行调度逻辑</strong>，包括 goroutine 的创建、销毁、调度决策等。
+<ul>
+<li>当 M 需要进行调度时，会从当前运行的用户 goroutine 切换到 g0 上执行 <code>schedule()</code> 函数。</li>
+<li>g0 还负责处理垃圾回收、栈扫描、信号处理等运行时操作。</li>
+</ul>
+</li>
+<li><strong>运行机制</strong>：正常情况下 M 在用户 goroutine 上运行用户代码，当发生调度事件时（如 goroutine 阻塞、抢占、系统调用返回等），M 会切换到 g0 执行调度器代码，选出下一个要运行的 goroutine 后再切换过去。</li>
+<li><strong>为什么需要 g0</strong>：因为调度器代码不能在普通 goroutine 的栈上执行，那样会有<strong>栈空间冲突和递归调度</strong>的问题。
+<ul>
+<li>g0 提供了一个独立的执行环境，确保调度器能安全稳定地工作。</li>
+</ul>
+</li>
+</ul>
+<p><a id="reference-g0-栈和用户栈的切换"></a></p>
+<h3 id="g0-栈和用户栈的切换">g0 栈和用户栈的切换</h3>
+<p>g0 和用户 goroutine 之间的栈切换，本质是<strong>SP 寄存器和栈指针的切换</strong></p>
+<ul>
+<li>当用户 goroutine 需要调度时，通过 <code>mcall()</code> 函数切换到 g0。</li>
+<li>这个过程会保存当前用户 goroutine 的 PC、SP 等寄存器到其 gobuf 中，然后将 SP 指向 g0 的栈，PC 指向传入的调度函数。</li>
+<li>调度完成后，通过 <code>gogo()</code> 函数从 g0 切换回用户 goroutine，恢复其保存的寄存器状态。</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="c"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">structG</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    uintptr    stackguard;</span><span style="color:#6A737D;--shiki-dark:#6A737D">    // 分段栈的可用空间下界</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    uintptr    stackbase;</span><span style="color:#6A737D;--shiki-dark:#6A737D">     // 分段栈的栈基址</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Gobuf    sched;</span><span style="color:#6A737D;--shiki-dark:#6A737D">           //协程切换时，利用sched域来保存上下文</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    uintptr    stack0;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    FuncVal</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">    fnstart;</span><span style="color:#6A737D;--shiki-dark:#6A737D">        // goroutine运行的函数void*    param;        // 用于传递参数，睡眠时其它goroutine设置param，唤醒时此goroutine可以获取</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    int16    status;</span><span style="color:#6A737D;--shiki-dark:#6A737D">          // 状态    Gidle,Grunnable,Grunning,Gsyscall,Gwaiting,Gdead</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    int64    goid;</span><span style="color:#6A737D;--shiki-dark:#6A737D">            // goroutine的id号</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    G</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">    schedlink;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    M</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">    m;</span><span style="color:#6A737D;--shiki-dark:#6A737D">                  // for debuggers, but offset not hard-coded</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    M</span><span style="color:#D73A49;--shiki-dark:#F97583">*</span><span style="color:#24292E;--shiki-dark:#E1E4E8">    lockedm;</span><span style="color:#6A737D;--shiki-dark:#6A737D">            // G被锁定只能在这个m上运行</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    uintptr    gopc;</span><span style="color:#6A737D;--shiki-dark:#6A737D">          // 创建这个goroutine的go表达式的pc...</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">};</span></span></code></pre>
+<p><a id="reference-面试追问"></a></p>
+<h2 id="面试追问">面试追问</h2>
+<p><a id="reference-为什么-gm-不够m-不能窃取吗"></a></p>
+<h3 id="为什么-gm-不够m-不能窃取吗">为什么 GM 不够，M 不能窃取吗</h3>
+<p>给每个 M 固定本地队列看似避免全局锁，但 M 是会阻塞、销毁和新建的系统线程；把队列、运行资格和线程生命周期绑死会造成迁移困难、队列失衡和资源浪费。P 是数量由 <code>GOMAXPROCS</code> 限制的稳定“执行配额”，持有本地 runq、mcache 等运行时资源；M 只是可替换的承载线程。<strong>P 可以偷 P 的工作，M 通过当前绑定的 P 参与窃取</strong>，这样既分片队列又限制并行执行 G 的数量。</p>
+<p><a id="reference-m-阻塞解绑与接手"></a></p>
+<h3 id="m-阻塞解绑与接手">M 阻塞、解绑与接手</h3>
+<p>进入可能长时间阻塞的系统调用前，runtime 会执行 <code>entersyscall</code> 标记 G 为 <code>_Gsyscall</code> 并解绑 P；P 被放回空闲列表，调度器唤醒或创建另一个 M 来绑定它继续执行其他 G。原 M 从 syscall 返回后尝试重新拿 P；拿不到则把 G 放入可运行队列，自己休眠/寻找工作。不是“提前准确预测”阻塞，而是在 syscall 包装路径上通知 runtime；对网络 I/O 优先使用 netpoll，避免阻塞 M。</p>
+<p>若所有 M 都阻塞在 syscall，只要仍有空闲 P 和可运行 G，runtime 会创建/唤醒 M（受 <code>SetMaxThreads</code> 上限约束），程序不会必然停住。若所有 P 都被不可抢占的长时间 cgo 调用等占住，才可能没有可运行资源；这是需要排查的异常状态。</p>
+<p><a id="reference-单核gomaxprocs1-的纯-cpu-死循环"></a></p>
+<h3 id="单核gomaxprocs1-的纯-cpu-死循环">单核、<code>GOMAXPROCS=1</code> 的纯 CPU 死循环</h3>
+<p>Go 1.14+ 有基于 <code>SIGURG</code> 的异步抢占，通常能在约 10ms 量级抢占，即使循环内没有函数调用，其他 G 仍会得到机会；因此不应说一定瘫痪。仍可能因为 cgo、禁用抢占、运行时/平台边界或长临界区出现明显延迟，CPU 密集任务应分块并在合适位置检查取消/让出。</p>
+<p><a id="reference-协程与系统线程的开销"></a></p>
+<h3 id="协程与系统线程的开销">协程与系统线程的开销</h3>
+<p>goroutine 初始栈很小且可增长，创建和切换主要由用户态 runtime 保存少量寄存器、栈指针和状态，不必每次进入内核；线程有内核对象、固定/较大栈和内核调度成本。线程切换还可能涉及内核调度、CPU 迁移、TLB/缓存影响；同一进程的线程通常共用页表，<strong>不必因为线程切换而切换页表</strong>，但跨进程才需要切 CR3/页表。</p>
+<p>协程缓存更友好是常见结果而非保证：G 在同一 M/P 上连续运行和窃取更少，工作集更可能留在本核缓存；OS 同样会通过 affinity、调度域尽力保持线程 CPU locality，只是它无法像语言 runtime 一样掌握 goroutine 的大量细粒度任务与队列语义。</p>
+<p>切换逻辑在汇编文件中实现，比如 <code>runtime·mcall</code> 和 <code>runtime·gogo</code>。这些函数直接操作 CPU 寄存器，确保切换的原子性和高效性。切换过程中会更新 <code>g.sched</code> 字段记录 goroutine 状态。</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>阻塞系统调用时，为什么需要让出 P？</li>
+<li>GOMAXPROCS 限制的是线程总数还是并行执行 Go 代码的资源数？</li>
+<li>为什么不能把 10ms 当作硬实时调度承诺？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#运行模式">运行模式</a></li><li style="--depth: 0"><a href="#go-scheduler">Go scheduler</a></li><li style="--depth: 0"><a href="#goroutine-调度策略">goroutine 调度策略</a></li><li style="--depth: 0"><a href="#调度发生时机">调度发生时机</a></li><li style="--depth: 0"><a href="#m-寻找-g-的过程">M 寻找 G 的过程</a></li><li style="--depth: 1"><a href="#work-steal">work-steal</a></li><li style="--depth: 0"><a href="#p-的作用">P 的作用</a></li><li style="--depth: 0"><a href="#p-和-m-的创建时机">P 和 M 的创建时机</a></li><li style="--depth: 1"><a href="#p-的创建时机">P 的创建时机</a></li><li style="--depth: 1"><a href="#m-的创建时机">M 的创建时机</a></li><li style="--depth: 1"><a href="#m-的创建流程">M 的创建流程</a></li><li style="--depth: 0"><a href="#m0">m0</a></li><li style="--depth: 0"><a href="#g0">g0</a></li><li style="--depth: 1"><a href="#g0-栈和用户栈的切换">g0 栈和用户栈的切换</a></li><li style="--depth: 0"><a href="#面试追问">面试追问</a></li><li style="--depth: 1"><a href="#为什么-gm-不够m-不能窃取吗">为什么 GM 不够，M 不能窃取吗</a></li><li style="--depth: 1"><a href="#m-阻塞解绑与接手">M 阻塞、解绑与接手</a></li><li style="--depth: 1"><a href="#单核gomaxprocs1-的纯-cpu-死循环">单核、GOMAXPROCS=1 的纯 CPU 死循环</a></li><li style="--depth: 1"><a href="#协程与系统线程的开销">协程与系统线程的开销</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>

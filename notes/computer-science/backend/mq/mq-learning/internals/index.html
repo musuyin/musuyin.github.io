@@ -1,0 +1,112 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="garden" style="--garden-art-large: url(&quot;/images/themes/cucumber-large.webp&quot;);--garden-art-small: url(&quot;/images/themes/cucumber-small.webp&quot;);--gothic-art-large: url(&quot;/images/themes/gothic-large.webp&quot;);--gothic-art-small: url(&quot;/images/themes/gothic-small.webp&quot;)"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>05-internals · Musuyin&#39; Home</title><meta name="description" content="队列 Broker 跟踪待处理与未确认消息，分区日志保存数据并分离消费位置。理解状态放在哪里后，就能解释灵活路由、细粒度 ACK、保留回放与批量吞吐为何适用于不同场景。"><link rel="canonical" href="https://musuyin.github.io/notes/computer-science/backend/mq/mq-learning/internals/"><link rel="icon" href="/favicon.svg?v=flower-5"><link rel="alternate" type="application/rss+xml" title="Musuyin' Home" href="/rss.xml"><meta property="og:title" content="05-internals · Musuyin' Home"><meta property="og:description" content="队列 Broker 跟踪待处理与未确认消息，分区日志保存数据并分离消费位置。理解状态放在哪里后，就能解释灵活路由、细粒度 ACK、保留回放与批量吞吐为何适用于不同场景。"><meta property="og:url" content="https://musuyin.github.io/notes/computer-science/backend/mq/mq-learning/internals/"><meta property="og:type" content="website"><script>
+      try {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'garden' || theme === 'gothic') document.documentElement.dataset.theme = theme;
+      } catch { /* Use the default theme when storage is unavailable. */ }
+    </script><link rel="stylesheet" href="/_astro/BaseLayout.Mj7VJ3hw.css"></head><body><a class="skip-link" href="#main">跳到正文</a><div class="shell"><header class="site-header"><a class="brand" href="/">Musuyin&#39; Home<span class="brand-mark" aria-hidden="true"></span></a><nav class="primary-nav" aria-label="主导航"><a href="/">首页</a><a href="/notes/">笔记</a><a href="/anime/">动漫</a><a href="/films/">电影</a><a href="/game/">游戏</a><a href="/music/">音乐</a><a href="/reading/">阅读</a><a href="/friends/">友链</a><a href="/about-site/">关于小站</a><a href="/about-me/">关于我</a><button id="theme-switch" class="theme-switch" type="button" aria-label="黑夜" data-garden-label="白昼" data-gothic-label="黑夜"><svg class="theme-sun" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path></svg><svg class="theme-moon" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5a8.7 8.7 0 1 0 10.7 10.7Z"></path></svg></button><script type="module">var e=document.querySelector(`#theme-switch`);function t(){let t=document.documentElement.dataset.theme===`gothic`;e&&e.setAttribute(`aria-label`,t?e.dataset.gardenLabel:e.dataset.gothicLabel)}t(),e?.addEventListener(`click`,()=>{let e=document.documentElement.dataset.theme===`gothic`?`garden`:`gothic`;document.documentElement.dataset.theme=e;try{localStorage.setItem(`theme`,e)}catch{}t()});</script></nav></header><div class="page-grid"><aside class="sidebar sidebar-left" aria-label="个人资料与最近文章"><section class="side-card profile-card"><img class="avatar" src="https://avatars.githubusercontent.com/u/100497286?v=4" alt="这照片是你吗" width="96" height="96"><h2>musuyin</h2><p>木素音的小屋</p><div class="profile-links"><a href="https://github.com/musuyin">GitHub</a></div></section><section class="side-card article-info"><h2>本文信息</h2><p class="current-title">05-internals</p><dl><div><dt>发布日期</dt><dd><time datetime="2026-10-11">2026-10-11</time></dd></div><div><dt>字数</dt><dd>1910</dd></div><div><dt>预计阅读</dt><dd>7 分钟</dd></div></dl></section><section class="side-card"><h2>最近文章</h2><ul class="recent-list"><li><a href="/notes/computer-science/">计算机科学学习地图</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/agent/">智能体学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/backend/">后端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/">云平台与运维学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/frontend/">前端开发学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/theory/">理论基础学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/tool/">开发工具学习索引</a><time datetime="2026-11-11">2026-11-11</time></li><li><a href="/notes/computer-science/cloud/component/openstack/">OpenStack</a><time datetime="2026-11-09">2026-11-09</time></li><li><a href="/notes/computer-science/agent/collections/prompt/english-answer-prompt/">English Answer Promotion</a><time datetime="2026-11-06">2026-11-06</time></li><li><a href="/notes/computer-science/agent/theory/llm-runtime-requests/">Agent 模型调用</a><time datetime="2026-10-28">2026-10-28</time></li></ul></section></aside><main id="main"><article><header class="article-header"><a href="/notes/">← 全部笔记</a><h1>05-internals</h1><time datetime="2026-10-11">2026-10-11</time></header><div class="prose"><p>队列 Broker 跟踪待处理与未确认消息，分区日志保存数据并分离消费位置。理解状态放在哪里后，就能解释灵活路由、细粒度 ACK、保留回放与批量吞吐为何适用于不同场景。</p>
+<p><a id="reference-底层实现与应用场景的因果关系"></a></p>
+<h2 id="底层实现与应用场景的因果关系">底层实现与应用场景的因果关系</h2>
+<p>本篇关注“为何产品会有这样的应用场景”，不是源码逐行解析。</p>
+<p><a id="reference-两类核心模型"></a></p>
+<h3 id="两类核心模型">两类核心模型</h3>
+<p><a id="reference-队列-brokerrabbitmq-传统-queue"></a></p>
+<h4 id="队列-brokerrabbitmq-传统-queue">队列 Broker：RabbitMQ 传统 Queue</h4>
+<p>Broker 维护“哪些消息仍在队列、哪些已投递未确认”。消费者 ACK 后消息可被删除。优点是单条任务状态、推送、路由和公平分发自然；代价是逐消息状态和复杂路由带来额外开销，历史回放不自然。</p>
+<p><a id="reference-分区日志kafkarocketmq-也有日志式基础"></a></p>
+<h4 id="分区日志kafkarocketmq-也有日志式基础">分区日志：Kafka（RocketMQ 也有日志式基础）</h4>
+<p>Broker 将记录顺序追加到日志段；消费者位置是 offset，消费不删除原记录，保留由时间/空间策略决定。顺序 IO、批量与共享日志让吞吐和回放自然；代价是路由和任务级重试通常围绕 topic/partition/offset 设计。</p>
+<p>这不是“谁更先进”，而是状态放在哪里、为哪种访问模式优化。</p>
+<p><a id="reference-rabbitmq-内部机制"></a></p>
+<h3 id="rabbitmq-内部机制">RabbitMQ 内部机制</h3>
+<p><a id="reference-connection--channel-多路复用"></a></p>
+<h4 id="connection--channel-多路复用">Connection / Channel 多路复用</h4>
+<p>AMQP Connection 是 TCP 连接；Channel 在其上多路复用，减少大量 TCP/TLS 连接成本。因此工程上应复用 Connection，为消费者创建独立 Channel。Connection 断开时其上所有 Channel 都失效，必须重建 Channel、QoS、Confirm 与订阅，不能只替换 Connection 指针。</p>
+<p><a id="reference-exchange-路由"></a></p>
+<h4 id="exchange-路由">Exchange 路由</h4>
+<p>消息先进入 Exchange，Broker 根据 binding 做精确、模式或广播匹配。这使 RabbitMQ 擅长复杂业务拓扑；同时绑定数量和路由复杂度不是免费的。</p>
+<p><a id="reference-推送unacked-与-prefetch"></a></p>
+<h4 id="推送unacked-与-prefetch">推送、unacked 与 prefetch</h4>
+<p>RabbitMQ 主动投递；未 ACK delivery 记录在 Channel/Consumer 相关状态中。prefetch 限制在途消息，形成显式背压。连接关闭后未 ACK 消息重新可投递，所以天然偏向 at-least-once。</p>
+<p><a id="reference-持久化与-confirm"></a></p>
+<h4 id="持久化与-confirm">持久化与 Confirm</h4>
+<p>持久消息进入 durable/quorum queue 后要经历内存、磁盘和可能的副本复制。客户端调用 write 成功只表示数据交给连接层，不等价于 Broker 安全接受。Confirm 把 Broker 处理结果反馈给生产者；断线窗口仍可能结果未知，因此重发 + 幂等是必要组合。</p>
+<p><a id="reference-quorum-queue"></a></p>
+<h4 id="quorum-queue">Quorum Queue</h4>
+<p>Quorum Queue 使用 Raft，在多个节点复制日志并由 leader 协调。多数派可用时才能继续，提升节点故障下的数据安全；代价是网络复制、磁盘和更高延迟。它适合关键队列，不意味着可以忽略容量、分区故障和客户端确认。</p>
+<p><a id="reference-为什么传统-rabbitmq-不以回放见长"></a></p>
+<h4 id="为什么传统-rabbitmq-不以回放见长">为什么传统 RabbitMQ 不以回放见长</h4>
+<p>ACK 后消息通常从队列生命周期中退出。要让多个独立下游消费，需要为每个订阅创建队列并复制路由，而不是让所有消费者共享同一长期日志位置。这恰好换来了直观的任务完成语义。</p>
+<p><a id="reference-kafka-内部机制"></a></p>
+<h3 id="kafka-内部机制">Kafka 内部机制</h3>
+<p><a id="reference-partition-append-only-log"></a></p>
+<h4 id="partition-append-only-log">Partition append-only log</h4>
+<p>每个分区是有序追加日志，记录有单调 offset。生产者批量追加，消费者按 offset 拉取；顺序磁盘 IO、操作系统 page cache、批处理/压缩以及高效网络传输使其适合高吞吐。</p>
+<p><a id="reference-consumer-group"></a></p>
+<h4 id="consumer-group">Consumer Group</h4>
+<p>组内每个分区在一个时刻分配给一个消费者，因此：</p>
+<ul>
+<li>分区内顺序容易保持；</li>
+<li>最大有效并行度受分区数限制；</li>
+<li>成员变化触发分区再分配；</li>
+<li>不同组维护独立 offset，可重复读取同一日志。</li>
+</ul>
+<p><a id="reference-retention-与回放"></a></p>
+<h4 id="retention-与回放">Retention 与回放</h4>
+<p>Broker 按时间或大小保留日志，而非 ACK 后删除。消费者可重置 offset 重放，这使事件流、审计和数据管道自然，但单条失败不能简单“留住队头”：通常要暂停分区、重试，或转发 retry/DLQ topic。</p>
+<p><a id="reference-复制与一致性"></a></p>
+<h4 id="复制与一致性">复制与一致性</h4>
+<p>分区 leader 接受读写，followers 复制；<code>acks</code>、ISR 和副本配置决定延迟/安全权衡。幂等 producer 可避免特定重试下的日志内重复；事务可原子写多个 Kafka 分区并协调 offset，但外部数据库副作用仍需 outbox/幂等等方案。</p>
+<p><a id="reference-rocketmq-内部机制"></a></p>
+<h3 id="rocketmq-内部机制">RocketMQ 内部机制</h3>
+<p>RocketMQ 的 Broker 通常把消息顺序写入 <strong>CommitLog</strong>，再构建按 Topic/Queue 的逻辑索引 <strong>ConsumeQueue</strong>。统一顺序写有利吞吐，逻辑队列支持消费定位。NameServer 提供轻量路由发现；消费者按队列分配并维护进度。</p>
+<p>这种“物理日志 + 逻辑队列”让它既能高吞吐持久化，又围绕业务消息提供：</p>
+<ul>
+<li>顺序消息：同一 sharding key 进入同一队列；</li>
+<li>延迟/定时投递：由 Broker 的定时存储/调度机制到期转投；</li>
+<li>消费失败重试与 DLQ；</li>
+<li>事务消息：先写半消息，本地事务后提交/回滚，未知时回查生产者。</li>
+</ul>
+<p>事务回查要求生产者能根据业务状态作确定判断；消费者仍可能收到重复消息。</p>
+<p><a id="reference-redis-streams-内部机制"></a></p>
+<h3 id="redis-streams-内部机制">Redis Streams 内部机制</h3>
+<p>Stream 是 Redis 键空间中的有序条目集合，每条记录有 <code>milliseconds-sequence</code> ID。底层使用为紧凑存储和范围查询优化的数据结构（实现随版本演进，不应把应用契约绑定到具体结构名）。</p>
+<p>Consumer Group 维护：</p>
+<ul>
+<li>group 的 last-delivered ID；</li>
+<li>每个 consumer；</li>
+<li>PEL：已投递但未 ACK 的 entry、归属、空闲时间和投递次数。</li>
+</ul>
+<p>因此可以 <code>XPENDING</code> 检查卡住任务，并以 <code>XAUTOCLAIM</code> 接管。但这也意味着应用必须主动实现超时、认领、重试和 DLQ。数据通常驻内存，持久性由 AOF/RDB 和复制决定，所以成本/容量模型与磁盘日志系统不同。</p>
+<p><a id="reference-redis-pubsub-内部机制"></a></p>
+<h3 id="redis-pubsub-内部机制">Redis Pub/Sub 内部机制</h3>
+<p>Redis 维护 channel/pattern 到当前客户端的订阅关系。<code>PUBLISH</code> 时遍历匹配订阅并把数据写入在线客户端输出缓冲区；没有持久日志、offset、PEL 或 ACK。于是它极低延迟、简单，却无法补发断线消息。这个底层事实直接决定它只能承担可丢通知。</p>
+<p><a id="reference-机制到场景的推导"></a></p>
+<h3 id="机制到场景的推导">机制到场景的推导</h3>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>RabbitMQ：逐 delivery 状态 + Exchange + push/QoS</span></span>
+<span class="line"><span>=&gt; 灵活路由、任务分发、细粒度确认、低延迟</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Kafka：分区追加日志 + offset + retention + pull/batch</span></span>
+<span class="line"><span>=&gt; 高吞吐、长期保留、多下游、任意回放、流处理</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>RocketMQ：CommitLog + ConsumeQueue + 业务消息机制</span></span>
+<span class="line"><span>=&gt; 高吞吐业务事件、顺序、延迟、事务检查、重试/DLQ</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Redis Streams：内存型有序流 + PEL</span></span>
+<span class="line"><span>=&gt; 已有 Redis 时的轻量可靠流，但需自己补齐治理</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Redis Pub/Sub：只维护在线订阅关系</span></span>
+<span class="line"><span>=&gt; 极低延迟广播，但断线即丢、不可恢复</span></span></code></pre>
+<p><a id="reference-性能不是单一数字"></a></p>
+<h3 id="性能不是单一数字">性能不是单一数字</h3>
+<p>压测至少固定：消息大小、生产/消费并发、持久化级别、副本数、Confirm/acks、批量大小、积压量、路由数量、失败率、磁盘与网络。只报“每秒多少条”而不报这些条件没有选型价值。</p>
+<p><a id="reference-复习"></a></p>
+<h2 id="复习">复习</h2>
+<ul>
+<li>RabbitMQ ACK 与 Kafka offset 提交对原消息的影响有什么不同？</li>
+<li>Redis Stream 的 PEL 与消息本体为何需要分开管理？</li>
+<li>内部模型怎样决定故障恢复的操作？</li>
+</ul>
+<p><a id="reference-专题导航"></a></p>
+<h2 id="专题导航">专题导航</h2>
+<p>返回 <a href="/notes/computer-science/backend/">后端开发学习索引</a>。</p>
+</div></article></main><aside class="sidebar sidebar-right" aria-label="大纲"><section class="side-card outline-card"><h2>大纲</h2><nav aria-label="大纲"><ol class="outline-list"><li style="--depth: 0"><a href="#底层实现与应用场景的因果关系">底层实现与应用场景的因果关系</a></li><li style="--depth: 1"><a href="#两类核心模型">两类核心模型</a></li><li style="--depth: 2"><a href="#队列-brokerrabbitmq-传统-queue">队列 Broker：RabbitMQ 传统 Queue</a></li><li style="--depth: 2"><a href="#分区日志kafkarocketmq-也有日志式基础">分区日志：Kafka（RocketMQ 也有日志式基础）</a></li><li style="--depth: 1"><a href="#rabbitmq-内部机制">RabbitMQ 内部机制</a></li><li style="--depth: 2"><a href="#connection--channel-多路复用">Connection / Channel 多路复用</a></li><li style="--depth: 2"><a href="#exchange-路由">Exchange 路由</a></li><li style="--depth: 2"><a href="#推送unacked-与-prefetch">推送、unacked 与 prefetch</a></li><li style="--depth: 2"><a href="#持久化与-confirm">持久化与 Confirm</a></li><li style="--depth: 2"><a href="#quorum-queue">Quorum Queue</a></li><li style="--depth: 2"><a href="#为什么传统-rabbitmq-不以回放见长">为什么传统 RabbitMQ 不以回放见长</a></li><li style="--depth: 1"><a href="#kafka-内部机制">Kafka 内部机制</a></li><li style="--depth: 2"><a href="#partition-append-only-log">Partition append-only log</a></li><li style="--depth: 2"><a href="#consumer-group">Consumer Group</a></li><li style="--depth: 2"><a href="#retention-与回放">Retention 与回放</a></li><li style="--depth: 2"><a href="#复制与一致性">复制与一致性</a></li><li style="--depth: 1"><a href="#rocketmq-内部机制">RocketMQ 内部机制</a></li><li style="--depth: 1"><a href="#redis-streams-内部机制">Redis Streams 内部机制</a></li><li style="--depth: 1"><a href="#redis-pubsub-内部机制">Redis Pub/Sub 内部机制</a></li><li style="--depth: 1"><a href="#机制到场景的推导">机制到场景的推导</a></li><li style="--depth: 1"><a href="#性能不是单一数字">性能不是单一数字</a></li><li style="--depth: 0"><a href="#复习">复习</a></li><li style="--depth: 0"><a href="#专题导航">专题导航</a></li></ol></nav></section></aside></div><footer>musuyin 的个人角落 · <a href="/rss.xml">RSS</a></footer></div><div class="corner-controls"><div id="blog-pet" class="blog-pet corner-control-slot" hidden data-state="hidden" data-config="{&quot;enabled&quot;:true,&quot;name&quot;:&quot;长崎素世&quot;,&quot;model&quot;:&quot;/pet/soyo/soyo.model.json&quot;,&quot;width&quot;:200,&quot;height&quot;:340,&quot;scale&quot;:1,&quot;offset&quot;:[0,0],&quot;minWidth&quot;:1024,&quot;bubbleDuration&quot;:6000,&quot;idleInterval&quot;:45000,&quot;labels&quot;:{&quot;show&quot;:&quot;显示&quot;,&quot;hide&quot;:&quot;隐藏&quot;,&quot;interact&quot;:&quot;和素世说句话&quot;,&quot;loading&quot;:&quot;素世正在过来，请稍等一下……&quot;,&quot;unavailable&quot;:&quot;素世暂时没能过来，稍后再试试吧。&quot;,&quot;retry&quot;:&quot;重新邀请素世&quot;},&quot;messages&quot;:{&quot;welcome&quot;:[&quot;你来了呀。要不要坐下来，喝杯红茶？&quot;,&quot;欢迎来到这里。今天也慢慢来吧。&quot;],&quot;idle&quot;:[&quot;看了这么久，要不要休息一下？&quot;,&quot;我就在这里，陪你再读一会儿。&quot;,&quot;今天有没有遇到值得记下来的事呢？&quot;],&quot;head&quot;:{&quot;lines&quot;:[&quot;嗯？是在叫我吗？&quot;,&quot;这样突然打招呼，我会有点不好意思呢。&quot;],&quot;motion&quot;:&quot;shame01&quot;,&quot;expression&quot;:&quot;shame01&quot;},&quot;body&quot;:{&quot;lines&quot;:[&quot;想聊点什么？我在听哦。&quot;,&quot;要不要一起看看，这里又添了什么新内容？&quot;,&quot;能在这里见到你，我很开心。&quot;],&quot;motion&quot;:&quot;smile01&quot;,&quot;expression&quot;:&quot;smile01&quot;}}}" style="--pet-width: 200px; --pet-height: 340px"><p id="pet-speech" class="pet-speech" role="status" aria-live="polite" aria-atomic="true" hidden></p><button class="corner-control pet-toggle" type="button" aria-label="显示长崎素世"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6m-6 3h6M8.4 14.5a6 6 0 1 1 7.2 0C14.6 15.3 15 17 15 18H9c0-1 .4-2.7-.6-3.5Z"></path></svg><span>显示</span></button></div><script type="module" src="/_astro/Pet.astro_astro_type_script_index_0_lang.6frIQRmx.js"></script><button id="background-music" class="corner-control corner-control-slot background-music" type="button" hidden data-play="播放" data-stop="停止" data-retry="音乐加载失败，重试" data-astro-cid-g645ryte><svg class="play-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><path d="M8 5.5v13l11-6.5z" data-astro-cid-g645ryte></path></svg><svg class="stop-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" data-astro-cid-g645ryte><rect x="6" y="6" width="12" height="12" rx="1.5" data-astro-cid-g645ryte></rect></svg><span aria-live="polite" data-astro-cid-g645ryte>播放</span></button><audio id="background-audio" src="/audio/bgm.flac" data-tracks="[&quot;/audio/bgm.flac&quot;]" preload="none" hidden data-astro-cid-g645ryte></audio><script type="module">var e=document.querySelector(`#background-audio`),t=document.querySelector(`#background-music`);if(e&&t){let n=t.querySelector(`span`),r=JSON.parse(e.dataset.tracks),i=0,a=(r=!1)=>{let i=!r&&!e.paused;t.dataset.playing=String(i),n.textContent=r?t.dataset.retry:i?t.dataset.stop:t.dataset.play},o=t=>{t===i?e.currentTime=0:(i=t,e.src=r[t])},s=()=>{e.pause(),o(0)},c=async()=>{e.error&&e.load();try{await e.play()}catch(e){e instanceof DOMException&&e.name===`AbortError`||a(!0)}};t.hidden=!1,t.addEventListener(`click`,()=>{e.paused?c():s()}),e.addEventListener(`play`,()=>a()),e.addEventListener(`pause`,()=>a(!!e.error)),e.addEventListener(`error`,()=>a(!0)),e.addEventListener(`ended`,()=>{e.ended&&(o((i+1)%r.length),c())}),window.addEventListener(`pagehide`,s)}</script></div></body></html>
